@@ -191,9 +191,9 @@ namespace Server
                     int rowSpacing = 140;
                     int columnSpacing = 125;
             
-                    int categoryCount = categoryEndIndex - categoryStartIndex;
+                    int categoryDisplayCount = categoryEndIndex - categoryStartIndex;
 
-                    for (int a = 0; a < categoryCount + 1; a++)
+                    for (int a = 0; a < categoryDisplayCount + 1; a++)
                     {
                         int categoryIndex = categoryStartIndex + a;
                         int buttonIndex = 10 + categoryIndex;

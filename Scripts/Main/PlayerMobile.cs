@@ -1065,7 +1065,7 @@ namespace Server.Mobiles
         public UOACZAccountEntry m_UOACZAccountEntry = null;
         public Guild Guild = null;
         public GuildMemberEntry m_GuildMemberEntry = null;
-        public GuildGumpSettings m_GuildGumpSettings = null;
+        public GuildSettings m_GuildSettings = null;
 
         public override bool KeepsItemsOnDeath { get { return (AccessLevel > AccessLevel.Player || Region is UOACZRegion); } }
 
@@ -5093,7 +5093,7 @@ namespace Server.Mobiles
             writer.Write(m_LongTermElapse);
             writer.Write(m_ShortTermElapse);
             writer.Write(GameTime);
-            writer.Write(m_GuildGumpSettings);
+            writer.Write(m_GuildSettings);
 
             writer.Write((int)m_HairModID);
             writer.Write((int)m_HairModHue);
@@ -5191,7 +5191,7 @@ namespace Server.Mobiles
                 m_LongTermElapse = reader.ReadTimeSpan();
                 m_ShortTermElapse = reader.ReadTimeSpan();
                 m_GameTime = reader.ReadTimeSpan();
-                m_GuildGumpSettings = (GuildGumpSettings)reader.ReadItem();
+                m_GuildSettings = (GuildSettings)reader.ReadItem();
 
                 m_HairModID = reader.ReadInt();
                 m_HairModHue = reader.ReadInt();
@@ -5804,7 +5804,6 @@ namespace Server.Mobiles
         {
             ReleaseAllFollowers();
 
-            //Guild
             if (Guild != null)
                 Guild.OnPlayerDeleted(this);
 
