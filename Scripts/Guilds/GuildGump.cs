@@ -50,7 +50,8 @@ namespace Server
             int WhiteTextHue = 2655;
             int GreenTextHue = 63;
             int YellowTextHue = 2550;
-            int GreyTextHue = 2401;            
+            int GreyTextHue = 2401;
+            int RedTextHue = 2115;
 
             #region Background
 
@@ -494,10 +495,10 @@ namespace Server
 
                 m_Player.m_GuildSettings.AuditInvitations();
 
-                List<GuildInvitation> invitationsSorted = m_Player.m_GuildSettings.GetInvitations(m_GuildGumpObject.m_InvitationSortCriteria, m_GuildGumpObject.m_InvitationSortAscending);
+                m_GuildGumpObject.m_InvitationsSorted = m_Player.m_GuildSettings.GetInvitations(m_GuildGumpObject.m_InvitationSortCriteria, m_GuildGumpObject.m_InvitationSortAscending);
                 
                 int invitationsPerPage = 12;
-                int totalInvitations = invitationsSorted.Count;
+                int totalInvitations = m_GuildGumpObject.m_InvitationsSorted.Count;
                 int totalInvitationPages = (int)(Math.Ceiling((double)totalInvitations / (double)invitationsPerPage));
 
                 if (m_GuildGumpObject.m_InvitationPage >= totalInvitationPages)
@@ -547,7 +548,6 @@ namespace Server
                     break;
                 }
 
-                //List
                 for (int a = 0; a < invitationDisplayCount + 1; a++)
                 {
                     int invitationIndex = invitationStartIndex + a;
@@ -555,23 +555,28 @@ namespace Server
                     if (invitationStartIndex >= totalInvitations)
                         continue;
 
-                    GuildInvitation invitationItem = invitationsSorted[invitationIndex];
+                    GuildInvitation invitationItem = m_GuildGumpObject.m_InvitationsSorted[invitationIndex];                    
 
-                    DateTime expirationDate = invitationItem.m_InvitationTime + Guilds.InvitationExpiration;
+                    if (invitationItem != null)
+                    {
+                        int buttonIndex = m_GuildGumpObject.m_InvitationButtonIndexOffset + (a * 10);
 
-                    string guildName = invitationItem.m_Guild.Name + " (" + invitationItem.m_Guild.m_Abbreviation + ")";
-                    string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, expirationDate, true, true, true, true, false);
+                        DateTime expirationDate = invitationItem.m_InvitationTime + Guilds.InvitationExpiration;
 
-                    if (invitationItem.m_Accepted)
-                        AddButton(165, startY, 9724, 9721, 0, GumpButtonType.Reply, 0);
+                        string guildName = invitationItem.m_Guild.GetDisplayName(true);
+                        string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, expirationDate, true, true, true, true, false);
 
-                    else
-                        AddButton(165, startY, 9721, 9724, 0, GumpButtonType.Reply, 0);
+                        if (invitationItem.m_Accepted)
+                            AddButton(165, startY, 9724, 9721, buttonIndex, GumpButtonType.Reply, 0);
 
-                    AddLabel(Utility.CenteredTextOffset(310, guildName), startY + 7, WhiteTextHue, guildName);
-                    AddLabel(Utility.CenteredTextOffset(485, timeRemaining), startY + 5, WhiteTextHue, timeRemaining);
-                    AddButton(550, startY + 5, 4011, 4013, 0, GumpButtonType.Reply, 0);
-                    AddButton(614, startY, 2472, 2473, 0, GumpButtonType.Reply, 0);
+                        else
+                            AddButton(165, startY, 9721, 9724, buttonIndex, GumpButtonType.Reply, 0);
+
+                        AddLabel(Utility.CenteredTextOffset(310, guildName), startY + 7, WhiteTextHue, guildName);
+                        AddLabel(Utility.CenteredTextOffset(485, timeRemaining), startY + 5, WhiteTextHue, timeRemaining);
+                        AddButton(550, startY + 5, 4011, 4013, buttonIndex + 1, GumpButtonType.Reply, 0);
+                        AddButton(614, startY, 2472, 2473, buttonIndex + 2, GumpButtonType.Reply, 0);
+                    }
 
                     startY += rowSpacing;
                 }               
@@ -801,13 +806,12 @@ namespace Server
                     m_GuildGumpObject.m_MemberSortAscending = false;
                 }
 
-                //TEST: FINISH THIS
-                //m_GuildGumpObject.m_Guild.AuditMembers()
+                m_GuildGumpObject.m_Guild.AuditMembers();
 
-                List<GuildMemberEntry> membersSorted = m_GuildGumpObject.m_Guild.GetGuildMemberEntries(m_GuildGumpObject.m_MemberSortCriteria, m_GuildGumpObject.m_MemberSortAscending);
+                m_GuildGumpObject.m_MembersSorted = m_GuildGumpObject.m_Guild.GetGuildMemberEntries(m_GuildGumpObject.m_MemberSortCriteria, m_GuildGumpObject.m_MemberSortAscending);
 
                 int membersPerPage = 12;
-                int totalMembers = membersSorted.Count;
+                int totalMembers = m_GuildGumpObject.m_MembersSorted.Count;
                 int totalMemberPages = (int)(Math.Ceiling((double)totalMembers / (double)membersPerPage));
 
                 if (m_GuildGumpObject.m_MemberPage >= totalMemberPages)
@@ -837,7 +841,7 @@ namespace Server
                 switch (guildGumpObject.m_MemberSortCriteria)
                 {
                     case Guilds.MemberSortCriteria.LastOnline:
-                        if (guildGumpObject.m_CandidateSortAscending)
+                        if (guildGumpObject.m_MemberSortAscending)
                             AddButton(151, 73, 5600, 5600, 6, GumpButtonType.Reply, 0); //Sort Last Online
 
                         else
@@ -850,7 +854,7 @@ namespace Server
                     case Guilds.MemberSortCriteria.PlayerName:
                         AddButton(151, 73, 2117, 2118, 6, GumpButtonType.Reply, 0); //Sort Last Online
 
-                        if (guildGumpObject.m_CandidateSortAscending)
+                        if (guildGumpObject.m_MemberSortAscending)
                             AddButton(259, 73, 5600, 5600, 7, GumpButtonType.Reply, 0); //Sort Player Name
 
                         else
@@ -862,8 +866,8 @@ namespace Server
                     case Guilds.MemberSortCriteria.GuildRank:
                         AddButton(151, 73, 2117, 2118, 6, GumpButtonType.Reply, 0); //Sort Last Online
                         AddButton(259, 73, 2117, 2118, 7, GumpButtonType.Reply, 0); //Sort Player Name
-                        
-                        if (guildGumpObject.m_CandidateSortAscending)
+
+                        if (guildGumpObject.m_MemberSortAscending)
                             AddButton(387, 73, 5600, 5600, 8, GumpButtonType.Reply, 0); //Sort Rank
 
                         else
@@ -878,53 +882,61 @@ namespace Server
                     if (memberStartIndex >= totalMembers)
                         continue;
 
-                    GuildMemberEntry memberEntry = membersSorted[memberIndex];
+                    GuildMemberEntry memberEntry = m_GuildGumpObject.m_MembersSorted[memberIndex];                                     
 
-                    PlayerMobile guildMember = memberEntry.m_Player;
-
-                    string rankName = guildGumpObject.m_Guild.GetRankName(memberEntry.m_Rank);
-                    int rankHue = guildGumpObject.m_Guild.GetRankHue(memberEntry.m_Rank);
-
-                    //Online
-                    if (guildMember.NetState != null)
+                    if (memberEntry != null)
                     {
-                        AddButton(163, startY + 8, 2361, 2361, 0, GumpButtonType.Reply, 0);
-                        AddLabel(185, startY + 5, 63, "Online");
+                        int buttonIndex = m_GuildGumpObject.m_MemberButtonIndexOffset + (a * 10);   
+
+                        PlayerMobile guildMember = memberEntry.m_Player;
+
+                        if (guildMember != null)
+                        {
+                            string rankName = guildGumpObject.m_Guild.GetRankName(memberEntry.m_Rank);
+                            int rankHue = guildGumpObject.m_Guild.GetRankHue(memberEntry.m_Rank);
+
+                            //Online
+                            if (guildMember.NetState != null)
+                            {
+                                AddButton(163, startY + 8, 2361, 2361, buttonIndex, GumpButtonType.Reply, 0);
+                                AddLabel(185, startY + 5, GreenTextHue, "Online");
+                            }
+
+                            //Offline
+                            else if (guildGumpObject.m_Guild.IsPlayerActive(guildMember))
+                            {
+                                AddButton(163, startY + 8, 2362, 2362, buttonIndex, GumpButtonType.Reply, 0);
+                                AddLabel(185, startY + 5, GreyTextHue, "Offline");
+                            }
+
+                            //Inactive
+                            else
+                            {
+                                AddButton(163, startY + 8, 2360, 2360, buttonIndex, GumpButtonType.Reply, 0);
+                                AddLabel(185, startY + 5, RedTextHue, "Inactive");
+                            }
+
+                            AddLabel(Utility.CenteredTextOffset(320, guildMember.RawName), startY + 5, WhiteTextHue, guildMember.RawName); //PlayerName
+                            AddLabel(Utility.CenteredTextOffset(440, rankName), startY + 5, rankHue, rankName); //Rank
+                            AddButton(512, startY + 5, 4011, 4013, buttonIndex + 1, GumpButtonType.Reply, 0); //Manage Player
+
+                            //Declare Fealty
+                            if (playerEntry.m_DeclaredFealty == guildMember)
+                                AddButton(564, startY, 9724, 9721, buttonIndex + 2, GumpButtonType.Reply, 0);
+
+                            else
+                                AddButton(564, startY, 9721, 9724, buttonIndex + 2, GumpButtonType.Reply, 0);
+
+                            AddButton(614, startY, 2472, 2473, buttonIndex + 3, GumpButtonType.Reply, 0); //Dismiss
+                        }
                     }
-
-                    //Offline
-                    else if (guildGumpObject.m_Guild.IsPlayerActive(guildMember))
-                    {
-                        AddButton(163, startY + 8, 2362, 2362, 0, GumpButtonType.Reply, 0);
-                        AddLabel(185, startY + 5, 63, "Offline");
-                    }
-
-                    //Inactive
-                    else
-                    {
-                        AddButton(163, startY + 8, 2360, 2360, 0, GumpButtonType.Reply, 0);
-                        AddLabel(185, startY + 5, 63, "Inactive");
-                    }
-
-                    AddLabel(Utility.CenteredTextOffset(320, guildMember.RawName), startY + 5, WhiteTextHue, guildMember.RawName); //PlayerName
-                    AddLabel(Utility.CenteredTextOffset(440, rankName), startY + 5, rankHue, rankName); //Rank
-                    AddButton(512, startY + 5, 4011, 4013, 0, GumpButtonType.Reply, 0); //Manage Player
-
-                    //Declare Fealty
-                    if (playerEntry.m_DeclaredFealty == guildMember)
-                        AddButton(564, startY, 9724, 9721, 0, GumpButtonType.Reply, 0);
-
-                    else
-                        AddButton(564, startY, 9721, 9724, 0, GumpButtonType.Reply, 0);
-
-                    AddButton(614, startY, 2472, 2473, 0, GumpButtonType.Reply, 0); //Dismiss
 
                     startY += rowSpacing;
                 }
 
                 int onlineMembers = 0;
 
-                foreach (GuildMemberEntry memberEntry in membersSorted)
+                foreach (GuildMemberEntry memberEntry in m_GuildGumpObject.m_MembersSorted)
                 {
                     if (memberEntry == null) continue;
                     if (memberEntry.m_Player == null) continue;
@@ -992,10 +1004,10 @@ namespace Server
 
                 m_GuildGumpObject.m_Guild.AuditCandidates();
 
-                List<GuildInvitation> candidatesSorted = m_GuildGumpObject.m_Guild.GetCandidates(m_GuildGumpObject.m_CandidateSortCriteria, m_GuildGumpObject.m_CandidateSortAscending);
+                m_GuildGumpObject.m_CandidatesSorted = m_GuildGumpObject.m_Guild.GetCandidates(m_GuildGumpObject.m_CandidateSortCriteria, m_GuildGumpObject.m_CandidateSortAscending);
 
                 int candidatesPerPage = 12;
-                int totalCandidates = candidatesSorted.Count;
+                int totalCandidates = m_GuildGumpObject.m_CandidatesSorted.Count;
                 int totalCandidatesPages = (int)(Math.Ceiling((double)totalCandidates / (double)candidatesPerPage));
 
                 if (m_GuildGumpObject.m_CandidatePage >= totalCandidatesPages)
@@ -1065,33 +1077,38 @@ namespace Server
 
                     if (candidateStartIndex >= totalCandidates)
                         continue;
+                    
+                    GuildInvitation invitationItem = m_GuildGumpObject.m_CandidatesSorted[candidateIndex];                    
 
-                    GuildInvitation invitationItem = candidatesSorted[candidateIndex];
+                    if (invitationItem != null)
+                    {
+                        int buttonIndex = m_GuildGumpObject.m_CandidateButtonIndexOffset + (a * 10);
 
-                    DateTime expirationDate = invitationItem.m_InvitationTime + Guilds.InvitationExpiration;
+                        DateTime expirationDate = invitationItem.m_InvitationTime + Guilds.InvitationExpiration;
 
-                    string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, expirationDate, true, true, true, true, false);
+                        string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, expirationDate, true, true, true, true, false);
 
-                    if (invitationItem.m_Accepted)
-                        AddButton(185, startY, 9724, 9721, 0, GumpButtonType.Reply, 0); //Accepted
-                    else
-                        AddButton(185, startY, 9721, 9724, 0, GumpButtonType.Reply, 0); //Accepted
+                        if (invitationItem.m_Accepted)
+                            AddImage(185, startY, 9724, 0); //Accepted
+                        else
+                            AddImage(185, startY, 9721, 0); //Accepted
 
-                    AddLabel(Utility.CenteredTextOffset(310, invitationItem.m_PlayerTarget.RawName), startY + 5, WhiteTextHue, invitationItem.m_PlayerTarget.RawName);
-                    AddLabel(Utility.CenteredTextOffset(415, timeRemaining), startY + 5, WhiteTextHue, timeRemaining);
-                    AddButton(485, startY + 5, 4011, 4013, 0, GumpButtonType.Reply, 0); //Player Info
-                    AddButton(559, startY, 2151, 2154, 0, GumpButtonType.Reply, 0); //Approve
-                    AddButton(614, startY, 2472, 2473, 0, GumpButtonType.Reply, 0); //Decline
+                        AddLabel(Utility.CenteredTextOffset(310, invitationItem.m_PlayerTarget.RawName), startY + 5, WhiteTextHue, invitationItem.m_PlayerTarget.RawName);
+                        AddLabel(Utility.CenteredTextOffset(415, timeRemaining), startY + 5, WhiteTextHue, timeRemaining);
+                        AddButton(485, startY + 5, 4011, 4013, buttonIndex + 0, GumpButtonType.Reply, 0); //Player Info
+                        AddButton(559, startY, 2151, 2154, buttonIndex + 1, GumpButtonType.Reply, 0); //Approve
+                        AddButton(614, startY, 2472, 2473, buttonIndex + 2, GumpButtonType.Reply, 0); //Decline
+                    }
 
                     startY += rowSpacing;
                 }
 
                 int totalAccepted = 0;
 
-                for (int a = 0; a < candidatesSorted.Count; a++)
+                for (int a = 0; a < m_GuildGumpObject.m_CandidatesSorted.Count; a++)
                 {
-                    if (candidatesSorted[a] == null) continue;
-                    if (candidatesSorted[a].m_Accepted)
+                    if (m_GuildGumpObject.m_CandidatesSorted[a] == null) continue;
+                    if (m_GuildGumpObject.m_CandidatesSorted[a].m_Accepted)
                         totalAccepted++;
                 }
 
@@ -1204,7 +1221,7 @@ namespace Server
 
             if (m_Player == null)
                 return;
-
+            
             List<GuildGumpPageType> m_GuildTabs = Guilds.GetGuildPageTypeList(m_Player);
 
             if (m_GuildTabs.Count == 0) return;
@@ -1316,7 +1333,7 @@ namespace Server
 
                             newGuild.AddMember(m_Player, GuildMemberRank.Guildmaster);
 
-                            m_Player.SendMessage("You are now the founding member of " + guildNameText + " [" + guildAbbreviationText + "].");
+                            m_Player.SendMessage("You are now the founding member of " + newGuild.GetDisplayName(true) + ".");
 
                             m_Player.m_GuildSettings.m_GuildGumpPage = GuildGumpPageType.Overview;
                             m_GuildGumpObject.m_GuildTabPage = 0;
@@ -1339,6 +1356,59 @@ namespace Server
             {
                 if (m_Player.Guild != null) return;
                 if (m_GuildGumpObject.m_Guild != null) return;
+
+                if (info.ButtonID >= m_GuildGumpObject.m_InvitationButtonIndexOffset)
+                {
+                    int invitationBaseIndex = info.ButtonID - m_GuildGumpObject.m_InvitationButtonIndexOffset;
+                    int invitationIndex = (int)(Math.Floor((double)invitationBaseIndex / 10));
+                    int invitationRemainder = invitationBaseIndex % 10;
+                    
+                    if (invitationIndex < m_GuildGumpObject.m_InvitationsSorted.Count)
+                    {
+                        GuildInvitation invitation = m_GuildGumpObject.m_InvitationsSorted[invitationIndex];
+
+                        if (invitation == null)
+                            m_Player.SendMessage("That guild invitation no longer exists.");
+
+                        else if (invitation.Deleted)
+                            m_Player.SendMessage("That guild invitation no longer exists.");
+
+                        else if (invitation.m_Guild == null)
+                            m_Player.SendMessage("That guild no longer exists.");
+
+                        else if (invitation.m_Guild.Deleted)
+                            m_Player.SendMessage("That guild no longer exists.");
+
+                        else
+                        {
+                            switch (invitationRemainder)
+                            {
+                                //Accept
+                                case 0:
+                                    invitation.m_Accepted = !invitation.m_Accepted;
+
+                                    if (invitation.m_Accepted)
+                                        m_Player.SendMessage("You accept the invitation and must now await final approval for membership.");
+                                break;
+
+                                //Guild Info
+                                case 1:
+                                    //TEST
+                                    m_Player.Say(invitation.m_Guild.Name);
+                                break;
+
+                                //Decline
+                                case 2:
+                                    invitation.Delete();
+
+                                    m_Player.SendMessage("You decline the guild invitation.");
+                                break;
+                            }
+                        }
+                    }
+
+                    closeGump = false;
+                }
 
                 switch (info.ButtonID)
                 {
@@ -1394,6 +1464,11 @@ namespace Server
                     case 10:
                         m_Player.m_GuildSettings.m_IgnoreGuildInvitations = !m_Player.m_GuildSettings.m_IgnoreGuildInvitations;
 
+                        if (m_Player.m_GuildSettings.m_IgnoreGuildInvitations)
+                            m_Player.SendMessage("You will no longer receive guild invitations.");
+                        else
+                            m_Player.SendMessage("You now will be open to receiving guild invitations.");
+
                         closeGump = false;
                     break;
                 }
@@ -1418,8 +1493,121 @@ namespace Server
                 if (m_GuildGumpObject.m_Guild == null) return;
                 if (!m_GuildGumpObject.m_Guild.IsMember(m_Player)) return;
 
+                Guild guild = m_GuildGumpObject.m_Guild;
+
+                if (guild == null)
+                    return;
+
+                GuildMemberEntry guildMemberEntry = guild.GetGuildMemberEntry(m_Player);
+
+                if (guildMemberEntry == null)
+                    return;
+
+                if (info.ButtonID >= m_GuildGumpObject.m_MemberButtonIndexOffset)
+                {
+                    int memberBaseIndex = info.ButtonID - m_GuildGumpObject.m_MemberButtonIndexOffset;
+                    int memberIndex = (int)(Math.Floor((double)memberBaseIndex / 10));
+                    int memberRemainder = memberBaseIndex % 10;
+
+                    if (memberIndex < m_GuildGumpObject.m_MembersSorted.Count)
+                    {
+                        GuildMemberEntry member = m_GuildGumpObject.m_MembersSorted[memberIndex];
+
+                        if (member == null)
+                            m_Player.SendMessage("That player is no longer a member of the guild.");
+
+                        else if (member.m_Player == null)
+                            m_Player.SendMessage("That player no longer exists.");
+
+                        else if (member.m_Player.Deleted)
+                            m_Player.SendMessage("That player no longer exists.");
+
+                        else
+                        {
+                            switch (memberRemainder)
+                            {
+                                //Last Online Button
+                                case 0:
+                                break;
+
+                                //Manage Player
+                                case 1:
+                                break;
+
+                                //Dismiss Player
+                                case 2:
+                                break;
+                            }
+                        }
+                    }
+
+                    closeGump = false;
+                }
+
                 switch (info.ButtonID)
                 {
+                    //Search Previous Player
+                    case 4:
+                        closeGump = false;
+                        break;
+
+                    //Search Next Player
+                    case 5:
+                        closeGump = false;
+                        break;
+
+                    //Sort by Last Online
+                    case 6:
+                        if (m_GuildGumpObject.m_MemberSortCriteria == Guilds.MemberSortCriteria.LastOnline)
+                            m_GuildGumpObject.m_MemberSortAscending = !m_GuildGumpObject.m_MemberSortAscending;
+
+                        else
+                        {
+                            m_GuildGumpObject.m_MemberSortCriteria = Guilds.MemberSortCriteria.LastOnline;
+                            m_GuildGumpObject.m_MemberSortAscending = false;
+                        }
+
+                        closeGump = false;
+                        break;
+
+                    //Sort by Player Name
+                    case 7:
+                        if (m_GuildGumpObject.m_MemberSortCriteria == Guilds.MemberSortCriteria.PlayerName)
+                            m_GuildGumpObject.m_MemberSortAscending = !m_GuildGumpObject.m_MemberSortAscending;
+
+                        else
+                        {
+                            m_GuildGumpObject.m_MemberSortCriteria = Guilds.MemberSortCriteria.PlayerName;
+                            m_GuildGumpObject.m_MemberSortAscending = true;
+                        }
+
+                        closeGump = false;
+                    break;
+
+                    //Sort by Guild Rank
+                    case 8:
+                        if (m_GuildGumpObject.m_MemberSortCriteria == Guilds.MemberSortCriteria.GuildRank)
+                            m_GuildGumpObject.m_MemberSortAscending = !m_GuildGumpObject.m_MemberSortAscending;
+
+                        else
+                        {
+                            m_GuildGumpObject.m_MemberSortCriteria = Guilds.MemberSortCriteria.GuildRank;
+                            m_GuildGumpObject.m_MemberSortAscending = false;
+                        }
+
+                        closeGump = false;
+                    break;
+
+                    //Previous Page
+                    case 9:
+                        closeGump = false;
+                    break;
+
+                    //Next Page
+                    case 10:
+                        closeGump = false;
+                    break;
+
                     //Invite New Member
                     case 11:
                         m_GuildGumpObject.m_Guild.RecruitMember(m_Player);
@@ -1435,8 +1623,92 @@ namespace Server
 
             else if (m_GuildGumpObject.m_GumpPageType == GuildGumpPageType.Candidates)
             {
-                if (m_GuildGumpObject.m_Guild == null) return;
-                if (!m_GuildGumpObject.m_Guild.IsMember(m_Player)) return;
+                Guild guild = m_GuildGumpObject.m_Guild;
+
+                if (guild == null)
+                    return;                
+
+                GuildMemberEntry guildMemberEntry = guild.GetGuildMemberEntry(m_Player);
+
+                if (guildMemberEntry == null)
+                    return;
+
+                if (info.ButtonID >= m_GuildGumpObject.m_CandidateButtonIndexOffset)
+                {
+                    int candidateBaseIndex = info.ButtonID - m_GuildGumpObject.m_CandidateButtonIndexOffset;
+                    int candidateIndex = (int)(Math.Floor((double)candidateBaseIndex / 10));
+                    int candidateRemainder = candidateBaseIndex % 10;
+
+                    if (candidateIndex < m_GuildGumpObject.m_CandidatesSorted.Count)
+                    {
+                        GuildInvitation candidate = m_GuildGumpObject.m_CandidatesSorted[candidateIndex];
+
+                        if (candidate == null)
+                            m_Player.SendMessage("That player is no longer a candidate for guild membership.");
+
+                        else if (candidate.Deleted)
+                            m_Player.SendMessage("That player is no longer a candidate for guild membership.");
+
+                        else
+                        {
+                            switch (candidateRemainder)
+                            {
+                                //Player Info
+                                case 0:
+                                    //TEST
+                                    if (candidate.m_PlayerTarget != null)
+                                        m_Player.Say(candidate.m_PlayerTarget.RawName);
+                                    break;
+
+                                //Approve
+                                case 1:
+                                    PlayerMobile playerTarget = candidate.m_PlayerTarget;
+
+                                    if (!guild.CanApproveCandidates(guildMemberEntry.m_Rank))
+                                        m_Player.SendMessage("You do not have a high enough rank in this guild to approve candidates for membership.");
+
+                                    else if (!candidate.m_Accepted)
+                                        m_Player.SendMessage("That player has not yet accepted this guild invitation.");
+
+                                    else if (playerTarget == null)
+                                    {
+                                        candidate.Delete();
+                                        m_Player.SendMessage("That player no longer exists.");
+                                    }
+
+                                    else if (playerTarget.Deleted)
+                                    {
+                                        candidate.Delete();
+                                        m_Player.SendMessage("That player no longer exists.");
+                                    }
+
+                                    else if (playerTarget.Guild != null)
+                                    {
+                                        candidate.Delete();
+                                        m_Player.SendMessage("That player already belongs to a guild.");
+                                    }
+
+                                    else
+                                    {
+                                        candidate.Delete();
+
+                                        guild.GuildAnnouncement(playerTarget.RawName + " has been made a member of " + guild.GetDisplayName(true) + ".", new List<PlayerMobile>(), GuildMemberRank.Recruit);
+                                        guild.AddMember(playerTarget, GuildMemberRank.Recruit);
+
+                                        playerTarget.SendMessage(Guilds.GuildTextHue, "You have been made a member of " + guild.GetDisplayName(true) + ".");
+                                    }
+                                break;
+
+                                //Reject
+                                case 2:
+                                    candidate.Delete();
+                                break;
+                            }
+                        }
+                    }
+
+                    closeGump = false;
+                }               
 
                 switch (info.ButtonID)
                 {
@@ -1579,6 +1851,9 @@ namespace Server
 
                 if (buttonIndex < m_GuildTabs.Count)
                 {
+                    if (m_GuildGumpObject != null)                    
+                        m_GuildGumpObject.ClearLists();                    
+
                     m_Player.m_GuildSettings.m_GuildGumpPage = m_GuildTabs[buttonIndex];
                     m_Player.SendSound(Guilds.GuildGumpOpenGumpSound);
                 }
@@ -1609,30 +1884,36 @@ namespace Server
         public int GuildSymbolHue = 0;
 
         //Invitations
+        public List<GuildInvitation> m_InvitationsSorted = new List<GuildInvitation>();
+
         public string m_InvitationSearchText = "Guild Name";
         public int m_InvitationSearchIndex = 0;
         public int m_InvitationPage = 0;
-
         public Guilds.InvitationSortCriteria m_InvitationSortCriteria = Guilds.InvitationSortCriteria.GuildName;
         public bool m_InvitationSortAscending = true;
+        public int m_InvitationButtonIndexOffset = 100;
+
+        //Candidates
+        public List<GuildInvitation> m_CandidatesSorted = new List<GuildInvitation>();
+
+        public string m_CandidateSearchText = "Player Name";
+        public int m_CandidateSearchIndex = 0;
+        public int m_CandidatePage = 0;
+        public Guilds.CandidateSortCriteria m_CandidateSortCriteria = Guilds.CandidateSortCriteria.PlayerName;
+        public bool m_CandidateSortAscending = true;
+        public int m_CandidateButtonIndexOffset = 100;
 
         //Overview
 
         //Members
+        public List<GuildMemberEntry> m_MembersSorted = new List<GuildMemberEntry>();
+
         public string m_MemberSearchText = "Player Name";
         public int m_MemberSearchIndex = 0;
         public int m_MemberPage = 0;
-
         public Guilds.MemberSortCriteria m_MemberSortCriteria = Guilds.MemberSortCriteria.LastOnline;
         public bool m_MemberSortAscending = false;
-
-        //Candidates
-        public string m_CandidateSearchText = "Player Name";
-        public int m_CandidateSearchIndex = 0;
-        public int m_CandidatePage = 0;
-
-        public Guilds.CandidateSortCriteria m_CandidateSortCriteria = Guilds.CandidateSortCriteria.PlayerName;
-        public bool m_CandidateSortAscending = true;
+        public int m_MemberButtonIndexOffset = 100;
 
         //Diplomacy
 
@@ -1640,6 +1921,13 @@ namespace Server
 
         public GuildGumpObject()
         {
+        }
+
+        public void ClearLists()
+        {
+            m_InvitationsSorted.Clear();
+            m_MembersSorted.Clear();
+            m_CandidatesSorted.Clear();
         }
     }
 }

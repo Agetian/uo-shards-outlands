@@ -47,15 +47,26 @@ namespace Server.Items
             Fealty
         }
 
+        public enum GuildRelationshipType
+        {
+            None,
+            War,
+            Ally,
+            WarRequest,
+            AllyRequest
+        }
+
         public static int GuildNameCharacterLimit = 35;
         public static int GuildAbbreviationCharacterLimit = 3;
 
         public static int GuildRegistrationFee = 50000;
 
         public static int GuildTextHue = 63;
-
+        
         public static TimeSpan InvitationExpiration = TimeSpan.FromDays(30);
         public static TimeSpan InactivityThreshold = TimeSpan.FromDays(60);
+
+        public static TimeSpan GuildRequestExpiration = TimeSpan.FromDays(30);
 
         public static int GuildGumpChangePageSound = 0x057;
         public static int GuildGumpOpenGumpSound = 0x055;
@@ -101,6 +112,40 @@ namespace Server.Items
         {
             CheckCreateGuildGuildSettings(player);
         }
+
+        public static void OnPlayerDeleted(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            CheckCreateGuildGuildSettings(player);
+
+            if (player.m_GuildSettings != null)
+            {
+                //Invitations
+                Queue m_Queue = new Queue();
+
+                foreach (GuildInvitation invitation in player.m_GuildSettings.m_GuildInvitations)
+                {
+                    if (invitation == null) 
+                        continue;
+
+                    m_Queue.Enqueue(invitation);
+                }
+
+                while (m_Queue.Count > 0)
+                {
+                    GuildInvitation invitation = (GuildInvitation)m_Queue.Dequeue();
+
+                    invitation.Delete();
+                }
+
+                player.m_GuildSettings.Delete();
+            }
+
+            if (player.Guild != null)            
+                player.Guild.DismissMember(player, false, true);            
+        } 
 
         public static void CheckCreateGuildGuildSettings(PlayerMobile player)
         {
@@ -343,7 +388,103 @@ namespace Server.Items
         }
     }
 
-    public class GuildInvitation: Item
+    public class GuildRelationship: Item
+    {
+        public Guild m_GuildFrom;
+        public Guild m_GuildTarget;
+        public Guilds.GuildRelationshipType m_RelationshipType;
+        public DateTime m_DateIssued;
+        public DateTime m_DateBegan;
+
+        [Constructable]
+        public GuildRelationship(Guild guildFrom, Guild guildTarget, Guilds.GuildRelationshipType relationshipType, DateTime dateIssued, DateTime dateBegan): base(0x0)
+        {
+            m_GuildFrom = guildFrom;
+            m_GuildTarget = guildTarget;
+            m_RelationshipType = relationshipType;
+            m_DateIssued = dateIssued;
+            m_DateBegan = dateBegan;
+        }        
+
+        public GuildRelationship(Serial serial): base(serial)
+        {
+        }
+
+        public bool CheckExpired()
+        {
+            if (m_RelationshipType == Guilds.GuildRelationshipType.WarRequest || m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
+            {
+                if (m_DateIssued + Guilds.GuildRequestExpiration <= DateTime.UtcNow)
+                    return true;
+            }
+
+            if (m_GuildFrom == null) return true;
+            if (m_GuildFrom.Deleted) return true;
+            if (m_GuildTarget == null) return true;
+            if (m_GuildTarget.Deleted) return true;
+
+            return false;
+        }
+
+        public override void OnDelete()
+        {
+            if (m_GuildFrom != null)
+            {
+                if (m_GuildFrom.m_Relationships.Contains(this))
+                    m_GuildFrom.m_Relationships.Remove(this);
+            }
+
+            if (m_GuildTarget != null)
+            {
+                if (m_GuildTarget.m_Relationships.Contains(this))
+                    m_GuildTarget.m_Relationships.Remove(this);
+            }
+
+            base.OnDelete();
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //Version
+
+            //Version 0
+            writer.Write(m_GuildFrom);
+            writer.Write(m_GuildTarget);
+            writer.Write((int)m_RelationshipType);
+            writer.Write(m_DateIssued);
+            writer.Write(m_DateBegan);
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+                m_GuildFrom = (Guild)reader.ReadItem();
+                m_GuildTarget = (Guild)reader.ReadItem();
+                m_RelationshipType = (Guilds.GuildRelationshipType)reader.ReadInt();
+                m_DateIssued = reader.ReadDateTime();
+                m_DateBegan = reader.ReadDateTime();
+            }   
+
+            //-----
+
+            if (CheckExpired())
+                Delete();
+
+            else
+            {
+                m_GuildFrom.m_Relationships.Add(this);
+                m_GuildTarget.m_Relationships.Add(this);
+            }            
+        }
+    }
+    
+    public class GuildInvitation : Item
     {
         public PlayerMobile m_PlayerTarget;
         public PlayerMobile m_PlayerInviter;
@@ -352,7 +493,7 @@ namespace Server.Items
         public bool m_Accepted = false;
 
         [Constructable]
-        public GuildInvitation(PlayerMobile playerTarget, PlayerMobile playerInviter, Guild guild, DateTime invitationTime, bool accepted) : base(0x0)
+        public GuildInvitation(PlayerMobile playerTarget, PlayerMobile playerInviter, Guild guild, DateTime invitationTime, bool accepted): base(0x0)
         {
             m_PlayerTarget = playerTarget;
             m_PlayerInviter = playerInviter;
@@ -365,6 +506,17 @@ namespace Server.Items
         {
         }
 
+        public bool CheckExpired()
+        {
+            if (m_InvitationTime + Guilds.InvitationExpiration <= DateTime.UtcNow) return true;
+            if (m_PlayerTarget == null) return true;
+            if (m_PlayerTarget.Deleted) return true;
+            if (m_Guild == null) return true;
+            if (m_Guild.Deleted) return true;
+
+            return false;
+        }
+
         public override void OnDelete()
         {
             if (m_PlayerTarget != null)
@@ -374,12 +526,12 @@ namespace Server.Items
                 if (m_PlayerTarget.m_GuildSettings.m_GuildInvitations.Contains(this))
                     m_PlayerTarget.m_GuildSettings.m_GuildInvitations.Remove(this);
             }
-            
+
             if (m_Guild != null)
             {
                 if (m_Guild.m_Candidates.Contains(this))
                     m_Guild.m_Candidates.Remove(this);
-            }            
+            }
 
             base.OnDelete();
         }
@@ -410,14 +562,11 @@ namespace Server.Items
                 m_Guild = (Guild)reader.ReadItem();
                 m_InvitationTime = reader.ReadDateTime();
                 m_Accepted = reader.ReadBool();
-            }   
-         
+            }
+
             //-----
 
-            if (m_InvitationTime + Guilds.InvitationExpiration <= DateTime.UtcNow)
-                Delete();
-
-            else if (m_PlayerTarget == null)
+            if (CheckExpired())
                 Delete();
 
             else
@@ -428,7 +577,7 @@ namespace Server.Items
                 m_Guild.m_Candidates.Add(this);
             }
         }
-    }
+    }    
 
     public class GuildSettings: Item
     {
@@ -492,14 +641,14 @@ namespace Server.Items
                     {
                         case Guilds.InvitationSortCriteria.GuildName:
                             if (string.Compare(invitationEntry.m_Guild.Name, invitationListItem.m_Guild.Name) >= 0)
-                                newIndexPosition = b;
+                                newIndexPosition = b + 1;
                         break;
 
                         case Guilds.InvitationSortCriteria.Expiration:
                             addToStart = false;
 
                             if (invitationEntry.m_InvitationTime <= invitationListItem.m_InvitationTime)
-                                newIndexPosition = b;    
+                                newIndexPosition = b + 1;    
                         break;
                     }
                 }
@@ -514,11 +663,17 @@ namespace Server.Items
                 }
 
                 else
-                    invitationsList.Insert(newIndexPosition, invitationEntry);
+                {
+                    if (newIndexPosition >= invitationsList.Count)
+                        invitationsList.Add(invitationEntry);
 
-                if (!ascending)
-                    invitationsList.Reverse(0, invitationsList.Count);
+                    else
+                        invitationsList.Insert(newIndexPosition, invitationEntry);
+                }               
             }
+
+            if (!ascending)
+                invitationsList.Reverse(0, invitationsList.Count);
             
             return invitationsList;
         }
@@ -532,18 +687,7 @@ namespace Server.Items
                 if (invitation == null) continue;
                 if (invitation.Deleted) continue;
 
-                bool inviteValid = true;
-
-                if (invitation.m_PlayerTarget == null)
-                    inviteValid = false;
-
-                else if (invitation.m_PlayerTarget.Deleted)
-                    inviteValid = false;
-
-                if (invitation.m_InvitationTime + Guilds.InvitationExpiration <= DateTime.UtcNow)
-                    inviteValid = false;
-
-                if (!inviteValid)
+                if (invitation.CheckExpired())
                     m_Queue.Enqueue(invitation);
             }
 
@@ -646,17 +790,9 @@ namespace Server.Items
 
         public string[] m_RankNames = new string[] { Guilds.GuildRankNames[0], Guilds.GuildRankNames[1], Guilds.GuildRankNames[2], Guilds.GuildRankNames[3], Guilds.GuildRankNames[4] };
 
-        public List<GuildMemberEntry> m_Members = new List<GuildMemberEntry>(); 
-       
-        public List<Guild> m_Allies = new List<Guild>();
-        public List<Guild> m_AlliesRequestsSent = new List<Guild>();
-        public List<Guild> m_AlliesRequestsReceived = new List<Guild>();
-
-        public List<Guild> m_Enemies = new List<Guild>();
-        public List<Guild> m_EnemiesRequestsSent = new List<Guild>();
-        public List<Guild> m_EnemiesRequestsReceived = new List<Guild>();
-
-        public List<GuildInvitation> m_Candidates = new List<GuildInvitation>();    
+        public List<GuildMemberEntry> m_Members = new List<GuildMemberEntry>();
+        public List<GuildInvitation> m_Candidates = new List<GuildInvitation>();
+        public List<GuildRelationship> m_Relationships = new List<GuildRelationship>();
 
         [Constructable]
         public Guild(string name, string abbreviation): base(0x0)
@@ -674,6 +810,15 @@ namespace Server.Items
 
         public Guild(Serial serial): base(serial)
         {
+        }
+
+        public string GetDisplayName(bool addAbbreviation)
+        {
+            if (addAbbreviation)
+                return Name + " [" + m_Abbreviation + "]";
+
+            else
+                return Name;
         }
 
         public string GetRankName(GuildMemberRank rank)
@@ -800,10 +945,10 @@ namespace Server.Items
 
             for (int a = 0; a < m_Candidates.Count; a++)
             {
-                GuildInvitation invitationEntry = m_Candidates[a];
+                GuildInvitation candidateEntry = m_Candidates[a];
 
-                if (invitationEntry == null) continue;
-                if (invitationEntry.m_PlayerTarget == null) continue;
+                if (candidateEntry == null) continue;
+                if (candidateEntry.m_PlayerTarget == null) continue;
 
                 int newIndexPosition = -1;
 
@@ -817,20 +962,20 @@ namespace Server.Items
                     switch (sortCriteria)
                     {
                         case Guilds.CandidateSortCriteria.Accepted:
-                            if (invitationEntry.m_Accepted && !invitationListItem.m_Accepted)
-                                    newIndexPosition = b;
+                            if (candidateEntry.m_Accepted && !invitationListItem.m_Accepted)
+                                    newIndexPosition = b + 1;
                             break;
 
                         case Guilds.CandidateSortCriteria.PlayerName:
-                            if (string.Compare(invitationEntry.m_PlayerTarget.RawName, invitationListItem.m_PlayerTarget.RawName) >= 0)
-                                newIndexPosition = b;
+                            if (string.Compare(candidateEntry.m_PlayerTarget.RawName, invitationListItem.m_PlayerTarget.RawName) >= 0)
+                                newIndexPosition = b + 1;
                         break;
 
                         case Guilds.CandidateSortCriteria.Expiration:
                             addToStart = false;
 
-                            if (invitationEntry.m_InvitationTime <= invitationListItem.m_InvitationTime)
-                                newIndexPosition = b;
+                            if (candidateEntry.m_InvitationTime <= invitationListItem.m_InvitationTime)
+                                newIndexPosition = b + 1;
                         break;
                     }
                 }
@@ -838,18 +983,24 @@ namespace Server.Items
                 if (newIndexPosition == -1)
                 {
                     if (addToStart)
-                        candidatesList.Insert(0, invitationEntry);
+                        candidatesList.Insert(0, candidateEntry);
 
                     else
-                        candidatesList.Add(invitationEntry);
+                        candidatesList.Add(candidateEntry);
                 }
 
                 else
-                    candidatesList.Insert(newIndexPosition, invitationEntry);
+                {
+                    if (newIndexPosition >= candidatesList.Count)
+                        candidatesList.Add(candidateEntry);
 
-                if (!ascending)
-                    candidatesList.Reverse(0, candidatesList.Count);
+                    else
+                        candidatesList.Insert(newIndexPosition, candidateEntry);
+                }  
             }
+
+            if (!ascending)
+                candidatesList.Reverse(0, candidatesList.Count);
 
             return candidatesList;
         }
@@ -863,18 +1014,7 @@ namespace Server.Items
                 if (candidate == null) continue;
                 if (candidate.Deleted) continue;
 
-                bool candidateValid = true;
-
-                if (candidate.m_PlayerTarget == null)
-                    candidateValid = false;
-
-                else if (candidate.m_PlayerTarget.Deleted)
-                    candidateValid = false;
-
-                if (candidate.m_InvitationTime + Guilds.InvitationExpiration <= DateTime.UtcNow)
-                    candidateValid = false;
-
-                if (!candidateValid)
+                if (candidate.CheckExpired())
                     m_Queue.Enqueue(candidate);
             }
 
@@ -942,21 +1082,21 @@ namespace Server.Items
                     
                     switch (sortCriteria)
                     {
-                        case Guilds.MemberSortCriteria.LastOnline:
-                            addToStart = false;
-
+                        case Guilds.MemberSortCriteria.LastOnline:  
                             if (memberEntry.m_Player.LastOnline >= memberListItem.m_Player.LastOnline)
-                                newIndexPosition = b;
+                                newIndexPosition = b + 1;                            
                         break;
 
                         case Guilds.MemberSortCriteria.PlayerName:
-                            if (string.Compare(memberEntry.m_Player.RawName, memberListItem.m_Player.RawName) >= 0)
-                                newIndexPosition = b;
+                            int compareResult = string.Compare(memberEntry.m_Player.RawName, memberListItem.m_Player.RawName);
+
+                            if (compareResult >= 0)
+                                newIndexPosition = b + 1;                            
                         break;  
                      
                         case Guilds.MemberSortCriteria.GuildRank:
                             if ((int)memberEntry.m_Rank >= (int)memberListItem.m_Rank)
-                                newIndexPosition = b;
+                                newIndexPosition = b + 1;
                         break;
                     }
                 }
@@ -971,20 +1111,66 @@ namespace Server.Items
                 }
 
                 else
-                    membersList.Insert(newIndexPosition, memberEntry);
+                {
+                    if (newIndexPosition >= membersList.Count)
+                        membersList.Add(memberEntry);
 
-                if (!ascending)
-                    membersList.Reverse(0, membersList.Count);
+                    else
+                        membersList.Insert(newIndexPosition, memberEntry);
+                }
             }
 
+            if (!ascending)
+                membersList.Reverse(0, membersList.Count);
+
             return membersList;
-        }       
+        }
+
+        public void AuditMembers()
+        {            
+            Queue m_Queue = new Queue();
+
+            foreach (GuildMemberEntry member in m_Members)
+            {
+                if (member == null) 
+                    continue;
+
+                if (member.m_Player == null)
+                    m_Queue.Enqueue(member);
+
+                else if (member.m_Player.Deleted)
+                    m_Queue.Enqueue(member);
+
+                else
+                {
+                    if (member.m_DeclaredFealty == null)
+                    {
+                        if (m_Guildmaster != null)
+                            member.m_DeclaredFealty = m_Guildmaster;
+
+                        else
+                            member.m_DeclaredFealty = member.m_Player;
+                    }                        
+                }
+            }
+
+            while (m_Queue.Count > 0)
+            {
+                GuildMemberEntry member = (GuildMemberEntry)m_Queue.Dequeue();
+
+                if (m_Members.Contains(member))
+                    m_Members.Remove(member);
+            }            
+        }
 
         public bool IsAlliedGuild(Guild guild)
         {
-            foreach (Guild otherGuild in m_Allies)
+            foreach (GuildRelationship relationship in m_Relationships)
             {
-                if (guild == otherGuild)
+                if (relationship == null) continue;
+                if (relationship.Deleted) continue;
+
+                if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.Ally)
                     return true;
             }
 
@@ -993,9 +1179,12 @@ namespace Server.Items
 
         public bool IsEnemyGuild(Guild guild)
         {
-            foreach (Guild otherGuild in m_Enemies)
+            foreach (GuildRelationship relationship in m_Relationships)
             {
-                if (guild == otherGuild)
+                if (relationship == null) continue;
+                if (relationship.Deleted) continue;
+
+                if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.War)
                     return true;
             }
 
@@ -1069,14 +1258,12 @@ namespace Server.Items
 
         public void AssignNewGuildmaster(PlayerMobile previousGuildmaster)
         {
-            string guildText = Name + " [" + m_Abbreviation + "]";
-
             List<GuildMemberEntry> guildMemberEntries = GetGuildMemberEntries(Guilds.MemberSortCriteria.None, true);
 
             if (guildMemberEntries.Count == 0)
             {
                 if (previousGuildmaster != null)
-                    previousGuildmaster.SendMessage(Guilds.GuildTextHue, guildText + " has disbanded.");
+                    previousGuildmaster.SendMessage(Guilds.GuildTextHue, GetDisplayName(true) + " has disbanded.");
 
                 DisbandGuild();
 
@@ -1123,12 +1310,9 @@ namespace Server.Items
             }
         }
 
-
         public void DisbandGuild()
         {
-            string guildText = Name + " [" + m_Abbreviation + "]";
-
-            GuildAnnouncement(guildText + " has disbanded.", new List<PlayerMobile> { }, GuildMemberRank.Recruit);
+            GuildAnnouncement(GetDisplayName(true) + " has disbanded.", new List<PlayerMobile> { }, GuildMemberRank.Recruit);
 
             Delete();
         }
@@ -1161,18 +1345,7 @@ namespace Server.Items
 
         public void OnFealtyChange()
         {
-        }
-
-        public void OnPlayerDeleted(PlayerMobile player)
-        {
-            if (player == null)
-                return;
-
-            if (player.m_GuildSettings != null)
-                player.m_GuildSettings.Delete();
-
-            DismissMember(player, false, true);
-        }        
+        }    
 
         public void RecruitMember(PlayerMobile player)
         {
@@ -1304,9 +1477,11 @@ namespace Server.Items
         {
             Queue m_Queue = new Queue();
 
+            //Members
             foreach (GuildMemberEntry entry in m_Members)
             {
-                if (entry.m_Player == null) continue;
+                if (entry.m_Player == null)
+                    continue;
 
                 entry.m_Player.Guild = null;
                 entry.m_Player.m_GuildMemberEntry = null;
@@ -1320,30 +1495,42 @@ namespace Server.Items
 
                 if (m_Members.Contains(entry))
                     m_Members.Remove(entry);
+            }    
+ 
+            //Candiates
+            m_Queue = new Queue();
+
+            foreach (GuildInvitation invitation in m_Candidates)
+            {
+                if (invitation == null)
+                    continue;
+
+                m_Queue.Enqueue(invitation);
             }
 
-            foreach (Guild guild in Guilds.m_Guilds)
+            while (m_Queue.Count > 0)
             {
-                if (guild == null) continue;
-                if (guild.Deleted) continue;
+                GuildInvitation invitation = (GuildInvitation)m_Queue.Dequeue();
 
-                if (guild.m_Allies.Contains(this))
-                    guild.m_Allies.Remove(this);
+                invitation.Delete();
+            }
 
-                if (guild.m_AlliesRequestsSent.Contains(this))
-                    guild.m_AlliesRequestsSent.Remove(this);
+            //Relationships   
+            m_Queue = new Queue();
 
-                if (guild.m_AlliesRequestsReceived.Contains(this))
-                    guild.m_AlliesRequestsReceived.Remove(this);
+            foreach (GuildRelationship relationship in m_Relationships)
+            {
+                if (relationship == null)
+                    continue;
 
-                if (guild.m_Enemies.Contains(this))
-                    guild.m_Enemies.Remove(this);
+                m_Queue.Enqueue(relationship);
+            }
 
-                if (guild.m_EnemiesRequestsSent.Contains(this))
-                    guild.m_EnemiesRequestsSent.Remove(this);
+            while (m_Queue.Count > 0)
+            {
+                GuildRelationship relationship = (GuildRelationship)m_Queue.Dequeue();
 
-                if (guild.m_EnemiesRequestsReceived.Contains(this))
-                    guild.m_EnemiesRequestsReceived.Remove(this);
+                relationship.Delete();
             }
 
             if (Guilds.m_Guilds.Contains(this))
@@ -1367,14 +1554,12 @@ namespace Server.Items
             writer.Write(m_Guildhouse);
             writer.Write(m_Faction);
 
-            //Rank Names
             writer.Write(m_RankNames.Length);
             for (int a = 0; a < m_RankNames.Length; a++)
             {
                 writer.Write(m_RankNames[a]);
             }
 
-            //Members
             writer.Write(m_Members.Count);
             for (int a = 0; a < m_Members.Count; a++)
             {
@@ -1382,44 +1567,7 @@ namespace Server.Items
                 writer.Write((int)m_Members[a].m_Rank);
                 writer.Write(m_Members[a].m_JoinDate);
                 writer.Write(m_Members[a].m_DeclaredFealty);
-            }
-
-            //Lists
-            writer.Write(m_Allies.Count);
-            for (int a = 0; a < m_Allies.Count; a++)
-            {
-                writer.Write(m_Allies[a]);
-            }
-
-            writer.Write(m_AlliesRequestsSent.Count);
-            for (int a = 0; a < m_AlliesRequestsSent.Count; a++)
-            {
-                writer.Write(m_AlliesRequestsSent[a]);
-            }
-
-            writer.Write(m_AlliesRequestsReceived.Count);
-            for (int a = 0; a < m_AlliesRequestsReceived.Count; a++)
-            {
-                writer.Write(m_AlliesRequestsReceived[a]);
-            }
-
-            writer.Write(m_Enemies.Count);
-            for (int a = 0; a < m_Enemies.Count; a++)
-            {
-                writer.Write(m_Enemies[a]);
-            }
-
-            writer.Write(m_EnemiesRequestsSent.Count);
-            for (int a = 0; a < m_EnemiesRequestsSent.Count; a++)
-            {
-                writer.Write(m_EnemiesRequestsSent[a]);
-            }
-
-            writer.Write(m_EnemiesRequestsReceived.Count);
-            for (int a = 0; a < m_EnemiesRequestsReceived.Count; a++)
-            {
-                writer.Write(m_EnemiesRequestsReceived[a]);
-            }
+            }            
         }
 
         public override void Deserialize(GenericReader reader)
@@ -1439,14 +1587,12 @@ namespace Server.Items
                 m_Guildhouse = reader.ReadItem() as BaseHouse;
                 m_Faction = reader.ReadItem() as Faction;
 
-                //Rank Names
                 int rankNamesCount = reader.ReadInt();
                 for (int a = 0; a < rankNamesCount; a++)
                 {
                     m_RankNames[a] = reader.ReadString();
-                }
-                
-                //Members
+                }     
+           
                 int membersCount = reader.ReadInt();
                 for (int a = 0; a < membersCount; a++)
                 {
@@ -1464,79 +1610,6 @@ namespace Server.Items
                             m_Members.Add(guildMemberEntry);
                         }
                     }                    
-                }
-
-                //Lists
-                int alliesCount = reader.ReadInt();
-                for (int a = 0; a < alliesCount; a++)
-                {
-                    Guild entry = reader.ReadItem() as Guild;
-
-                    if (entry != null)
-                    {
-                        if (!entry.Deleted)
-                            m_Allies.Add(entry);
-                    }
-                }
-
-                int alliesRequestsSentCount = reader.ReadInt();
-                for (int a = 0; a < alliesRequestsSentCount; a++)
-                {
-                    Guild entry = reader.ReadItem() as Guild;                   
-
-                    if (entry != null)
-                    {
-                        if (!entry.Deleted)
-                            m_AlliesRequestsSent.Add(entry);
-                    }
-                }
-
-                int alliesRequestsReceivedCount = reader.ReadInt();
-                for (int a = 0; a < alliesRequestsReceivedCount; a++)
-                {
-                    Guild entry = reader.ReadItem() as Guild;
-
-                    if (entry != null)
-                    {
-                        if (!entry.Deleted)
-                            m_AlliesRequestsReceived.Add(entry);
-                    }
-                }
-
-                int enemiesCount = reader.ReadInt();
-                for (int a = 0; a < enemiesCount; a++)
-                {
-                    Guild entry = reader.ReadItem() as Guild;
-
-                    if (entry != null)
-                    {
-                        if (!entry.Deleted)
-                            m_Enemies.Add(entry);
-                    }
-                }
-
-                int enemiesRequestsSentCount = reader.ReadInt();
-                for (int a = 0; a < enemiesRequestsSentCount; a++)
-                {
-                    Guild entry = reader.ReadItem() as Guild;
-
-                    if (entry != null)
-                    {
-                        if (!entry.Deleted)
-                            m_EnemiesRequestsSent.Add(entry);
-                    }
-                }
-
-                int enemiesRequestsReceivedCount = reader.ReadInt();
-                for (int a = 0; a < enemiesRequestsReceivedCount; a++)
-                {
-                    Guild entry = reader.ReadItem() as Guild;
-
-                    if (entry != null)
-                    {
-                        if (!entry.Deleted)
-                            m_EnemiesRequestsReceived.Add(entry);
-                    }
                 }
             }
 

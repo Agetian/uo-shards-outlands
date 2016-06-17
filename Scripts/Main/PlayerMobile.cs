@@ -5803,9 +5803,8 @@ namespace Server.Mobiles
         public override void OnDelete()
         {
             ReleaseAllFollowers();
-
-            if (Guild != null)
-                Guild.OnPlayerDeleted(this);
+            
+            Guilds.OnPlayerDeleted(this);
 
             #region UOACZ
 
