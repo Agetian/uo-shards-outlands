@@ -56,10 +56,11 @@ namespace Server.Items
         }
 
         public enum RelationshipFilterType
-        {
-            ShowAll,
-            ShowReceived,
-            ShowSent
+        {            
+            ShowActiveAgreements,
+            ShowAgreementsReceived,
+            ShowAgreementsSent,
+            ShowAvailableGuilds
         }
 
         public enum GuildRelationshipType
@@ -414,6 +415,18 @@ namespace Server.Items
         }
     }
 
+    public class DiplomacyEntry
+    {
+        public Guild m_Guild;
+        public GuildRelationship m_GuildRelationship;
+
+        public DiplomacyEntry(Guild guild, GuildRelationship guildRelationship)
+        {
+            m_Guild = guild;
+            m_GuildRelationship = guildRelationship;
+        }   
+    }
+
     public class GuildRelationship: Item
     {
         public Guild m_GuildFrom;
@@ -436,14 +449,14 @@ namespace Server.Items
         {
         }
 
-        public string GetDisplayName(bool guildFrom)
+        public static string GetDisplayName(Guilds.GuildRelationshipType relationshipType, bool guildFrom)
         {
             string relationshipText = "";
 
-            switch (m_RelationshipType)
+            switch (relationshipType)
             {
                 case Guilds.GuildRelationshipType.None:
-                    relationshipText = "None";
+                    relationshipText = "-";
                 break;
 
                 case Guilds.GuildRelationshipType.War:
@@ -472,14 +485,14 @@ namespace Server.Items
             return relationshipText;
         }
 
-        public int GetHue(bool guildFrom)
+        public static int GetHue(Guilds.GuildRelationshipType relationshipType, bool guildFrom)
         {
-            int relationshipTextHue = 0;
+            int relationshipTextHue = 2655;
 
-            switch (m_RelationshipType)
+            switch (relationshipType)
             {
                 case Guilds.GuildRelationshipType.None:
-                    relationshipTextHue = 0;
+                    relationshipTextHue = 2655;
                 break;
 
                 case Guilds.GuildRelationshipType.War:
@@ -539,6 +552,21 @@ namespace Server.Items
             }
 
             base.OnDelete();
+        }
+
+        public void Delete()
+        {
+            if (m_GuildFrom != null)
+            {
+                if (m_GuildFrom.m_Relationships.Contains(this))
+                    m_GuildFrom.m_Relationships.Remove(this);
+            }
+
+            if (m_GuildTarget != null)
+            {
+                if (m_GuildTarget.m_Relationships.Contains(this))
+                    m_GuildTarget.m_Relationships.Remove(this);
+            }
         }
 
         public override void Serialize(GenericWriter writer)
@@ -1356,169 +1384,159 @@ namespace Server.Items
             }            
         }
 
-        public List<GuildRelationship> GetGuildRelationships(Guilds.RelationshipFilterType filterType, Guilds.RelationshipSortCriteria sortCriteria, bool ascending)
+        public List<DiplomacyEntry> GetGuildRelationships(Guilds.RelationshipFilterType filterType, Guilds.RelationshipSortCriteria sortCriteria, bool ascending)
         {
-            List<GuildRelationship> relationshipList = new List<GuildRelationship>();
-
-            if (sortCriteria == Guilds.RelationshipSortCriteria.None)
+            List<DiplomacyEntry> relationshipList = new List<DiplomacyEntry>();            
+            
+            switch (filterType)
             {
-                switch (filterType)
-                {
-                    case Guilds.RelationshipFilterType.ShowAll:
-                        return m_Relationships;
-                    break;
-
-                    case Guilds.RelationshipFilterType.ShowSent:
-                        foreach (GuildRelationship relationship in m_Relationships)
-                        {
-                            if (relationship == null)
-                                continue;
-
-                            if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest || relationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
-                            {
-                                if (relationship.m_GuildFrom == this)
-                                    relationshipList.Add(relationship);
-                            }
-                        }
-
-                        return relationshipList;
-                    break;
-
-                    case Guilds.RelationshipFilterType.ShowReceived:
-                        foreach (GuildRelationship relationship in m_Relationships)
-                        {
-                            if (relationship == null)
-                                continue;
-
-                            if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest || relationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
-                            {
-                                if (relationship.m_GuildTarget == this)
-                                    relationshipList.Add(relationship);
-                            }
-                        }
-
-                        return relationshipList;
-                    break;
-                }
-            }
-
-            bool addToStart = true;
-
-            for (int a = 0; a < m_Relationships.Count; a++)
-            {
-                GuildRelationship relationship = m_Relationships[a];
-
-                if (relationship == null) continue;
-                if (relationship.m_GuildFrom == null) continue;
-                if (relationship.m_GuildFrom.Deleted) continue;
-                if (relationship.m_GuildTarget == null) continue;
-                if (relationship.m_GuildTarget.Deleted) continue;
-
-                switch (filterType)
-                {
-                    case Guilds.RelationshipFilterType.ShowAll:
-                    break;
-
-                    case Guilds.RelationshipFilterType.ShowSent:
-                        if (relationship.m_GuildFrom != this)
-                            continue;
-                    break;
-
-                    case Guilds.RelationshipFilterType.ShowReceived:
-                        if (relationship.m_GuildTarget != this)
-                            continue;
-                    break;
-                }
-
-                Guild firstGuild = null;
-
-                if (relationship.m_GuildFrom == this)
-                    firstGuild = relationship.m_GuildTarget;
-
-                else
-                    firstGuild = relationship.m_GuildFrom;
-
-                int newIndexPosition = -1;
-
-                for (int b = 0; b < relationshipList.Count; b++)
-                {
-                    GuildRelationship relationshipListItem = relationshipList[b];
-
-                    if (relationshipListItem == null) continue;
-                    if (relationshipListItem.m_GuildFrom == null) continue;
-                    if (relationshipListItem.m_GuildFrom.Deleted) continue;
-                    if (relationshipListItem.m_GuildTarget == null) continue;
-                    if (relationshipListItem.m_GuildTarget.Deleted) continue;
-
-                    switch (filterType)
+                case Guilds.RelationshipFilterType.ShowActiveAgreements:
+                    foreach (GuildRelationship relationship in m_Relationships)
                     {
-                        case Guilds.RelationshipFilterType.ShowAll:
-                        break;
+                        if (relationship == null) continue;
+                        if (relationship.Deleted) continue;
 
-                        case Guilds.RelationshipFilterType.ShowSent:
-                            if (relationshipListItem.m_GuildFrom != this)
-                                continue;
-                        break;
+                        if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.War || relationship.m_RelationshipType == Guilds.GuildRelationshipType.Ally)
+                        {
+                            if (relationship.m_GuildFrom == this)
+                            {
+                                DiplomacyEntry diplomacyEntry = new DiplomacyEntry(relationship.m_GuildTarget, relationship);
 
-                        case Guilds.RelationshipFilterType.ShowReceived:
-                            if (relationshipListItem.m_GuildTarget != this)
-                                continue;
-                        break;
+                                relationshipList.Add(diplomacyEntry);
+                            }
+                        }
+                    }
+                break;
+
+                case Guilds.RelationshipFilterType.ShowAgreementsSent:
+                    foreach (GuildRelationship relationship in m_Relationships)
+                    {
+                        if (relationship == null) continue;
+                        if (relationship.Deleted) continue;
+
+                        if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest || relationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
+                        {
+                            if (relationship.m_GuildFrom == this)
+                            {
+                                DiplomacyEntry diplomacyEntry = new DiplomacyEntry(relationship.m_GuildTarget, relationship);
+
+                                relationshipList.Add(diplomacyEntry);
+                            }
+                        }
+                    }                        
+                break;
+
+                case Guilds.RelationshipFilterType.ShowAgreementsReceived:
+                    foreach (GuildRelationship relationship in m_Relationships)
+                    {
+                        if (relationship == null) continue;
+                        if (relationship.Deleted) continue;
+
+                        if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest || relationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
+                        {
+                            if (relationship.m_GuildTarget == this)
+                            {
+                                DiplomacyEntry diplomacyEntry = new DiplomacyEntry(relationship.m_GuildTarget, relationship);
+
+                                relationshipList.Add(diplomacyEntry);
+                            }
+                        }
                     }
 
-                    Guild secondGuild = null;
+                break;
 
-                    if (relationshipListItem.m_GuildFrom == this)
-                        secondGuild = relationshipListItem.m_GuildTarget;
-
-                    else
-                        secondGuild = relationshipListItem.m_GuildFrom; 
-                    
-                    if (firstGuild != null && secondGuild != null)
+                case Guilds.RelationshipFilterType.ShowAvailableGuilds:
+                    foreach (Guild guild in Guilds.m_Guilds)
                     {
-                        switch (sortCriteria)
+                        if (guild == null) continue;
+                        if (guild.Deleted) continue;
+                        if (guild == this) continue;
+
+                        DiplomacyEntry diplomacyEntry = new DiplomacyEntry(guild, null);
+
+                        bool foundAgreement = false;
+
+                        for (int a = 0; a < guild.m_Relationships.Count; a++)
                         {
-                            case Guilds.RelationshipSortCriteria.GuildName:
-                                if (string.Compare(firstGuild.Name, secondGuild.Name) >= 0)
-                                    newIndexPosition = b + 1;
-                            break;
-
-                            case Guilds.RelationshipSortCriteria.Relationship:
-                                if ((int)relationship.m_RelationshipType >= (int)relationshipListItem.m_RelationshipType)
-                                    newIndexPosition = b + 1;
-                            break;
-
-                            case Guilds.RelationshipSortCriteria.PlayerCount:
-                                if (firstGuild.GetCharacterCount(true) >= secondGuild.GetCharacterCount(true))
-                                    newIndexPosition = b + 1;
-                            break;
+                            if (guild.m_Relationships[a].m_GuildFrom == this || guild.m_Relationships[a].m_GuildTarget == this)
+                            {
+                                foundAgreement = true;
+                                break;
+                            }
                         }
-                    }                    
-                }
 
-                if (newIndexPosition == -1)
+                        if (!foundAgreement)
+                            relationshipList.Add(diplomacyEntry);
+                    }
+                break;
+            }
+
+            if (sortCriteria == Guilds.RelationshipSortCriteria.None)
+                return relationshipList;
+
+            List<DiplomacyEntry> relationshipListSorted = new List<DiplomacyEntry>();
+            
+            for (int a = 0; a < relationshipList.Count; a++)
+            {
+                DiplomacyEntry diplomacyEntry = relationshipList[a];
+
+                if (diplomacyEntry.m_Guild == null) continue;
+                if (diplomacyEntry.m_Guild.Deleted) continue;
+                
+                int newIndexPosition = -1;
+
+                for (int b = 0; b < relationshipListSorted.Count; b++)
                 {
-                    if (addToStart)
-                        relationshipList.Insert(0, relationship);
+                    DiplomacyEntry diplomacyEntryTarget = relationshipListSorted[b];
 
-                    else
-                        relationshipList.Add(relationship);
+                    if (diplomacyEntryTarget.m_Guild == null) 
+                        continue;
+
+                    switch (sortCriteria)
+                    {
+                        case Guilds.RelationshipSortCriteria.GuildName:
+                            if (string.Compare(diplomacyEntry.m_Guild.Name, diplomacyEntryTarget.m_Guild.Name) >= 0)
+                                newIndexPosition = b + 1;
+                            break;
+
+                        case Guilds.RelationshipSortCriteria.Relationship:
+                            Guilds.GuildRelationshipType fromRelationship = Guilds.GuildRelationshipType.None;
+                            Guilds.GuildRelationshipType targetRelationship = Guilds.GuildRelationshipType.None;
+
+                            if (diplomacyEntry.m_GuildRelationship != null)
+                                fromRelationship = diplomacyEntry.m_GuildRelationship.m_RelationshipType;
+
+                            if (diplomacyEntryTarget.m_GuildRelationship != null)
+                                targetRelationship = diplomacyEntryTarget.m_GuildRelationship.m_RelationshipType;
+
+                            if ((int)fromRelationship >= (int)targetRelationship)
+                                newIndexPosition = b + 1;
+                        break;
+
+                        case Guilds.RelationshipSortCriteria.PlayerCount:
+                            if (diplomacyEntry.m_Guild.GetCharacterCount(true) >= diplomacyEntryTarget.m_Guild.GetCharacterCount(true))
+                                newIndexPosition = b + 1;
+                        break;
+                    }
                 }
+
+                if (newIndexPosition == -1)                
+                    relationshipListSorted.Insert(0, diplomacyEntry);                
 
                 else
                 {
                     if (newIndexPosition >= relationshipList.Count)
-                        relationshipList.Add(relationship);
+                        relationshipListSorted.Add(diplomacyEntry);
 
                     else
-                        relationshipList.Insert(newIndexPosition, relationship);
+                        relationshipListSorted.Insert(newIndexPosition, diplomacyEntry);
                 }
             }
 
             if (!ascending)
-                relationshipList.Reverse(0, relationshipList.Count);
+                relationshipListSorted.Reverse(0, relationshipListSorted.Count);
 
-            return m_Relationships;
+            return relationshipListSorted;  
         }
 
         public void AuditRelationships()

@@ -1192,16 +1192,15 @@ namespace Server
                 #region Images 
 
                 AddLabel(365, 15, 2606, "Diplomacy");
-                AddLabel(244, 70, 149, "Guild Name");
-                AddLabel(422, 70, 149, "Relationship");
-                AddLabel(188, 429, WhiteTextHue, "Previous Page");
-                AddLabel(552, 429, WhiteTextHue, "Next Page");
+                AddLabel(260, 70, 149, "Guild Name");               
+                
                 AddLabel(373, 429, 63, "Add New Guild");
                 AddLabel(609, 70, 149, "Manage");
                 AddImage(299, 39, 2446, 2401);
                 AddLabel(508, 39, 149, "Search for Guild Name");
-                AddLabel(360, 400, 149, "Page");
-                AddLabel(546, 70, 149, "Players");
+
+                AddLabel(447, 70, 149, "Relationship");
+                AddLabel(555, 70, 149, "Players");
 
                 #endregion
 
@@ -1226,7 +1225,7 @@ namespace Server
                 guild.AuditRelationships();
 
                 m_GuildGumpObject.m_RelationshipsSorted = guild.GetGuildRelationships(m_GuildGumpObject.m_RelationshipFilterType, m_GuildGumpObject.m_RelationshipSortCriteria, m_GuildGumpObject.m_RelationshipSortAscending);
-
+                
                 int relationshipsPerPage = 12;
                 int totalRelationships = m_GuildGumpObject.m_RelationshipsSorted.Count;
                 int totalRelationshipPages = (int)(Math.Ceiling((double)totalRelationships / (double)relationshipsPerPage));
@@ -1253,36 +1252,36 @@ namespace Server
                 {
                     case Guilds.RelationshipSortCriteria.GuildName:
                         if (guildGumpObject.m_RelationshipSortAscending)
-                            AddButton(223, 73, 5600, 5600, 6, GumpButtonType.Reply, 0); //Sort Guild Name
+                            AddButton(238, 73, 5600, 5600, 6, GumpButtonType.Reply, 0); //Sort Guild Name
 
                         else
-                            AddButton(223, 73, 5602, 5602, 6, GumpButtonType.Reply, 0); //Sort Guild Name
+                            AddButton(238, 73, 5602, 5602, 6, GumpButtonType.Reply, 0); //Sort Guild Name
 
-                        AddButton(400, 73, 2117, 2118, 7, GumpButtonType.Reply, 0); //Sort Relationship
-                        AddButton(526, 73, 2117, 2118, 8, GumpButtonType.Reply, 0); //Sort Players
+                        AddButton(425, 73, 2117, 2118, 7, GumpButtonType.Reply, 0); //Sort Relationship
+                        AddButton(536, 73, 2117, 2118, 8, GumpButtonType.Reply, 0); //Sort Players
                     break;
 
                     case Guilds.RelationshipSortCriteria.Relationship:
-                        AddButton(223, 73, 2117, 2118, 6, GumpButtonType.Reply, 0); //Sort Guild Name
+                        AddButton(238, 73, 2117, 2118, 6, GumpButtonType.Reply, 0); //Sort Guild Name
 
                         if (guildGumpObject.m_RelationshipSortAscending)
-                            AddButton(308, 73, 5600, 5600, 7, GumpButtonType.Reply, 0); //Sort Relationship
+                            AddButton(425, 73, 5600, 5600, 7, GumpButtonType.Reply, 0); //Sort Relationship
 
                         else
-                            AddButton(308, 73, 5602, 5602, 7, GumpButtonType.Reply, 0); //Sort Relationship
+                            AddButton(425, 73, 5602, 5602, 7, GumpButtonType.Reply, 0); //Sort Relationship
 
-                        AddButton(526, 73, 2117, 2118, 8, GumpButtonType.Reply, 0); //Sort Players
+                        AddButton(536, 73, 2117, 2118, 8, GumpButtonType.Reply, 0); //Sort Players
                     break;
 
                     case Guilds.RelationshipSortCriteria.PlayerCount:
-                        AddButton(223, 73, 2117, 2118, 6, GumpButtonType.Reply, 0); //Sort Guild Name
-                        AddButton(400, 73, 5602, 5606, 7, GumpButtonType.Reply, 0); //Sort Relationship
+                        AddButton(238, 73, 2117, 2118, 6, GumpButtonType.Reply, 0); //Sort Guild Name
+                        AddButton(425, 73, 2117, 2118, 7, GumpButtonType.Reply, 0); //Sort Relationship
 
                         if (guildGumpObject.m_RelationshipSortAscending)
-                            AddButton(526, 73, 5600, 5600, 8, GumpButtonType.Reply, 0); //Sort Rank
+                            AddButton(536, 73, 5600, 5600, 8, GumpButtonType.Reply, 0); //Sort Rank
 
                         else
-                            AddButton(526, 73, 5602, 5602, 8, GumpButtonType.Reply, 0); //Sort Rank
+                            AddButton(536, 73, 5602, 5602, 8, GumpButtonType.Reply, 0); //Sort Rank
                     break;
                 }
 
@@ -1297,35 +1296,34 @@ namespace Server
                     if (relationshipStartIndex >= totalRelationships)
                         continue;
 
-                    GuildRelationship relationship = m_GuildGumpObject.m_RelationshipsSorted[relationshipIndex];
+                    DiplomacyEntry diplomacyEntry = m_GuildGumpObject.m_RelationshipsSorted[relationshipIndex];
 
-                    Guild otherGuild = null;
+                    if (diplomacyEntry.m_Guild == null)
+                        continue;
 
-                    if (relationship.m_GuildFrom == guild)
-                        relationship.m_GuildTarget = otherGuild;
+                    Guilds.GuildRelationshipType relationshipType = Guilds.GuildRelationshipType.None;
 
-                    else
-                       otherGuild = relationship.m_GuildFrom;
+                    bool isFromGuild = true;
 
-                    if (relationship != null && otherGuild != null)
+                    if (diplomacyEntry.m_GuildRelationship != null)
                     {
-                        int buttonIndex = m_GuildGumpObject.m_RelationshipButtonIndexOffset + (a * 10);
+                        relationshipType = diplomacyEntry.m_GuildRelationship.m_RelationshipType;
 
-                        bool isGuildFrom = true;
+                        if (diplomacyEntry.m_GuildRelationship.m_GuildTarget == guild)
+                            isFromGuild = false;
+                    }                    
+                                        
+                    int buttonIndex = m_GuildGumpObject.m_RelationshipButtonIndexOffset + (a * 10);
 
-                        if (relationship.m_GuildTarget == guild)
-                            isGuildFrom = false;
+                    string relationshipText = GuildRelationship.GetDisplayName(relationshipType, isFromGuild);
+                    int relationshipHue = GuildRelationship.GetHue(relationshipType, isFromGuild);
 
-                        string relationshipText = relationship.GetDisplayName(isGuildFrom);
-                        int relationshipHue = relationship.GetHue(isGuildFrom);
+                    AddLabel(Utility.CenteredTextOffset(300, diplomacyEntry.m_Guild.GetDisplayName(true)), startY, WhiteTextHue, diplomacyEntry.m_Guild.GetDisplayName(true));
+                    AddLabel(Utility.CenteredTextOffset(475, relationshipText), startY, relationshipHue, relationshipText);
+                    AddLabel(Utility.CenteredTextOffset(570, diplomacyEntry.m_Guild.GetPlayerCount(true).ToString()), startY, 2599, diplomacyEntry.m_Guild.GetPlayerCount(true).ToString());
+                    AddButton(617, startY, 4011, 4013, buttonIndex, GumpButtonType.Reply, 0); //Manage Relationship
 
-                        AddLabel(Utility.CenteredTextOffset(225, otherGuild.GetDisplayName(true)), startY, WhiteTextHue, otherGuild.GetDisplayName(true));
-                        AddLabel(Utility.CenteredTextOffset(450, relationshipText), startY, relationshipHue, relationshipText);
-                        AddLabel(Utility.CenteredTextOffset(560, otherGuild.GetCharacterCount(true).ToString()), startY, 2599, otherGuild.GetCharacterCount(true).ToString());
-                        AddButton(617, startY, 4011, 4013, buttonIndex, GumpButtonType.Reply, 0); //Manage Relationship
-
-                        startY += rowSpacing;
-                    }
+                    startY += rowSpacing;                    
                 }
 
                 string relationshipFilterText = "";
@@ -1335,17 +1333,19 @@ namespace Server
 
                 switch (guildGumpObject.m_RelationshipFilterType)
                 {
-                    case Guilds.RelationshipFilterType.ShowAll: relationshipFilterText = "Show All"; 
-                        foreach(GuildRelationship relationship in m_GuildGumpObject.m_RelationshipsSorted)
-                        {
-                            if (relationship == null) 
-                                continue;
-                            
-                            if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.War)
-                                warCount++;
+                    case Guilds.RelationshipFilterType.ShowActiveAgreements:
+                        relationshipFilterText = "Showing Active Agreements";
 
-                            if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.Ally)
-                                allyCount++;                            
+                        foreach (DiplomacyEntry diplomacyEntry in m_GuildGumpObject.m_RelationshipsSorted)
+                        {
+                            if (diplomacyEntry.m_GuildRelationship != null)
+                            {
+                                if (diplomacyEntry.m_GuildRelationship.m_RelationshipType == Guilds.GuildRelationshipType.War)
+                                    warCount++;
+
+                                if (diplomacyEntry.m_GuildRelationship.m_RelationshipType == Guilds.GuildRelationshipType.Ally)
+                                    allyCount++;
+                            }                          
                         }
 
                         AddLabel(158, 400, 1256, "Active Wars");
@@ -1355,18 +1355,42 @@ namespace Server
                         AddLabel(625, 400, WhiteTextHue, allyCount.ToString());                        
                     break;
 
-                    case Guilds.RelationshipFilterType.ShowReceived: relationshipFilterText = "Show Received";                        
-                        foreach(GuildRelationship relationship in m_GuildGumpObject.m_RelationshipsSorted)
-                        {
-                            if (relationship == null) 
-                                continue;
+                    case Guilds.RelationshipFilterType.ShowAgreementsReceived: 
+                        relationshipFilterText = "Showing Agreements Received";  
 
-                            if (relationship.m_GuildTarget == guild)
+                        foreach (DiplomacyEntry diplomacyEntry in m_GuildGumpObject.m_RelationshipsSorted)
+                        {
+                            if (diplomacyEntry.m_GuildRelationship != null)
                             {
-                                if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest)
+                                if (diplomacyEntry.m_GuildRelationship.m_GuildTarget == guild)
+                                {
+                                    if (diplomacyEntry.m_GuildRelationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest)
+                                        warCount++;
+
+                                    if (diplomacyEntry.m_GuildRelationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
+                                        allyCount++;
+                                }
+                            }
+                        }
+
+                        AddLabel(158, 400, 1256, "War Requests");
+                        AddLabel(251, 400, WhiteTextHue, warCount.ToString());
+
+                        AddLabel(533, 400, 2599, "Ally Requests");
+                        AddLabel(625, 400, WhiteTextHue, allyCount.ToString());
+                    break;
+
+                    case Guilds.RelationshipFilterType.ShowAgreementsSent: 
+                        relationshipFilterText = "Showing Agreements Sent";  
+
+                        foreach (DiplomacyEntry diplomacyEntry in m_GuildGumpObject.m_RelationshipsSorted)
+                        {
+                            if (diplomacyEntry.m_GuildRelationship.m_GuildFrom == guild)
+                            {
+                                if (diplomacyEntry.m_GuildRelationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest)
                                     warCount++;
 
-                                if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
+                                if (diplomacyEntry.m_GuildRelationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
                                     allyCount++;
                             }
                         }
@@ -1378,42 +1402,40 @@ namespace Server
                         AddLabel(625, 400, WhiteTextHue, allyCount.ToString());
                     break;
 
-                    case Guilds.RelationshipFilterType.ShowSent: relationshipFilterText = "Show Sent";
-                        foreach(GuildRelationship relationship in m_GuildGumpObject.m_RelationshipsSorted)
+                    case Guilds.RelationshipFilterType.ShowAvailableGuilds:
+                        relationshipFilterText = "Showing Available Guilds";
+
+                        foreach (DiplomacyEntry diplomacyEntry in m_GuildGumpObject.m_RelationshipsSorted)
                         {
-                            if (relationship == null) 
-                                continue;
-
-                            if (relationship.m_GuildFrom == guild)
-                            {
-                                if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest)
-                                    warCount++;
-
-                                if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
-                                    allyCount++;
-                            }
+                            warCount++;
                         }
 
-                        AddLabel(158, 400, 1256, "War Requests");
-                        AddLabel(251, 400, WhiteTextHue, warCount.ToString());
-
-                        AddLabel(533, 400, 2599, "Ally Requests");
-                        AddLabel(625, 400, WhiteTextHue, allyCount.ToString());
+                        AddLabel(158, 400, YellowTextHue, "Total Guilds");
+                        AddLabel(251, 400, WhiteTextHue, warCount.ToString());                        
                     break;
                 }
 
-                AddButton(295, 379, 2223, 2223, 9, GumpButtonType.Reply, 0); //Previous Relationship Filter
-                AddLabel(Utility.CenteredTextOffset(375, relationshipFilterText), 375, 2603, relationshipFilterText);
-                AddButton(473, 379, 2224, 2224, 10, GumpButtonType.Reply, 0); //Next Relationship Filter
-                
+                AddButton(275, 379, 2223, 2223, 9, GumpButtonType.Reply, 0); //Previous Relationship Filter
+                AddLabel(Utility.CenteredTextOffset(405, relationshipFilterText), 375, 2603, relationshipFilterText);
+                AddButton(495, 379, 2224, 2224, 10, GumpButtonType.Reply, 0); //Next Relationship Filter
+
                 if (guildGumpObject.m_RelationshipsSorted.Count > 0)
-                    AddLabel(397, 400, WhiteTextHue, (guildGumpObject.m_RelationshipPage + 1).ToString() + "/" + totalRelationshipPages.ToString()); //Page                
+                {
+                    AddLabel(360, 400, 149, "Page");
+                    AddLabel(397, 400, WhiteTextHue, (guildGumpObject.m_RelationshipPage + 1).ToString() + "/" + totalRelationshipPages.ToString()); //Page 
+                }
 
                 if (guildGumpObject.m_RelationshipPage > 0)
+                {
+                    AddLabel(188, 429, WhiteTextHue, "Previous Page");
                     AddButton(154, 429, 4014, 4016, 11, GumpButtonType.Reply, 0); //Previous Page
+                }
 
                 if (guildGumpObject.m_RelationshipPage < totalRelationshipPages - 1)
+                {
+                    AddLabel(552, 429, WhiteTextHue, "Next Page");
                     AddButton(620, 429, 4005, 4007, 12, GumpButtonType.Reply, 0); //Next Page
+                }
 
                 AddButton(337, 429, 4002, 4004, 13, GumpButtonType.Reply, 0); //Add New Guild
             }
@@ -2213,31 +2235,22 @@ namespace Server
 
                 if (info.ButtonID >= m_GuildGumpObject.m_RelationshipButtonIndexOffset)
                 {
-                    int relationshipBaseIndex = info.ButtonID - m_GuildGumpObject.m_CandidateButtonIndexOffset;
+                    int relationshipBaseIndex = info.ButtonID - m_GuildGumpObject.m_RelationshipButtonIndexOffset;
                     int relationshipIndex = (int)(Math.Floor((double)relationshipBaseIndex / 10));
                     int relationshipRemainder = relationshipBaseIndex % 10;
 
                     if (relationshipIndex < m_GuildGumpObject.m_RelationshipsSorted.Count)
                     {
-                        GuildRelationship relationship = m_GuildGumpObject.m_RelationshipsSorted[relationshipIndex];
+                        DiplomacyEntry diplomacyEntry = m_GuildGumpObject.m_RelationshipsSorted[relationshipIndex];
 
-                        if (relationship == null)
-                            m_Player.SendMessage("Details of that guild relationship have changed.");
+                        if (diplomacyEntry == null)
+                            m_Player.SendMessage("Details of that guild have changed.");
 
-                        else if (relationship.Deleted)
-                            m_Player.SendMessage("Details of that guild relationship have changed.");
+                        else if (diplomacyEntry.m_Guild == null)
+                            m_Player.SendMessage("Details of that guild have changed.");
 
-                        else if (relationship.m_GuildFrom == null)
-                            m_Player.SendMessage("Details of that guild relationship have changed.");
-
-                        else if (relationship.m_GuildFrom.Deleted)
-                            m_Player.SendMessage("Details of that guild relationship have changed.");
-
-                        else if (relationship.m_GuildTarget == null)
-                            m_Player.SendMessage("Details of that guild relationship have changed.");
-
-                        else if (relationship.m_GuildTarget.Deleted)
-                            m_Player.SendMessage("Details of that guild relationship have changed.");
+                        else if (diplomacyEntry.m_Guild.Deleted)
+                            m_Player.SendMessage("Details of that guild have changed.");
 
                         else
                         {
@@ -2245,8 +2258,8 @@ namespace Server
                             {
                                 //Manage Relationship
                                 case 0:
-                                    //TEST                                    
-                                    m_Player.Say(relationship.m_RelationshipType.ToString() + ": between " + relationship.m_GuildFrom.GetDisplayName(true) + " and " + relationship.m_GuildTarget.GetDisplayName(true) + ".");
+                                    //TEST
+                                    m_Player.Say(diplomacyEntry.m_Guild.Name);
                                 break;
                             }
                         }
@@ -2313,10 +2326,12 @@ namespace Server
                     case 9:
                         switch (m_GuildGumpObject.m_RelationshipFilterType)
                         {
-                            case Guilds.RelationshipFilterType.ShowAll: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowSent; break;
-                            case Guilds.RelationshipFilterType.ShowReceived: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowAll; break;
-                            case Guilds.RelationshipFilterType.ShowSent: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowReceived; break;
+                            case Guilds.RelationshipFilterType.ShowAvailableGuilds: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowAgreementsSent; break;
+                            case Guilds.RelationshipFilterType.ShowAgreementsReceived: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowAvailableGuilds; break;
+                            case Guilds.RelationshipFilterType.ShowAgreementsSent: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowAgreementsReceived; break;
                         }
+
+                        m_Player.SendSound(Guilds.GuildGumpSelectionSound);
 
                         closeGump = false;
                     break;
@@ -2325,10 +2340,12 @@ namespace Server
                     case 10:
                         switch (m_GuildGumpObject.m_RelationshipFilterType)
                         {
-                            case Guilds.RelationshipFilterType.ShowAll: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowReceived; break;
-                            case Guilds.RelationshipFilterType.ShowReceived: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowSent; break;
-                            case Guilds.RelationshipFilterType.ShowSent: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowAll; break;
+                            case Guilds.RelationshipFilterType.ShowAvailableGuilds: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowAgreementsReceived; break;
+                            case Guilds.RelationshipFilterType.ShowAgreementsReceived: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowAgreementsSent; break;
+                            case Guilds.RelationshipFilterType.ShowAgreementsSent: m_GuildGumpObject.m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowAvailableGuilds; break;
                         }
+
+                        m_Player.SendSound(Guilds.GuildGumpSelectionSound);
 
                         closeGump = false;
                     break;
@@ -2857,12 +2874,12 @@ namespace Server
         public GuildMemberEntry m_PlayerToDismiss = null;
 
         //Diplomacy
-        public List<GuildRelationship> m_RelationshipsSorted = new List<GuildRelationship>();
+        public List<DiplomacyEntry> m_RelationshipsSorted = new List<DiplomacyEntry>();
 
         public string m_RelationshipSearchText = "Guild Name";
         public int m_RelationshipSearchIndex = 0;
         public int m_RelationshipPage = 0;
-        public Guilds.RelationshipFilterType m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowAll;
+        public Guilds.RelationshipFilterType m_RelationshipFilterType = Guilds.RelationshipFilterType.ShowAvailableGuilds;
         public Guilds.RelationshipSortCriteria m_RelationshipSortCriteria = Guilds.RelationshipSortCriteria.GuildName;
         public bool m_RelationshipSortAscending = true;
         public int m_RelationshipButtonIndexOffset = 100;
