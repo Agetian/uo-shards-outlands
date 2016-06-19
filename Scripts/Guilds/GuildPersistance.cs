@@ -47,6 +47,21 @@ namespace Server.Items
             Fealty
         }
 
+        public enum RelationshipSortCriteria
+        {
+            None,
+            GuildName,
+            Relationship,
+            PlayerCount
+        }
+
+        public enum RelationshipFilterType
+        {
+            ShowAll,
+            ShowReceived,
+            ShowSent
+        }
+
         public enum GuildRelationshipType
         {
             None,
@@ -56,21 +71,27 @@ namespace Server.Items
             AllyRequest
         }
 
-        public static int GuildNameCharacterLimit = 35;
+        public static int GuildNameCharacterLimit = 40;
         public static int GuildAbbreviationCharacterLimit = 3;
 
         public static int GuildRegistrationFee = 50000;
 
         public static int GuildTextHue = 63;
+
+        public static double RequiredFealtyPercentageForChange = .67;
         
-        public static TimeSpan InvitationExpiration = TimeSpan.FromDays(30);
-        public static TimeSpan InactivityThreshold = TimeSpan.FromDays(60);
+        public static TimeSpan InvitationExpiration = TimeSpan.FromDays(14);
+        public static TimeSpan GuildRequestExpiration = TimeSpan.FromDays(14);
 
-        public static TimeSpan GuildRequestExpiration = TimeSpan.FromDays(30);
+        public static TimeSpan CharacterInactivityThreshold = TimeSpan.FromDays(60);
 
+        public static int GuildGumpSelectionSound = 0x3E6;
         public static int GuildGumpChangePageSound = 0x057;
         public static int GuildGumpOpenGumpSound = 0x055;
         public static int GuildGumpCloseGumpSound = 0x058;
+
+        public static int SuccessSound = 0x5A7;
+        public static int PromotionSound = 0x5A7;
 
         public static string[] GuildRankNames = new string[] { "Recruit", "Initiate", "Veteran", "Officer", "Guildmaster" };
 
@@ -98,6 +119,11 @@ namespace Server.Items
             if (player == null)
                 return;
 
+            LaunchGuildGump(player);
+        }
+
+        public static void LaunchGuildGump(PlayerMobile player)
+        {
             GuildGumpObject guildGumpObject = new GuildGumpObject();
 
             int startingGuildTabPage = Guilds.DetermineStartingGuildTabPage(player);
@@ -408,6 +434,78 @@ namespace Server.Items
 
         public GuildRelationship(Serial serial): base(serial)
         {
+        }
+
+        public string GetDisplayName(bool guildFrom)
+        {
+            string relationshipText = "";
+
+            switch (m_RelationshipType)
+            {
+                case Guilds.GuildRelationshipType.None:
+                    relationshipText = "None";
+                break;
+
+                case Guilds.GuildRelationshipType.War:
+                    relationshipText = "War";
+                break;
+
+                case Guilds.GuildRelationshipType.Ally:
+                    relationshipText = "Alliance";
+                break;
+
+                case Guilds.GuildRelationshipType.WarRequest:
+                    if (guildFrom)
+                        relationshipText = "War Request (Sent)";
+                    else
+                        relationshipText = "War Request (Received)";
+                break;
+
+                case Guilds.GuildRelationshipType.AllyRequest:
+                    if (guildFrom)
+                        relationshipText = "Ally Request (Sent)";
+                    else
+                        relationshipText = "Ally Request (Received)";
+                break;
+            }
+
+            return relationshipText;
+        }
+
+        public int GetHue(bool guildFrom)
+        {
+            int relationshipTextHue = 0;
+
+            switch (m_RelationshipType)
+            {
+                case Guilds.GuildRelationshipType.None:
+                    relationshipTextHue = 0;
+                break;
+
+                case Guilds.GuildRelationshipType.War:
+                    relationshipTextHue = 1256;
+                break;
+
+                case Guilds.GuildRelationshipType.Ally:
+                    relationshipTextHue = 63;
+                break;
+
+                case Guilds.GuildRelationshipType.WarRequest:
+                    if (guildFrom)
+                        relationshipTextHue = 2116;
+                    else
+                        relationshipTextHue = 2116;
+                    break;
+
+                case Guilds.GuildRelationshipType.AllyRequest:
+                    if (guildFrom)
+                        relationshipTextHue = 2599;
+                    else
+                        relationshipTextHue = 2599;
+                break;
+            }
+
+            return relationshipTextHue;
         }
 
         public bool CheckExpired()
@@ -779,8 +877,7 @@ namespace Server.Items
         public string m_Abbreviation = "";
         public DateTime m_CreationTime;
 
-        public int m_Icon = 4014;
-        public int m_IconHue = 0;
+        public GuildSymbolType m_GuildSymbol;
 
         public string m_Website = "http://www.outlandsuo.com/index.html";
 
@@ -849,6 +946,79 @@ namespace Server.Items
             return rankHue;
         }
 
+        public int GetCharacterCount(bool activeOnly)
+        {
+            if (activeOnly)
+            {
+                int count = 0;
+
+                foreach (GuildMemberEntry entry in m_Members)
+                {
+                    if (entry == null) continue;
+                    if (entry.m_Player == null) continue;
+
+                    if (IsCharacterActive(entry.m_Player))
+                        count++;
+                }
+
+                return count;
+            }
+
+            else
+                return m_Members.Count;
+        }
+
+        public int GetPlayerCount(bool activeOnly)
+        {
+            List<string> m_AccountNames = new List<string>();
+
+            foreach (GuildMemberEntry entry in m_Members)
+            {
+                if (entry == null) continue;
+                if (entry.m_Player == null) continue;
+
+                if (IsCharacterActive(entry.m_Player))
+                {
+                    Account account = entry.m_Player.Account as Account;
+
+                    if (!m_AccountNames.Contains(account.Username))
+                        m_AccountNames.Add(account.Username);
+                }
+            }
+
+            return m_AccountNames.Count;
+        }
+
+        public int GetWarCount(bool activeOnly)
+        {
+            int totalWars = 0;
+
+            foreach (GuildRelationship relationship in m_Relationships)
+            {
+                if (relationship == null) continue;
+
+                if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.War)
+                    totalWars++;                     
+            }
+
+            return totalWars;
+        }
+
+        public int GetAllyCount(bool activeOnly)
+        {
+            int totalAllies = 0;
+
+            foreach (GuildRelationship relationship in m_Relationships)
+            {
+                if (relationship == null) continue;
+
+                if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.Ally)
+                    totalAllies++;
+            }
+
+            return totalAllies;
+        }
+
         public bool CanAddCandidates(GuildMemberRank rank)
         {
             switch (rank)
@@ -873,6 +1043,31 @@ namespace Server.Items
                 case GuildMemberRank.Officer: return true;
                 case GuildMemberRank.Guildmaster: return true;
             }
+
+            return false;
+        }
+
+        public bool CanPromoteMembers(GuildMemberRank rank)
+        {
+            switch (rank)
+            {
+                case GuildMemberRank.Recruit: return false;
+                case GuildMemberRank.Initiate: return false;
+                case GuildMemberRank.Veteran: return false;
+                case GuildMemberRank.Officer: return true;
+                case GuildMemberRank.Guildmaster: return true;
+            }
+
+            return false;
+        }
+
+        public bool CanDismissPlayer(GuildMemberRank playerRank, GuildMemberRank playerTargetRank)
+        {
+            if (playerRank == GuildMemberRank.Recruit || playerRank == GuildMemberRank.Initiate || playerRank == GuildMemberRank.Veteran)
+                return false;
+
+            if ((int)playerRank > (int)playerTargetRank)
+                return true;
 
             return false;
         }
@@ -906,14 +1101,14 @@ namespace Server.Items
             return false;
         }
 
-        public bool IsPlayerActive(PlayerMobile player)
+        public bool IsCharacterActive(PlayerMobile player)
         {
-            if (player == null)
-                return false;
+            if (player == null) return false;
+            if (player.Deleted) return false;
 
             if (IsMember(player))
             {
-                if (player.LastOnline + Guilds.InactivityThreshold >= DateTime.UtcNow)
+                if (player.LastOnline + Guilds.CharacterInactivityThreshold >= DateTime.UtcNow)
                     return true;
             }
 
@@ -1088,9 +1283,7 @@ namespace Server.Items
                         break;
 
                         case Guilds.MemberSortCriteria.PlayerName:
-                            int compareResult = string.Compare(memberEntry.m_Player.RawName, memberListItem.m_Player.RawName);
-
-                            if (compareResult >= 0)
+                            if (string.Compare(memberEntry.m_Player.RawName, memberListItem.m_Player.RawName) >= 0)
                                 newIndexPosition = b + 1;                            
                         break;  
                      
@@ -1163,6 +1356,207 @@ namespace Server.Items
             }            
         }
 
+        public List<GuildRelationship> GetGuildRelationships(Guilds.RelationshipFilterType filterType, Guilds.RelationshipSortCriteria sortCriteria, bool ascending)
+        {
+            List<GuildRelationship> relationshipList = new List<GuildRelationship>();
+
+            if (sortCriteria == Guilds.RelationshipSortCriteria.None)
+            {
+                switch (filterType)
+                {
+                    case Guilds.RelationshipFilterType.ShowAll:
+                        return m_Relationships;
+                    break;
+
+                    case Guilds.RelationshipFilterType.ShowSent:
+                        foreach (GuildRelationship relationship in m_Relationships)
+                        {
+                            if (relationship == null)
+                                continue;
+
+                            if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest || relationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
+                            {
+                                if (relationship.m_GuildFrom == this)
+                                    relationshipList.Add(relationship);
+                            }
+                        }
+
+                        return relationshipList;
+                    break;
+
+                    case Guilds.RelationshipFilterType.ShowReceived:
+                        foreach (GuildRelationship relationship in m_Relationships)
+                        {
+                            if (relationship == null)
+                                continue;
+
+                            if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest || relationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
+                            {
+                                if (relationship.m_GuildTarget == this)
+                                    relationshipList.Add(relationship);
+                            }
+                        }
+
+                        return relationshipList;
+                    break;
+                }
+            }
+
+            bool addToStart = true;
+
+            for (int a = 0; a < m_Relationships.Count; a++)
+            {
+                GuildRelationship relationship = m_Relationships[a];
+
+                if (relationship == null) continue;
+                if (relationship.m_GuildFrom == null) continue;
+                if (relationship.m_GuildFrom.Deleted) continue;
+                if (relationship.m_GuildTarget == null) continue;
+                if (relationship.m_GuildTarget.Deleted) continue;
+
+                switch (filterType)
+                {
+                    case Guilds.RelationshipFilterType.ShowAll:
+                    break;
+
+                    case Guilds.RelationshipFilterType.ShowSent:
+                        if (relationship.m_GuildFrom != this)
+                            continue;
+                    break;
+
+                    case Guilds.RelationshipFilterType.ShowReceived:
+                        if (relationship.m_GuildTarget != this)
+                            continue;
+                    break;
+                }
+
+                Guild firstGuild = null;
+
+                if (relationship.m_GuildFrom == this)
+                    firstGuild = relationship.m_GuildTarget;
+
+                else
+                    firstGuild = relationship.m_GuildFrom;
+
+                int newIndexPosition = -1;
+
+                for (int b = 0; b < relationshipList.Count; b++)
+                {
+                    GuildRelationship relationshipListItem = relationshipList[b];
+
+                    if (relationshipListItem == null) continue;
+                    if (relationshipListItem.m_GuildFrom == null) continue;
+                    if (relationshipListItem.m_GuildFrom.Deleted) continue;
+                    if (relationshipListItem.m_GuildTarget == null) continue;
+                    if (relationshipListItem.m_GuildTarget.Deleted) continue;
+
+                    switch (filterType)
+                    {
+                        case Guilds.RelationshipFilterType.ShowAll:
+                        break;
+
+                        case Guilds.RelationshipFilterType.ShowSent:
+                            if (relationshipListItem.m_GuildFrom != this)
+                                continue;
+                        break;
+
+                        case Guilds.RelationshipFilterType.ShowReceived:
+                            if (relationshipListItem.m_GuildTarget != this)
+                                continue;
+                        break;
+                    }
+
+                    Guild secondGuild = null;
+
+                    if (relationshipListItem.m_GuildFrom == this)
+                        secondGuild = relationshipListItem.m_GuildTarget;
+
+                    else
+                        secondGuild = relationshipListItem.m_GuildFrom; 
+                    
+                    if (firstGuild != null && secondGuild != null)
+                    {
+                        switch (sortCriteria)
+                        {
+                            case Guilds.RelationshipSortCriteria.GuildName:
+                                if (string.Compare(firstGuild.Name, secondGuild.Name) >= 0)
+                                    newIndexPosition = b + 1;
+                            break;
+
+                            case Guilds.RelationshipSortCriteria.Relationship:
+                                if ((int)relationship.m_RelationshipType >= (int)relationshipListItem.m_RelationshipType)
+                                    newIndexPosition = b + 1;
+                            break;
+
+                            case Guilds.RelationshipSortCriteria.PlayerCount:
+                                if (firstGuild.GetCharacterCount(true) >= secondGuild.GetCharacterCount(true))
+                                    newIndexPosition = b + 1;
+                            break;
+                        }
+                    }                    
+                }
+
+                if (newIndexPosition == -1)
+                {
+                    if (addToStart)
+                        relationshipList.Insert(0, relationship);
+
+                    else
+                        relationshipList.Add(relationship);
+                }
+
+                else
+                {
+                    if (newIndexPosition >= relationshipList.Count)
+                        relationshipList.Add(relationship);
+
+                    else
+                        relationshipList.Insert(newIndexPosition, relationship);
+                }
+            }
+
+            if (!ascending)
+                relationshipList.Reverse(0, relationshipList.Count);
+
+            return m_Relationships;
+        }
+
+        public void AuditRelationships()
+        {
+            Queue m_Queue = new Queue();
+
+            foreach (GuildRelationship relationship in m_Relationships)
+            {
+                if (relationship == null)
+                    continue;
+
+                if (relationship.m_GuildFrom == null)
+                    m_Queue.Enqueue(relationship);
+
+                else if (relationship.m_GuildFrom.Deleted)
+                    m_Queue.Enqueue(relationship);
+
+                else if (relationship.m_GuildTarget == null)
+                    m_Queue.Enqueue(relationship);
+
+                else if (relationship.m_GuildTarget.Deleted)
+                    m_Queue.Enqueue(relationship);
+
+                if (relationship.m_RelationshipType == Guilds.GuildRelationshipType.WarRequest || relationship.m_RelationshipType == Guilds.GuildRelationshipType.AllyRequest)
+                {
+                    if (relationship.m_DateIssued + Guilds.GuildRequestExpiration <= DateTime.UtcNow)
+                        m_Queue.Enqueue(relationship);
+                }
+            }
+
+            while (m_Queue.Count > 0)
+            {
+                GuildRelationship relationship = (GuildRelationship)m_Queue.Dequeue();
+
+                relationship.Delete();
+            }
+        }
+
         public bool IsAlliedGuild(Guild guild)
         {
             foreach (GuildRelationship relationship in m_Relationships)
@@ -1229,15 +1623,13 @@ namespace Server.Items
             if (m_Members.Contains(entry))
                 m_Members.Remove(entry);
             
-            string guildText = Name + " [" + m_Abbreviation + "]";
-
             if (player != null)
             {
                 player.Guild = null;
                 player.m_GuildMemberEntry = null;
 
                 if (forced)
-                    player.SendMessage(Guilds.GuildTextHue, "You have been removed from " + guildText + ".");
+                    player.SendMessage(Guilds.GuildTextHue, "You have been removed from " + GetDisplayName(true) + ".");
 
                 else
                     player.SendMessage(Guilds.GuildTextHue, "You leave the guild.");
@@ -1289,7 +1681,7 @@ namespace Server.Items
                     if (account == null)
                         continue;
 
-                    bool isActiveMember = IsPlayerActive(entry.m_Player);
+                    bool isActiveMember = IsCharacterActive(entry.m_Player);
 
                     //TEST: FINISH!!!
 
@@ -1548,8 +1940,7 @@ namespace Server.Items
             writer.Write(m_Guildmaster);
             writer.Write(m_Abbreviation);
             writer.Write(m_CreationTime);
-            writer.Write(m_Icon);
-            writer.Write(m_IconHue);
+            writer.Write((int)m_GuildSymbol);
             writer.Write(m_Website);
             writer.Write(m_Guildhouse);
             writer.Write(m_Faction);
@@ -1581,8 +1972,7 @@ namespace Server.Items
                 m_Guildmaster = (PlayerMobile)reader.ReadMobile();
                 m_Abbreviation = reader.ReadString();
                 m_CreationTime = reader.ReadDateTime();
-                m_Icon = reader.ReadInt();
-                m_IconHue = reader.ReadInt();
+                m_GuildSymbol = (GuildSymbolType)reader.ReadInt();
                 m_Website = reader.ReadString();
                 m_Guildhouse = reader.ReadItem() as BaseHouse;
                 m_Faction = reader.ReadItem() as Faction;

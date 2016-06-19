@@ -995,7 +995,37 @@ namespace Server
             sTimeRemaining = sTimeRemaining.Trim();
 
             if (sTimeRemaining == "")
-                sTimeRemaining = "1 second";
+            {
+                if (abbreviated)
+                {
+                    if (useDays)
+                        sTimeRemaining = "1d";
+
+                    if (useHours)
+                        sTimeRemaining = "1h";
+
+                    if (useMinutes)
+                        sTimeRemaining = "1m";
+
+                    if (useSeconds)
+                        sTimeRemaining = "1s";
+                }
+
+                else
+                {
+                    if (useDays)
+                        sTimeRemaining = "1 day";
+
+                    if (useHours)
+                        sTimeRemaining = "1 hour";
+
+                    if (useMinutes)
+                        sTimeRemaining = "1 minute";
+
+                    if (useSeconds)
+                        sTimeRemaining = "1 second";
+                }
+            }
             
             return sTimeRemaining;
         }

@@ -19,70 +19,7 @@ namespace Server.Items
             CoOwner,
             Friend,
             Anyone
-        }
-
-        public static string GetSkillName(SkillName skillName)
-        {
-            string name = "";
-
-            #region Skills
-
-            switch (skillName)
-            {
-                case SkillName.Alchemy: name = "Alchemy"; break;
-                case SkillName.Anatomy: name = "Anatomy"; break;
-                case SkillName.AnimalLore: name = "Animal Lore"; break;
-                case SkillName.AnimalTaming: name = "Animal Taming"; break;
-                case SkillName.Archery: name = "Archery"; break;
-                case SkillName.ArmsLore: name = "Arms Lore"; break;
-                case SkillName.Begging: name = "Begging"; break;
-                case SkillName.Blacksmith: name = "Blacksmithy"; break;
-                case SkillName.Camping: name = "Camping"; break;
-                case SkillName.Carpentry: name = "Carpentry"; break;
-                case SkillName.Cartography: name = "Cartography"; break;
-                case SkillName.Cooking: name = "Cooking"; break;
-                case SkillName.DetectHidden: name = "Detect Hidden"; break;
-                case SkillName.Discordance: name = "Discordance"; break;
-                case SkillName.EvalInt: name = "Eval Int"; break;
-                case SkillName.Fencing: name = "Fencing"; break;
-                case SkillName.Fishing: name = "Fishing"; break;
-                case SkillName.Forensics: name = "Forensic Eval"; break;
-                case SkillName.Healing: name = "Healing"; break;
-                case SkillName.Herding: name = "Herding"; break;
-                case SkillName.Hiding: name = "Hiding"; break;
-                case SkillName.Inscribe: name = "Inscription"; break;
-                case SkillName.ItemID: name = "Item Id"; break;
-                case SkillName.Lockpicking: name = "Lockpicking"; break;
-                case SkillName.Lumberjacking: name = "Lumberjacking"; break;
-                case SkillName.Macing: name = "Macing"; break;
-                case SkillName.Magery: name = "Magery"; break;
-                case SkillName.MagicResist: name = "Magic Resist"; break;
-                case SkillName.Meditation: name = "Meditation"; break;
-                case SkillName.Mining: name = "Mining"; break;
-                case SkillName.Musicianship: name = "Musicianship"; break;
-                case SkillName.Parry: name = "Parrying"; break;
-                case SkillName.Peacemaking: name = "Peacemaking"; break;
-                case SkillName.Poisoning: name = "Poisoning"; break;
-                case SkillName.Provocation: name = "Provocation"; break;
-                case SkillName.RemoveTrap: name = "Remove Trap"; break;
-                case SkillName.Snooping: name = "Snooping"; break;
-                case SkillName.SpiritSpeak: name = "Spirit Speak"; break;
-                case SkillName.Stealing: name = "Stealing"; break;
-                case SkillName.Stealth: name = "Stealth"; break;
-                case SkillName.Swords: name = "Swordsmanship"; break;
-                case SkillName.Tactics: name = "Tactics"; break;
-                case SkillName.Tailoring: name = "Tailoring"; break;
-                case SkillName.TasteID: name = "Taste Id"; break;
-                case SkillName.Tinkering: name = "Tinkering"; break;
-                case SkillName.Tracking: name = "Tracking"; break;
-                case SkillName.Veterinary: name = "Veterinary"; break;
-                case SkillName.Wrestling: name = "Wrestling"; break;
-            }
-
-            #endregion
-
-            return name;            
-        }
+        }        
 
         private LockedDownAccessLevelType m_LockedDownAccessLevel = LockedDownAccessLevelType.Owner;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -662,7 +599,7 @@ namespace Server.Items
                     //Left Side
                     if (entryCount < EntriesPerSide)
                     {
-                        string skillName = PowerScrollLibrary.GetSkillName(entry.SkillName);
+                        string skillName = SkillCheck.GetSkillName(entry.SkillName);
 
                         AddLabel(Utility.CenteredTextOffset(180, skillName), leftStartY, 2590, skillName);
 
@@ -688,7 +625,7 @@ namespace Server.Items
                     //Right Side
                     else
                     {
-                        string skillName = PowerScrollLibrary.GetSkillName(entry.SkillName);
+                        string skillName = SkillCheck.GetSkillName(entry.SkillName);
 
                         AddLabel(Utility.CenteredTextOffset(435, skillName), rightStartY, 2590, skillName);
 
