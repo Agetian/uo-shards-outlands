@@ -740,26 +740,13 @@ namespace Server
                     AddLabel(473, 203, 2550, "Show Location");
                     AddButton(453, 206, 2117, 2118, 4, GumpButtonType.Reply, 0); //Show Guildhouse Location
                 }
-
-                int guildAge = (int)(Math.Floor((DateTime.UtcNow - guild.m_CreationTime).TotalDays));
-
-                string guildAgeText = "";
-
-                if (guildAge > 1)
-                    guildAgeText = guildAge.ToString() + " Days";
-
-                else if (guildAge == 1)
-                    guildAgeText = "1 Day";
-
-                else
-                    guildAgeText = "Brand New";
-
-                int activePlayers = guild.GetPlayerCount(true);
-                int activeCharacters = guild.GetCharacterCount(true);
+                
+                int activePlayers = guild.m_ActivePlayers;
+                int activeCharacters = guild.m_ActiveCharacters;
                 int wars = guild.GetWarCount(true);
                 int alliances = guild.GetAllyCount(true);
 
-                AddLabel(196, 282, WhiteTextHue, guildAgeText);
+                AddLabel(196, 282, WhiteTextHue, guild.GetGuildAge());
                 AddLabel(332, 296, WhiteTextHue, activePlayers.ToString());
                 AddLabel(443, 297, WhiteTextHue, activeCharacters.ToString());
                 AddLabel(529, 297, WhiteTextHue, wars.ToString());
@@ -1320,7 +1307,7 @@ namespace Server
 
                     AddLabel(Utility.CenteredTextOffset(300, diplomacyEntry.m_Guild.GetDisplayName(true)), startY, WhiteTextHue, diplomacyEntry.m_Guild.GetDisplayName(true));
                     AddLabel(Utility.CenteredTextOffset(475, relationshipText), startY, relationshipHue, relationshipText);
-                    AddLabel(Utility.CenteredTextOffset(570, diplomacyEntry.m_Guild.GetPlayerCount(true).ToString()), startY, 2599, diplomacyEntry.m_Guild.GetPlayerCount(true).ToString());
+                    AddLabel(Utility.CenteredTextOffset(570, diplomacyEntry.m_Guild.m_ActivePlayers.ToString()), startY, 2599, diplomacyEntry.m_Guild.m_ActivePlayers.ToString());
                     AddButton(617, startY, 4011, 4013, buttonIndex, GumpButtonType.Reply, 0); //Manage Relationship
 
                     startY += rowSpacing;                    
@@ -1547,6 +1534,9 @@ namespace Server
                         if (m_Player.Guild != null)
                             m_Player.SendMessage("You are already in a guild.");
 
+                        else if (guildNameText == "Guild Name")
+                            m_Player.SendMessage("You must give your guild a name.");
+
                         else if (guildNameText.Length == 0)                                              
                             m_Player.SendMessage("Guild names must be at least 1 character.");
 
@@ -1558,7 +1548,7 @@ namespace Server
                         
                         else if (guildAbbreviationText.Length > Guilds.GuildAbbreviationCharacterLimit)
                             m_Player.SendMessage("Guild abbreviations may be no longer than " + Guilds.GuildAbbreviationCharacterLimit.ToString() + " characters.");
-
+                            
                         else if (!Guilds.CheckProfanity(guildNameText))
                             m_Player.SendMessage("That guild name is not allowed.");
 
@@ -1680,8 +1670,14 @@ namespace Server
 
                                 //Guild Info
                                 case 1:
-                                    //TEST
-                                    m_Player.Say(invitation.m_Guild.Name);
+                                    Guilds.SendGuildGump(m_Player, m_GuildGumpObject);
+
+                                    m_Player.CloseGump(typeof(GuildInvitationGuildPreviewGump));
+                                    m_Player.SendGump(new GuildInvitationGuildPreviewGump(m_Player, guild));
+
+                                    m_Player.SendSound(Guilds.GuildGumpOpenGumpSound);
+
+                                    return;
                                 break;
 
                                 //Decline
@@ -2258,8 +2254,23 @@ namespace Server
                             {
                                 //Manage Relationship
                                 case 0:
-                                    //TEST
-                                    m_Player.Say(diplomacyEntry.m_Guild.Name);
+                                    Guilds.SendGuildGump(m_Player, m_GuildGumpObject);
+
+                                    if (diplomacyEntry.m_GuildRelationship == null)
+                                    {
+                                        m_Player.CloseGump(typeof(GuildManageDiplomacyGump));
+                                        m_Player.SendGump(new GuildManageDiplomacyGump(m_Player, guild, diplomacyEntry.m_Guild, Guilds.GuildRelationshipType.None));
+                                    }
+
+                                    else
+                                    {
+                                        m_Player.CloseGump(typeof(GuildManageDiplomacyGump));
+                                        m_Player.SendGump(new GuildManageDiplomacyGump(m_Player, guild, diplomacyEntry.m_Guild, diplomacyEntry.m_GuildRelationship.m_RelationshipType));
+                                    }
+
+                                    m_Player.SendSound(Guilds.GuildGumpOpenGumpSound);
+
+                                    return;                                   
                                 break;
                             }
                         }
@@ -2361,8 +2372,7 @@ namespace Server
                     break;
 
                     //Create New Relationship
-                    case 13:
-                        closeGump = false;
+                    case 13:                        
                     break;
                 }
             }
@@ -2818,6 +2828,489 @@ namespace Server
             {
                 m_Player.CloseGump(typeof(GuildCharacterPreviewGump));
                 m_Player.SendGump(new GuildCharacterPreviewGump(m_Player, m_PlayerTarget, m_NewRankIndex));
+            }
+
+            else
+                m_Player.SendSound(Guilds.GuildGumpCloseGumpSound);
+        }
+    }
+
+    public class GuildInvitationGuildPreviewGump : Gump
+    {
+        public PlayerMobile m_Player;
+        public Guild m_Guild;
+
+        public GuildInvitationGuildPreviewGump(Mobile from, Guild guild): base(350, 275)
+        {
+            m_Player = from as PlayerMobile;
+            m_Guild = guild;
+
+            if (m_Player == null) return;
+            if (m_Guild == null) return;            
+
+            Closable = true;
+            Disposable = true;
+            Dragable = true;
+            Resizable = false;
+
+            int WhiteTextHue = 2655;
+
+            #region Images 
+
+            AddImage(4, 193, 103);
+			AddImage(3, 98, 103);
+			AddImage(400, 3, 103);
+			AddImage(400, 98, 103);
+			AddImage(400, 193, 103);
+			AddImage(4, 3, 103);
+			AddImage(137, 3, 103);
+			AddImage(267, 3, 103);
+			AddImage(267, 98, 103);
+			AddImage(267, 193, 103);
+			AddImage(137, 98, 103);
+			AddImage(137, 193, 103);
+			AddImage(17, 14, 3604, 2052);
+			AddImage(17, 107, 3604, 2052);
+			AddImage(17, 156, 3604, 2052);
+			AddImage(156, 14, 3604, 2052);
+			AddImage(143, 122, 3604, 2052);
+			AddImage(281, 14, 3604, 2052);
+			AddImage(262, 156, 3604, 2052);
+			AddImage(142, 156, 3604, 2052);
+			AddImage(401, 14, 3604, 2052);
+			AddImage(401, 107, 3604, 2052);
+			AddImage(372, 156, 3604, 2052);
+			AddImage(54, 14, 3604, 2052);
+			AddImage(54, 107, 3604, 2052);
+			AddImage(401, 156, 3604, 2052);
+			AddImage(262, 123, 3604, 2052);
+			AddImage(299, 114, 3604, 2052);
+			AddLabel(64, 58, 149, "Guild Abbreviation");
+			AddLabel(64, 22, 149, "Guild Name");
+			AddImage(138, 20, 1141, 2400);			
+			AddImage(187, 57, 2444, 2401);			
+			AddItem(18, 19, 3796);
+			AddLabel(64, 106, 149, "Guild Symbol");
+			AddItem(11, 95, 7776);
+			AddLabel(382, 106, 149, "Faction");
+			AddBackground(25, 258, 493, 23, 5100);			
+			AddLabel(166, 169, 2501, "Players");
+			AddLabel(249, 169, 2505, "Characters");
+			AddLabel(360, 169, 1256, "Wars");
+			AddLabel(420, 169, 2599, "Alliances");			
+			AddLabel(64, 169, 149, "Guild Age");			
+			AddItem(31, 162, 3103);			
+			AddItem(349, 77, 5402);
+			AddImage(152, 87, 2328);			
+			AddItem(163, 193, 8454, 2500);
+			AddItem(250, 193, 8454, 2515);			
+			AddItem(271, 193, 8455, 2515);
+			AddItem(360, 204, 3914);
+			AddItem(346, 205, 5049);
+			AddItem(425, 207, 4030);
+			AddItem(425, 199, 4031);
+
+            #endregion
+
+            //-----
+
+            AddLabel(Utility.CenteredTextOffset(265, m_Guild.Name), 22, WhiteTextHue, m_Guild.Name);
+            AddLabel(Utility.CenteredTextOffset(220, m_Guild.m_Abbreviation), 58, WhiteTextHue, m_Guild.m_Abbreviation);
+
+            GuildSymbolDetail guildSymbolDetail = GuildSymbols.GetGuildSymbolDetail(m_Guild.m_GuildSymbol);
+
+            AddItem(152 + guildSymbolDetail.SymbolIconOffsetX, 87 + guildSymbolDetail.SymbolIconOffsetY, guildSymbolDetail.SymbolIconItemId, guildSymbolDetail.SymbolIconHue);
+
+            //Faction
+            AddItem(467, 88, 11009, 2603);
+            AddItem(422, 55, 17099, 2603);
+            AddLabel(453, 141, 2603, "Order");
+
+            AddLabel(63, 194, WhiteTextHue, m_Guild.GetGuildAge());
+
+            AddLabel(199, 208, WhiteTextHue, m_Guild.m_ActivePlayers.ToString());
+
+            AddLabel(310, 209, WhiteTextHue, m_Guild.m_ActiveCharacters.ToString());
+
+            AddLabel(396, 209, WhiteTextHue, m_Guild.GetWarCount(true).ToString());
+            AddLabel(466, 209, WhiteTextHue, m_Guild.GetWarCount(true).ToString());
+
+            AddLabel(64, 236, 149, "Website");
+            AddLabel(34, 259, WhiteTextHue, m_Guild.m_Website);
+            AddButton(32, 239, 30008, 248, 2, GumpButtonType.Reply, 0);
+        }
+
+        public override void OnResponse(NetState sender, RelayInfo info)
+        {
+            if (m_Player == null)
+                return;
+
+            bool closeGump = true;
+
+            switch (info.ButtonID)
+            {
+                //Website
+                case 2:
+                    if (m_Guild != null)
+                    {
+                        if (m_Player.NetState != null)
+                            m_Player.NetState.LaunchBrowser(m_Guild.m_Website);
+                    }
+
+                    closeGump = false;
+                break;
+            }
+
+            if (!closeGump)
+            {
+                m_Player.CloseGump(typeof(GuildInvitationGuildPreviewGump));
+                m_Player.SendGump(new GuildInvitationGuildPreviewGump(m_Player, m_Guild));
+            }
+
+            else
+                m_Player.SendSound(Guilds.GuildGumpCloseGumpSound);
+        }
+    }
+
+    public class GuildManageDiplomacyGump : Gump
+    {
+        public PlayerMobile m_Player;
+
+        public Guild m_Guild;
+        public Guild m_GuildTarget;
+        public Guilds.GuildRelationshipType m_NewRelationshipType = Guilds.GuildRelationshipType.None;
+
+        public GuildManageDiplomacyGump(Mobile from, Guild guild, Guild guildTarget, Guilds.GuildRelationshipType newRelationshipType): base(250, 100)
+        {
+            m_Player = from as PlayerMobile;
+            m_Guild = guild;
+            m_GuildTarget = guildTarget;
+            m_NewRelationshipType = newRelationshipType;
+
+            if (m_Player == null) return;
+            if (m_Guild == null) return;
+            if (m_Guild.Deleted) return;
+            if (guildTarget == null) return;
+            if (guildTarget.Deleted) return;
+
+            if (m_Player.Guild != m_Guild)
+                return;
+
+            GuildRelationship guildRelationship = m_Guild.GetGuildRelationship(guildTarget);
+
+            Closable = true;
+            Disposable = true;
+            Dragable = true;
+            Resizable = false;
+
+            int WhiteTextHue = 2655;
+
+            #region Images
+
+            AddImage(4, 193, 103);
+            AddImage(3, 98, 103);
+            AddImage(400, 369, 103);
+            AddImage(267, 369, 103);
+            AddImage(137, 369, 103);
+            AddImage(4, 369, 103);
+            AddImage(400, 3, 103);
+            AddImage(400, 98, 103);
+            AddImage(400, 193, 103);
+            AddImage(4, 3, 103);
+            AddImage(137, 3, 103);
+            AddImage(267, 3, 103);
+            AddImage(267, 98, 103);
+            AddImage(267, 193, 103);
+            AddImage(137, 98, 103);
+            AddImage(137, 193, 103);
+            AddImage(17, 14, 3604, 2052);
+            AddImage(17, 107, 3604, 2052);
+            AddImage(17, 163, 3604, 2052);
+            AddImage(17, 330, 3604, 2052);
+            AddImage(156, 14, 3604, 2052);
+            AddImage(143, 122, 3604, 2052);
+            AddImage(156, 330, 3604, 2052);
+            AddImage(281, 14, 3604, 2052);
+            AddImage(262, 163, 3604, 2052);
+            AddImage(142, 163, 3604, 2052);
+            AddImage(281, 330, 3604, 2052);
+            AddImage(401, 14, 3604, 2052);
+            AddImage(401, 107, 3604, 2052);
+            AddImage(372, 163, 3604, 2052);
+            AddImage(401, 330, 3604, 2052);
+            AddImage(54, 14, 3604, 2052);
+            AddImage(54, 107, 3604, 2052);
+            AddImage(54, 329, 3604, 2052);
+            AddImage(401, 163, 3604, 2052);
+            AddImage(262, 163, 3604, 2052);
+            AddImage(262, 123, 3604, 2052);
+            AddImage(299, 114, 3604, 2052);
+            AddImage(4, 288, 103);
+            AddImage(136, 288, 103);
+            AddImage(266, 288, 103);
+            AddImage(399, 288, 103);
+            AddImage(127, 301, 3604, 2052);
+            AddImage(17, 301, 3604, 2052);
+            AddImage(275, 301, 3604, 2052);
+            AddImage(403, 301, 3604, 2052);
+            AddImage(202, 301, 3604, 2052);
+            AddLabel(64, 58, 149, "Guild Abbreviation");
+            AddLabel(64, 22, 149, "Guild Name");
+            AddImage(138, 20, 1141, 2400);            
+            AddImage(187, 57, 2444, 2401);           
+            AddItem(18, 19, 3796);
+            AddLabel(64, 106, 149, "Guild Symbol");
+            AddItem(11, 95, 7776);
+            AddLabel(382, 106, 149, "Faction");
+            AddBackground(25, 259, 493, 23, 5100);
+            AddLabel(166, 169, 2501, "Players");
+            AddLabel(249, 169, 2505, "Characters");
+            AddLabel(360, 169, 1256, "Wars");
+            AddLabel(420, 169, 2599, "Alliances");           
+            AddLabel(64, 169, 149, "Guild Age");           
+            AddItem(31, 162, 3103);           
+            AddItem(349, 77, 5402);
+            AddImage(152, 87, 2328);            
+            AddItem(163, 193, 8454, 2500);    
+            AddItem(250, 193, 8454, 2515);           
+            AddItem(271, 193, 8455, 2515);
+            AddItem(360, 204, 3914);
+            AddItem(346, 205, 5049);
+            AddItem(425, 207, 4030);
+            AddItem(425, 199, 4031);
+
+            #endregion
+
+            //-----
+
+            AddLabel(Utility.CenteredTextOffset(270, guildTarget.Name), 22, WhiteTextHue, guildTarget.Name);
+            AddLabel(Utility.CenteredTextOffset(220, guildTarget.m_Abbreviation), 58, WhiteTextHue, guildTarget.m_Abbreviation);
+
+            AddItem(167, 94, 4014);
+
+            //Faction
+            AddItem(467, 88, 11009, 2603);
+            AddItem(422, 55, 17099, 2603);
+            AddLabel(453, 141, 2603, "Order");
+
+            AddLabel(63, 194, WhiteTextHue, guildTarget.GetGuildAge());
+
+            AddLabel(199, 208, WhiteTextHue, guildTarget.m_ActivePlayers.ToString());
+            AddLabel(310, 209, WhiteTextHue, guildTarget.m_ActiveCharacters.ToString());
+            AddLabel(396, 209, WhiteTextHue, guildTarget.GetWarCount(true).ToString());
+            AddLabel(466, 209, WhiteTextHue, guildTarget.GetAllyCount(true).ToString());
+
+            AddLabel(64, 236, 149, "Website");
+            AddButton(32, 239, 30008, 248, 2, GumpButtonType.Reply, 0);
+            AddLabel(34, 260, WhiteTextHue, guildTarget.m_Website);
+
+            AddLabel(224, 306, 2606, "Diplomacy Status");
+
+            if (guildRelationship != null)
+            {
+                switch (guildRelationship.m_RelationshipType)
+                {
+                    case Guilds.GuildRelationshipType.War:
+                        AddLabel(Utility.CenteredTextOffset(275, "At War"), 331, 1256, "At War");
+
+                        AddItem(248, 357, 5049);
+                        AddItem(262, 356, 3914);
+
+                        AddLabel(227, 397, 149, "End Agreement");
+                        AddButton(262, 419, 2472, 2473, 6, GumpButtonType.Reply, 0);
+                    break;
+
+                    case Guilds.GuildRelationshipType.Ally:
+                        AddLabel(Utility.CenteredTextOffset(275, "Allied"), 331, 2599, "Allied");
+
+                        AddItem(257, 361, 4030);
+                        AddItem(257, 353, 4031);
+
+                        AddLabel(227, 397, 149, "End Agreement");
+                        AddButton(262, 419, 2472, 2473, 6, GumpButtonType.Reply, 0);
+                    break;
+
+                    case Guilds.GuildRelationshipType.WarRequest:
+
+                        AddItem(248, 357, 5049);
+                        AddItem(262, 356, 3914);
+
+                        if (m_Guild == guildRelationship.m_GuildFrom)
+                        {
+                            AddLabel(Utility.CenteredTextOffset(275, "War Request Sent"), 331, 1256, "War Request Sent");
+
+                            AddLabel(229, 397, 149, "Retract Offer");
+                            AddButton(262, 419, 2472, 2473, 6, GumpButtonType.Reply, 0);
+                        }
+
+                        else
+                        {
+                            AddLabel(Utility.CenteredTextOffset(275, "War Offer Available"), 331, 1256, "War Offer Available");
+
+                            AddLabel(213, 397, 149, "Accept");
+                            AddButton(225, 419, 2151, 2154, 6, GumpButtonType.Reply, 0);
+
+                            AddLabel(290, 397, 149, "Decline");
+                            AddButton(300, 419, 2472, 2473, 5, GumpButtonType.Reply, 0);                           
+                          
+                        }
+                    break;
+
+                    case Guilds.GuildRelationshipType.AllyRequest:
+                        AddItem(257, 361, 4030);
+                        AddItem(257, 353, 4031);
+
+                        if (m_Guild == guildRelationship.m_GuildFrom)
+                        {
+                            AddLabel(Utility.CenteredTextOffset(275, "Alliance Request Sent"), 331, 2599, "Alliance Request Sent");
+
+                            AddLabel(229, 397, 149, "Retract Offer");
+                            AddButton(262, 419, 2472, 2473, 6, GumpButtonType.Reply, 0);
+                        }
+
+                        else
+                        {
+                            AddLabel(Utility.CenteredTextOffset(275, "Alliance Offer Available"), 331, 2599, "Alliance Offer Available");
+
+                            AddLabel(213, 397, 149, "Accept");
+                            AddButton(225, 419, 2151, 2154, 6, GumpButtonType.Reply, 0);
+
+                            AddLabel(290, 397, 149, "Decline");
+                            AddButton(300, 419, 2472, 2473, 5, GumpButtonType.Reply, 0);                           
+                        }
+                    break;
+                }
+            }
+
+            else
+            {
+                switch (m_NewRelationshipType)
+                {
+                    case Guilds.GuildRelationshipType.None:
+                        AddLabel(Utility.CenteredTextOffset(275, "Neutral"), 331, 2401, "Neutral");
+
+                        AddItem(254, 353, 4644);
+                    break;
+
+                    case Guilds.GuildRelationshipType.WarRequest:
+                        AddLabel(Utility.CenteredTextOffset(275, "Send War Request"), 331, 1256, "Sent War Request");
+
+                        AddItem(248, 357, 5049);
+                        AddItem(262, 356, 3914);
+
+                        AddLabel(240, 397, 149, "Send Offer");
+                        AddButton(262, 419, 2151, 2154, 5, GumpButtonType.Reply, 0);
+                    break;
+
+                    case Guilds.GuildRelationshipType.AllyRequest:
+                        AddLabel(Utility.CenteredTextOffset(275, "Send Alliance Request"), 331, 2599, "Send Alliance Request");
+
+                        AddItem(257, 361, 4030);
+                        AddItem(257, 353, 4031);
+
+                        AddLabel(240, 397, 149, "Send Offer");
+                        AddButton(262, 419, 2151, 2154, 5, GumpButtonType.Reply, 0);
+                    break;
+                }
+
+                AddButton(226, 359, 9909, 9909, 3, GumpButtonType.Reply, 0);
+                AddButton(305, 359, 9903, 9903, 4, GumpButtonType.Reply, 0);
+            }            
+
+            AddButton(467, 427, 4029, 4031, 7, GumpButtonType.Reply, 0);
+            AddLabel(439, 403, 2550, "Send Message");
+        }
+
+        public override void OnResponse(NetState sender, RelayInfo info)
+        {
+            if (m_Player == null) return;
+            if (m_Guild == null) return;
+            if (m_Guild.Deleted) return;
+            if (m_GuildTarget == null) return;
+            if (m_GuildTarget.Deleted) return;
+
+            if (m_Player.Guild != m_Guild)
+                return;
+
+            bool closeGump = true;
+
+            switch (info.ButtonID)
+            {       
+                //Website
+                case 2:
+                    if (m_Guild != null)
+                    {
+                        if (m_Player.NetState != null)
+                            m_Player.NetState.LaunchBrowser(m_GuildTarget.m_Website);
+                    }
+
+                    closeGump = false;
+                break;
+
+                //Previous Relationship Type
+                case 3:
+                    switch (m_NewRelationshipType)
+                    {
+                        case Guilds.GuildRelationshipType.None:
+                            m_NewRelationshipType = Guilds.GuildRelationshipType.AllyRequest;
+                        break;
+
+                        case Guilds.GuildRelationshipType.AllyRequest:
+                            m_NewRelationshipType = Guilds.GuildRelationshipType.WarRequest;
+                        break;
+
+                        case Guilds.GuildRelationshipType.WarRequest:
+                            m_NewRelationshipType = Guilds.GuildRelationshipType.None;
+                        break;
+                    }
+
+                    m_Player.SendSound(Guilds.GuildGumpSelectionSound);
+
+                    closeGump = false;
+                break;
+
+                //Next Relationship Type
+                case 4:
+                    switch (m_NewRelationshipType)
+                    {
+                        case Guilds.GuildRelationshipType.None:
+                            m_NewRelationshipType = Guilds.GuildRelationshipType.WarRequest;
+                        break;
+
+                        case Guilds.GuildRelationshipType.WarRequest:
+                            m_NewRelationshipType = Guilds.GuildRelationshipType.AllyRequest;
+                        break;
+
+                        case Guilds.GuildRelationshipType.AllyRequest:
+                            m_NewRelationshipType = Guilds.GuildRelationshipType.None;
+                        break;
+                    }
+
+                    m_Player.SendSound(Guilds.GuildGumpSelectionSound);
+
+                    closeGump = false;
+                break;
+
+                //Approve Relationship
+                case 5:
+                    closeGump = false;
+                break;
+
+                //Decline Relationship
+                case 6:
+                    closeGump = false;
+                break;
+
+                //Send Message
+                case 7:
+                    closeGump = false;
+                break;
+            }
+
+            if (!closeGump)
+            {
+                m_Player.CloseGump(typeof(GuildManageDiplomacyGump));
+                m_Player.SendGump(new GuildManageDiplomacyGump(m_Player, m_Guild, m_GuildTarget, m_NewRelationshipType));
             }
 
             else

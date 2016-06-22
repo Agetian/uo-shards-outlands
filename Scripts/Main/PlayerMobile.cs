@@ -26,7 +26,6 @@ using Server.Custom;
 using Server.SkillHandlers;
 
 using Server.Regions;
-using Server.Poker;
 using System.Text;
 
 namespace Server.Mobiles
@@ -801,34 +800,15 @@ namespace Server.Mobiles
             //Damage Tracker
             pm_From.m_DamageTracker = new DamageTracker(pm_From);
 
-            //Guild
             Guilds.OnLogin(pm_From);
-
-            //Faction
             Faction.OnLogin(pm_From);
-
-            //Titles
             TitlePersistance.OnLogin(pm_From);
-
-            //Achievements
-            AchievementsPersistance.OnLogin(pm_From);
-
-            //Player Enhancements            
-            PlayerCustomization.OnLogin(pm_From);           
-
-            //Influence System
+            AchievementsPersistance.OnLogin(pm_From);       
+            PlayerCustomization.OnLogin(pm_From);
             InfluencePersistance.OnLogin(pm_From);
-
-            //UOACZ
             UOACZSystem.OnLogin(pm_From);
-
-            //World Chat
             ChatPersistance.OnLogin(pm_From);
-
-            //Monster Hunter Society
             MHSPersistance.CheckAndCreateMHSAccountEntry(pm_From);
-
-            //Event Calendar Account
             EventCalendarPersistance.CheckAndCreateEventCalendarAccount(pm_From);
 
             //Dungeon Armor
@@ -836,22 +816,6 @@ namespace Server.Mobiles
 
             //OverloadProtectionSystem
             pm_From.SystemOverloadActions = 0;
-        }
-
-        private static void Disconnect(object state)
-        {
-            NetState ns = ((Mobile)state).NetState;
-
-            if (ns != null)
-                ns.Dispose();
-        }
-
-        private static void OnLogout(LogoutEventArgs e)
-        {
-            PlayerMobile player = e.Mobile as PlayerMobile;
-
-            if (player == null)
-                return;
         }
 
         private static void EventSink_Connected(ConnectedEventArgs e)
@@ -867,7 +831,7 @@ namespace Server.Mobiles
             }
 
             DisguiseTimers.StartTimer(e.Mobile);
-        }
+        }      
         
         private static void EventSink_Disconnected(DisconnectedEventArgs e)
         {
@@ -889,35 +853,42 @@ namespace Server.Mobiles
                 context.Foundation.RestoreRelocatedEntities();
             }
 
-            PlayerMobile pm = e.Mobile as PlayerMobile;
+            PlayerMobile player = e.Mobile as PlayerMobile;
 
-            if (pm != null)
+            if (player != null)
             {
-                if (pm.m_PokerGame != null)
-                {
-                    PokerPlayer player = pm.m_PokerGame.GetPlayer(pm);
+                if (YoungChatListeners.Contains(player))
+                    YoungChatListeners.Remove(player);
 
-                    if (player != null)
-                    {
-                        if (pm.m_PokerGame.Players != null && pm.m_PokerGame.Players.Contains(player))
-                            pm.m_PokerGame.RemovePlayer(player);
-                    }
-                }
+                TimeSpan gameTime = DateTime.UtcNow - player.m_SessionStart;
 
-                if (YoungChatListeners.Contains(pm))
-                    YoungChatListeners.Remove(pm);
+                player.m_GameTime += gameTime;
 
-                TimeSpan gameTime = DateTime.UtcNow - pm.m_SessionStart;
+                player.m_SpeechLog = null;
+                player.LastOnline = DateTime.UtcNow;
+                player.SetSallos(false);
 
-                pm.m_GameTime += gameTime;
-
-                pm.m_SpeechLog = null;
-                pm.LastOnline = DateTime.UtcNow;
-                pm.SetSallos(false);
+                Guilds.OnLogout(player);
             }
 
             DisguiseTimers.StopTimer(from);
         }
+
+        private static void Disconnect(object state)
+        {
+            NetState ns = ((Mobile)state).NetState;
+
+            if (ns != null)
+                ns.Dispose();
+        }
+
+        private static void OnLogout(LogoutEventArgs e)
+        {
+            PlayerMobile player = e.Mobile as PlayerMobile;
+
+            if (player == null)
+                return;
+        } 
 
         public void ResetRegenTimers()
         {
@@ -1135,14 +1106,7 @@ namespace Server.Mobiles
         public static TimeSpan SystemOverloadInterval = TimeSpan.FromSeconds(60);
 
         public DateTime LastTeamSwitch = DateTime.MinValue;
-
-        private PokerGame m_PokerGame;
-        public PokerGame PokerGame
-        {
-            get { return m_PokerGame; }
-            set { m_PokerGame = value; }
-        }
-
+        
         private int m_NumGoldCoinsGenerated;
         [CommandProperty(AccessLevel.GameMaster)]
         public int NumGoldCoinsGenerated
@@ -5486,17 +5450,6 @@ namespace Server.Mobiles
 
         protected override bool OnMove(Direction d)
         {
-            #region Poker
-            if (m_PokerGame != null)
-            {
-                if (!HasGump(typeof(PokerLeaveGump)))
-                {
-                    SendGump(new PokerLeaveGump(this, m_PokerGame));
-                    return false;
-                }
-            }
-            #endregion
-
             if (AccessLevel != AccessLevel.Player)
                 return true;
 

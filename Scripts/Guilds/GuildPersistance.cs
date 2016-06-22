@@ -107,7 +107,9 @@ namespace Server.Items
             Timer.DelayCall(TimeSpan.FromTicks(1), delegate
             {
                 if (PersistanceItem == null)
-                    PersistanceItem = new GuildPersistanceItem();               
+                    PersistanceItem = new GuildPersistanceItem();
+
+                Guilds.AuditAllGuilds();
             });
         }
 
@@ -137,7 +139,28 @@ namespace Server.Items
 
         public static void OnLogin(PlayerMobile player)
         {
+            if (player == null)
+                return;
+
             CheckCreateGuildGuildSettings(player);
+
+            if (player.Guild != null)
+            {
+                player.Guild.UpdatePlayerCount();
+                player.Guild.UpdateCharacterCount();
+            }
+        }
+
+        public static void OnLogout(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            if (player.Guild != null)
+            {
+                player.Guild.UpdatePlayerCount();
+                player.Guild.UpdateCharacterCount();
+            }
         }
 
         public static void OnPlayerDeleted(PlayerMobile player)
@@ -171,7 +194,8 @@ namespace Server.Items
             }
 
             if (player.Guild != null)            
-                player.Guild.DismissMember(player, false, true);            
+                player.Guild.DismissMember(player, false, true);               
+            
         } 
 
         public static void CheckCreateGuildGuildSettings(PlayerMobile player)
@@ -184,6 +208,26 @@ namespace Server.Items
 
             else if (player.m_GuildSettings.Deleted)
                 player.m_GuildSettings = new GuildSettings(player);
+        }
+
+        public static void AuditAllGuilds()
+        {
+            Queue m_Queue = new Queue();
+
+            foreach (Guild guild in m_Guilds)
+            {
+                if (guild == null) continue;
+                if (guild.Deleted) continue;
+
+                m_Queue.Enqueue(guild);
+            }
+
+            while (m_Queue.Count > 0)
+            {
+                Guild guild = (Guild)m_Queue.Dequeue();
+                
+                guild.AuditGuild();
+            }
         }
 
         public static List<GuildGumpPageType> GetGuildPageTypeList(PlayerMobile player)
@@ -913,11 +957,14 @@ namespace Server.Items
 
         public Faction m_Faction = null;
 
+        public int m_ActivePlayers = 0;
+        public int m_ActiveCharacters = 0;
+
         public string[] m_RankNames = new string[] { Guilds.GuildRankNames[0], Guilds.GuildRankNames[1], Guilds.GuildRankNames[2], Guilds.GuildRankNames[3], Guilds.GuildRankNames[4] };
 
         public List<GuildMemberEntry> m_Members = new List<GuildMemberEntry>();
         public List<GuildInvitation> m_Candidates = new List<GuildInvitation>();
-        public List<GuildRelationship> m_Relationships = new List<GuildRelationship>();
+        public List<GuildRelationship> m_Relationships = new List<GuildRelationship>();       
 
         [Constructable]
         public Guild(string name, string abbreviation): base(0x0)
@@ -974,29 +1021,7 @@ namespace Server.Items
             return rankHue;
         }
 
-        public int GetCharacterCount(bool activeOnly)
-        {
-            if (activeOnly)
-            {
-                int count = 0;
-
-                foreach (GuildMemberEntry entry in m_Members)
-                {
-                    if (entry == null) continue;
-                    if (entry.m_Player == null) continue;
-
-                    if (IsCharacterActive(entry.m_Player))
-                        count++;
-                }
-
-                return count;
-            }
-
-            else
-                return m_Members.Count;
-        }
-
-        public int GetPlayerCount(bool activeOnly)
+        public void UpdatePlayerCount()
         {
             List<string> m_AccountNames = new List<string>();
 
@@ -1004,17 +1029,36 @@ namespace Server.Items
             {
                 if (entry == null) continue;
                 if (entry.m_Player == null) continue;
+                if (entry.m_Player.Deleted) continue;
 
                 if (IsCharacterActive(entry.m_Player))
                 {
-                    Account account = entry.m_Player.Account as Account;
+                    Account account = entry.m_Player.Account as Account;                    
+
+                    if (account == null)
+                        continue;
 
                     if (!m_AccountNames.Contains(account.Username))
                         m_AccountNames.Add(account.Username);
                 }
             }
 
-            return m_AccountNames.Count;
+            m_ActivePlayers = m_AccountNames.Count;
+        }
+
+        public void UpdateCharacterCount()
+        {
+            m_ActiveCharacters = 0;
+
+            foreach (GuildMemberEntry entry in m_Members)
+            {
+                if (entry == null) continue;
+                if (entry.m_Player == null) continue;
+                if (entry.m_Player.Deleted) continue;
+
+                if (IsCharacterActive(entry.m_Player))                
+                    m_ActiveCharacters++;                
+            }            
         }
 
         public int GetWarCount(bool activeOnly)
@@ -1045,6 +1089,24 @@ namespace Server.Items
             }
 
             return totalAllies;
+        }
+
+        public string GetGuildAge()
+        {
+            int guildAge = (int)(Math.Floor((DateTime.UtcNow - m_CreationTime).TotalDays));
+
+            string guildAgeText = "";
+
+            if (guildAge > 1)
+                guildAgeText = guildAge.ToString() + " Days";
+
+            else if (guildAge == 1)
+                guildAgeText = "1 Day";
+
+            else
+                guildAgeText = "Founded Today";
+
+            return guildAgeText;
         }
 
         public bool CanAddCandidates(GuildMemberRank rank)
@@ -1350,6 +1412,10 @@ namespace Server.Items
         public void AuditMembers()
         {            
             Queue m_Queue = new Queue();
+            
+            List<string> accountList = new List<string>();
+
+            int characterCount = 0;
 
             foreach (GuildMemberEntry member in m_Members)
             {
@@ -1364,6 +1430,19 @@ namespace Server.Items
 
                 else
                 {
+                    if (IsCharacterActive(member.m_Player))
+                    {
+                        characterCount++;
+
+                        Account account = member.m_Player.Account as Account;
+
+                        if (account != null)
+                        {
+                            if (!accountList.Contains(account.Username))
+                                accountList.Add(account.Username);
+                        }
+                    }
+
                     if (member.m_DeclaredFealty == null)
                     {
                         if (m_Guildmaster != null)
@@ -1381,7 +1460,33 @@ namespace Server.Items
 
                 if (m_Members.Contains(member))
                     m_Members.Remove(member);
-            }            
+            }
+
+            m_ActiveCharacters = characterCount;
+            m_ActivePlayers = accountList.Count;
+        }
+
+        public GuildRelationship GetGuildRelationship(Guild targetGuild)
+        {
+            GuildRelationship relationship = null;
+
+            foreach (GuildRelationship guildRelationship in m_Relationships)
+            {
+                if (guildRelationship == null) continue;
+                if (guildRelationship.Deleted) continue;
+                if (guildRelationship.m_GuildFrom == null) continue;
+                if (guildRelationship.m_GuildFrom.Deleted) continue;
+                if (guildRelationship.m_GuildTarget == null) continue;
+                if (guildRelationship.m_GuildTarget.Deleted) continue;
+
+                if (guildRelationship.m_GuildFrom == this && guildRelationship.m_GuildTarget != this)
+                    return guildRelationship;
+
+                if (guildRelationship.m_GuildFrom != this && guildRelationship.m_GuildTarget == this)
+                    return guildRelationship;
+            }
+
+            return relationship;
         }
 
         public List<DiplomacyEntry> GetGuildRelationships(Guilds.RelationshipFilterType filterType, Guilds.RelationshipSortCriteria sortCriteria, bool ascending)
@@ -1514,7 +1619,7 @@ namespace Server.Items
                         break;
 
                         case Guilds.RelationshipSortCriteria.PlayerCount:
-                            if (diplomacyEntry.m_Guild.GetCharacterCount(true) >= diplomacyEntryTarget.m_Guild.GetCharacterCount(true))
+                            if (diplomacyEntry.m_Guild.m_ActivePlayers >= diplomacyEntryTarget.m_Guild.m_ActivePlayers)
                                 newIndexPosition = b + 1;
                         break;
                     }
@@ -1621,7 +1726,10 @@ namespace Server.Items
             player.Guild = this;
             player.m_GuildMemberEntry = entry;
 
-            m_Members.Add(entry);           
+            m_Members.Add(entry);
+
+            UpdatePlayerCount();
+            UpdateCharacterCount();
 
             return true;
         }
@@ -1663,7 +1771,10 @@ namespace Server.Items
             } 
 
             if (wasGuildmaster)            
-                AssignNewGuildmaster(player);            
+                AssignNewGuildmaster(player);
+
+            UpdatePlayerCount();
+            UpdateCharacterCount();
         }
 
         public void AssignNewGuildmaster(PlayerMobile previousGuildmaster)
@@ -1743,14 +1854,21 @@ namespace Server.Items
         {
             List<GuildMemberEntry> guildMemberEntries = GetGuildMemberEntries(Guilds.MemberSortCriteria.None, true);
 
-            if (guildMemberEntries.Count == 0)            
-                DisbandGuild();            
+            if (guildMemberEntries.Count == 0)
+            {
+                DisbandGuild();
+
+                return;
+            }
 
             else if (m_Guildmaster == null)
                 AssignNewGuildmaster(m_Guildmaster);
 
             else if (m_Guildmaster.Deleted)
                 AssignNewGuildmaster(m_Guildmaster);
+
+            UpdatePlayerCount();
+            UpdateCharacterCount();
         }
 
         public void OnFealtyChange()
@@ -1962,6 +2080,8 @@ namespace Server.Items
             writer.Write(m_Website);
             writer.Write(m_Guildhouse);
             writer.Write(m_Faction);
+            writer.Write(m_ActivePlayers);
+            writer.Write(m_ActiveCharacters);
 
             writer.Write(m_RankNames.Length);
             for (int a = 0; a < m_RankNames.Length; a++)
@@ -1994,6 +2114,8 @@ namespace Server.Items
                 m_Website = reader.ReadString();
                 m_Guildhouse = reader.ReadItem() as BaseHouse;
                 m_Faction = reader.ReadItem() as Faction;
+                m_ActivePlayers = reader.ReadInt();
+                m_ActiveCharacters = reader.ReadInt();
 
                 int rankNamesCount = reader.ReadInt();
                 for (int a = 0; a < rankNamesCount; a++)
@@ -2026,8 +2148,6 @@ namespace Server.Items
             Guilds.m_Guilds.Add(this);
 
             ReapplyMemberships();
-
-            AuditGuild();
         }
     }
 }
