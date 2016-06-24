@@ -133,12 +133,9 @@ namespace Server
         {
         }
 
-        public LiarsDicePlayer GetPlayer(int index)
+        public int GetPlayerIndex(LiarsDicePlayer player)
         {
-            if (index < m_Players.Count)
-                return m_Players[index];
-
-            return null;
+            return m_Players.IndexOf(player);
         }
 
         public void StartGame()
@@ -147,41 +144,147 @@ namespace Server
             m_Timer.Start();
         }
 
-        public void EndGame()
+        public void RefreshGumps()
         {
         }
 
-        public override void Serialize(GenericWriter writer)
+        public bool RandomizeStartingPlayer()
         {
-            base.Serialize(writer);
-            writer.Write((int)0); //Version
+            List<LiarsDicePlayer> activePlayers = new List<LiarsDicePlayer>();
 
-            //Version 0
-            writer.Write((int)m_CurrentAction);
-            writer.Write(m_ActionTimeRemaining);
-            writer.Write(m_CurrentPlayerIndex);
-            writer.Write(m_Started);
-            writer.Write(m_Completed);
-            writer.Write(m_CreatedOn);
-            writer.Write(m_CreatedBy);
-            writer.Write(m_Pot);
-
-            writer.Write(m_Players.Count);
             for (int a = 0; a < m_Players.Count; a++)
-            {        
+            {
                 LiarsDicePlayer player = m_Players[a];
 
-                writer.Write(player.m_Player);
-                writer.Write(player.m_Active);
-                writer.Write(player.m_BidCount);
-                writer.Write(player.m_BidValue);
+                if (player == null) continue;
+                if (!player.m_Active) continue;
 
-                writer.Write(player.m_Dice.Count);
-                for (int b = 0; b < player.m_Dice.Count; b++)
+                activePlayers.Add(player);
+            }
+
+            if (activePlayers.Count > 0)  
+            {           
+                LiarsDicePlayer startingPlayer = activePlayers[Utility.RandomMinMax(0, activePlayers.Count - 1)];            
+                m_CurrentPlayerIndex = GetPlayerIndex(startingPlayer);
+
+                return true;
+            }
+
+            else   
+            {
+                EndGame();
+   
+                return false;
+            }
+        }
+
+        public bool NextPlayer()
+        {
+            int m_NewIndex = m_CurrentPlayerIndex;
+
+            bool foundNewPlayer = false;
+
+            for (int a = 0; a < m_Players.Count; a++)
+            {
+                m_NewIndex++;
+
+                if (m_NewIndex >= m_Players.Count)
+                    m_NewIndex = 0;
+
+                LiarsDicePlayer player = m_Players[m_NewIndex];
+
+                if (player == null) continue;
+                if (player.m_Active)
                 {
-                    writer.Write(player.m_Dice[b]);
+                    m_CurrentPlayerIndex = m_NewIndex;
+                    foundNewPlayer = true;
+
+                    break;
                 }
             }
+
+            if (foundNewPlayer)
+                return true;
+            else
+            {
+                EndGame();
+                return false;
+            }
+        }
+
+        public void BeginRound()
+        {
+            foreach (LiarsDicePlayer player in m_Players)
+            {
+                if (player == null) continue;
+                if (!player.m_Active) continue;
+
+                player.m_BidCount = 0;
+                player.m_BidValue = 0;
+
+                player.m_Dice.Clear();
+
+                for (int a = 0; a < player.m_DiceRemaining; a++)
+                {
+                    int diceValue = Utility.RandomMinMax(1, 6);
+                    player.m_Dice.Add(diceValue);
+                }
+            }
+
+            if (RandomizeStartingPlayer())
+            {
+                m_CurrentAction = CurrentActionType.PlayerBidding;
+                m_ActionTimeRemaining = TimeSpan.FromSeconds(30);
+            }
+        }
+
+        public void PlaceBid(LiarsDicePlayer player, int bidCount, int bidValue)
+        {
+            if (player == null) 
+                return;
+
+            player.m_BidCount = bidCount;
+            player.m_BidValue = bidValue;
+
+            if (NextPlayer())
+            {
+                m_CurrentAction = CurrentActionType.PlayerBidding;
+                m_ActionTimeRemaining = TimeSpan.FromSeconds(30);
+            }
+        }
+
+        public bool CanCallOutPlayer(LiarsDicePlayer playerFrom, LiarsDicePlayer playerTarget)
+        {
+            if (playerFrom == null) return false;
+            if (playerTarget == null) return false;
+            if (!playerFrom.m_Active) return false;
+            if (!playerTarget.m_Active) return false;
+
+            if (playerFrom == playerTarget) return false;
+            if (playerTarget.m_BidCount == 0) return false;
+            if (playerTarget.m_BidValue == 0) return false;
+
+            return true;
+        }
+
+        public void CallOutPlayer(LiarsDicePlayer playerFrom, LiarsDicePlayer playerTarget)
+        {
+            if (playerFrom == null) return;
+            if (playerTarget == null) return;
+            if (!playerFrom.m_Active) return;
+            if (!playerTarget.m_Active) return;
+
+            m_LiarCalloutPlayerIndex = GetPlayerIndex(playerFrom);
+            m_CurrentAction = CurrentActionType.LiarCallout;
+            m_ActionTimeRemaining = TimeSpan.FromSeconds(5);
+        }
+
+        public void ResolveCallOut()
+        {
+        }
+
+        public void EndGame()
+        {
         }
 
         public class LiarsDiceTimer : Timer
@@ -231,6 +334,41 @@ namespace Server
             }
         }
 
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //Version
+
+            //Version 0
+            writer.Write((int)m_CurrentAction);
+            writer.Write(m_ActionTimeRemaining);
+            writer.Write(m_CurrentPlayerIndex);
+            writer.Write(m_Started);
+            writer.Write(m_Completed);
+            writer.Write(m_CreatedOn);
+            writer.Write(m_CreatedBy);
+            writer.Write(m_Pot);
+
+            writer.Write(m_Players.Count);
+            for (int a = 0; a < m_Players.Count; a++)
+            {        
+                LiarsDicePlayer player = m_Players[a];
+
+                writer.Write(player.m_Player);
+                writer.Write(player.m_Active);
+                writer.Write(player.m_TurnsSkipped);
+                writer.Write(player.m_BidCount);
+                writer.Write(player.m_BidValue);
+                writer.Write(player.m_DiceRemaining);
+
+                writer.Write(player.m_Dice.Count);
+                for (int b = 0; b < player.m_Dice.Count; b++)
+                {
+                    writer.Write(player.m_Dice[b]);
+                }
+            }
+        }        
+
         public override void Deserialize(GenericReader reader)
         {
             base.Deserialize(reader);
@@ -253,8 +391,10 @@ namespace Server
                 {
                     LiarsDicePlayer liarsDicePlayer = new LiarsDicePlayer((PlayerMobile)reader.ReadMobile());
                     liarsDicePlayer.m_Active = reader.ReadBool();
+                    liarsDicePlayer.m_TurnsSkipped = reader.ReadInt();
                     liarsDicePlayer.m_BidCount = reader.ReadInt();
                     liarsDicePlayer.m_BidValue = reader.ReadInt();
+                    liarsDicePlayer.m_DiceRemaining = reader.ReadInt();
 
                     int diceCount = reader.ReadInt();
 
@@ -283,9 +423,11 @@ namespace Server
     {
         public PlayerMobile m_Player;
         public bool m_Active;
+        public int m_TurnsSkipped = 0;
 
-        public int m_BidCount = 1;
-        public int m_BidValue = 1;
+        public int m_BidCount = 0;
+        public int m_BidValue = 0;
+        public int m_DiceRemaining = 5;
 
         public List<int> m_Dice = new List<int>();
 
