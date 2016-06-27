@@ -172,9 +172,14 @@ namespace Server
         public static int MaxPlayers = 5;
         public static int MaxTurnsSkippable = 3;
 
+        public static int MaximumEffectiveBidValue = 156;
+
         public string m_CurrentText = "";
         public CurrentActionType m_CurrentAction = CurrentActionType.LobbyWaitingForPlayers;
         public TimeSpan m_ActionTimeRemaining = TimeSpan.FromSeconds(30);
+
+        public int m_LastBidCount = 1;
+        public int m_LastBidValue = 0;
 
         public LiarsDicePlayer m_CurrentPlayer;
         public int m_CurrentPlayerIndex = 0;
@@ -334,6 +339,9 @@ namespace Server
                 if (player == null) continue;
                 if (!player.m_Playing) continue;
 
+                player.m_NewBidCount = 1;
+                player.m_NewBidValue = 1;
+
                 player.m_BidCount = 0;
                 player.m_BidValue = 0;
 
@@ -370,6 +378,15 @@ namespace Server
                     m_CurrentPlayer = player;
                     m_CurrentPlayerIndex = m_NewIndex;
 
+                    player.m_NewBidCount = player.m_BidCount;
+                    player.m_NewBidValue = player.m_BidValue;
+
+                    if (player.m_NewBidCount == 0)
+                        player.m_NewBidCount = 1;
+
+                    if (player.m_NewBidValue == 0)
+                        player.m_NewBidValue = 1;
+
                     foundNewPlayer = true;
 
                     break;
@@ -381,6 +398,7 @@ namespace Server
             else
             {
                 EndGame();
+
                 return false;
             }            
         }
@@ -395,6 +413,9 @@ namespace Server
             if (playerFrom == playerTarget) return false;
             if (playerTarget.m_BidCount == 0) return false;
             if (playerTarget.m_BidValue == 0) return false;
+
+            if (m_CurrentAction != CurrentActionType.PlayerBidding)
+                return false;
 
             return true;
         }
@@ -423,6 +444,12 @@ namespace Server
             if (!GetStartingPlayer())
                 return;
 
+            m_LastBidCount = 1;
+            m_LastBidValue = 0;
+
+            m_LiarCalloutPlayer = null;
+            m_LiarCalloutPlayerTarget = null;
+
             m_CurrentText = "New round beginning in 5 seconds.";
             m_CurrentAction = CurrentActionType.RoundStart;
             m_ActionTimeRemaining = TimeSpan.FromSeconds(5);
@@ -434,21 +461,49 @@ namespace Server
         {
             m_CurrentText = m_CurrentPlayer.m_Player.RawName + " begins the bidding.";
             m_CurrentAction = CurrentActionType.PlayerBidding;
-            m_ActionTimeRemaining = TimeSpan.FromSeconds(30);
+            m_ActionTimeRemaining = TimeSpan.FromSeconds(20);
 
             UpdateGumps();
         }
 
         public void PlayerPasses()
         {
-            if (m_CurrentPlayer.m_BidValue < 6)
-                m_CurrentPlayer.m_BidValue++;
+            m_CurrentPlayer.m_NewBidCount = m_LastBidCount;
+            m_CurrentPlayer.m_NewBidValue = m_LastBidValue;
+
+            double randomAction = Utility.RandomDouble();
+
+            if (randomAction <= .25)
+                m_CurrentPlayer.m_NewBidCount++;
+
+            else if (randomAction <= .50)
+            {
+                m_CurrentPlayer.m_NewBidValue += Utility.RandomMinMax(1, 5);
+
+                if (m_CurrentPlayer.m_NewBidValue > 6)
+                {
+                    m_CurrentPlayer.m_NewBidCount++;
+                    m_CurrentPlayer.m_NewBidValue = m_CurrentPlayer.m_NewBidValue - 6;
+                }
+            }
 
             else
             {
-                m_CurrentPlayer.m_BidCount++;
-                m_CurrentPlayer.m_BidValue = 1;
+                if (m_CurrentPlayer.m_BidValue > m_CurrentPlayer.m_NewBidValue)
+                    m_CurrentPlayer.m_NewBidValue = m_CurrentPlayer.m_BidValue;
+
+                else
+                {
+                    m_CurrentPlayer.m_NewBidCount++;
+                    m_CurrentPlayer.m_NewBidValue = m_CurrentPlayer.m_BidValue;
+                }
             }
+
+            m_CurrentPlayer.m_BidCount = m_CurrentPlayer.m_NewBidCount;
+            m_CurrentPlayer.m_BidValue = m_CurrentPlayer.m_NewBidValue;
+
+            m_LastBidCount = m_CurrentPlayer.m_BidCount;
+            m_LastBidValue = m_CurrentPlayer.m_BidValue;
 
             m_CurrentPlayer.m_TurnsSkipped++;
 
@@ -468,7 +523,7 @@ namespace Server
             if (NextPlayer())
             {
                 m_CurrentAction = CurrentActionType.PlayerBidding;
-                m_ActionTimeRemaining = TimeSpan.FromSeconds(30);
+                m_ActionTimeRemaining = TimeSpan.FromSeconds(20);
 
                 UpdateGumps();
             }
@@ -482,12 +537,15 @@ namespace Server
             player.m_BidCount = bidCount;
             player.m_BidValue = bidValue;
 
+            m_LastBidCount = player.m_BidCount;
+            m_LastBidValue = player.m_BidValue;
+
             m_CurrentText = m_CurrentPlayer.m_Player.RawName + " bids " + m_CurrentPlayer.m_BidCount.ToString() + " " + m_CurrentPlayer.m_BidValue.ToString() + "'s.";
 
             if (NextPlayer())
             {
                 m_CurrentAction = CurrentActionType.PlayerBidding;
-                m_ActionTimeRemaining = TimeSpan.FromSeconds(30);
+                m_ActionTimeRemaining = TimeSpan.FromSeconds(20);
 
                 UpdateGumps();
             }
@@ -500,13 +558,72 @@ namespace Server
             if (!playerFrom.m_Playing) return;
             if (!playerTarget.m_Playing) return;
 
+            m_LiarCalloutPlayer = playerFrom;
             m_LiarCalloutPlayerIndex = GetPlayerIndex(playerFrom);
+
+            m_LiarCalloutPlayerTarget = playerTarget;
+            m_LiarCalloutPlayerTargetIndex = GetPlayerIndex(playerTarget);
+
+            m_CurrentText = playerFrom.m_Player.RawName + " calls " + playerTarget.m_Player.RawName + " a liar!";
             m_CurrentAction = CurrentActionType.LiarCallout;
             m_ActionTimeRemaining = TimeSpan.FromSeconds(5);
+
+            UpdateGumps();
         }
 
         public void ResolveCallOut()
         {
+        }
+
+        public void PlayerLeave(LiarsDicePlayer playerFrom)
+        {
+            if (playerFrom == null)
+                return; 
+           
+            //TEST: ADD DOUBLE CLICK PREVENTION FOR LEAVING
+
+            playerFrom.m_Playing = false;
+            playerFrom.m_Spectating = false;
+
+            if (playerFrom.m_Player == null)
+                m_CurrentText = "A player has left the game.";
+            else
+                m_CurrentText = playerFrom.m_Player.RawName + " has left the game.";
+
+            switch (m_CurrentAction)
+            {
+                case CurrentActionType.PlayerBidding:
+                    if (m_CurrentPlayer == playerFrom)
+                    {
+                        if (NextPlayer())
+                        {
+                            m_CurrentAction = CurrentActionType.PlayerBidding;
+                            m_ActionTimeRemaining = TimeSpan.FromSeconds(20);
+
+                            UpdateGumps();
+                        }
+
+                        else
+                            return;
+                    }
+                break;
+
+                case CurrentActionType.RoundStart:
+                    if (m_CurrentPlayer == playerFrom)
+                    {
+                        if (NextPlayer())
+                        {
+                            m_CurrentAction = CurrentActionType.RoundStart;
+                            m_ActionTimeRemaining = TimeSpan.FromSeconds(5);
+
+                            UpdateGumps();
+                        }
+
+                        else
+                            return;
+                    }
+                break;
+            }            
         }
 
         public void EndGame()
@@ -577,9 +694,13 @@ namespace Server
                     break;
 
                     case CurrentActionType.LiarCallout:
+                        if (m_Instance.m_ActionTimeRemaining <= TimeSpan.FromSeconds(0))
+                            m_Instance.ResolveCallOut();  
                     break;
 
                     case CurrentActionType.CalloutResolution:
+                        if (m_Instance.m_ActionTimeRemaining <= TimeSpan.FromSeconds(0))
+                            m_Instance.RoundStart();  
                     break;
 
                     case CurrentActionType.GameResolution:
@@ -597,7 +718,11 @@ namespace Server
             writer.Write(m_CurrentText);
             writer.Write((int)m_CurrentAction);
             writer.Write(m_ActionTimeRemaining);
+            writer.Write(m_LastBidCount);
+            writer.Write(m_LastBidValue);
             writer.Write(m_CurrentPlayerIndex);
+            writer.Write(m_LiarCalloutPlayerIndex);
+            writer.Write(m_LiarCalloutPlayerTargetIndex);
             writer.Write(m_Started);
             writer.Write(m_Completed);
             writer.Write(m_StartTime);
@@ -637,7 +762,11 @@ namespace Server
                 m_CurrentText = reader.ReadString();
                 m_CurrentAction = (CurrentActionType)reader.ReadInt();
                 m_ActionTimeRemaining = reader.ReadTimeSpan();
+                m_LastBidCount = reader.ReadInt();
+                m_LastBidValue = reader.ReadInt();
                 m_CurrentPlayerIndex = reader.ReadInt();
+                m_LiarCalloutPlayerIndex = reader.ReadInt();
+                m_LiarCalloutPlayerTargetIndex = reader.ReadInt();
                 m_Started = reader.ReadBool();
                 m_Completed = reader.ReadBool();
                 m_StartTime = reader.ReadDateTime();
@@ -671,6 +800,18 @@ namespace Server
 
             LiarsDicePersistance.m_Instances.Add(this);
 
+            if (m_Players.Count > 0)
+            {
+                if (m_CurrentPlayerIndex < m_Players.Count)
+                    m_CurrentPlayer = m_Players[m_CurrentPlayerIndex];
+
+                if (m_LiarCalloutPlayerIndex < m_Players.Count)
+                    m_LiarCalloutPlayer = m_Players[m_LiarCalloutPlayerIndex];
+
+                if (m_LiarCalloutPlayerTargetIndex < m_Players.Count)
+                    m_LiarCalloutPlayerTarget = m_Players[m_LiarCalloutPlayerTargetIndex];
+            }
+
             if (m_Started && !m_Completed)
             {
                 m_Timer = new LiarsDiceTimer(this);
@@ -685,6 +826,8 @@ namespace Server
 
         public LiarsDicePlayer m_DicePlayer;
         public LiarsDiceInstance m_Instance;
+
+        public List<LiarsDicePlayer> m_OrderedPlayerList = new List<LiarsDicePlayer>();
 
         public LiarsDiceGump(LiarsDicePlayer dicePlayer, LiarsDiceInstance instance): base(0, 0)
         {
@@ -747,24 +890,33 @@ namespace Server
             AddLabel(524, 28, 1256, "Leave Game");
             AddButton(601, 24, 2472, 2473, 2, GumpButtonType.Reply, 0);
 
+            #region Player
+
             if (m_Instance.m_CurrentAction == LiarsDiceInstance.CurrentActionType.PlayerBidding && m_Instance.m_CurrentPlayer == m_DicePlayer && dicePlayer.m_Playing)
             {
-                //Check Valid Bid
-
                 AddImage(62, 21, 30077, 2599); //Selection
                 AddLabel(Utility.CenteredTextOffset(110, m_Player.RawName), 46, 63, m_Player.RawName);
 
-                AddButton(38, 71, 9900, 9900, 4, GumpButtonType.Reply, 0);
-                AddButton(38, 95, 9906, 9906, 5, GumpButtonType.Reply, 0);
+                int currentBidTotal = ((m_DicePlayer.m_NewBidCount) * 6) + (m_DicePlayer.m_NewBidValue);
+                int effectiveLastBidTotal = ((m_Instance.m_LastBidCount) * 6) + (m_Instance.m_LastBidValue);
+
+                if (m_DicePlayer.m_NewBidCount < 98)
+                    AddButton(38, 71, 9900, 9900, 4, GumpButtonType.Reply, 0); //Increase Bid Count
+
+                if (m_DicePlayer.m_NewBidCount > 1)
+                    AddButton(38, 95, 9906, 9906, 5, GumpButtonType.Reply, 0); //Decrease Bid Count
 
                 AddLabel(69, 82, WhiteTextHue, m_DicePlayer.m_NewBidCount.ToString()); //Count
                 AddImage(97, 83, m_Instance.GetDiceItemId(m_DicePlayer.m_NewBidValue)); //Dice
+                
+                AddButton(138, 71, 9900, 9900, 6, GumpButtonType.Reply, 0); //Increase Bid Value
+                AddButton(139, 95, 9906, 9906, 7, GumpButtonType.Reply, 0); //Decrease Bid Value
 
-                AddButton(138, 71, 9900, 9900, 6, GumpButtonType.Reply, 0);
-                AddButton(139, 95, 9906, 9906, 7, GumpButtonType.Reply, 0);
-
-                AddLabel(97, 132, WhiteTextHue, "Bid");
-                AddButton(93, 157, 9721, 9725, 8, GumpButtonType.Reply, 0);
+                if (currentBidTotal > effectiveLastBidTotal)
+                {
+                    AddLabel(97, 132, WhiteTextHue, "Bid");
+                    AddButton(93, 157, 9721, 9725, 8, GumpButtonType.Reply, 0);
+                }
 
                 for (int a = 0; a < dicePlayer.m_Dice.Count; a++)
                 {
@@ -773,7 +925,7 @@ namespace Server
                     int diceItemId = m_Instance.GetDiceItemId(diceValue);
                     int diceHue = 0;
 
-                    if (m_DicePlayer.m_BidValue == diceValue)
+                    if (m_DicePlayer.m_NewBidValue == diceValue)
                         diceHue = 63;
 
                     switch (a)
@@ -819,11 +971,13 @@ namespace Server
             }         
    
             else            
-                AddLabel(Utility.CenteredTextOffset(110, m_Player.RawName), 46, WhiteTextHue, m_Player.RawName); 
+                AddLabel(Utility.CenteredTextOffset(110, m_Player.RawName), 46, 2401, m_Player.RawName);
 
-            #region Other Players  
-          
-            List<LiarsDicePlayer> orderedPlayerList = new List<LiarsDicePlayer>();
+            #endregion
+
+            #region Other Players
+
+            m_OrderedPlayerList = new List<LiarsDicePlayer>();
 
             int playerIndex = m_Instance.m_Players.IndexOf(m_DicePlayer);
 
@@ -837,16 +991,16 @@ namespace Server
                 LiarsDicePlayer otherPlayer = m_Instance.m_Players[playerIndex];
 
                 if (otherPlayer != m_DicePlayer)
-                    orderedPlayerList.Add(otherPlayer);
+                    m_OrderedPlayerList.Add(otherPlayer);
             }
 
             int startX = 210;
             int startY = 95;
             int playerSpacing = 105;
 
-            for (int a = 0; a < orderedPlayerList.Count; a++)
+            for (int a = 0; a < m_OrderedPlayerList.Count; a++)
             {
-                LiarsDicePlayer otherPlayer = orderedPlayerList[a];
+                LiarsDicePlayer otherPlayer = m_OrderedPlayerList[a];
 
                 switch(m_Instance.m_CurrentAction)
                 {
@@ -863,11 +1017,40 @@ namespace Server
                     break;
                 }
 
-                if (m_Instance.m_CurrentPlayer == otherPlayer)
-                    AddImage(0 + startX, 0 + startY, 30077, 2587); //Selection
+                switch (m_Instance.m_CurrentAction)
+                {
+                    case LiarsDiceInstance.CurrentActionType.PlayerBidding:
+                        if (m_Instance.m_CurrentPlayer == otherPlayer)
+                        {
+                            AddImage(0 + startX, 0 + startY, 30077, 2587); //Selection
+                            AddLabel(Utility.CenteredTextOffset(48 + startX, otherPlayer.m_Player.RawName), 24 + startY, 149, otherPlayer.m_Player.RawName);
+                        }
 
-                AddImage(20 + startX, 49 + startY, 9801); //Cup               
-                AddLabel(Utility.CenteredTextOffset(48 + startX, otherPlayer.m_Player.RawName), 24 + startY, 149, otherPlayer.m_Player.RawName);
+                        else
+                            AddLabel(Utility.CenteredTextOffset(48 + startX, otherPlayer.m_Player.RawName), 24 + startY, WhiteTextHue, otherPlayer.m_Player.RawName);
+                    break;
+
+                    case LiarsDiceInstance.CurrentActionType.LiarCallout:
+                        if (m_Instance.m_LiarCalloutPlayerTarget == otherPlayer)
+                        {
+                            AddImage(0 + startX, 0 + startY, 30077, 1256); //Selection
+                            AddLabel(Utility.CenteredTextOffset(48 + startX, otherPlayer.m_Player.RawName), 24 + startY, 1256, otherPlayer.m_Player.RawName);
+                        }
+
+                        else if (m_Instance.m_LiarCalloutPlayer == otherPlayer)
+                            AddLabel(Utility.CenteredTextOffset(48 + startX, otherPlayer.m_Player.RawName), 24 + startY, 63, otherPlayer.m_Player.RawName);
+                        
+                    break;
+
+                    default:
+                        if (otherPlayer.m_Playing)
+                            AddLabel(Utility.CenteredTextOffset(48 + startX, otherPlayer.m_Player.RawName), 24 + startY, WhiteTextHue, otherPlayer.m_Player.RawName);
+                        else
+                            AddLabel(Utility.CenteredTextOffset(48 + startX, otherPlayer.m_Player.RawName), 24 + startY, 2401, otherPlayer.m_Player.RawName);
+                    break;
+                }
+
+                AddImage(20 + startX, 49 + startY, 9801); //Cup
                 
                 int diceItemId = m_Instance.GetDiceItemId(otherPlayer.m_BidValue);
                 int diceHue = 0;
@@ -909,12 +1092,19 @@ namespace Server
                     }
                 }
 
-                bool canCallLiar = true; //m_Instance.CanCallOutPlayer(dicePlayer, otherPlayer);
-
-                if (canCallLiar)
+                if (m_Instance.CanCallOutPlayer(dicePlayer, otherPlayer))
                 {
                     AddButton(17 + startX, 180 + startY, 4500, 4500, 10 + a, GumpButtonType.Reply, 0);
                     AddLabel(13 + startX, 233 + startY, WhiteTextHue, "Call Liar!");
+                }
+
+                else if (m_Instance.m_CurrentAction == LiarsDiceInstance.CurrentActionType.LiarCallout)
+                {
+                    if (m_Instance.m_LiarCalloutPlayerTarget == otherPlayer)
+                    {                        
+                        AddImage(17 + startX, 180 + startY, 4500, 1256);
+                        AddLabel(10 + startX, 233 + startY, WhiteTextHue, "Called Liar");
+                    }
                 }
 
                 startX += playerSpacing;
@@ -929,7 +1119,211 @@ namespace Server
         }
 
         public override void OnResponse(NetState sender, RelayInfo info)
-        {            
+        {
+            if (m_Player == null) return;
+            if (m_DicePlayer == null) return;
+            if (m_Instance == null) return;
+            if (m_Instance.Deleted) return;
+
+            bool closeGump = true;
+
+            int maximumNewBidValue = 156;
+
+            int currentBidTotal = ((m_DicePlayer.m_NewBidCount) * 6) + (m_DicePlayer.m_NewBidValue);
+            int effectiveLastBidTotal = ((m_Instance.m_LastBidCount) * 6) + (m_Instance.m_LastBidValue);
+
+            switch (info.ButtonID)
+            {
+                //Guide
+                case 1:
+                    closeGump = false;
+                break;
+
+                //Leave
+                case 2:
+                    if (m_DicePlayer.m_Playing)
+                    {
+                        if (m_Instance.m_CurrentAction == LiarsDiceInstance.CurrentActionType.PlayerBidding || m_Instance.m_CurrentAction == LiarsDiceInstance.CurrentActionType.RoundStart)
+                        {
+                            m_Instance.PlayerLeave(m_DicePlayer);
+                            return;
+                        }
+
+                        else
+                            m_Player.SendMessage("You must wait until the current phase is resolved before you may leave this game.");
+                    }
+
+                    closeGump = false;
+                break;
+
+                //Send Chat Message
+                case 3:
+                    closeGump = false;
+                break;
+
+                //Increase Bid Count
+                case 4:
+                    if (m_Instance.m_CurrentAction == LiarsDiceInstance.CurrentActionType.PlayerBidding && m_DicePlayer == m_Instance.m_CurrentPlayer)
+                    {
+                        if (m_DicePlayer.m_NewBidValue < 98)
+                        {
+                            m_DicePlayer.m_NewBidCount++;
+                            m_Player.SendSound(0x3E6);
+                        }
+
+                        /*
+                        int effectiveNewBidValue = ((m_DicePlayer.m_NewBidCount + 1) * 6) + (m_DicePlayer.m_NewBidValue);
+
+                        if (effectiveNewBidValue <= maximumNewBidValue)
+                        {
+                            m_DicePlayer.m_NewBidCount++;
+                            m_Player.SendSound(0x3E6);
+                        }
+                        */
+                    }
+
+                    closeGump = false;
+                break;
+
+                //Decrease Bid Count
+                case 5:
+                    if (m_Instance.m_CurrentAction == LiarsDiceInstance.CurrentActionType.PlayerBidding && m_DicePlayer == m_Instance.m_CurrentPlayer)
+                    {
+                        if (m_DicePlayer.m_NewBidCount > 1)
+                        {
+                            m_DicePlayer.m_NewBidCount--;
+                            m_Player.SendSound(0x3E6);
+                        }
+
+                        /*
+                        int effectiveNewBidValue = ((m_DicePlayer.m_NewBidCount - 1) * 6) + (m_DicePlayer.m_NewBidValue);
+
+                        if (effectiveNewBidValue >= effectiveLastBidTotal)
+                        {
+                            m_DicePlayer.m_NewBidCount--;
+                            m_Player.SendSound(0x3E6);
+                        }
+                        */
+                    }
+
+                    closeGump = false;
+                break;
+
+                //Increase Bid Value
+                case 6:
+                    if (m_Instance.m_CurrentAction == LiarsDiceInstance.CurrentActionType.PlayerBidding && m_DicePlayer == m_Instance.m_CurrentPlayer)
+                    {
+                        m_DicePlayer.m_NewBidValue++;
+                        m_Player.SendSound(0x3E6);
+
+                        if (m_DicePlayer.m_NewBidValue > 6)
+                            m_DicePlayer.m_NewBidValue = 1;
+
+                        /*
+                        int effectiveNewBidValue = ((m_DicePlayer.m_NewBidCount) * 6) + (m_DicePlayer.m_NewBidValue + 1);
+
+                        if (effectiveNewBidValue <= maximumNewBidValue)
+                        {
+                            m_DicePlayer.m_NewBidValue++;
+
+                            if (m_DicePlayer.m_NewBidValue == 7)
+                            {
+                                m_DicePlayer.m_NewBidCount++;
+                                m_DicePlayer.m_NewBidValue = 1;
+                            }
+
+                            m_Player.SendSound(0x3E6);
+                        }
+                        */
+                    }
+
+                    closeGump = false;
+                break;
+
+                //Decrease Bid Value
+                case 7:
+                    if (m_Instance.m_CurrentAction == LiarsDiceInstance.CurrentActionType.PlayerBidding && m_DicePlayer == m_Instance.m_CurrentPlayer)
+                    {
+                        m_DicePlayer.m_NewBidValue--;
+                        m_Player.SendSound(0x3E6);
+
+                        if (m_DicePlayer.m_NewBidValue < 1)
+                            m_DicePlayer.m_NewBidValue = 6;
+
+                        /*
+                        int effectiveNewBidValue = ((m_DicePlayer.m_NewBidCount) * 6) + (m_DicePlayer.m_NewBidValue - 1);
+
+                        if (effectiveNewBidValue >= effectiveLastBidTotal)
+                        {
+                            m_DicePlayer.m_NewBidValue--;
+
+                            if (m_DicePlayer.m_NewBidValue == 0)
+                            {
+                                m_DicePlayer.m_NewBidCount--;
+                                m_DicePlayer.m_NewBidValue = 6;
+                            }
+
+                            m_Player.SendSound(0x3E6);
+                        }
+                        */
+                    }
+
+                    closeGump = false;
+                break;
+
+                //Place Bid
+                case 8:
+                    if (m_Instance.m_CurrentAction == LiarsDiceInstance.CurrentActionType.PlayerBidding && m_DicePlayer ==  m_Instance.m_CurrentPlayer)
+                    {
+                        if (m_DicePlayer.m_NewBidCount > 99)
+                            m_Player.SendMessage("You have exceeded the maximum bid allowed.");
+
+                        else if (currentBidTotal <= effectiveLastBidTotal)
+                            m_Player.SendMessage("Your bid must be of a higher dice count or higher dice face value than the last bidder.");
+
+                        else           
+                        {
+                            m_Instance.PlaceBid(m_DicePlayer, m_DicePlayer.m_NewBidCount, m_DicePlayer.m_NewBidValue);
+
+                            return;
+                        }
+                    }
+
+                    closeGump = false;
+                break;
+            }
+
+            //Callout Liar
+            if (info.ButtonID >= 10)
+            {
+                int playerIndex = info.ButtonID - 10;
+
+                if (playerIndex < m_OrderedPlayerList.Count)
+                {
+                    LiarsDicePlayer playerTarget = m_OrderedPlayerList[playerIndex];
+
+                    if (playerTarget != null)
+                    {
+                        if (m_Instance.CanCallOutPlayer(m_DicePlayer, playerTarget)) 
+                        {
+                            m_Instance.CallOutPlayer(m_DicePlayer, playerTarget); 
+
+                            return;
+                        }
+                    }
+                }
+
+                closeGump = false;
+            }
+
+            if (!closeGump)
+            {
+                m_Player.CloseGump(typeof(LiarsDiceGump));
+                m_Player.SendGump(new LiarsDiceGump(m_DicePlayer, m_Instance));
+            }
+
+            else
+                m_Player.SendSound(0x058);
         }
     }
 
