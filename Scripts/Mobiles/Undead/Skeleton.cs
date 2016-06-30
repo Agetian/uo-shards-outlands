@@ -30,13 +30,15 @@ namespace Server.Mobiles
 
 			Fame = 450;
 			Karma = -450;
-		}       
+		}      
 
         public override SlayerGroupType SlayerGroup { get { return SlayerGroupType.Undead; } }
         public override SpeedGroupType BaseSpeedGroup { get { return SpeedGroupType.Slow; } }
         public override AIGroupType AIBaseGroup { get { return AIGroupType.EvilMonster; } }
         public override AISubGroupType AIBaseSubGroup { get { return AISubGroupType.Melee; } }
         public override double BaseUniqueDifficultyScalar { get { return 1.0; } }
+
+        public override SpawnEffectType SpawnEffect { get { return SpawnEffectType.BonesSmall; } }        
 
         public override int PoisonResistance { get { return 3; } }
         

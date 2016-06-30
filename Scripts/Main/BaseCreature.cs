@@ -56,6 +56,14 @@ namespace Server.Mobiles
         None
     }
 
+    public enum SpawnEffectType
+    {
+        None,
+        BonesSmall,
+        BonesMedium,
+        BonesLarge,
+    }
+
     public enum FightMode
     {
         None,           // Never focus on others
@@ -82,7 +90,7 @@ namespace Server.Mobiles
         Stop,           //"(All/Name) stop Cancels any current orders to attack, guard or follow.  
         Transfer,       //"(Name) transfer" Transfers complete ownership to targeted player. 
         Fetch           //"(All/Name) Walks to location of item targeted, puts it in is pack if able, and then goes into Follow Mode
-    }
+    }    
 
     [Flags]
     public enum FoodType
@@ -2759,12 +2767,14 @@ namespace Server.Mobiles
 
         public DateTime m_NextWeaponChangeAllowed = DateTime.UtcNow;
         public TimeSpan NextWeaponChangeDelay = TimeSpan.FromSeconds(Utility.RandomMinMax(4, 6));
-
+        
         public virtual SlayerGroupType SlayerGroup { get { return SlayerGroupType.Monstrous; } }
         public virtual SpeedGroupType BaseSpeedGroup { get { return SpeedGroupType.Medium; } }
         public virtual AIGroupType AIBaseGroup { get { return AIGroupType.None; } }
         public virtual AISubGroupType AIBaseSubGroup { get { return AISubGroupType.Melee; } }
         public virtual double BaseUniqueDifficultyScalar { get { return 1.0; } }
+
+        public virtual SpawnEffectType SpawnEffect { get { return SpawnEffectType.None; } }
 
         private SpeedGroupType m_SpeedGroup = SpeedGroupType.None;
         [CommandProperty(AccessLevel.GameMaster, AccessLevel.GameMaster)]
@@ -9326,6 +9336,218 @@ namespace Server.Mobiles
                     boat.EmbarkedMobiles.Add(this);
                 }
             }
+            
+            #region Spawn Effect: None
+
+            if (SpawnEffect == SpawnEffectType.None)
+            {
+            }
+
+            #endregion
+
+            #region Spawn Effect: Bones (Small)
+
+            if (SpawnEffect == SpawnEffectType.BonesSmall)
+            {
+                int animation = Utility.RandomMinMax(2, 3);
+                int frameCount = 4;
+
+                List<int> primaryItemId = new List<int>() { 6921, 6922, 6925, 6926, 3786, 3787, 3788, 3789, 3790, 3791, 3792, 3793, 3794,  };
+                List<int> secondaryItemId = new List<int>() { 6929, 6930, 6937, 6938, 6933, 6934, 6935, 6936, 6939, 6940, 6884, 6881, 6880,  };
+
+                string primaryStaticName = "bones";
+                string secondaryStaticName = "bones";
+
+                TimeSpan spawnDelay = TimeSpan.FromSeconds(1.5);
+
+                int radius = 1;
+                double secondaryItemChance = .33;
+
+                TimedStatic primaryStatic = new TimedStatic(primaryItemId[Utility.RandomMinMax(0, primaryItemId.Count - 1)], 5);
+                primaryStatic.Name = primaryStaticName;
+                primaryStatic.MoveToWorld(newLocation, map);
+
+                for (int a = -1 * radius; a < radius + 1; a++)
+                {
+                    for (int b = -1 * radius; b < radius + 1; b++)
+                    {
+                        Point3D newPoint = new Point3D(newLocation.X + a, newLocation.Y + b, newLocation.Z);
+                        SpellHelper.AdjustField(ref newPoint, map, 12, false);
+
+                        double distanceFromCenter = Utility.GetDistanceToSqrt(newLocation, newPoint);
+
+                        double extraSecondaryChance = 1;
+
+                        if (distanceFromCenter >= 1)
+                            extraSecondaryChance = (1 / (distanceFromCenter)) * secondaryItemChance;
+
+                        if (Utility.RandomDouble() <= extraSecondaryChance)
+                        {
+                            Timer.DelayCall(TimeSpan.FromSeconds(distanceFromCenter * .25), delegate
+                            {
+                                TimedStatic secondaryStatic = new TimedStatic(secondaryItemId[Utility.RandomMinMax(0, secondaryItemId.Count - 1)], 5);
+                                secondaryStatic.Name = secondaryStaticName;
+                                secondaryStatic.MoveToWorld(newPoint, map);
+                            });
+                        }
+                    }
+                }
+
+                PlaySound(GetIdleSound());
+
+                Hidden = true;
+                Frozen = true;
+
+                Timer.DelayCall(spawnDelay, delegate
+                {
+                    if (this == null) return;
+                    if (Deleted) return;
+
+                    Hidden = false;
+                    Frozen = false;
+
+                    PlaySound(GetAngerSound());
+                    Animate(animation, frameCount, 1, false, false, 1);
+                });
+            }
+
+            #endregion
+
+            #region Spawn Effect: Bones (Medium)
+
+            if (SpawnEffect == SpawnEffectType.BonesMedium)
+            {
+                int animation = Utility.RandomMinMax(2, 3);
+                int frameCount = 4;
+
+                List<int> primaryItemId = new List<int>() { 6921, 6922, 6925, 6926, 3786, 3787, 3788, 3789, 3790, 3791, 3792, 3793, 3794, };
+                List<int> secondaryItemId = new List<int>() { 6929, 6930, 6937, 6938, 6933, 6934, 6935, 6936, 6939, 6940, 6884, 6881, 6880, };
+
+                string primaryStaticName = "bones";
+                string secondaryStaticName = "bones";
+
+                TimeSpan spawnDelay = TimeSpan.FromSeconds(1.5);
+
+                int radius = 1;
+                double secondaryItemChance = .66;
+
+                TimedStatic primaryStatic = new TimedStatic(primaryItemId[Utility.RandomMinMax(0, primaryItemId.Count - 1)], 5);
+                primaryStatic.Name = primaryStaticName;
+                primaryStatic.MoveToWorld(newLocation, map);
+
+                for (int a = -1 * radius; a < radius + 1; a++)
+                {
+                    for (int b = -1 * radius; b < radius + 1; b++)
+                    {
+                        Point3D newPoint = new Point3D(newLocation.X + a, newLocation.Y + b, newLocation.Z);
+                        SpellHelper.AdjustField(ref newPoint, map, 12, false);
+
+                        double distanceFromCenter = Utility.GetDistanceToSqrt(newLocation, newPoint);
+
+                        double extraSecondaryChance = 1;
+
+                        if (distanceFromCenter >= 1)
+                            extraSecondaryChance = (1 / (distanceFromCenter)) * secondaryItemChance;
+
+                        if (Utility.RandomDouble() <= extraSecondaryChance)
+                        {
+                            Timer.DelayCall(TimeSpan.FromSeconds(distanceFromCenter * .25), delegate
+                            {
+                                TimedStatic secondaryStatic = new TimedStatic(secondaryItemId[Utility.RandomMinMax(0, secondaryItemId.Count - 1)], 5);
+                                secondaryStatic.Name = secondaryStaticName;
+                                secondaryStatic.MoveToWorld(newPoint, map);
+                            });
+                        }
+                    }
+                }
+
+                PlaySound(GetIdleSound());
+
+                Hidden = true;
+                Frozen = true;
+
+                Timer.DelayCall(spawnDelay, delegate
+                {
+                    if (this == null) return;
+                    if (Deleted) return;
+
+                    Hidden = false;
+                    Frozen = false;
+
+                    PlaySound(GetAngerSound());
+                    Animate(animation, frameCount, 1, false, false, 1);
+                });
+            }
+
+            #endregion
+
+            #region Spawn Effect: Bones (Large)
+
+            if (SpawnEffect == SpawnEffectType.BonesLarge)
+            {
+                int animation = Utility.RandomMinMax(2, 3);
+                int frameCount = 4;
+
+                List<int> primaryItemId = new List<int>() { 6922, 6923, 6924, 6926, 6927, 6928 };
+                List<int> secondaryItemId = new List<int>() { 6929, 6930, 6937, 6938, 6933, 6934, 6935, 6936, 6939, 6940, 6884, 6881, 6880, };
+
+                string primaryStaticName = "bones";
+                string secondaryStaticName = "bones";
+
+                TimeSpan spawnDelay = TimeSpan.FromSeconds(1.5);
+
+                int radius = 2;
+                double secondaryItemChance = .80;
+
+                TimedStatic primaryStatic = new TimedStatic(primaryItemId[Utility.RandomMinMax(0, primaryItemId.Count - 1)], 5);
+                primaryStatic.Name = primaryStaticName;
+                primaryStatic.MoveToWorld(newLocation, map);
+
+                for (int a = -1 * radius; a < radius + 1; a++)
+                {
+                    for (int b = -1 * radius; b < radius + 1; b++)
+                    {
+                        Point3D newPoint = new Point3D(newLocation.X + a, newLocation.Y + b, newLocation.Z);
+                        SpellHelper.AdjustField(ref newPoint, map, 12, false);
+
+                        double distanceFromCenter = Utility.GetDistanceToSqrt(newLocation, newPoint);
+
+                        double extraSecondaryChance = 1;
+
+                        if (distanceFromCenter >= 1)
+                            extraSecondaryChance = (1 / (distanceFromCenter)) * secondaryItemChance;
+
+                        if (Utility.RandomDouble() <= extraSecondaryChance)
+                        {
+                            Timer.DelayCall(TimeSpan.FromSeconds(distanceFromCenter * .25), delegate
+                            {
+                                TimedStatic secondaryStatic = new TimedStatic(secondaryItemId[Utility.RandomMinMax(0, secondaryItemId.Count - 1)], 5);
+                                secondaryStatic.Name = secondaryStaticName;
+                                secondaryStatic.MoveToWorld(newPoint, map);
+                            });
+                        }
+                    }
+                }
+
+                PlaySound(GetIdleSound());
+
+                Hidden = true;
+                Frozen = true;
+
+                Timer.DelayCall(spawnDelay, delegate
+                {
+                    if (this == null) return;
+                    if (Deleted) return;
+
+                    Hidden = false;
+                    Frozen = false;
+
+                    PlaySound(GetAngerSound());
+                    Animate(animation, frameCount, 1, false, false, 1);
+                });
+            }
+
+            #endregion                        
         }
 
         public override void OnAfterSpawn()

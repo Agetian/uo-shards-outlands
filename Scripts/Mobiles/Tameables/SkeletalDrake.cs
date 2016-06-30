@@ -78,6 +78,8 @@ namespace Server.Mobiles
         public override AISubGroupType AIBaseSubGroup { get { return AISubGroupType.Melee; } }
         public override double BaseUniqueDifficultyScalar { get { return 1.0; } }
 
+        public override SpawnEffectType SpawnEffect { get { return SpawnEffectType.BonesLarge; } }
+
         public override int PoisonResistance { get { return 4; } }
 
         public override bool CanFly { get { return true; } }        
