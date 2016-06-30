@@ -148,8 +148,8 @@
     <Compile Include="CustomAlchemy\CustomAlchemyKit.cs" />
     <Compile Include="CustomAlchemy\CustomAlchemy.cs" />
     <Compile Include="CustomAlchemy\CustomAlchemyPotion.cs" />
-    <Compile Include="Donations\DonationShop.cs" />
-    <Compile Include="Donations\DonationShopGump.cs" />
+    <Compile Include="DonationShop\DonationShop.cs" />
+    <Compile Include="DonationShop\DonationShopGump.cs" />
     <Compile Include="Faction\CaptureLocations\Town\PrevaliaTownsquareAndSlums.cs" />
     <Compile Include="Faction\CaptureLocations\Town\PrevaliaBankAndShipwright.cs" />
     <Compile Include="Faction\FactionPlayerProfile.cs" />
@@ -834,7 +834,7 @@
     <Compile Include="Mobiles\Bosses\Minions\DeepTentacle.cs" />
     <Compile Include="Mobiles\Bosses\Minions\DeepWater.cs" />
     <Compile Include="Mobiles\Bosses\TheDeepOne.cs" />
-    <Compile Include="Donations\DragonCoin.cs" />
+    <Compile Include="DonationShop\DragonCoin.cs" />
     <Compile Include="Items\DragonLotteryTicket.cs" />
     <Compile Include="Items\ItemRenameDeed.cs" />
     <Compile Include="Items\MaskDye.cs" />
@@ -1796,7 +1796,6 @@
     <Compile Include="Items\OgreChew.cs" />
     <Compile Include="Items\OgreChow.cs" />
     <Compile Include="Items\OgreDecoBag.cs" />
-    <Compile Include="Items\OgreLordMask.cs" />
     <Compile Include="Items\Packs\BlacksmithDecoBag.cs" />
     <Compile Include="Items\Packs\ChristmasPack.cs" />
     <Compile Include="Items\Packs\DollHouseFurniture1.cs" />

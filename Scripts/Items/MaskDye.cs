@@ -12,13 +12,11 @@ namespace Server.Custom.Donations.Items
     {
         private static List<Type> m_PossibleTypes = new List<Type>()
         {
-            typeof(HornedTribalMask),
-            typeof(TribalMask),
             typeof(BearMask),
             typeof(DeerMask),
             typeof(OrcMask),
-            typeof(OrcishKinMask),
-            typeof(OgreLordMask),
+            typeof(SavageMask),
+            typeof(TribalMask),
         };
 
         private static int[] m_RareHues = new int[] { 1281, 2052, 1150, 1266 };

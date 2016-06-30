@@ -373,9 +373,9 @@ namespace Server.Custom
                 break;
 
                 case UOACZUnlockableType.HornedTribalMask:
-                    unlockableDetail.Name = "Blessed Horned Tribal Mask";
-                    unlockableDetail.m_Items.Add(typeof(HornedTribalMask));
-                    unlockableDetail.Description = new string[] { "Blessed Horned Tribal Mask" };
+                    unlockableDetail.Name = "Blessed Tribal Mask";
+                    unlockableDetail.m_Items.Add(typeof(TribalMask));
+                    unlockableDetail.Description = new string[] { "Blessed Tribal Mask" };
                     unlockableDetail.UnlockableCategory = UOACZUnlockableCategory.LayerHelm;
                     unlockableDetail.ItemId = 5449;
                     unlockableDetail.ItemHue = 0;

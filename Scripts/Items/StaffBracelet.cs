@@ -13,6 +13,8 @@ namespace Server.Items
         {
             Name = "staff bracelet";
             Hue = 2587;
+
+            LootType = Server.LootType.Blessed;
         }
 
         public StaffBracelet(Serial serial): base(serial)

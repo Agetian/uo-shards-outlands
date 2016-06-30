@@ -40,6 +40,7 @@ namespace Server.Mobiles
 			{
 				return base.Hue;
 			}
+
 			set
 			{
 				base.Hue = value;
@@ -73,8 +74,7 @@ namespace Server.Mobiles
 			base.OnDelete();
 		}
 
-		public BaseMount( Serial serial )
-			: base( serial )
+		public BaseMount( Serial serial ): base( serial )
 		{
 		}
 
@@ -103,6 +103,7 @@ namespace Server.Mobiles
 					m_NextMountAbility = reader.ReadDateTime();
 					goto case 0;
 				}
+
 				case 0:
 				{
 					m_Rider = reader.ReadMobile();
@@ -123,22 +124,12 @@ namespace Server.Mobiles
 
 		public override void OnDoubleClick( Mobile from )
 		{
-			// IPY Mount Block
-			if ( from.AccessLevel == AccessLevel.Player )
-			{
-					from.SendMessage("The animal refuses to let you ride... odd.");
-					return;
-			}
-
 			if ( IsDeadPet )
 				return;
 
 			if ( from.IsBodyMod && !from.Body.IsHuman )
 			{
-				if ( Core.AOS ) // You cannot ride a mount in your current form.
-					PrivateOverheadMessage( Network.MessageType.Regular, 0x3B2, 1062061, from.NetState );
-				else
-					from.SendLocalizedMessage( 1061628 ); // You can't do that while polymorphed.
+				from.SendLocalizedMessage( 1061628 ); // You can't do that while polymorphed.
 
 				return;
 			}
@@ -177,20 +168,24 @@ namespace Server.Mobiles
 				{
 					if ( this.Poisoned )
 						PrivateOverheadMessage( Network.MessageType.Regular, 0x3B2, 1049692, from.NetState ); // This mount is too ill to ride.
-					else
+					
+                    else
 						Rider = from;
 				}
+
 				else if ( !Controlled && !Summoned )
 				{
 					// That mount does not look broken! You would have to tame it to ride it.
 					PrivateOverheadMessage( Network.MessageType.Regular, 0x3B2, 501263, from.NetState );
 				}
+
 				else
 				{
 					// This isn't your mount; it refuses to let you ride.
 					PrivateOverheadMessage( Network.MessageType.Regular, 0x3B2, 501264, from.NetState );
 				}
 			}
+
 			else
 			{
 				from.SendLocalizedMessage( 500206 ); // That is too far away to ride.
@@ -204,9 +199,11 @@ namespace Server.Mobiles
 			{
 				if ( m_InternalItem != null )
 					return m_InternalItem.ItemID;
+
 				else
 					return 0;
 			}
+
 			set
 			{
 				if ( m_InternalItem != null )
@@ -229,6 +226,7 @@ namespace Server.Mobiles
 			{
 				return m_Rider;
 			}
+
 			set
 			{
 				if ( m_Rider != value )
@@ -251,6 +249,7 @@ namespace Server.Mobiles
 						if ( m_InternalItem != null )
 							m_InternalItem.Internalize();
 					}
+
 					else
 					{
 						if ( m_Rider != null )
@@ -303,6 +302,7 @@ namespace Server.Mobiles
 				entry.m_Type = type;
 				entry.m_Expiration = expiration;
 			}
+
 			else
 			{
 				m_Table[mob] = entry = new BlockEntry( type, expiration );
@@ -350,11 +350,13 @@ namespace Server.Mobiles
 						mob.SendLocalizedMessage( 1040024 ); // You are still too dazed from being knocked off your mount to ride!
 						break;
 					}
+
 					case BlockMountType.BolaRecovery:
 					{
 						mob.SendLocalizedMessage( 1062910 ); // You cannot mount while recovering from a bola throw.
 						break;
 					}
+
 					case BlockMountType.DismountRecovery:
 					{
 						mob.SendLocalizedMessage( 1070859 ); // You cannot mount while recovering from a dismount special maneuver.
@@ -430,14 +432,12 @@ namespace Server.Mobiles
 			base.Serialize( writer );
 
 			writer.Write( (int) 0 ); // version
-
 			writer.Write( m_Mount );
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 
 			switch ( version )

@@ -35,7 +35,6 @@ namespace Server.Items
 			base.Serialize( writer );
 
 			writer.Write( (int) 1 ); // version
-
 			writer.Write( m_IsShipwreckedItem );
 		}
 
@@ -77,7 +76,10 @@ namespace Server.Items
 		}
 
 	}
-	[Flipable( 0x2798, 0x27E3 )]
+
+    #region Hats
+
+    [Flipable( 0x2798, 0x27E3 )]
 	public class Kasa : BaseHat
 	{
 		public override int BasePhysicalResistance{ get{ return 0; } }
@@ -224,6 +226,7 @@ namespace Server.Items
 		[Constructable]
 		public FloppyHat( int hue ) : base( 0x1713, hue )
 		{
+            Name = "a floppy hat";
 			Weight = 1.0;
 		}
 
@@ -234,14 +237,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -259,12 +260,13 @@ namespace Server.Items
 
 		[Constructable]
 		public WideBrimHat() : this( 0 )
-		{
+		{            
 		}
 
 		[Constructable]
 		public WideBrimHat( int hue ) : base( 0x1714, hue )
 		{
+            Name = "a wide-brim hat";
 			Weight = 1.0;
 		}
 
@@ -275,14 +277,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -306,6 +306,7 @@ namespace Server.Items
 		[Constructable]
 		public Cap( int hue ) : base( 0x1715, hue )
 		{
+            Name = "a cap";
 			Weight = 1.0;
 		}
 
@@ -316,14 +317,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -347,6 +346,7 @@ namespace Server.Items
 		[Constructable]
 		public SkullCap( int hue ) : base( 0x1544, hue )
 		{
+            Name = "a skullcap";
 			Weight = 1.0;
 		}
 
@@ -357,14 +357,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -388,6 +386,7 @@ namespace Server.Items
 		[Constructable]
 		public Bandana( int hue ) : base( 0x1540, hue )
 		{
+            Name = "a bandana";
 			Weight = 1.0;
 		}
 
@@ -398,14 +397,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -429,6 +426,7 @@ namespace Server.Items
 		[Constructable]
 		public TallStrawHat( int hue ) : base( 0x1716, hue )
 		{
+            Name = "a tall straw hat";
 			Weight = 1.0;
 		}
 
@@ -439,14 +437,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -470,6 +466,7 @@ namespace Server.Items
 		[Constructable]
 		public StrawHat( int hue ) : base( 0x1717, hue )
 		{
+            Name = "a straw hat";
 			Weight = 1.0;
 		}
 
@@ -480,174 +477,15 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
-	}
-
-	public class OrcishKinMask : BaseHat
-	{
-		public override int BasePhysicalResistance{ get{ return 1; } }
-		public override int BaseFireResistance{ get{ return 1; } }
-		public override int BaseColdResistance{ get{ return 7; } }
-		public override int BasePoisonResistance{ get{ return 7; } }
-		public override int BaseEnergyResistance{ get{ return 8; } }
-
-		public override int InitMinHits{ get{ return 20; } }
-		public override int InitMaxHits{ get{ return 30; } }
-
-		public override bool Dye( Mobile from, DyeTub sender )
-		{
-			from.SendLocalizedMessage( sender.FailMessage );
-			return false;
-		}
-
-        public override bool OnEquip(Mobile from)
-        {
-            if (from is PlayerMobile && Hue == 0x8A4)
-            {
-                var player = from as PlayerMobile;
-                int original = Hue;
-                Hue = player.Hue & 0xFFF;
-                OriginalHue = original;
-            }
-            return base.OnEquip(from);
-        }
-
-        public override bool OnDragLift(Mobile from)
-        {
-            Hue = OriginalHue;
-            return base.OnDragLift(from);
-        }
-
-        public override void OnRemoved(object parent)
-        {
-            Hue = OriginalHue;
-            base.OnRemoved(parent);
-        }
-
-		public override string DefaultName
-		{
-			get { return "a mask of orcish kin"; }
-		}
-
-		[Constructable]
-		public OrcishKinMask() : this( 0x8A4 )
-		{
-		}
-
-		[Constructable]
-		public OrcishKinMask( int hue ) : base( 0x141B, hue )
-		{
-			Weight = 2.0;
-		}
-
-		public override bool CanEquip( Mobile m )
-		{
-			if ( !base.CanEquip( m ) )
-				return false;
-
-			if ( m.BodyMod == 183 || m.BodyMod == 184 )
-			{
-				m.SendLocalizedMessage( 1061629 ); // You can't do that while wearing savage kin paint.
-				return false;
-			}
-
-			return true;
-		}
-
-		public override void OnAdded( object parent )
-		{
-			base.OnAdded( parent );
-
-			if ( parent is Mobile )
-				FameKarmaTitles.AwardKarma( (Mobile)parent, -20, true );
-		}
-
-		public OrcishKinMask( Serial serial ) : base( serial )
-		{
-		}
-
-		public override void Serialize( GenericWriter writer )
-		{
-			base.Serialize( writer );
-
-			writer.Write( (int) 0 ); // version
-		}
-
-		public override void Deserialize( GenericReader reader )
-		{
-			base.Deserialize( reader );
-
-			int version = reader.ReadInt();
-		}
-	}
-
-	public class SavageMask : BaseHat
-	{
-		public override int BasePhysicalResistance{ get{ return 3; } }
-		public override int BaseFireResistance{ get{ return 0; } }
-		public override int BaseColdResistance{ get{ return 6; } }
-		public override int BasePoisonResistance{ get{ return 10; } }
-		public override int BaseEnergyResistance{ get{ return 5; } }
-
-		public override int InitMinHits{ get{ return 20; } }
-		public override int InitMaxHits{ get{ return 30; } }
-
-        //Not on IPY - CHECK
-		public static int GetRandomHue()
-		{
-			int v = Utility.RandomBirdHue();
-
-			if ( v == 2101 )
-				v = 0;
-
-			return v;
-		}
-
-		public override bool Dye( Mobile from, DyeTub sender )
-		{
-			from.SendLocalizedMessage( sender.FailMessage );
-			return false;
-		}
-		[Constructable]
-		public SavageMask() : this( GetRandomHue() )
-		{
-		}
-
-		[Constructable]
-		public SavageMask( int hue ) : base( 0x154B, hue )
-		{
-			Weight = 2.0;
-		}
-
-		public SavageMask( Serial serial ) : base( serial )
-		{
-		}
-
-		public override void Serialize( GenericWriter writer )
-		{
-			base.Serialize( writer );
-
-			writer.Write( (int) 0 ); // version
-		}
-
-		public override void Deserialize( GenericReader reader )
-		{
-			base.Deserialize( reader );
-
-			int version = reader.ReadInt();
-			if ( Hue != 0 && (Hue < 2101 || Hue > 2130) )
-				Hue = GetRandomHue();
-		}
-	}
+	}	
 
 	public class WizardsHat : BaseHat
 	{
@@ -668,6 +506,7 @@ namespace Server.Items
 		[Constructable]
 		public WizardsHat( int hue ) : base( 0x1718, hue )
 		{
+            Name = "a wizard's hat";
 			Weight = 1.0;
 		}
 
@@ -678,14 +517,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -697,7 +534,7 @@ namespace Server.Items
 		public override int BaseColdResistance{ get{ return 9; } }
 		public override int BasePoisonResistance{ get{ return 5; } }
 		public override int BaseEnergyResistance{ get{ return 5; } }
-		public override int LabelNumber{ get{ return 1041072; } } // a magical wizard's hat
+		public override int LabelNumber{ get{ return 1041072; } }
 
 		#region Stat Mods
 		public void AddStatMods( Mobile m )
@@ -744,8 +581,6 @@ namespace Server.Items
 		public override int InitMinHits{ get{ return 20; } }
 		public override int InitMaxHits{ get{ return 30; } }
 
-	   //	public override int LabelNumber{ get{ return 1041072; } } // a magical wizard's hat
-
 		public override int BaseStrBonus{ get{ return -5; } }
 		public override int BaseDexBonus{ get{ return -5; } }
 		public override int BaseIntBonus{ get{ return +5; } }
@@ -758,6 +593,7 @@ namespace Server.Items
 		[Constructable]
 		public MagicWizardsHat( int hue ) : base( 0x1718, hue )
 		{
+            Name = "a magical wizard's hat";
 			Weight = 1.0;
 		}
 
@@ -768,16 +604,16 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
-            //Added by IPY
+
+            //-----
+
 			AddStatMods( Parent as Mobile );
 		}
 	}
@@ -801,6 +637,7 @@ namespace Server.Items
 		[Constructable]
 		public Bonnet( int hue ) : base( 0x1719, hue )
 		{
+            Name = "a bonnet";
 			Weight = 1.0;
 		}
 
@@ -811,14 +648,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -842,6 +677,7 @@ namespace Server.Items
 		[Constructable]
 		public FeatheredHat( int hue ) : base( 0x171A, hue )
 		{
+            Name = "a feathered hat";
 			Weight = 1.0;
 		}
 
@@ -852,14 +688,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -883,6 +717,7 @@ namespace Server.Items
 		[Constructable]
 		public TricorneHat( int hue ) : base( 0x171B, hue )
 		{
+            Name = "a tricorne hat";
 			Weight = 1.0;
 		}
 
@@ -893,14 +728,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -924,6 +757,7 @@ namespace Server.Items
 		[Constructable]
 		public JesterHat( int hue ) : base( 0x171C, hue )
 		{
+            Name = "a jester's hat";
 			Weight = 1.0;
 		}
 
@@ -934,36 +768,23 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
 
-	#region New Masks
+    #endregion
+
+    #region Masks    
 
 	[Flipable( 0x1545, 0x1546 )]
 	public class BearMask : BaseHat
 	{
-		public override int BasePhysicalResistance{ get{ return 0; } }
-		public override int BaseFireResistance{ get{ return 0; } }
-		public override int BaseColdResistance{ get{ return 6; } }
-		public override int BasePoisonResistance{ get{ return 10; } }
-		public override int BaseEnergyResistance{ get{ return 5; } }
-
-		public override int InitMinHits{ get{ return 20; } }
-		public override int InitMaxHits{ get{ return 30; } }
-		public override bool Dye( Mobile from, DyeTub sender )
-		{
-			from.SendLocalizedMessage( sender.FailMessage );
-			return false;
-		}
 		[Constructable]
 		public BearMask() : this( 0 )
 		{
@@ -972,8 +793,15 @@ namespace Server.Items
 		[Constructable]
 		public BearMask( int hue ) : base( 0x1545, hue )
 		{
-			Weight = 2.0;
+            Name = "a bear mask";
+			Weight = 1.0;
 		}
+
+        public override bool Dye(Mobile from, DyeTub sender)
+        {
+            from.SendLocalizedMessage(sender.FailMessage);
+            return false;
+        }
 
 		public BearMask( Serial serial ) : base( serial )
 		{
@@ -982,38 +810,69 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
 
+    [Flipable(0x1547, 0x1548)]
+    public class DeerMask : BaseHat
+    {
+        [Constructable]
+        public DeerMask(): this(0)
+        {
+        }
+
+        [Constructable]
+        public DeerMask(int hue): base(0x1547, hue)
+        {
+            Name = "a deer mask";
+            Weight = 1.0;
+        }
+
+        public DeerMask(Serial serial): base(serial)
+        {
+        }
+
+        public override bool Dye(Mobile from, DyeTub sender)
+        {
+            from.SendLocalizedMessage(sender.FailMessage);
+            return false;
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); // version
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+        }
+    }
+
 	[Flipable( 0x141B, 0x141C )]
 	public class OrcMask : BaseHat
 	{
-		public override int PhysicalResistance{ get{ return 0; } }
-		public override int FireResistance{ get{ return 0; } }
-		public override int ColdResistance{ get{ return 6; } }
-		public override int PoisonResistance{ get{ return 10; } }
-		public override int EnergyResistance{ get{ return 5; } }
-
-		public override bool Dye( Mobile from, DyeTub sender )
-		{
-			from.SendLocalizedMessage( sender.FailMessage );
-			return false;
-		}
-
 		[Constructable]
 		public OrcMask() : base( 0x141B )
 		{
-			Weight = 2.0;
+            Name = "an orc mask";
+			Weight = 1.0;
 		}
+
+        public override bool Dye(Mobile from, DyeTub sender)
+        {
+            from.SendLocalizedMessage(sender.FailMessage);
+            return false;
+        }
 
 		public OrcMask( Serial serial ) : base( serial )
 		{
@@ -1022,133 +881,59 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
 
-	[Flipable( 0x1547, 0x1548 )]
-	public class DeerMask : BaseHat
-	{
-		public override int BasePhysicalResistance{ get{ return 0; } }
-		public override int BaseFireResistance{ get{ return 0; } }
-		public override int BaseColdResistance{ get{ return 6; } }
-		public override int BasePoisonResistance{ get{ return 10; } }
-		public override int BaseEnergyResistance{ get{ return 7; } }
+    public class SavageMask : BaseHat
+    {
+        [Constructable]
+        public SavageMask(): this(0)
+        {
+        }
 
-		public override int InitMinHits{ get{ return 20; } }
-		public override int InitMaxHits{ get{ return 30; } }
+        [Constructable]
+        public SavageMask(int hue) : base(0x154B, hue)
+        {
+            Name = "a savage mask";
+            Weight = 1.0;
+        }
 
-		public override bool Dye( Mobile from, DyeTub sender )
-		{
-			from.SendLocalizedMessage( sender.FailMessage );
-			return false;
-		}
+        public SavageMask(Serial serial): base(serial)
+        {
+        }
 
-		[Constructable]
-		public DeerMask() : this( 0 )
-		{
-		}
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); // version
+        }
 
-		[Constructable]
-		public DeerMask( int hue ) : base( 0x1547, hue )
-		{
-			Weight = 2.0;
-		}
-
-		public DeerMask( Serial serial ) : base( serial )
-		{
-		}
-
-		public override void Serialize( GenericWriter writer )
-		{
-			base.Serialize( writer );
-
-			writer.Write( (int) 0 ); // version
-		}
-
-		public override void Deserialize( GenericReader reader )
-		{
-			base.Deserialize( reader );
-
-			int version = reader.ReadInt();
-		}
-	}
-
-	public class HornedTribalMask : BaseHat
-	{
-		public override int BasePhysicalResistance{ get{ return 6; } }
-		public override int BaseFireResistance{ get{ return 9; } }
-		public override int BaseColdResistance{ get{ return 0; } }
-		public override int BasePoisonResistance{ get{ return 4; } }
-		public override int BaseEnergyResistance{ get{ return 5; } }
-
-		public override int InitMinHits{ get{ return 20; } }
-		public override int InitMaxHits{ get{ return 30; } }
-
-		[Constructable]
-		public HornedTribalMask() : this( 0 )
-		{
-		}
-
-		[Constructable]
-		public HornedTribalMask( int hue ) : base( 0x1549, hue )
-		{
-			Weight = 2.0;
-		}
-
-		public override bool Dye( Mobile from, DyeTub sender )
-		{
-			from.SendLocalizedMessage( sender.FailMessage );
-			return false;
-		}
-
-		public HornedTribalMask( Serial serial ) : base( serial )
-		{
-		}
-
-		public override void Serialize( GenericWriter writer )
-		{
-			base.Serialize( writer );
-
-			writer.Write( (int) 0 ); // version
-		}
-
-		public override void Deserialize( GenericReader reader )
-		{
-			base.Deserialize( reader );
-
-			int version = reader.ReadInt();
-		}
-	}
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+        }
+    }
 
 	public class TribalMask : BaseHat
 	{
-		public override int BasePhysicalResistance{ get{ return 3; } }
-		public override int BaseFireResistance{ get{ return 0; } }
-		public override int BaseColdResistance{ get{ return 6; } }
-		public override int BasePoisonResistance{ get{ return 10; } }
-		public override int BaseEnergyResistance{ get{ return 5; } }
-
-		public override int InitMinHits{ get{ return 20; } }
-		public override int InitMaxHits{ get{ return 30; } }
-
 		[Constructable]
 		public TribalMask() : this( 0 )
 		{
 		}
 
 		[Constructable]
-		public TribalMask( int hue ) : base( 0x154B, hue )
+        public TribalMask(int hue): base(0x1549, hue)
 		{
-			Weight = 2.0;
+            Name = "a tribal mask";
+			Weight = 1.0;
 		}
 
 		public override bool Dye( Mobile from, DyeTub sender )
@@ -1164,17 +949,15 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
 
-	#endregion
+    #endregion
 }

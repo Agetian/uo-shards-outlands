@@ -3,7 +3,7 @@ using Server;
 
 namespace Server.Items
 {
-	public class DivineCountenance : HornedTribalMask
+	public class DivineCountenance : TribalMask
 	{
 		public override int LabelNumber{ get{ return 1061289; } } // Divine Countenance
 

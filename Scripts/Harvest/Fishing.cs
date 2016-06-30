@@ -343,16 +343,7 @@ namespace Server.Engines.Harvest
                             chest.DropItem(new FabledFishingNet());
                         else
                             chest.DropItem(new SpecialFishingNet());
-
-                        if (Utility.Random(500) == 0)
-                        {
-                            Item mask = new HornedTribalMask();
-                            mask.Hue = 2715;
-                            mask.Name = "Mask of Cthulu";
-
-                            chest.DropItem(mask);
-                        }
-
+                        
                         switch (Utility.Random(300))
                         {
                             case 0:
