@@ -7805,17 +7805,7 @@ namespace Server.Mobiles
                         continue;
                     }
 
-                    PowerScroll powerscroll = null;
-
-                    if (!boss)
-                        powerscroll = PowerScroll.CreateRandom(5, 10);
-                    else
-                    {
-                        if (Utility.RandomDouble() < 0.25)
-                            powerscroll = PowerScroll.CreateRandom(20);
-                        else
-                            powerscroll = PowerScroll.CreateRandom(15);
-                    }
+                    PowerScroll powerscroll = new PowerScroll();
 
                     damager.m_Mobile.SendLocalizedMessage(1049524); // You have received a scroll of power!
 

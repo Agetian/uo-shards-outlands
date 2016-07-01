@@ -231,7 +231,7 @@ namespace Server.Engines.BulkOrders
 		private static Item CreatePowerScroll( int type )
 		{
 			if ( type == 5 || type == 10 || type == 15 || type == 20 )
-				return new PowerScroll( SkillName.Blacksmith, 100 + type );
+				return new PowerScroll( SkillName.Blacksmith );
 
 			throw new InvalidOperationException();
 		}
@@ -552,7 +552,7 @@ namespace Server.Engines.BulkOrders
 		private static Item CreatePowerScroll( int type )
 		{
 			if ( type == 5 || type == 10 || type == 15 || type == 20 )
-				return new PowerScroll( SkillName.Tailoring, 100 + type );
+				return new PowerScroll( SkillName.Tailoring);
 
 			throw new InvalidOperationException();
 		}

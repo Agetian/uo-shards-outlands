@@ -148,8 +148,9 @@
     <Compile Include="CustomAlchemy\CustomAlchemyKit.cs" />
     <Compile Include="CustomAlchemy\CustomAlchemy.cs" />
     <Compile Include="CustomAlchemy\CustomAlchemyPotion.cs" />
-    <Compile Include="DonationShop\DonationShop.cs" />
+    <Compile Include="DonationShop\DragonCoin.cs" />
     <Compile Include="DonationShop\DonationShopGump.cs" />
+    <Compile Include="DonationShop\DonationShop.cs" />
     <Compile Include="Faction\CaptureLocations\Town\PrevaliaTownsquareAndSlums.cs" />
     <Compile Include="Faction\CaptureLocations\Town\PrevaliaBankAndShipwright.cs" />
     <Compile Include="Faction\FactionPlayerProfile.cs" />
@@ -300,6 +301,7 @@
     <Compile Include="Items\Food\Vegetable\Onion.cs" />
     <Compile Include="Items\Food\Vegetable\Pumpkin.cs" />
     <Compile Include="Items\Food\Vegetable\Turnip.cs" />
+    <Compile Include="Items\Libraries\PowerScrollLibrary.cs" />
     <Compile Include="Items\Resources\Fishing\RawLargeFish.cs" />
     <Compile Include="Items\Resources\Fishing\RawFish.cs" />
     <Compile Include="Items\KittyLantern.cs" />
@@ -766,7 +768,6 @@
     <Compile Include="Items\HuePlating\Wood\YewWoodHuePlating.cs" />
     <Compile Include="Items\JewelryBlessDeed.cs" />
     <Compile Include="Items\Libraries\MasterScrollLibrary.cs" />
-    <Compile Include="Items\Libraries\PowerScrollLibrary.cs" />
     <Compile Include="Items\Libraries\PrestigeScrollLibrary.cs" />
     <Compile Include="Items\Libraries\SpellScrollLibrary.cs" />
     <Compile Include="Items\MasteryOrb\BaseMasteryOrb.cs" />
@@ -834,7 +835,6 @@
     <Compile Include="Mobiles\Bosses\Minions\DeepTentacle.cs" />
     <Compile Include="Mobiles\Bosses\Minions\DeepWater.cs" />
     <Compile Include="Mobiles\Bosses\TheDeepOne.cs" />
-    <Compile Include="DonationShop\DragonCoin.cs" />
     <Compile Include="Items\DragonLotteryTicket.cs" />
     <Compile Include="Items\ItemRenameDeed.cs" />
     <Compile Include="Items\MaskDye.cs" />

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Server.Multis;
 using Server.Accounting;
 using Server.Gumps;
+using Server.Spells;
 
 namespace Server.Items
 {
@@ -19,7 +20,7 @@ namespace Server.Items
             CoOwner,
             Friend,
             Anyone
-        }        
+        }     
 
         private LockedDownAccessLevelType m_LockedDownAccessLevel = LockedDownAccessLevelType.Owner;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -50,10 +51,10 @@ namespace Server.Items
         public PowerScrollLibrary(): base(8793)
         {
             Name = "a power scroll library";
-            Hue = 2500;
+            Hue = 2657;
             Weight = 5;
 
-            CheckSkillEntries();
+            CreateSkillEntries();
         }
 
         public PowerScrollLibrary(Serial serial): base(serial)
@@ -94,45 +95,42 @@ namespace Server.Items
             from.SendGump(new PowerScrollLibraryGump(player, this, 1));
         }        
 
-        public void CheckSkillEntries()
+        public void CreateSkillEntries()
         {
-            Queue m_Queue = new Queue();
-
-            foreach (SkillName skillName in PowerScroll.Skills)
+            for (int a = 0; a < PowerScroll.Skills.Length; a++)
             {
-                bool foundMatch = false;
-
-                foreach (PowerScrollLibraryEntry entry in m_LibraryEntries)
-                {
-                    if (entry.SkillName == skillName)
-                    {
-                        foundMatch = true;
-                        break;
-                    }
-                }
-
-                if (!foundMatch)
-                    m_Queue.Enqueue(skillName);
-            }
-
-            while (m_Queue.Count > 0)
-            {
-                SkillName skillName = (SkillName)m_Queue.Dequeue();
-
                 PowerScrollLibraryEntry entry = new PowerScrollLibraryEntry();
-                entry.SkillName = skillName;
+                entry.skillName = PowerScroll.Skills[a];
 
                 m_LibraryEntries.Add(entry);
             }
         }
 
-        public PowerScrollLibraryEntry GetEntryDetail(SkillName skillName)
+        public void AuditSkillEntries()
+        {
+            for (int a = 0; a < PowerScroll.Skills.Length; a++)
+            {
+                SkillName skillName = PowerScroll.Skills[a];
+
+                PowerScrollLibraryEntry entry = GetLibraryEntry(PowerScroll.Skills[a]);
+
+                if (entry == null)
+                {
+                    PowerScrollLibraryEntry newEntry = new PowerScrollLibraryEntry();
+                    newEntry.skillName = skillName;
+
+                    m_LibraryEntries.Add(newEntry);
+                }
+            }
+        }
+
+        public PowerScrollLibraryEntry GetLibraryEntry(SkillName skillName)
         {
             PowerScrollLibraryEntry targetEntry = null;
 
             foreach (PowerScrollLibraryEntry entry in m_LibraryEntries)
             {
-                if (entry.SkillName == skillName)
+                if (entry.skillName == skillName)
                     return entry;
             }
 
@@ -142,7 +140,8 @@ namespace Server.Items
         public void AddAllScrollsInPack(Mobile from)
         {
             if (from == null) return;
-            if (from.Backpack == null) return;
+            if (from.Backpack == null) 
+                return;
 
             List<PowerScroll> m_PowerScrolls = from.Backpack.FindItemsByType<PowerScroll>();
 
@@ -158,19 +157,16 @@ namespace Server.Items
             while (m_Queue.Count > 0)
             {
                 PowerScroll powerScroll = (PowerScroll)m_Queue.Dequeue();
-                PowerScrollLibraryEntry entry = GetEntryDetail(powerScroll.Skill);
+
+                if (powerScroll == null) continue;
+                if (powerScroll.Deleted) continue;
+
+                PowerScrollLibraryEntry entry = GetLibraryEntry(powerScroll.Skill);
 
                 if (entry == null)
                     continue;
 
-                switch ((int)powerScroll.Value)
-                {
-                    case 105: entry.Value105++; break;
-                    case 110: entry.Value110++; break;
-                    case 115: entry.Value115++; break;
-                    case 120: entry.Value120++; break;
-                }
-
+                entry.Count++;
                 totalCount++;
                 powerScroll.Delete();
             }
@@ -191,139 +187,76 @@ namespace Server.Items
                 from.SendMessage("You do not have any power scrolls in your backpack.");
         }
 
-        public void EjectScroll(Mobile from, SkillName skillName, int value, bool removeAll)
+        public void EjectScroll(Mobile from, SkillName skillName, bool ejectAll)
         {
             if (from == null)
                 return;
 
-            PowerScrollLibraryEntry entry = GetEntryDetail(skillName);
+            PowerScrollLibraryEntry entry = GetLibraryEntry(skillName);
 
             if (entry == null)
                 return;
 
-            switch (value)
+            if (entry.Count == 0)
             {
-                case 105:
-                    if (entry.Value105 == 0)
-                    {
-                        from.SendMessage("The are no power scrolls of that type currently stored within.");
-                        return;
-                    }
-                break;
-
-                case 110:
-                    if (entry.Value110 == 0)
-                    {
-                        from.SendMessage("The are no power scrolls of that type currently stored within.");
-                        return;
-                    }
-                break;
-
-                case 115:
-                    if (entry.Value115 == 0)
-                    {
-                        from.SendMessage("The are no power scrolls of that type currently stored within.");
-                        return;
-                    }
-                break;
-
-                case 120:
-                    if (entry.Value120 == 0)
-                    {
-                        from.SendMessage("The are no power scrolls of that type currently stored within.");
-                        return;
-                    }
-                break;
-
-                default:
-                    return;
-                break;
-            }
+                from.SendMessage("You do not have any copies of that power scroll currently stored within this library.");
+                return;
+            }            
 
             if (from.Backpack == null)
                 return;
 
-            if (from.Backpack.TotalItems == from.Backpack.MaxItems)
+            if (from.Backpack.TotalItems >= from.Backpack.MaxItems)
             {
                 from.SendMessage("Your backpack is at maximum capacity. Please remove some items and try again.");
                 return;
             }
 
-            if (removeAll)
+            if (ejectAll)
             {
-                int scrollCount = 0;
+                int spaceAvailable = from.Backpack.MaxItems - from.Backpack.TotalItems;
 
-                for (int a = 0; a < 1000; a++)
-                {
-                    bool outOfScrolls = false;
+                int retrievalAmount = 0;
+                bool partialRetrieval = false;                
 
-                    switch (value)
-                    {
-                        case 105: if (entry.Value105 == 0) outOfScrolls = true; break;
-                        case 110: if (entry.Value110 == 0) outOfScrolls = true; break;
-                        case 115: if (entry.Value115 == 0) outOfScrolls = true; break;
-                        case 120: if (entry.Value120 == 0) outOfScrolls = true; break;
-                    }
-
-                    if (from.Backpack.TotalItems == from.Backpack.MaxItems)
-                        break;
-
-                    if (outOfScrolls)
-                        break;
-
-                    PowerScroll powerScroll = new PowerScroll(skillName, (double)value);
-
-                    if (powerScroll != null)
-                    {
-                        switch (value)
-                        {
-                            case 105: entry.Value105--; break;
-                            case 110: entry.Value110--; break;
-                            case 115: entry.Value115--; break;
-                            case 120: entry.Value120--; break;
-                        }
-
-                        from.Backpack.DropItem(powerScroll);                        
-                    }
-
-                    scrollCount++;
-                }
-
-                if (scrollCount > 1)
-                {
-                    from.SendMessage("You retrieve " + scrollCount.ToString() + " power scrolls from the library.");
-                    from.SendSound(addItemSound);
-                }
-
-                else if (scrollCount == 1)
-                {
-                    from.SendMessage("You retrieve a power scroll from the library.");
-                    from.SendSound(addItemSound);
-                }
+                if (spaceAvailable >= entry.Count)                
+                    retrievalAmount = entry.Count;
 
                 else
-                    from.SendMessage("You do not have any scrolls of that value in the library.");
+                {
+                    partialRetrieval = true;
+                    retrievalAmount = spaceAvailable;
+                }
+
+                for (int a = 0; a < retrievalAmount; a++)
+                {
+                    PowerScroll powerScroll = new PowerScroll(entry.skillName);
+                    from.Backpack.DropItem(powerScroll);
+                }
+
+                entry.Count -= retrievalAmount;
+                from.SendSound(addItemSound);
+
+                if (entry.Count == 1)
+                    from.SendMessage("You retrieve a power scroll from the library.");
+
+                else if (partialRetrieval)
+                    from.SendMessage("You retrieve several power scrolls from the library but require more backpack space in order the remaining scrolls.");
+
+                else
+                    from.SendMessage("You retrieve several power scrolls from the library.");
             }
 
             else
             {
-                PowerScroll powerScroll = new PowerScroll(skillName, (double)value);
+                PowerScroll powerScroll = new PowerScroll(entry.skillName);
 
-                if (powerScroll != null)
-                {
-                    switch (value)
-                    {
-                        case 105: entry.Value105--; break;
-                        case 110: entry.Value110--; break;
-                        case 115: entry.Value115--; break;
-                        case 120: entry.Value120--; break;
-                    }
+                entry.Count--;
 
-                    from.Backpack.DropItem(powerScroll);
-                    from.SendSound(addItemSound);
-                    from.SendMessage("You retrieve a power scroll from the library.");
-                }
-            }             
+                from.Backpack.DropItem(powerScroll);
+                from.SendSound(addItemSound);
+                from.SendMessage("You retrieve a power scroll from the library."); 
+            }
         }
 
         public bool CanUse(Mobile from)
@@ -432,12 +365,8 @@ namespace Server.Items
             {
                 PowerScrollLibraryEntry entry = m_LibraryEntries[a];
 
-                writer.Write((int)entry.SkillName);
-
-                writer.Write(entry.Value105);
-                writer.Write(entry.Value110);
-                writer.Write(entry.Value115);
-                writer.Write(entry.Value120);
+                writer.Write((int)entry.skillName);
+                writer.Write(entry.Count);
             }
         }
 
@@ -456,31 +385,27 @@ namespace Server.Items
 
                 for (int a = 0; a < libraryEntryCount; a++)
                 {
+                    SkillName skillName = (SkillName)reader.ReadInt();
+                    int count = reader.ReadInt();
+
                     PowerScrollLibraryEntry entry = new PowerScrollLibraryEntry();
-
-                    entry.SkillName = (SkillName)reader.ReadInt();
-
-                    entry.Value105 = reader.ReadInt();
-                    entry.Value110 = reader.ReadInt();
-                    entry.Value115 = reader.ReadInt();
-                    entry.Value120 = reader.ReadInt();
+                    entry.skillName = skillName;
+                    entry.Count = count;
 
                     m_LibraryEntries.Add(entry);
                 }
             }
 
-            //-------
-            CheckSkillEntries();
+            //-----
+
+            AuditSkillEntries();
         }
     }
 
     public class PowerScrollLibraryEntry
     {
-        public SkillName SkillName = SkillName.Alchemy;
-        public int Value105 = 0;
-        public int Value110 = 0;
-        public int Value115 = 0;
-        public int Value120 = 0;
+        public SkillName skillName = SkillName.Alchemy;
+        public int Count = 0;
     }
 
     public class PowerScrollLibraryGump : Gump
@@ -492,8 +417,8 @@ namespace Server.Items
         int m_TotalPages = 1;
         int m_TotalEntries = 1;
 
-        int EntriesPerSide = 4;
-        int EntriesPerPage = 8;
+        int EntriesPerSide = 8;
+        int EntriesPerPage = 16;
 
         int WhiteTextHue = 2499;
 
@@ -505,7 +430,7 @@ namespace Server.Items
 
             m_Player = player;
             m_Library = library;
-            m_PageNumber = pageNumber;
+            m_PageNumber = pageNumber;            
 
             Closable = true;
             Disposable = true;
@@ -529,19 +454,19 @@ namespace Server.Items
             AddImage(41, 335, 2081);
             AddImage(43, 274, 2081, 2499);
             AddImageTiled(301, 2, 6, 405, 2701);
-            AddImage(41, 338, 2081, 2499);            
+            AddImage(41, 338, 2081, 2499);
             AddImage(49, 80, 3001, 2615);
             AddImage(56, 80, 3001, 2615);
             AddImage(306, 80, 3001, 2615);
             AddImage(315, 80, 3001, 2615);
 
-            AddItem(153, 24, 5360, 1152);
+            AddItem(153, 24, 5360, 2657);
 
             AddLabel(111, 5, 2590, "Power Scroll Library");
 
             AddLabel(88, 53, WhiteTextHue, "Add All in Backpack into Library");
             AddButton(65, 56, 2118, 2118, 1, GumpButtonType.Reply, 0);
-
+            
             AddLabel(354, 5, 2615, "Locked Down Access Level");
 
             string accessName = "Owner";
@@ -563,11 +488,18 @@ namespace Server.Items
             if (m_Library.RemoveAllOnSelection)
                 AddButton(313, 48, 2154, 2151, 4, GumpButtonType.Reply, 0);
             else
-                AddButton(313, 48, 2151, 2154, 4, GumpButtonType.Reply, 0);  
+                AddButton(313, 48, 2151, 2154, 4, GumpButtonType.Reply, 0);
 
             //-----
 
-            m_TotalEntries = m_Library.m_LibraryEntries.Count;
+            List<SkillName> m_SkillList = new List<SkillName>();
+
+            foreach (SkillName skillName in PowerScroll.Skills)
+            {
+                m_SkillList.Add(skillName);
+            }
+
+            m_TotalEntries = m_SkillList.Count;
             m_TotalPages = (int)(Math.Ceiling((double)m_TotalEntries / (double)EntriesPerPage));
 
             if (m_TotalPages == 0)
@@ -578,74 +510,43 @@ namespace Server.Items
 
             if (m_PageNumber > m_TotalPages)
                 m_PageNumber = m_TotalPages;
-            
+
             int startIndex = (m_PageNumber - 1) * EntriesPerPage;
             int endIndex = startIndex + EntriesPerPage;
 
             if (endIndex > m_TotalEntries)
                 endIndex = m_TotalEntries;
 
-            int leftStartY = 95;
-            int rightStartY = 95;
+            int leftStartY = 88;
+            int rightStartY = 88;
 
             int entryCount = 0;
 
             for (int a = startIndex; a < endIndex; a++)
             {
-                if (a < m_Library.m_LibraryEntries.Count)
+                if (a < m_SkillList.Count)
                 {
-                    PowerScrollLibraryEntry entry = m_Library.m_LibraryEntries[a];
+                    SkillName skillName = m_SkillList[a];
+                    PowerScrollLibraryEntry entry = m_Library.GetLibraryEntry(skillName);
 
                     //Left Side
                     if (entryCount < EntriesPerSide)
                     {
-                        string skillName = SkillCheck.GetSkillName(entry.SkillName);
+                        AddLabel(60, leftStartY, 2590, SkillCheck.GetSkillName(entry.skillName));
+                        AddButton(231, leftStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
+                        AddLabel(249, leftStartY, WhiteTextHue, entry.Count.ToString());
 
-                        AddLabel(Utility.CenteredTextOffset(180, skillName), leftStartY, 2590, skillName);
-
-                        AddLabel(80, leftStartY + 20, 2615, "105");
-                        AddButton(60, leftStartY + 43, 2118, 2118, (10 * entryCount) + 10, GumpButtonType.Reply, 0);
-                        AddLabel(80, leftStartY + 40, WhiteTextHue, entry.Value105.ToString());
-
-                        AddLabel(140, leftStartY + 20, 2615, "110");
-                        AddButton(121, leftStartY + 43, 2118, 2118, (10 * entryCount) + 11, GumpButtonType.Reply, 0);
-                        AddLabel(140, leftStartY + 40, WhiteTextHue, entry.Value110.ToString());
-
-                        AddLabel(200, leftStartY + 20, 2615, "115");
-                        AddButton(180, leftStartY + 43, 2118, 2118, (10 * entryCount) + 12, GumpButtonType.Reply, 0);
-                        AddLabel(200, leftStartY + 40, WhiteTextHue, entry.Value115.ToString());
-
-                        AddLabel(260, leftStartY + 20, 2615, "120");
-                        AddButton(241, leftStartY + 43, 2118, 2118, (10 * entryCount) + 13, GumpButtonType.Reply, 0);
-                        AddLabel(260, leftStartY + 40, WhiteTextHue, entry.Value120.ToString());  
-
-                        leftStartY += 67;
+                        leftStartY += 38;
                     }
 
                     //Right Side
                     else
                     {
-                        string skillName = SkillCheck.GetSkillName(entry.SkillName);
+                        AddLabel(317, rightStartY, 2590, SkillCheck.GetSkillName(entry.skillName));
+                        AddButton(488, rightStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
+                        AddLabel(506, rightStartY, WhiteTextHue, entry.Count.ToString());
 
-                        AddLabel(Utility.CenteredTextOffset(435, skillName), rightStartY, 2590, skillName);
-
-                        AddLabel(340, rightStartY + 20, 2615, "105");
-                        AddButton(320, rightStartY + 43, 2118, 2118, (10 * entryCount) + 10, GumpButtonType.Reply, 0);
-                        AddLabel(340, rightStartY + 40, WhiteTextHue, entry.Value105.ToString());
-
-                        AddLabel(400, rightStartY + 20, 2615, "110");
-                        AddButton(380, rightStartY + 43, 2118, 2118, (10 * entryCount) + 11, GumpButtonType.Reply, 0);
-                        AddLabel(400, rightStartY + 40, WhiteTextHue, entry.Value110.ToString());
-
-                        AddLabel(460, rightStartY + 20, 2615, "115");
-                        AddButton(440, rightStartY + 43, 2118, 2118, (10 * entryCount) + 12, GumpButtonType.Reply, 0);
-                        AddLabel(460, rightStartY + 40, WhiteTextHue, entry.Value115.ToString());
-
-                        AddLabel(520, rightStartY + 20, 2615, "120");
-                        AddButton(500, rightStartY + 43, 2118, 2118, (10 * entryCount) + 13, GumpButtonType.Reply, 0);
-                        AddLabel(520, rightStartY + 40, WhiteTextHue, entry.Value120.ToString());
-
-                        rightStartY += 67;
+                        rightStartY += 38;
                     }
 
                     entryCount++;
@@ -669,8 +570,15 @@ namespace Server.Items
 
             if (!m_Library.CanUse(m_Player))
                 return;
-            
-            m_TotalEntries = m_Library.m_LibraryEntries.Count;
+
+            List<SkillName> m_SkillList = new List<SkillName>();
+
+            foreach (SkillName skillName in PowerScroll.Skills)
+            {
+                m_SkillList.Add(skillName);
+            }
+
+            m_TotalEntries = m_SkillList.Count;
             m_TotalPages = (int)(Math.Ceiling((double)m_TotalEntries / (double)EntriesPerPage));
 
             if (m_TotalPages == 0)
@@ -764,35 +672,20 @@ namespace Server.Items
             //Eject Items
             if (info.ButtonID >= 10)
             {
-                int rootIndex = info.ButtonID - 10;
-                int baseIndex = (int)(Math.Floor((double)rootIndex / 10));
-                int remainder = info.ButtonID % 10;                
-                int value = 0;
+                int index = ((m_PageNumber - 1) * EntriesPerPage) + (info.ButtonID - 10);
 
-                switch (remainder)
-                {
-                    case 0: value = 105; break;
-                    case 1: value = 110; break;
-                    case 2: value = 115; break;
-                    case 3: value = 120; break;                        
-                }
-
-                if (value == 0)
+                if (index >= m_SkillList.Count || index < 0)
                     return;
 
-                int index = ((m_PageNumber - 1) * EntriesPerPage) + baseIndex;
-
-                if (index >= m_Library.m_LibraryEntries.Count || index < 0)
-                    return;
-
-                PowerScrollLibraryEntry entry = m_Library.m_LibraryEntries[index];
+                SkillName skillName = m_SkillList[index];
+                PowerScrollLibraryEntry entry = m_Library.GetLibraryEntry(skillName);
 
                 if (entry == null)
                     return;
 
                 bool removeAll = m_Library.RemoveAllOnSelection;
 
-                m_Library.EjectScroll(m_Player, entry.SkillName, value, removeAll);
+                m_Library.EjectScroll(m_Player, entry.skillName, removeAll);
 
                 closeGump = false;
             }

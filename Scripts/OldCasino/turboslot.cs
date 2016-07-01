@@ -2343,7 +2343,7 @@ namespace Server.Items
             try
             {
                 SkillName skillName = skillNames[type - 10923];
-                ps = new PowerScroll(skillName, 100 + level);
+                ps = new PowerScroll(skillName);
             }
             catch { return null; }
             return (Item)ps;

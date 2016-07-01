@@ -11,7 +11,6 @@ namespace Server.Items
 	public class PowerScroll : Item
 	{
 		private SkillName m_Skill;
-		private double m_Value;
 
         public static SkillName[] Skills { get { return m_Skills; } }
 
@@ -88,36 +87,22 @@ namespace Server.Items
             return skillName;
         }
 
-        public static PowerScroll CreateRandom(int value)
+        [Constructable]
+        public PowerScroll(): base(0x14F0)
         {
-            value /= 5;
+            Hue = 2657;
+            Weight = 1.0;
 
-            SkillName skillName = GetPowerscrollSkillName();
-            double skillValue = 100 + (value * 5);
-
-            return new PowerScroll(skillName, skillValue);
+            m_Skill = GetPowerscrollSkillName();
         }
 
-		public static PowerScroll CreateRandom( int min, int max )
-		{
-			min /= 5;
-			max /= 5;
-            
-            SkillName skillName = GetPowerscrollSkillName();
-            double skillValue = 100 + (Utility.RandomMinMax( min, max ) * 5);
-
-			return new PowerScroll(skillName, skillValue);
-		}
-
 		[Constructable]
-		public PowerScroll( SkillName skill, double value ) : base( 0x14F0 )
+		public PowerScroll( SkillName skill) : base( 0x14F0 )
 		{
-			base.Hue = 0x481;
-			base.Weight = 1.0;
+			Hue = 2657;
+			Weight = 1.0;
 
 			m_Skill = skill;
-			m_Value = value;
-			LootType = LootType.Cursed;
 		}
 
 		public PowerScroll( Serial serial ) : base( serial )
@@ -137,19 +122,6 @@ namespace Server.Items
 			}
 		}
 
-		[CommandProperty( AccessLevel.GameMaster )]
-		public double Value
-		{
-			get
-			{
-				return m_Value;
-			}
-			set
-			{
-				m_Value = value;
-			}
-		}
-
 		private string GetNameLocalized()
 		{
 			return String.Concat( "#", (1044060 + (int)m_Skill).ToString() );
@@ -158,40 +130,19 @@ namespace Server.Items
 		private string GetName()
 		{
 			int index = (int)m_Skill;
-			SkillInfo[] table = SkillInfo.Table;
+			
+            SkillInfo[] table = SkillInfo.Table;
 
 			if ( index >= 0 && index < table.Length )
 				return table[index].Name.ToLower();
 			else
 				return "???";
 		}
-
-		public override void AddNameProperty(ObjectPropertyList list)
-		{
-			if ( m_Value == 105.0 )
-				list.Add( 1049639, GetNameLocalized() ); // a wonderous scroll of ~1_type~ (105 Skill)
-			else if ( m_Value == 110.0 )
-				list.Add( 1049640, GetNameLocalized() ); // an exalted scroll of ~1_type~ (110 Skill)
-			else if ( m_Value == 115.0 )
-				list.Add( 1049641, GetNameLocalized() ); // a mythical scroll of ~1_type~ (115 Skill)
-			else if ( m_Value == 120.0 )
-				list.Add( 1049642, GetNameLocalized() ); // a legendary scroll of ~1_type~ (120 Skill)
-			else
-				list.Add( "a power scroll of {0} ({1} Skill)", GetName(), m_Value );
-		}
-
+        
 		public override void OnSingleClick( Mobile from )
 		{
-			if ( m_Value == 105.0 )
-				base.LabelTo( from, 1049639, GetNameLocalized() ); // a wonderous scroll of ~1_type~ (105 Skill)
-			else if ( m_Value == 110.0 )
-				base.LabelTo( from, 1049640, GetNameLocalized() ); // an exalted scroll of ~1_type~ (110 Skill)
-			else if ( m_Value == 115.0 )
-				base.LabelTo( from, 1049641, GetNameLocalized() ); // a mythical scroll of ~1_type~ (115 Skill)
-			else if ( m_Value == 120.0 )
-				base.LabelTo( from, 1049642, GetNameLocalized() ); // a legendary scroll of ~1_type~ (120 Skill)
-			else
-				base.LabelTo( from, "a power scroll of {0} ({1} Skill)", GetName(), m_Value );
+            LabelTo(from, "a power scroll");
+            LabelTo(from, "(" + SkillCheck.GetSkillName(m_Skill) + ")");
 		}
 
 		public void Use( Mobile from, bool firstStage )
@@ -199,15 +150,18 @@ namespace Server.Items
 			if ( Deleted )
 				return;
 
+            /*
 			if ( IsChildOf( from.Backpack ) )
 			{
 				Skill skill = from.Skills[m_Skill];
+
 				if ( skill != null )
 				{
-					if ( skill.Cap >= m_Value )
+					if ( skill.Cap >= PlayerMobile.MaxBonusSkillCap )
 					{
 						from.SendLocalizedMessage( 1049511, GetNameLocalized() ); // Your ~1_type~ is too high for this power scroll.
 					}
+
 					else
 					{
 						if ( firstStage )
@@ -241,10 +195,12 @@ namespace Server.Items
 					}
 				}
 			}
+             * 
 			else
 			{
 				from.SendLocalizedMessage( 1042001 ); // That must be in your pack for you to use it.
 			}
+            */
 		}
 
 		public override void OnDoubleClick( Mobile from )
@@ -253,75 +209,58 @@ namespace Server.Items
 		}
 
 		public override bool DropToMobile(Mobile from, Mobile target, Point3D p)
-    {
-        if (target is PlayerMobile && ((PlayerMobile)target).Young)
         {
-            from.SendMessage("Young players cannot be given house deeds.");
-            return false;
+
+            if (target is PlayerMobile && ((PlayerMobile)target).Young)
+            {
+                from.SendMessage("Young players cannot may not acquire power scrolls.");
+                return false;
+            }
+
+            return base.DropToMobile(from, target, p);
+        }   
+
+        public override bool DropToItem(Mobile from, Item target, Point3D p)
+        {
+            if (from is PlayerMobile && ((PlayerMobile)from).Young)
+            {
+                from.SendMessage("Young players may not acquire power scrolls.");
+                return false;
+            }
+
+            return base.DropToItem(from, target, p);
         }
 
-        return base.DropToMobile(from, target, p);
-    }
-
-    public override bool DropToItem(Mobile from, Item target, Point3D p)
-    {
-        if (from is PlayerMobile && ((PlayerMobile)from).Young)
+        public override bool OnDragLift(Mobile from)
         {
-            from.SendMessage("Young players cannot pick up house deeds.");
-            return false;
-        }
+            if (from is PlayerMobile && ((PlayerMobile)from).Young)
+            {
+                from.SendMessage("Young players may not acquire power scrolls.");
+                return false;
+            }
 
-        return base.DropToItem(from, target, p);
-    }
-
-    public override bool OnDragLift(Mobile from)
-    {
-        if (from is PlayerMobile && ((PlayerMobile)from).Young)
-        {
-            from.SendMessage("Young players cannot pick up house deeds.");
-            return false;
+            return base.OnDragLift(from);
         }
-        return base.OnDragLift(from);
-    }
 
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 
-			writer.Write( (int) m_Skill );
-			writer.Write( (double) m_Value );
+            //Version 0
+			writer.Write((int)m_Skill);
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 
-			switch ( version )
-			{
-				case 0:
-				{
-					m_Skill = (SkillName)reader.ReadInt();
-					m_Value = reader.ReadDouble();
-
-					break;
-				}
-			}
-
-			if ( m_Value == 105.0 )
-			{
-				LootType = LootType.Cursed;
-			}
-			else
-			{
-				LootType = LootType.Cursed;
-
-				if ( Insured )
-					Insured = false;
-			}
+            //Version 0
+            if (version >= 0)
+            {
+                m_Skill = (SkillName)reader.ReadInt();
+            }
 		}
 
 		public class InternalGump : Gump
@@ -355,7 +294,7 @@ namespace Server.Items
 				AddButton( 275, 172, 4005, 4007, 0, GumpButtonType.Reply, 0 );
 				AddHtmlLocalized( 310, 172, 120, 20, 1046363, 0xFFFFFF, false, false ); // No
 
-				double value = scroll.m_Value;
+                double value = 100; //scroll.m_Value;
 
 				if ( value == 105.0 )
 					AddHtmlLocalized( 40, 20, 260, 20, 1049635, 0xFFFFFF, false, false ); // Wonderous Scroll (105 Skill):
