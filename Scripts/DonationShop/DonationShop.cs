@@ -26,14 +26,23 @@ namespace Server
             CommandSystem.Register("DonationShop", AccessLevel.Player, new CommandEventHandler(DonationShop_OnCommand));
             
             //Masks
-            DonationShopList.Add(new DonationCategory("Masks", 0x1545, 0, 0, 0), 
+            DonationShopList.Add(new DonationCategory("Masks", 5445, 0, 0, 0), 
             new List<DonationItem>()
             {
-                new DonationItem(typeof(BearMask), "Bear Mask", new List<string>{"Bear Mask", "(non-blessed)"}, 1000, 5445, 0, 0, 0),
-                new DonationItem(typeof(DeerMask), "Deer Mask", new List<string>{"Deer Mask", "(non-blessed)"}, 1000, 5447, 0, 0, 0),
-                new DonationItem(typeof(OrcMask), "Orc Mask", new List<string>{"Orc Mask", "(non-blessed)"}, 1000, 5147, 0, 0, 0),
-                new DonationItem(typeof(SavageMask), "Savage Mask", new List<string>{"Savage Mask", "(non-blessed)"}, 1000, 5451, 0, 0, 0),
-                new DonationItem(typeof(TribalMask), "Tribal Mask", new List<string>{"Tribal Mask", "(non-blessed)"}, 1000, 5449, 0, 0, 0)
+                new DonationItem(typeof(BearMask), "Bear Mask", new List<string>{"A stylish piece of head protection.", "(equivalent to Leather Cap)"}, 500, 5445, 0, 0, -5),
+                new DonationItem(typeof(DeerMask), "Deer Mask", new List<string>{"A stylish piece of head protection.", "(equivalent to Leather Cap)"}, 500, 5447, 0, 0, -5),
+                new DonationItem(typeof(OrcMask), "Orc Mask", new List<string>{"A stylish piece of head protection.", "(equivalent to Leather Cap)"}, 500, 5147, 0, 5, 0),
+                new DonationItem(typeof(SavageMask), "Savage Mask", new List<string>{"A stylish piece of head protection.", "(equivalent to Leather Cap)"}, 500, 5451, 0, 5, 0),
+                new DonationItem(typeof(TribalMask), "Tribal Mask", new List<string>{"A stylish piece of head protection.", "(equivalent to Leather Cap)"}, 500, 5449, 0, 5, 0)
+            });
+
+            //Organizers
+            DonationShopList.Add(new DonationCategory("Organizers", 8793, 0, 0, 0),
+            new List<DonationItem>()
+            {
+                new DonationItem(typeof(PowerScrollLibrary), "Power Scroll Library", new List<string>{"Store and organize Power Scrolls", "in this handy tome."}, 500, 8793, 2657, 5, -5),
+                new DonationItem(typeof(SpellScrollLibrary), "Spell Scroll Library", new List<string>{"Store and organize Spell Scrolls", "in this handy tome."}, 500, 8793, 2117, 5, -5),
+                new DonationItem(typeof(TreasureMapLibrary), "Treasure Map Library", new List<string>{"Store and organize Treasure Maps", "in this handy tome."}, 500, 8793, 2550, 5, -5),
             });  
         }
 
@@ -48,6 +57,8 @@ namespace Server
 
             if (player == null)
                 return;
+
+            player.SendSound(0x055);
 
             player.CloseGump(typeof(DonationShop));
             player.SendGump(new DonationShopGump(player, 0, 0, 0));

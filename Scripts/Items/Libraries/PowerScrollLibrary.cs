@@ -65,22 +65,22 @@ namespace Server.Items
         {
             base.OnSingleClick(from);
 
+            LabelTo(from, "(" + GetTotalCount().ToString() + " scrolls)");
+
             if (IsLockedDown)
             {
                 switch (m_LockedDownAccessLevel)
                 {
-                    case LockedDownAccessLevelType.Owner: LabelTo(from, "(owner accessable)"); break;
-                    case LockedDownAccessLevelType.CoOwner: LabelTo(from, "(co-owner accessable)"); break;
-                    case LockedDownAccessLevelType.Friend: LabelTo(from, "(friend accessable)"); break;
-                    case LockedDownAccessLevelType.Anyone: LabelTo(from, "(freely access)"); break;
+                    case LockedDownAccessLevelType.Owner: LabelTo(from, "[owner accessable]"); break;
+                    case LockedDownAccessLevelType.CoOwner: LabelTo(from, "[co-owner accessable]"); break;
+                    case LockedDownAccessLevelType.Friend: LabelTo(from, "[friend accessable]"); break;
+                    case LockedDownAccessLevelType.Anyone: LabelTo(from, "[freely access]"); break;
                 }
             }
         }
 
         public override void OnDoubleClick(Mobile from)
         {
-            //base.OnDoubleClick(from);
-
             PlayerMobile player = from as PlayerMobile;
 
             if (player == null)
@@ -93,7 +93,22 @@ namespace Server.Items
             
             from.CloseGump(typeof(PowerScrollLibraryGump));
             from.SendGump(new PowerScrollLibraryGump(player, this, 1));
-        }        
+        }
+
+        public int GetTotalCount()
+        {
+            int totalCount = 0;
+
+            foreach (PowerScrollLibraryEntry entry in m_LibraryEntries)
+            {
+                if (entry == null)
+                    continue;
+
+                totalCount += entry.Count;
+            }
+
+            return totalCount;
+        }
 
         public void CreateSkillEntries()
         {
@@ -135,6 +150,31 @@ namespace Server.Items
             }
 
             return targetEntry;
+        }
+
+        public override bool OnDragDrop(Mobile from, Item dropped)
+        {
+            if (dropped is PowerScroll)
+            {
+                PowerScroll powerScroll = dropped as PowerScroll;
+
+                PowerScrollLibraryEntry entry = GetLibraryEntry(powerScroll.Skill);
+
+                if (entry != null)
+                {
+                    powerScroll.Delete();
+
+                    entry.Count++;
+
+                    from.SendMessage("You add a power scroll to the library.");
+                    from.SendSound(addItemSound);
+                }
+
+                return true;
+            }
+
+            else
+                return false;
         }
 
         public void AddAllScrollsInPack(Mobile from)
@@ -241,7 +281,7 @@ namespace Server.Items
                     from.SendMessage("You retrieve a power scroll from the library.");
 
                 else if (partialRetrieval)
-                    from.SendMessage("You retrieve several power scrolls from the library but require more backpack space in order the remaining scrolls.");
+                    from.SendMessage("You retrieve several power scrolls from the library but require more backpack space in order to retrieve the remaining scrolls.");
 
                 else
                     from.SendMessage("You retrieve several power scrolls from the library.");
@@ -529,12 +569,17 @@ namespace Server.Items
                     SkillName skillName = m_SkillList[a];
                     PowerScrollLibraryEntry entry = m_Library.GetLibraryEntry(skillName);
 
+                    int numberTextHue = WhiteTextHue;
+
+                    if (entry.Count > 0)
+                        numberTextHue = 2590;
+
                     //Left Side
                     if (entryCount < EntriesPerSide)
                     {
                         AddLabel(60, leftStartY, 2590, SkillCheck.GetSkillName(entry.skillName));
                         AddButton(231, leftStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
-                        AddLabel(249, leftStartY, WhiteTextHue, entry.Count.ToString());
+                        AddLabel(249, leftStartY, numberTextHue, entry.Count.ToString());
 
                         leftStartY += 38;
                     }
@@ -544,7 +589,7 @@ namespace Server.Items
                     {
                         AddLabel(317, rightStartY, 2590, SkillCheck.GetSkillName(entry.skillName));
                         AddButton(488, rightStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
-                        AddLabel(506, rightStartY, WhiteTextHue, entry.Count.ToString());
+                        AddLabel(506, rightStartY, numberTextHue, entry.Count.ToString());
 
                         rightStartY += 38;
                     }

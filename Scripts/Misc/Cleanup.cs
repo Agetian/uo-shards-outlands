@@ -29,68 +29,85 @@ namespace Server.Misc
 					items.Add( item );
 					continue;
 				}
-				else if ( item is CommodityDeed )
-				{
-					CommodityDeed deed = (CommodityDeed)item;
 
-					if ( deed.Commodity != null )
-						validItems.Add( deed.Commodity );
+                else if (item is TreasureMap)
+                {
+                    TreasureMap treasureMap = item as TreasureMap;
 
-					continue;
-				}
-				else if ( item is BaseHouse )
-				{
-					BaseHouse house = (BaseHouse)item;
+                    if (treasureMap.Archived)
+                    {
+                        validItems.Add(treasureMap);
 
-					foreach ( RelocatedEntity relEntity in house.RelocatedEntities )
-					{
-						if ( relEntity.Entity is Item )
-							validItems.Add( (Item)relEntity.Entity );
-					}
+                        continue;
+                    }
+                }
 
-					foreach ( VendorInventory inventory in house.VendorInventories )
-					{
-						foreach ( Item subItem in inventory.Items )
-							validItems.Add( subItem );
-					}
-				}
-				else if ( item is BankBox )
-				{
-					BankBox box = (BankBox)item;
-					Mobile owner = box.Owner;
+                else if (item is CommodityDeed)
+                {
+                    CommodityDeed deed = (CommodityDeed)item;
 
-					if ( owner == null )
-					{
-						items.Add( box );
-						++boxes;
-					}
-					else if ( box.Items.Count == 0 )
-					{
-						items.Add( box );
-						++boxes;
-					}
+                    if (deed.Commodity != null)
+                        validItems.Add(deed.Commodity);
 
-					continue;
-				}
-				else if ( (item.Layer == Layer.Hair || item.Layer == Layer.FacialHair) )
-				{
-					object rootParent = item.RootParent;
+                    continue;
+                }
 
-					if ( rootParent is Mobile )
-					{
-						Mobile rootMobile = (Mobile)rootParent;
-						if ( item.Parent != rootMobile && rootMobile.AccessLevel == AccessLevel.Player )
-						{
-							items.Add( item );
-							continue;
-						}
-						else if( item.Parent == rootMobile )
-						{
-							hairCleanup.Add( rootMobile );
-							continue;
-						}
-					}
-				}
+                else if (item is BaseHouse)
+                {
+                    BaseHouse house = (BaseHouse)item;
+
+                    foreach (RelocatedEntity relEntity in house.RelocatedEntities)
+                    {
+                        if (relEntity.Entity is Item)
+                            validItems.Add((Item)relEntity.Entity);
+                    }
+
+                    foreach (VendorInventory inventory in house.VendorInventories)
+                    {
+                        foreach (Item subItem in inventory.Items)
+                            validItems.Add(subItem);
+                    }
+                }
+
+                else if (item is BankBox)
+                {
+                    BankBox box = (BankBox)item;
+                    Mobile owner = box.Owner;
+
+                    if (owner == null)
+                    {
+                        items.Add(box);
+                        ++boxes;
+                    }
+                    else if (box.Items.Count == 0)
+                    {
+                        items.Add(box);
+                        ++boxes;
+                    }
+
+                    continue;
+                }
+
+                else if ((item.Layer == Layer.Hair || item.Layer == Layer.FacialHair))
+                {
+                    object rootParent = item.RootParent;
+
+                    if (rootParent is Mobile)
+                    {
+                        Mobile rootMobile = (Mobile)rootParent;
+                        if (item.Parent != rootMobile && rootMobile.AccessLevel == AccessLevel.Player)
+                        {
+                            items.Add(item);
+                            continue;
+                        }
+
+                        else if (item.Parent == rootMobile)
+                        {
+                            hairCleanup.Add(rootMobile);
+                            continue;
+                        }
+                    }
+                }
 
 				if ( item.Parent != null || item.Map != Map.Internal || item.HeldBy != null )
 					continue;

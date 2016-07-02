@@ -145,9 +145,6 @@ namespace Server.Items
 
                 foreach (SpellScroll spellScroll in m_Scrolls)
                 {
-                    if (spellScroll.MasterStatus != 0)
-                        continue;
-
                     SpellbookType type = GetTypeForSpell(spellScroll.SpellID);
 
                     if (type != spellbook.SpellbookType)
@@ -442,26 +439,17 @@ namespace Server.Items
 		{
 			return true;
 		}
-
+        
 		public override bool OnDragDrop( Mobile from, Item dropped )
 		{
 			if ( dropped is SpellScroll && dropped.Amount == 1)
 			{
 				SpellScroll scroll = (SpellScroll)dropped;
 
-                if (scroll.MasterStatus > 0)
-                    return false;
-
 				SpellbookType type = GetTypeForSpell( scroll.SpellID );
 
 				if ( type != this.SpellbookType )				
-					return false;				
-
-                else if (scroll.MasterStatus > 0)
-                {
-                    from.SendMessage("That is a Master Scroll.");
-                    return false;
-                }
+					return false;	
 
                 else if (HasSpell(scroll.SpellID))
                 {

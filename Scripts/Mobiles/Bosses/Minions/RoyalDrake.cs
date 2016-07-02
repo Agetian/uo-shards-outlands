@@ -51,12 +51,7 @@ namespace Server.Mobiles
         
         public override void OnDeath(Container c)
         {
-            base.OnDeath(c);            
-           
-            switch (Utility.Random(500))
-            {
-                case 0: { c.AddItem(SpellScroll.MakeMaster(new GateTravelScroll())); } break;
-            }            
+            base.OnDeath(c);           
         }
 
         public RoyalDrake(Serial serial): base(serial)

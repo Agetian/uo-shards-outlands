@@ -613,9 +613,7 @@ namespace Server
                 else if (m_Type == typeof(ClumsyScroll)) // low scroll
                     item = RandomScroll(0, 1, 3);
                 else if (m_Type == typeof(ArchCureScroll)) // med scroll
-                    item = RandomScroll(1, 4, 6);
-                else if (m_Type == typeof(SummonAirElementalScroll)) // master scroll
-                    item = RandomMasterScroll();
+                    item = RandomScroll(1, 4, 6);               
                 else if (m_Type == typeof(EnhancedSpellbook)) // enhanced spellbook
                     item = RandomEnhancedSpellbook();               
                 else if (m_Type == typeof(MaskDye))
@@ -630,12 +628,6 @@ namespace Server
             }
 
             return null;
-        }
-
-        private Item RandomMasterScroll()
-        {
-            var scroll = m_MasterScrolls[Utility.Random(m_MasterScrolls.Length)];
-            return SpellScroll.MakeMaster(Activator.CreateInstance(scroll) as SpellScroll);
         }
 
         public LootPackItem(Type type, int chance)

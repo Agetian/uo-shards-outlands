@@ -302,6 +302,7 @@
     <Compile Include="Items\Food\Vegetable\Pumpkin.cs" />
     <Compile Include="Items\Food\Vegetable\Turnip.cs" />
     <Compile Include="Items\Libraries\PowerScrollLibrary.cs" />
+    <Compile Include="Items\Libraries\TreasureMapLibrary.cs" />
     <Compile Include="Items\Resources\Fishing\RawLargeFish.cs" />
     <Compile Include="Items\Resources\Fishing\RawFish.cs" />
     <Compile Include="Items\KittyLantern.cs" />
@@ -767,7 +768,6 @@
     <Compile Include="Items\HuePlating\Wood\WoodHuePlating.cs" />
     <Compile Include="Items\HuePlating\Wood\YewWoodHuePlating.cs" />
     <Compile Include="Items\JewelryBlessDeed.cs" />
-    <Compile Include="Items\Libraries\MasterScrollLibrary.cs" />
     <Compile Include="Items\Libraries\PrestigeScrollLibrary.cs" />
     <Compile Include="Items\Libraries\SpellScrollLibrary.cs" />
     <Compile Include="Items\MasteryOrb\BaseMasteryOrb.cs" />
@@ -1826,8 +1826,6 @@
     <Compile Include="Items\FishingArtifacts\Sardines.cs" />
     <Compile Include="Items\houseplans.cs" />
     <Compile Include="Items\LockDownExpansionDeed.cs" />
-    <Compile Include="Items\MasterScroll\MasterSpellBook.cs" />
-    <Compile Include="Items\MasterScroll\MasterSpellBookGump.cs" />
     <Compile Include="Items\Music Box\MusicBox.cs" />
     <Compile Include="Items\Music Box\MusicBoxAddon.cs" />
     <Compile Include="Items\Music Box\MusicBoxComponent.cs" />

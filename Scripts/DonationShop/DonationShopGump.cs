@@ -18,8 +18,13 @@ namespace Server.Gumps
         public static int CategoriesPerPage = 5;
         public static int ItemsPerPage = 3;
 
-        public DonationShopGump(PlayerMobile player, int categoryPage, int categorySelected, int itemPage)
-            : base(10, 10)
+        public static int OpenGumpSound = 0x055;    
+        public static int ChangePageSound = 0x057;
+        public static int SelectionSound = 0x3E6;
+        public static int PurchaseSound = 0x2E6;
+        public static int CloseGumpSound = 0x058;
+
+        public DonationShopGump(PlayerMobile player, int categoryPage, int categorySelected, int itemPage): base(10, 10)
         {
             if (player == null)
                 return;
@@ -277,15 +282,14 @@ namespace Server.Gumps
                 {
                     for (int b = 0; b < item.ItemDescription.Count; b++)
                     {
-                        //AddLabel(140, startY + 18 + (b * 20), textHue, item.ItemDescription[b]);
-                        AddLabel(Utility.CenteredTextOffset(250, item.ItemDescription[b]), startY + 18 + (b * 20), textHue, item.ItemDescription[b]);
+                        AddLabel(Utility.CenteredTextOffset(280, item.ItemDescription[b]), startY + 18 + (b * 20), textHue, item.ItemDescription[b]);
                     }
                 }
 
                 AddItem(150, startY + 80, 3823, 2500);
-                AddLabel(190, startY + 83, 2519, Utility.CreateCurrencyString(item.ItemCost));
+                AddLabel(190, startY + 83, 149, Utility.CreateCurrencyString(item.ItemCost));
                 AddButton(270, startY + 75, 2152, 2151, itemButtonIndex, GumpButtonType.Reply, 0);
-                AddLabel(305, startY + 83, 169, "Purchase");
+                AddLabel(305, startY + 83, 63, "Purchase");
 
                 startY += itemSpacing;
             }
@@ -313,9 +317,9 @@ namespace Server.Gumps
                 AddItem(startX + category.CategoryIconOffsetX, 470 + category.CategoryIconOffsetY, category.CategoryIconItemId, category.CategoryIconHue);
 
                 if (categoryIndex == m_CategorySelected)
-                    AddButton(startX + 45, 475, 9724, 9721, 0, GumpButtonType.Reply, 0);
+                    AddButton(startX + 45, 475, 9724, 9721, categoryButtonIndex, GumpButtonType.Reply, 0);
                 else
-                    AddButton(startX + 45, 475, 9721, 9724, 0, GumpButtonType.Reply, 0);
+                    AddButton(startX + 45, 475, 9721, 9724, categoryButtonIndex, GumpButtonType.Reply, 0);
 
                 startX += categorySpacing;
             }
@@ -392,39 +396,51 @@ namespace Server.Gumps
                 //Make Donation
                 case 2:
                     closeGump = false;
-                    break;
+                break;
 
                 //Previous Item Page
                 case 3:
                     if (m_ItemPage > 0)
+                    {
                         m_ItemPage--;
+                        m_Player.SendSound(ChangePageSound);
+                    }
 
                     closeGump = false;
-                    break;
+                break;
 
                 //Next Item Page
                 case 4:
                     if (m_ItemPage < totalItemPages - 1)
+                    {
                         m_ItemPage++;
+                        m_Player.SendSound(ChangePageSound);
+                    }
 
                     closeGump = false;
-                    break;
+                break;
 
                 //Previous Category Page
                 case 5:
                     if (m_CategoryPage > 0)
+                    {
                         m_CategoryPage++;
+                        m_Player.SendSound(ChangePageSound);
+                    }
 
                     closeGump = false;
-                    break;
+                break;
 
                 //Next Category Page
                 case 6:
                     if (m_CategoryPage < totalCategoryPages - 1)
+                    {
                         m_CategoryPage++;
+                        m_Player.SendSound(ChangePageSound);
+                    }
 
                     closeGump = false;
-                    break;
+                break;
             }
 
             //Item Selection
@@ -453,10 +469,7 @@ namespace Server.Gumps
 
                     return;
                 }
-
-                //TEST
-                m_Player.Say("Cost: " + item.ItemCost.ToString() + " vs Bank: " + donationCurrencyInBank.ToString());
-
+                
                 if (item.ItemCost > donationCurrencyInBank)
                 {
                     m_Player.SendMessage("You do not have enough " + DonationShop.DonationCurrencyName + " in your bank to purchase this item.");
@@ -501,7 +514,7 @@ namespace Server.Gumps
                     return;
                 }
 
-                m_Player.SendSound(0x2E6);
+                m_Player.SendSound(PurchaseSound);
                 m_Player.SendMessage("You purchase the donation item.");
 
                 m_Player.Backpack.DropItem(donationItem);
@@ -520,6 +533,8 @@ namespace Server.Gumps
                 if (categorySelected >= totalCategories)
                     categorySelected = 0;
 
+                m_Player.SendSound(SelectionSound);
+
                 m_CategorySelected = categorySelected;
                 m_ItemPage = 0;
 
@@ -531,6 +546,9 @@ namespace Server.Gumps
                 m_Player.CloseGump(typeof(DonationShopGump));
                 m_Player.SendGump(new DonationShopGump(m_Player, m_CategoryPage, m_CategorySelected, m_ItemPage));
             }
+
+            else
+                m_Player.SendSound(CloseGumpSound);
         }
     }
 }

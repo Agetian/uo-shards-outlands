@@ -143,53 +143,7 @@ namespace Server.SkillHandlers
                 {
                     ResearchMaterials researchMaterials = target as ResearchMaterials;
                     researchMaterials.AttemptResearch(from);
-                }
-
-                else if (target is SpellScroll)
-                {
-                    SpellScroll spellScroll = target as SpellScroll;
-
-                    if (spellScroll.MasterStatus == 1 || spellScroll.MasterStatus == 2)
-                    {
-                        if (from.Skills.Forensics.Value < 95)
-                        {
-                            from.SendMessage("You do not have enough forensics evaluation skill to make an appropriate research attempt on that.");
-                            return;
-                        }
-
-                        from.NextSkillTime = Core.TickCount + (int)(SkillCooldown.ForensicsCooldown * 1000);
-
-                        if (from.CheckSkill(SkillName.Forensics, 95, 120, 1.0))
-                        {
-                            from.SendSound(0x652);
-                            from.SendMessage("You learn many a great secret whilst scrying the words held within. You may now apply this researched master scroll to an ancient mystery scroll.");
-
-                            spellScroll.Delete();
-                            from.AddToBackpack(new ResearchedMasterScroll());
-
-                            return;
-                        }
-
-                        else
-                        {
-                            if (Utility.RandomDouble() <= .33)
-                            {
-                                from.SendSound(0x5AE);
-                                from.SendMessage("The scroll crumbles to dust before your very eyes and is lost!");
-
-                                spellScroll.Delete();
-                            }
-
-                            else
-                            {
-                                from.SendSound(0x055);
-                                from.SendMessage("You diligently sift through the words within the scroll, but are unable to glean any secrets held within.");
-                            }
-
-                            return;
-                        }
-                    }    
-                }    
+                }                 
 			}
 		}
 	}

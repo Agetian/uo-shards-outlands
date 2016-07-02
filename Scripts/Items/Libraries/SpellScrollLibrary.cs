@@ -152,22 +152,22 @@ namespace Server.Items
         {
             base.OnSingleClick(from);
 
+            LabelTo(from, "(" + GetTotalCount().ToString() + " scrolls)");
+
             if (IsLockedDown)
             {
                 switch (m_LockedDownAccessLevel)
                 {
-                    case LockedDownAccessLevelType.Owner: LabelTo(from, "(owner accessable)"); break;
-                    case LockedDownAccessLevelType.CoOwner: LabelTo(from, "(co-owner accessable)"); break;
-                    case LockedDownAccessLevelType.Friend: LabelTo(from, "(friend accessable)"); break;
-                    case LockedDownAccessLevelType.Anyone: LabelTo(from, "(freely access)"); break;
+                    case LockedDownAccessLevelType.Owner: LabelTo(from, "[owner accessable]"); break;
+                    case LockedDownAccessLevelType.CoOwner: LabelTo(from, "[co-owner accessable]"); break;
+                    case LockedDownAccessLevelType.Friend: LabelTo(from, "[friend accessable]"); break;
+                    case LockedDownAccessLevelType.Anyone: LabelTo(from, "[freely access]"); break;
                 }
             }
         }
 
         public override void OnDoubleClick(Mobile from)
         {
-            //base.OnDoubleClick(from);
-
             PlayerMobile player = from as PlayerMobile;
 
             if (player == null)
@@ -180,7 +180,22 @@ namespace Server.Items
             
             from.CloseGump(typeof(SpellScrollLibraryGump));
             from.SendGump(new SpellScrollLibraryGump(player, this, 1));
-        }        
+        }
+
+        public int GetTotalCount()
+        {
+            int totalCount = 0;
+
+            foreach (SpellScrollLibraryEntry entry in m_LibraryEntries)
+            {
+                if (entry == null)
+                    continue;
+
+                totalCount += entry.Count;
+            }
+
+            return totalCount;
+        }
 
         public void CreateSpellEntries()
         {
@@ -193,7 +208,7 @@ namespace Server.Items
             }
         }
 
-        public SpellScrollLibraryEntry GetEntryDetail(Type spellType)
+        public SpellScrollLibraryEntry GetLibraryEntry(Type spellType)
         {
             SpellScrollLibraryEntry targetEntry = null;
 
@@ -206,29 +221,55 @@ namespace Server.Items
             return targetEntry;
         }
 
+        public override bool OnDragDrop(Mobile from, Item dropped)
+        {
+            if (dropped is SpellScroll)
+            {
+                SpellScroll spellScroll = dropped as SpellScroll;
+                
+                SpellScrollLibraryEntry entry = GetLibraryEntry(spellScroll.GetType());
+                
+                if (entry != null)
+                {
+                    entry.Count += spellScroll.Amount;                    
+
+                    if (spellScroll.Amount == 1)
+                        from.SendMessage("You add a spell scroll to the library.");
+                    else
+                        from.SendMessage("You add a " + spellScroll.Amount.ToString() + " spell scrolls to the library.");
+
+                    from.SendSound(addItemSound);
+
+                    spellScroll.Delete();
+                }
+
+                return true;
+            }
+
+            else
+                return false;
+        }
+
         public void AddAllScrollsInPack(Mobile from)
         {
             if (from == null) return;
             if (from.Backpack == null) return;
 
-            List<SpellScroll> m_MasterScrolls = from.Backpack.FindItemsByType<SpellScroll>();
+            List<SpellScroll> m_SpellScrolls = from.Backpack.FindItemsByType<SpellScroll>();
 
             int totalCount = 0;
 
             Queue m_Queue = new Queue();
 
-            foreach (SpellScroll spellScroll in m_MasterScrolls)
+            foreach (SpellScroll spellScroll in m_SpellScrolls)
             {
-                if (spellScroll.MasterStatus != 0)
-                    continue;
-
                 m_Queue.Enqueue(spellScroll);                
             }
 
             while (m_Queue.Count > 0)
             {
                 SpellScroll spellScroll = (SpellScroll)m_Queue.Dequeue();
-                SpellScrollLibraryEntry entry = GetEntryDetail(spellScroll.GetType());
+                SpellScrollLibraryEntry entry = GetLibraryEntry(spellScroll.GetType());
 
                 if (entry == null)
                     continue;
@@ -260,7 +301,7 @@ namespace Server.Items
             if (from == null)
                 return;
 
-            SpellScrollLibraryEntry entry = GetEntryDetail(spellType);
+            SpellScrollLibraryEntry entry = GetLibraryEntry(spellType);
 
             if (entry == null)
                 return;
@@ -594,12 +635,17 @@ namespace Server.Items
                 {
                     SpellScrollLibraryEntry entry = m_Library.m_LibraryEntries[a];
 
+                    int numberTextHue = WhiteTextHue;
+
+                    if (entry.Count > 0)
+                        numberTextHue = 2560;
+
                     //Left Side
                     if (entryCount < EntriesPerSide)
                     {
                         AddLabel(60, leftStartY, 2560, MagerySpell.GetSpellName(entry.SpellType));
                         AddButton(231, leftStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
-                        AddLabel(249, leftStartY, WhiteTextHue, entry.Count.ToString());
+                        AddLabel(249, leftStartY, numberTextHue, entry.Count.ToString());
 
                         leftStartY += 38;
                     }
@@ -609,7 +655,7 @@ namespace Server.Items
                     {
                         AddLabel(317, rightStartY, 2560, MagerySpell.GetSpellName(entry.SpellType));
                         AddButton(488, rightStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
-                        AddLabel(506, rightStartY, WhiteTextHue, entry.Count.ToString());
+                        AddLabel(506, rightStartY, numberTextHue, entry.Count.ToString());
 
                         rightStartY += 38;
                     }
