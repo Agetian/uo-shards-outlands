@@ -8,11 +8,11 @@ using System.Collections.Generic;
 using Server.Multis;
 using Server.Accounting;
 using Server.Gumps;
-using Server.Custom;
+using Server.Spells;
 
 namespace Server.Items
 {
-    public class DungeonCoreLibrary : Item
+    public class SkillMasteryScrollLibrary : Item
     {
         public enum LockedDownAccessLevelType
         {
@@ -20,7 +20,7 @@ namespace Server.Items
             CoOwner,
             Friend,
             Anyone
-        }
+        }     
 
         private LockedDownAccessLevelType m_LockedDownAccessLevel = LockedDownAccessLevelType.Owner;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -40,7 +40,7 @@ namespace Server.Items
 
         public override bool AlwaysAllowDoubleClick { get { return true; } }
 
-        public List<DungeonCoreLibraryEntry> m_LibraryEntries = new List<DungeonCoreLibraryEntry>();
+        public List<SkillMasteryScrollLibraryEntry> m_LibraryEntries = new List<SkillMasteryScrollLibraryEntry>();
 
         public int openGumpSound = 0x055;
         public int changeGumpSound = 0x057;
@@ -48,16 +48,16 @@ namespace Server.Items
         public int addItemSound = 0x249;
 
         [Constructable]
-        public DungeonCoreLibrary(): base(8793)
+        public SkillMasteryScrollLibrary(): base(8793)
         {
-            Name = "a dungeon core library";
-            Hue = 1106;
+            Name = "a skill mastery scroll library";
+            Hue = 2657;
             Weight = 5;
 
-            CreateDungeonEntries();
+            CreateSkillEntries();
         }
 
-        public DungeonCoreLibrary(Serial serial): base(serial)
+        public SkillMasteryScrollLibrary(Serial serial): base(serial)
         {
         }
 
@@ -65,22 +65,22 @@ namespace Server.Items
         {
             base.OnSingleClick(from);
 
+            LabelTo(from, "(" + GetTotalCount().ToString() + " scrolls)");
+
             if (IsLockedDown)
             {
                 switch (m_LockedDownAccessLevel)
                 {
-                    case LockedDownAccessLevelType.Owner: LabelTo(from, "(owner accessable)"); break;
-                    case LockedDownAccessLevelType.CoOwner: LabelTo(from, "(co-owner accessable)"); break;
-                    case LockedDownAccessLevelType.Friend: LabelTo(from, "(friend accessable)"); break;
-                    case LockedDownAccessLevelType.Anyone: LabelTo(from, "(freely access)"); break;
+                    case LockedDownAccessLevelType.Owner: LabelTo(from, "[owner accessable]"); break;
+                    case LockedDownAccessLevelType.CoOwner: LabelTo(from, "[co-owner accessable]"); break;
+                    case LockedDownAccessLevelType.Friend: LabelTo(from, "[friend accessable]"); break;
+                    case LockedDownAccessLevelType.Anyone: LabelTo(from, "[freely access]"); break;
                 }
             }
         }
 
         public override void OnDoubleClick(Mobile from)
         {
-            //base.OnDoubleClick(from);
-
             PlayerMobile player = from as PlayerMobile;
 
             if (player == null)
@@ -90,163 +90,213 @@ namespace Server.Items
                 return;
 
             player.SendSound(openGumpSound);
+            
+            from.CloseGump(typeof(SkillMasteryScrollLibraryGump));
+            from.SendGump(new SkillMasteryScrollLibraryGump(player, this, 1));
+        }
 
-            from.CloseGump(typeof(DungeonCoreLibraryGump));
-            from.SendGump(new DungeonCoreLibraryGump(player, this, 1));
-        }        
-
-        public void CreateDungeonEntries()
+        public int GetTotalCount()
         {
-            int dungeonCount = Enum.GetNames(typeof(DungeonEnum)).Length;
+            int totalCount = 0;
 
-            for (int a = 1; a < dungeonCount; a++)
+            foreach (SkillMasteryScrollLibraryEntry entry in m_LibraryEntries)
             {
-                DungeonCoreLibraryEntry entry = new DungeonCoreLibraryEntry();
-                entry.Dungeon = (DungeonEnum)a;
+                if (entry == null)
+                    continue;
+
+                totalCount += entry.Count;
+            }
+
+            return totalCount;
+        }
+
+        public void CreateSkillEntries()
+        {
+            for (int a = 0; a < SkillMasteryScroll.Skills.Length; a++)
+            {
+                SkillMasteryScrollLibraryEntry entry = new SkillMasteryScrollLibraryEntry();
+                entry.skillName = SkillMasteryScroll.Skills[a];
 
                 m_LibraryEntries.Add(entry);
             }
         }
 
-        public DungeonCoreLibraryEntry GetEntryDetail(DungeonEnum dungeon)
+        public void AuditSkillEntries()
         {
-            DungeonCoreLibraryEntry targetEntry = null;
-
-            foreach (DungeonCoreLibraryEntry entry in m_LibraryEntries)
+            for (int a = 0; a < SkillMasteryScroll.Skills.Length; a++)
             {
-                if (entry.Dungeon == dungeon)
+                SkillName skillName = SkillMasteryScroll.Skills[a];
+
+                SkillMasteryScrollLibraryEntry entry = GetLibraryEntry(SkillMasteryScroll.Skills[a]);
+
+                if (entry == null)
+                {
+                    SkillMasteryScrollLibraryEntry newEntry = new SkillMasteryScrollLibraryEntry();
+                    newEntry.skillName = skillName;
+
+                    m_LibraryEntries.Add(newEntry);
+                }
+            }
+        }
+
+        public SkillMasteryScrollLibraryEntry GetLibraryEntry(SkillName skillName)
+        {
+            SkillMasteryScrollLibraryEntry targetEntry = null;
+
+            foreach (SkillMasteryScrollLibraryEntry entry in m_LibraryEntries)
+            {
+                if (entry.skillName == skillName)
                     return entry;
             }
 
             return targetEntry;
         }
 
-        public void AddAllDungeonCoresInPack(Mobile from)
+        public override bool OnDragDrop(Mobile from, Item dropped)
+        {
+            if (dropped is SkillMasteryScroll)
+            {
+                SkillMasteryScroll skillMasteryScroll = dropped as SkillMasteryScroll;
+
+                SkillMasteryScrollLibraryEntry entry = GetLibraryEntry(skillMasteryScroll.Skill);
+
+                if (entry != null)
+                {
+                    skillMasteryScroll.Delete();
+
+                    entry.Count++;
+
+                    from.SendMessage("You add a skill mastery scroll to the library.");
+                    from.SendSound(addItemSound);
+                }
+
+                return true;
+            }
+
+            else
+                return false;
+        }
+
+        public void AddAllScrollsInPack(Mobile from)
         {
             if (from == null) return;
-            if (from.Backpack == null) return;
+            if (from.Backpack == null) 
+                return;
 
-            List<DungeonCore> m_DungeonCores = from.Backpack.FindItemsByType<DungeonCore>();
+            List<SkillMasteryScroll> m_SkillMasteryScrolls = from.Backpack.FindItemsByType<SkillMasteryScroll>();
 
             int totalCount = 0;
 
             Queue m_Queue = new Queue();
 
-            foreach (DungeonCore dungeonCore in m_DungeonCores)
+            foreach (SkillMasteryScroll skillMasteryScroll in m_SkillMasteryScrolls)
             {
-                m_Queue.Enqueue(dungeonCore);                
+                m_Queue.Enqueue(skillMasteryScroll);                
             }
 
             while (m_Queue.Count > 0)
             {
-                DungeonCore dungeonCore = (DungeonCore)m_Queue.Dequeue();
-                DungeonCoreLibraryEntry entry = GetEntryDetail(dungeonCore.Dungeon);
+                SkillMasteryScroll skillMasteryScroll = (SkillMasteryScroll)m_Queue.Dequeue();
+
+                if (skillMasteryScroll == null) continue;
+                if (skillMasteryScroll.Deleted) continue;
+
+                SkillMasteryScrollLibraryEntry entry = GetLibraryEntry(skillMasteryScroll.Skill);
 
                 if (entry == null)
                     continue;
 
-                entry.Count++;                
+                entry.Count++;
                 totalCount++;
-
-                dungeonCore.Delete();
+                skillMasteryScroll.Delete();
             }
 
             if (totalCount > 1)
             {
-                from.SendMessage("You add " + totalCount.ToString() + " dungeon cores to the library.");
+                from.SendMessage("You add " + totalCount.ToString() + " skill mastery scrolls to the library.");
                 from.SendSound(addItemSound);
             }
 
             else if (totalCount == 1)
             {
-                from.SendMessage("You add a dungeon core to the library.");
+                from.SendMessage("You add a skill mastery scroll to the library.");
                 from.SendSound(addItemSound);
             }
 
             else
-                from.SendMessage("You do not have any dungeon cores in your backpack.");
+                from.SendMessage("You do not have any skill mastery scrolls in your backpack.");
         }
 
-        public void EjectDungeonCore(Mobile from, DungeonEnum dungeon, bool removeAll)
+        public void EjectScroll(Mobile from, SkillName skillName, bool ejectAll)
         {
-            if (from == null || dungeon == null)
+            if (from == null)
                 return;
 
-            DungeonCoreLibraryEntry entry = GetEntryDetail(dungeon);
+            SkillMasteryScrollLibraryEntry entry = GetLibraryEntry(skillName);
 
             if (entry == null)
                 return;
 
             if (entry.Count == 0)
             {
-                from.SendMessage("You do not have any of that dungeon core currently stored within this library.");
+                from.SendMessage("You do not have any copies of that skill mastery scroll currently stored within this library.");
                 return;
             }            
 
             if (from.Backpack == null)
                 return;
 
-            if (from.Backpack.TotalItems == from.Backpack.MaxItems)
+            if (from.Backpack.TotalItems >= from.Backpack.MaxItems)
             {
-                from.SendMessage("Your backpack is at capacity. Please remove some items and try again.");
+                from.SendMessage("Your backpack is at maximum capacity. Please remove some items and try again.");
                 return;
-            }            
+            }
 
-            if (removeAll)
+            if (ejectAll)
             {
-                int itemCount = 0;
+                int spaceAvailable = from.Backpack.MaxItems - from.Backpack.TotalItems;
 
-                for (int a = 0; a < 1000; a++)
-                {
-                    if (entry.Count == 0)
-                        break;
+                int retrievalAmount = 0;
+                bool partialRetrieval = false;                
 
-                    if (from.Backpack.TotalItems == from.Backpack.MaxItems)
-                        break;
-
-                    DungeonCore dungeonCore = (DungeonCore)Activator.CreateInstance(typeof(DungeonCore));
-                    dungeonCore.Dungeon = dungeon;
-
-                    if (dungeonCore != null)
-                    {
-                        entry.Count--;
-
-                        from.Backpack.DropItem(dungeonCore);
-                        itemCount++;
-                    }
-                }
-
-                if (itemCount > 1)
-                {
-                    from.SendMessage("You retrieve " + itemCount.ToString() + " dungeon cores from the library.");
-                    from.SendSound(addItemSound);
-                }
-
-                else if (itemCount == 1)
-                {
-                    from.SendMessage("You retrieve a dungeon core from the library.");
-                    from.SendSound(addItemSound);
-                }
+                if (spaceAvailable >= entry.Count)                
+                    retrievalAmount = entry.Count;
 
                 else
-                    from.SendMessage("You do not have any dungeon cores of that in the library.");
+                {
+                    partialRetrieval = true;
+                    retrievalAmount = spaceAvailable;
+                }
+
+                for (int a = 0; a < retrievalAmount; a++)
+                {
+                    SkillMasteryScroll skillMasteryScroll = new SkillMasteryScroll(entry.skillName);
+                    from.Backpack.DropItem(skillMasteryScroll);
+                }
+
+                entry.Count -= retrievalAmount;
+                from.SendSound(addItemSound);
+
+                if (entry.Count == 1)
+                    from.SendMessage("You retrieve a skill mastery scroll from the library.");
+
+                else if (partialRetrieval)
+                    from.SendMessage("You retrieve several skill mastery scrolls from the library but require more backpack space in order to retrieve the remaining scrolls.");
+
+                else
+                    from.SendMessage("You retrieve several skill mastery scrolls from the library.");
             }
 
             else
             {
+                SkillMasteryScroll skillMasteryScroll = new SkillMasteryScroll(entry.skillName);
 
-                DungeonCore dungeonCore = (DungeonCore)Activator.CreateInstance(typeof(DungeonCore));
-                dungeonCore.Dungeon = dungeon;
+                entry.Count--;
 
-                if (dungeonCore != null)
-                {
-                    entry.Count--;
-
-                    from.Backpack.DropItem(dungeonCore);
-                    from.SendMessage("You retrieve a dungeon core from the library.");
-                    from.SendSound(addItemSound);
-                }
-            }            
+                from.Backpack.DropItem(skillMasteryScroll);
+                from.SendSound(addItemSound);
+                from.SendMessage("You retrieve a skill mastery scroll from the library."); 
+            }
         }
 
         public bool CanUse(Mobile from)
@@ -259,11 +309,11 @@ namespace Server.Items
 
             if (!from.Alive)
                 return false;
-            
+
             if (IsChildOf(from.Backpack) || IsChildOf(from.BankBox))
                 return true;
 
-            if (from.Map != Map || !from.InRange(GetWorldLocation(), 2) )
+            if (from.Map != Map || !from.InRange(GetWorldLocation(), 2))
             {
                 from.SendMessage("That is too far away to use.");
                 return false;
@@ -284,7 +334,7 @@ namespace Server.Items
                     from.SendMessage("That is not accessible.");
                     return false;
                 }
-                
+
                 switch (m_LockedDownAccessLevel)
                 {
                     case LockedDownAccessLevelType.Owner:
@@ -302,7 +352,7 @@ namespace Server.Items
                                 return false;
                             }
                         }
-                    break;
+                        break;
 
                     case LockedDownAccessLevelType.CoOwner:
                         if (house.IsCoOwner(from))
@@ -312,23 +362,23 @@ namespace Server.Items
                             from.SendMessage("You do not have the neccessary access rights to use that.");
                             return false;
                         }
-                    break;
+                        break;
 
                     case LockedDownAccessLevelType.Friend:
                         if (house.IsFriend(from))
                             return true;
 
                         else
-                            {
-                                from.SendMessage("You do not have the neccessary access rights to use that.");
-                                return false;
-                            }
+                        {
+                            from.SendMessage("You do not have the neccessary access rights to use that.");
+                            return false;
+                        }
 
-                    break;
+                        break;
 
                     case LockedDownAccessLevelType.Anyone:
                         return true;
-                    break;
+                        break;
                 }
             }
 
@@ -353,9 +403,9 @@ namespace Server.Items
             writer.Write(m_LibraryEntries.Count);
             for (int a = 0; a < m_LibraryEntries.Count; a++)
             {
-                DungeonCoreLibraryEntry entry = m_LibraryEntries[a];
+                SkillMasteryScrollLibraryEntry entry = m_LibraryEntries[a];
 
-                writer.Write((int)entry.Dungeon);
+                writer.Write((int)entry.skillName);
                 writer.Write(entry.Count);
             }
         }
@@ -375,27 +425,33 @@ namespace Server.Items
 
                 for (int a = 0; a < libraryEntryCount; a++)
                 {
-                    DungeonCoreLibraryEntry entry = new DungeonCoreLibraryEntry();
+                    SkillName skillName = (SkillName)reader.ReadInt();
+                    int count = reader.ReadInt();
 
-                    entry.Dungeon = (DungeonEnum)reader.ReadInt();
-                    entry.Count = reader.ReadInt();
+                    SkillMasteryScrollLibraryEntry entry = new SkillMasteryScrollLibraryEntry();
+                    entry.skillName = skillName;
+                    entry.Count = count;
 
-                    m_LibraryEntries.Add(entry);                    
+                    m_LibraryEntries.Add(entry);
                 }
             }
+
+            //-----
+
+            AuditSkillEntries();
         }
     }
 
-    public class DungeonCoreLibraryEntry
+    public class SkillMasteryScrollLibraryEntry
     {
-        public DungeonEnum Dungeon = DungeonEnum.Shame;
+        public SkillName skillName = SkillName.Alchemy;
         public int Count = 0;
     }
 
-    public class DungeonCoreLibraryGump : Gump
+    public class SkillMasteryScrollLibraryGump : Gump
     {
         PlayerMobile m_Player;
-        DungeonCoreLibrary m_Library; 
+        SkillMasteryScrollLibrary m_Library;
 
         int m_PageNumber = 1;
         int m_TotalPages = 1;
@@ -404,27 +460,27 @@ namespace Server.Items
         int EntriesPerSide = 8;
         int EntriesPerPage = 16;
 
-        int WhiteTextHue = 2499; 
+        int WhiteTextHue = 2499;
 
-        public DungeonCoreLibraryGump(PlayerMobile player, DungeonCoreLibrary library, int pageNumber): base(10, 10)
+        public SkillMasteryScrollLibraryGump(PlayerMobile player, SkillMasteryScrollLibrary library, int pageNumber): base(10, 10)
         {
             if (player == null) return;
             if (library == null) return;
             if (library.Deleted) return;
 
-            m_Player = player;    
+            m_Player = player;
             m_Library = library;
-            m_PageNumber = pageNumber;
+            m_PageNumber = pageNumber;            
 
             Closable = true;
             Disposable = true;
             Dragable = true;
             Resizable = false;
 
-            AddImage(205, 193, 11015, 2550);
-            AddImage(204, 1, 11015, 2550);
-            AddImage(3, 192, 11015, 2550);
-            AddImage(3, 1, 11015, 2550);
+            AddImage(205, 193, 11015, 2499);
+            AddImage(204, 1, 11015, 2499);
+            AddImage(3, 192, 11015, 2499);
+            AddImage(3, 1, 11015, 2499);
             AddImage(302, 75, 2081, 2499);
             AddImage(300, 270, 2081, 2499);
             AddImage(301, 141, 2081, 2499);
@@ -439,29 +495,28 @@ namespace Server.Items
             AddImage(43, 274, 2081, 2499);
             AddImageTiled(301, 2, 6, 405, 2701);
             AddImage(41, 338, 2081, 2499);
-            AddItem(152, 29, 8002, 2550);
             AddImage(49, 80, 3001, 2615);
             AddImage(56, 80, 3001, 2615);
             AddImage(306, 80, 3001, 2615);
             AddImage(315, 80, 3001, 2615);
 
-            //TEST: FINISH AFTER THIS
+            AddItem(153, 24, 5360, 2963);
 
-            AddLabel(105, 5, 2599, "Dungeon Core Library");
+            AddLabel(95, 5, 2590, "Skill Mastery Scroll Library");
 
             AddLabel(88, 53, WhiteTextHue, "Add All in Backpack into Library");
-            AddButton(65, 56, 2118, 2118, 1, GumpButtonType.Reply, 0);            
-         
+            AddButton(65, 56, 2118, 2118, 1, GumpButtonType.Reply, 0);
+            
             AddLabel(354, 5, 2615, "Locked Down Access Level");
 
             string accessName = "Owner";
 
             switch (m_Library.LockedDownAccessLevel)
             {
-                case DungeonCoreLibrary.LockedDownAccessLevelType.Owner: accessName = "Owner"; break;
-                case DungeonCoreLibrary.LockedDownAccessLevelType.CoOwner: accessName = "Co-Owner"; break;
-                case DungeonCoreLibrary.LockedDownAccessLevelType.Friend: accessName = "Friend"; break;
-                case DungeonCoreLibrary.LockedDownAccessLevelType.Anyone: accessName = "Anyone"; break;
+                case SkillMasteryScrollLibrary.LockedDownAccessLevelType.Owner: accessName = "Owner"; break;
+                case SkillMasteryScrollLibrary.LockedDownAccessLevelType.CoOwner: accessName = "Co-Owner"; break;
+                case SkillMasteryScrollLibrary.LockedDownAccessLevelType.Friend: accessName = "Friend"; break;
+                case SkillMasteryScrollLibrary.LockedDownAccessLevelType.Anyone: accessName = "Anyone"; break;
             }
 
             AddLabel(Utility.CenteredTextOffset(435, accessName), 25, 2562, accessName);
@@ -470,7 +525,6 @@ namespace Server.Items
             AddButton(488, 29, 2224, 2224, 3, GumpButtonType.Reply, 0);
 
             AddLabel(347, 53, WhiteTextHue, "Remove All Possible on Selection");
-            
             if (m_Library.RemoveAllOnSelection)
                 AddButton(313, 48, 2154, 2151, 4, GumpButtonType.Reply, 0);
             else
@@ -478,7 +532,14 @@ namespace Server.Items
 
             //-----
 
-            m_TotalEntries = m_Library.m_LibraryEntries.Count;
+            List<SkillName> m_SkillList = new List<SkillName>();
+
+            foreach (SkillName skillName in SkillMasteryScroll.Skills)
+            {
+                m_SkillList.Add(skillName);
+            }
+
+            m_TotalEntries = m_SkillList.Count;
             m_TotalPages = (int)(Math.Ceiling((double)m_TotalEntries / (double)EntriesPerPage));
 
             if (m_TotalPages == 0)
@@ -488,7 +549,7 @@ namespace Server.Items
                 m_PageNumber = 1;
 
             if (m_PageNumber > m_TotalPages)
-                m_PageNumber = m_TotalPages;  
+                m_PageNumber = m_TotalPages;
 
             int startIndex = (m_PageNumber - 1) * EntriesPerPage;
             int endIndex = startIndex + EntriesPerPage;
@@ -503,17 +564,22 @@ namespace Server.Items
 
             for (int a = startIndex; a < endIndex; a++)
             {
-                if (a < m_Library.m_LibraryEntries.Count)
+                if (a < m_SkillList.Count)
                 {
-                    DungeonCoreLibraryEntry entry = m_Library.m_LibraryEntries[a];                    
+                    SkillName skillName = m_SkillList[a];
+                    SkillMasteryScrollLibraryEntry entry = m_Library.GetLibraryEntry(skillName);
+
+                    int numberTextHue = WhiteTextHue;
+
+                    if (entry.Count > 0)
+                        numberTextHue = 2590;
 
                     //Left Side
                     if (entryCount < EntriesPerSide)
                     {
-                        AddLabel(60, leftStartY, 2599, BaseWeapon.GetDungeonName(entry.Dungeon));
-                        AddLabel(174, leftStartY, 2615, "Count");
+                        AddLabel(60, leftStartY, 2590, SkillCheck.GetSkillName(entry.skillName));
                         AddButton(231, leftStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
-                        AddLabel(249, leftStartY, WhiteTextHue, entry.Count.ToString());
+                        AddLabel(249, leftStartY, numberTextHue, entry.Count.ToString());
 
                         leftStartY += 38;
                     }
@@ -521,10 +587,9 @@ namespace Server.Items
                     //Right Side
                     else
                     {
-                        AddLabel(317, rightStartY, 2599, BaseWeapon.GetDungeonName(entry.Dungeon));
-                        AddLabel(431, rightStartY, 2615, "Count");
+                        AddLabel(317, rightStartY, 2590, SkillCheck.GetSkillName(entry.skillName));
                         AddButton(488, rightStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
-                        AddLabel(506, rightStartY, WhiteTextHue, entry.Count.ToString());                
+                        AddLabel(506, rightStartY, numberTextHue, entry.Count.ToString());
 
                         rightStartY += 38;
                     }
@@ -534,7 +599,7 @@ namespace Server.Items
             }
 
             if (m_PageNumber > 1)
-                AddButton(160, 380, 4014, 4016, 5, GumpButtonType.Reply, 0);            
+                AddButton(160, 380, 4014, 4016, 5, GumpButtonType.Reply, 0);
 
             if (m_PageNumber < m_TotalPages)
                 AddButton(415, 380, 4005, 4007, 6, GumpButtonType.Reply, 0);    
@@ -551,6 +616,14 @@ namespace Server.Items
             if (!m_Library.CanUse(m_Player))
                 return;
 
+            List<SkillName> m_SkillList = new List<SkillName>();
+
+            foreach (SkillName skillName in SkillMasteryScroll.Skills)
+            {
+                m_SkillList.Add(skillName);
+            }
+
+            m_TotalEntries = m_SkillList.Count;
             m_TotalPages = (int)(Math.Ceiling((double)m_TotalEntries / (double)EntriesPerPage));
 
             if (m_TotalPages == 0)
@@ -560,7 +633,7 @@ namespace Server.Items
                 m_PageNumber = 1;
 
             if (m_PageNumber > m_TotalPages)
-                m_PageNumber = m_TotalPages;            
+                m_PageNumber = m_TotalPages;
 
             bool closeGump = true;
 
@@ -570,24 +643,24 @@ namespace Server.Items
             {
                 case 1:
                     //Add All From Backpack
-                    m_Library.AddAllDungeonCoresInPack(m_Player);
+                    m_Library.AddAllScrollsInPack(m_Player);
 
                     closeGump = false;
                 break;
 
                 case 2:
                     //Previous Access Level
-                    if (m_Library.IsLockedDown && m_Player.AccessLevel == AccessLevel.Player)                    
-                        m_Player.SendMessage("You may not change the access level of this item while it is currently locked down.");                    
+                    if (m_Library.IsLockedDown && m_Player.AccessLevel == AccessLevel.Player)    
+                        m_Player.SendMessage("You may not change the access level of this item while it is currently locked down.");
 
                     else
                     {
                         switch (m_Library.LockedDownAccessLevel)
                         {
-                            case DungeonCoreLibrary.LockedDownAccessLevelType.Owner: m_Library.LockedDownAccessLevel = DungeonCoreLibrary.LockedDownAccessLevelType.Anyone; break;
-                            case DungeonCoreLibrary.LockedDownAccessLevelType.CoOwner: m_Library.LockedDownAccessLevel = DungeonCoreLibrary.LockedDownAccessLevelType.Owner; break;
-                            case DungeonCoreLibrary.LockedDownAccessLevelType.Friend: m_Library.LockedDownAccessLevel = DungeonCoreLibrary.LockedDownAccessLevelType.CoOwner; break;
-                            case DungeonCoreLibrary.LockedDownAccessLevelType.Anyone: m_Library.LockedDownAccessLevel = DungeonCoreLibrary.LockedDownAccessLevelType.Friend; break;
+                            case SkillMasteryScrollLibrary.LockedDownAccessLevelType.Owner: m_Library.LockedDownAccessLevel = SkillMasteryScrollLibrary.LockedDownAccessLevelType.Anyone; break;
+                            case SkillMasteryScrollLibrary.LockedDownAccessLevelType.CoOwner: m_Library.LockedDownAccessLevel = SkillMasteryScrollLibrary.LockedDownAccessLevelType.Owner; break;
+                            case SkillMasteryScrollLibrary.LockedDownAccessLevelType.Friend: m_Library.LockedDownAccessLevel = SkillMasteryScrollLibrary.LockedDownAccessLevelType.CoOwner; break;
+                            case SkillMasteryScrollLibrary.LockedDownAccessLevelType.Anyone: m_Library.LockedDownAccessLevel = SkillMasteryScrollLibrary.LockedDownAccessLevelType.Friend; break;
                         }
                     }
 
@@ -603,10 +676,10 @@ namespace Server.Items
                     {
                         switch (m_Library.LockedDownAccessLevel)
                         {
-                            case DungeonCoreLibrary.LockedDownAccessLevelType.Owner: m_Library.LockedDownAccessLevel = DungeonCoreLibrary.LockedDownAccessLevelType.CoOwner; break;
-                            case DungeonCoreLibrary.LockedDownAccessLevelType.CoOwner: m_Library.LockedDownAccessLevel = DungeonCoreLibrary.LockedDownAccessLevelType.Friend; break;
-                            case DungeonCoreLibrary.LockedDownAccessLevelType.Friend: m_Library.LockedDownAccessLevel = DungeonCoreLibrary.LockedDownAccessLevelType.Anyone; break;
-                            case DungeonCoreLibrary.LockedDownAccessLevelType.Anyone: m_Library.LockedDownAccessLevel = DungeonCoreLibrary.LockedDownAccessLevelType.Owner; break;
+                            case SkillMasteryScrollLibrary.LockedDownAccessLevelType.Owner: m_Library.LockedDownAccessLevel = SkillMasteryScrollLibrary.LockedDownAccessLevelType.CoOwner; break;
+                            case SkillMasteryScrollLibrary.LockedDownAccessLevelType.CoOwner: m_Library.LockedDownAccessLevel = SkillMasteryScrollLibrary.LockedDownAccessLevelType.Friend; break;
+                            case SkillMasteryScrollLibrary.LockedDownAccessLevelType.Friend: m_Library.LockedDownAccessLevel = SkillMasteryScrollLibrary.LockedDownAccessLevelType.Anyone; break;
+                            case SkillMasteryScrollLibrary.LockedDownAccessLevelType.Anyone: m_Library.LockedDownAccessLevel = SkillMasteryScrollLibrary.LockedDownAccessLevelType.Owner; break;
                         }
                     }
 
@@ -645,26 +718,27 @@ namespace Server.Items
             if (info.ButtonID >= 10)
             {
                 int index = ((m_PageNumber - 1) * EntriesPerPage) + (info.ButtonID - 10);
-                
-                if (index >= m_Library.m_LibraryEntries.Count || index < 0)
+
+                if (index >= m_SkillList.Count || index < 0)
                     return;
 
-                DungeonCoreLibraryEntry entry = m_Library.m_LibraryEntries[index];
+                SkillName skillName = m_SkillList[index];
+                SkillMasteryScrollLibraryEntry entry = m_Library.GetLibraryEntry(skillName);
 
                 if (entry == null)
                     return;
 
                 bool removeAll = m_Library.RemoveAllOnSelection;
 
-                m_Library.EjectDungeonCore(m_Player, entry.Dungeon, removeAll);
+                m_Library.EjectScroll(m_Player, entry.skillName, removeAll);
 
                 closeGump = false;
             }
 
             if (!closeGump)
             {
-                m_Player.CloseGump(typeof(DungeonCoreLibraryGump));
-                m_Player.SendGump(new DungeonCoreLibraryGump(m_Player, m_Library, m_PageNumber));
+                m_Player.CloseGump(typeof(SkillMasteryScrollLibraryGump));
+                m_Player.SendGump(new SkillMasteryScrollLibraryGump(m_Player, m_Library, m_PageNumber));
             }
 
             else

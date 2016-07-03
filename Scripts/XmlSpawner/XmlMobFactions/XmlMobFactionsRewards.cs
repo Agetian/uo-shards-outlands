@@ -54,10 +54,10 @@ namespace Server.Engines.XmlSpawner2
             //MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 1000, typeof(BagOfHolding), "Bag of Holding, 10 items", 20000, 0xE76, new object[] { 10 } ));
             //MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 1000, typeof(BagOfHolding), "Bag of Holding, 20 items", 50000, 0xE76, new object[] { 20 } ));
             MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 2500, typeof(AncientSmithyHammer), "+20 Ancient Smithy Hammer, 50 uses", 50000, 0x13E4, new object[] { 20, 50 }));
-            MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 5000, typeof(PowerScroll), "105 Smithing powerscroll", 100000, 0x14F0, new object[] { SkillName.Blacksmith, 105 }));
-            MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 8000, typeof(PowerScroll), "110 Smithing powerscroll", 200000, 0x14F0, new object[] { SkillName.Blacksmith, 110 }));
-            MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 12000, typeof(PowerScroll), "115 Smithing powerscroll", 350000, 0x14F0, new object[] { SkillName.Blacksmith, 115 }));
-            MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 20000, typeof(PowerScroll), "120 Smithing powerscroll", 600000, 0x14F0, new object[] { SkillName.Blacksmith, 120 }));
+            MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 5000, typeof(SkillMasteryScroll), "105 Smithing powerscroll", 100000, 0x14F0, new object[] { SkillName.Blacksmith, 105 }));
+            MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 8000, typeof(SkillMasteryScroll), "110 Smithing powerscroll", 200000, 0x14F0, new object[] { SkillName.Blacksmith, 110 }));
+            MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 12000, typeof(SkillMasteryScroll), "115 Smithing powerscroll", 350000, 0x14F0, new object[] { SkillName.Blacksmith, 115 }));
+            MobFactionsRewardList.Add( new XmlMobFactionsRewards( "Player", 20000, typeof(SkillMasteryScroll), "120 Smithing powerscroll", 600000, 0x14F0, new object[] { SkillName.Blacksmith, 120 }));
 
             // this is an example of adding a mobile as a reward
             //MobFactionsRewardList.Add( new XmlMobFactionsRewards( null, 0, typeof(RidableLlama),"Ridable Llama", 1000, 0x20f6, null));

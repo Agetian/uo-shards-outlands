@@ -15,8 +15,8 @@ namespace Server.Custom.Donations.Items
             typeof(BearMask),
             typeof(DeerMask),
             typeof(OrcMask),
-            typeof(SavageMask),
             typeof(TribalMask),
+            typeof(AncestorMask),
         };
 
         private static int[] m_RareHues = new int[] { 1281, 2052, 1150, 1266 };
@@ -32,8 +32,7 @@ namespace Server.Custom.Donations.Items
         }
 
         [Constructable]
-        public MaskDye()
-            : base(0xE26)
+        public MaskDye(): base(0xE26)
         {
         }
 
@@ -90,6 +89,7 @@ namespace Server.Custom.Donations.Items
             {
                 if (m_Dye == null || m_Dye.Deleted)
                     return;
+
                 if (!(targeted is Item))
                 {
                     from.SendMessage("That is not a valid mask type.");

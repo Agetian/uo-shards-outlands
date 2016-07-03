@@ -2251,39 +2251,7 @@ namespace Server.Items
 
                         break;
 
-                    }
-                case SlotThemeType.PowerScrolls:
-                    {
-                        if (m_DropReward())
-                        {
-                            item = CreateReward(from, Utility.Random(450));
-                        }
-
-                        break;
-
-                    }
-                case SlotThemeType.StatScrolls:
-                    if (jackpotindex == 0)
-                    {
-                        int level;
-                        double random = Utility.RandomDouble();
-                        if (0.1 >= random)
-                            level = 25;
-                        else if (0.25 >= random)
-                            level = 20;
-                        else if (0.45 >= random)
-                            level = 15;
-                        else if (0.70 >= random)
-                            level = 10;
-                        else
-                            level = 5;
-                        item = new StatCapScroll(225 + level);
-                        if (item != null)
-                            GiveItem(from, item);
-                        else
-                            SlotOffline(10010);
-                    }
-                    break;
+                    }                
 
                 case SlotThemeType.TailorTreats:
                     {
@@ -2334,7 +2302,7 @@ namespace Server.Items
 
         private Item CreatePowerScroll(int type, int level)
         {
-            PowerScroll ps = null;
+            SkillMasteryScroll ps = null;
 
             SkillName[] skillNames = new SkillName[]
 			{
@@ -2343,7 +2311,7 @@ namespace Server.Items
             try
             {
                 SkillName skillName = skillNames[type - 10923];
-                ps = new PowerScroll(skillName);
+                ps = new SkillMasteryScroll(skillName);
             }
             catch { return null; }
             return (Item)ps;
@@ -2421,12 +2389,8 @@ namespace Server.Items
                     to.BankBox.DropItem(i);
                     text = String.Format("{0} {1} has been placed in your bankbox!", i.Amount > 1 ? "Some" : "A", i.Name);
                 }
-                if (i is PowerScroll || i is StatCapScroll)
-                {
-                    DoPowerScrollEffect(to);
-                    to.SendLocalizedMessage(1049524); // You have received a scroll of power!
-                }
-                else if (i is ShipModelOfTheHMSCape)
+                
+                if (i is ShipModelOfTheHMSCape)
                     to.SendMessage(this.Hue, "You have received a model pirate ship!");// You have received a scroll of power!
                 else
                     to.SendMessage(this.Hue, text);

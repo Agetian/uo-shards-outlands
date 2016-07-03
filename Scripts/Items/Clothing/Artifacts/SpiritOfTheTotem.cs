@@ -45,8 +45,7 @@ namespace Server.Items
 			{
 				case 0:
 				{
-					Resistances.Physical = 0;
-					break;
+                    break;
 				}
 			}
 		}

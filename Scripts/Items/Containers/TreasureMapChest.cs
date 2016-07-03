@@ -315,7 +315,7 @@ namespace Server.Items
             {
                 case 6:
                     if (Utility.RandomDouble() < 0.09)
-                        cont.DropItem(new PowerScroll());
+                        cont.DropItem(new SkillMasteryScroll());
                     break;
                 case 5:
                     if (Utility.RandomDouble() < 0.06)

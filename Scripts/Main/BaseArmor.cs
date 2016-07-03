@@ -550,6 +550,14 @@ namespace Server.Items
             return bonus;
         }
 
+        public bool IsMask()
+        {
+            if (this is BearMask || this is DeerMask || this is OrcMask || this is TribalMask || this is AncestorMask)
+                return true;
+
+            return false;
+        }
+
         public bool Scissor(Mobile from, Scissors scissors)
         {
             if (!IsChildOf(from.Backpack))

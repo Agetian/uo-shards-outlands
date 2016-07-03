@@ -386,15 +386,6 @@ namespace Server.Items
                             rewardText = "You receive a paragon wand.";
                         break;
 
-                        case "Lure":
-                            if (Utility.RandomDouble() <= .66)
-                                item = new Custom.FaintLure();
-                            else
-                                item = new Custom.PotentLure();
-                            
-                            rewardText = "You receive a lure.";
-                        break;
-
                         case "ResearchMaterials":
                             item = new Custom.ResearchMaterials();
                             rewardText = "You receive some research materials.";

@@ -41,9 +41,9 @@ namespace Server.Engines.XmlSpawner2
         public static void Initialize()
         {
             // these are items as rewards. Note that the args list must match a constructor for the reward type specified.
-            PointsRewardList.Add( new XmlPointsRewards( 1000, typeof(PowerScroll), "105 Smithing powerscroll", 1000, 0x14F0, new object[] { SkillName.Blacksmith, 105 }));
-            PointsRewardList.Add( new XmlPointsRewards( 2000, typeof(PowerScroll), "110 Smithing powerscroll", 2000, 0x14F0, new object[] { SkillName.Blacksmith, 110 }));
-            PointsRewardList.Add( new XmlPointsRewards( 4000, typeof(PowerScroll), "115 Smithing powerscroll", 4000, 0x14F0, new object[] { SkillName.Blacksmith, 115 }));
+            PointsRewardList.Add( new XmlPointsRewards( 1000, typeof(SkillMasteryScroll), "105 Smithing powerscroll", 1000, 0x14F0, new object[] { SkillName.Blacksmith, 105 }));
+            PointsRewardList.Add( new XmlPointsRewards( 2000, typeof(SkillMasteryScroll), "110 Smithing powerscroll", 2000, 0x14F0, new object[] { SkillName.Blacksmith, 110 }));
+            PointsRewardList.Add( new XmlPointsRewards( 4000, typeof(SkillMasteryScroll), "115 Smithing powerscroll", 4000, 0x14F0, new object[] { SkillName.Blacksmith, 115 }));
             PointsRewardList.Add( new XmlPointsRewards( 500, typeof(AncientSmithyHammer), "+20 Ancient Smithy Hammer, 50 uses", 500, 0x13E4, new object[] { 20, 50 }));
 			PointsRewardList.Add( new XmlPointsRewards( 1500, typeof(RewardScroll), "1 Reward Scroll", 1500, 0x2D51, null ));
             PointsRewardList.Add( new XmlPointsRewards( 200, typeof(ColoredAnvil), "Colored Anvil", 400, 0xFAF, null ));

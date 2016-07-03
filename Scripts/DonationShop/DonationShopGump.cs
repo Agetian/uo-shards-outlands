@@ -95,7 +95,7 @@ namespace Server.Gumps
             Dragable = true;
             Resizable = false;
 
-            int textHue = 2036;
+            int WhiteTextHue = 2036; //2655;
 
             AddPage(0);
 
@@ -233,11 +233,11 @@ namespace Server.Gumps
 
             //Guide
             AddButton(29, 10, 2094, 2095, 1, GumpButtonType.Reply, 0);
-            AddLabel(56, 19, textHue, "Guide");
+            AddLabel(56, 19, WhiteTextHue, "Guide");
 
             //Bank Account
             AddItem(467, 337, 3823, 2500);
-            AddLabel(Utility.CenteredTextOffset(490, Utility.CreateCurrencyString(donationCurrencyInBank)), 366, textHue, Utility.CreateCurrencyString(donationCurrencyInBank));
+            AddLabel(Utility.CenteredTextOffset(490, Utility.CreateCurrencyString(donationCurrencyInBank)), 366, WhiteTextHue, Utility.CreateCurrencyString(donationCurrencyInBank));
             AddLabel(440, 386, 149, DonationShop.DonationCurrencyName + " in Bank");
 
             //Make Donation
@@ -252,8 +252,9 @@ namespace Server.Gumps
                 AddButton(436, 265, 9906, 9906, 4, GumpButtonType.Reply, 0);
 
             //Item
-            int startY = 75;
-            int itemSpacing = 124;
+            int startX = 75;
+            int startY = 70;
+            int itemSpacing = 125;
 
             int itemCount = itemEndIndex - itemStartIndex;
 
@@ -270,32 +271,48 @@ namespace Server.Gumps
                 if (item == null)
                     continue;
 
-                AddImage(75, startY, 103, 2412);
-                AddImage(205, startY, 103, 2412);
-                AddImage(275, startY, 103, 2412);
-                AddBackground(85, startY + 10, 323, 81, 3000);
+                #region Images
 
-                AddLabel(Utility.CenteredTextOffset(250, item.ItemName), startY - 10, 149, item.ItemName);
-                AddItem(85 + item.ItemIconOffsetX, startY + 35 + item.ItemIconOffsetY, item.ItemIconItemId, item.ItemIconHue);
+                int borderHue = 2412;
+                int innerRegionHue = 2052;
+
+                AddImage(startX + 202, startY + 12, 103, borderHue);
+                AddImage(startX + 0, startY + 12, 103, borderHue);
+                AddImage(startX + 103, startY + 12, 103, borderHue);
+                AddImage(startX + 0, startY + 0, 103, borderHue);
+                AddImage(startX + 131, startY + 0, 103, borderHue);
+                AddImage(startX + 202, startY + 0, 103, borderHue);
+
+                AddImage(startX + 10, startY + 10, 5104, innerRegionHue);
+                AddImage(startX + 89, startY + 10, 5104, innerRegionHue);
+                AddImage(startX + 132, startY + 10, 5104, innerRegionHue);
+                AddImage(startX + 196, startY + 10, 5104, innerRegionHue);
+                AddImage(startX + 245, startY + 10, 5104, innerRegionHue);
+
+                #endregion
+
+                AddItem(startX + 15 + item.ItemIconOffsetX, startY + 30 + item.ItemIconOffsetY, item.ItemIconItemId, item.ItemIconHue);
+                AddLabel(Utility.CenteredTextOffset(startX + 185, item.ItemName), startY + 8, 149, item.ItemName);
 
                 if (item.ItemDescription != null)
                 {
                     for (int b = 0; b < item.ItemDescription.Count; b++)
                     {
-                        AddLabel(Utility.CenteredTextOffset(280, item.ItemDescription[b]), startY + 18 + (b * 20), textHue, item.ItemDescription[b]);
+                        AddLabel(Utility.CenteredTextOffset(startX + 205, item.ItemDescription[b]), startY + 28 + (b * 20), 2550, item.ItemDescription[b]);
                     }
                 }
 
-                AddItem(150, startY + 80, 3823, 2500);
-                AddLabel(190, startY + 83, 149, Utility.CreateCurrencyString(item.ItemCost));
-                AddButton(270, startY + 75, 2152, 2151, itemButtonIndex, GumpButtonType.Reply, 0);
-                AddLabel(305, startY + 83, 63, "Purchase");
+                AddItem(startX + 75, startY + 91, 3823, 2500);
+                AddLabel(startX + 116, startY + 93, 149, Utility.CreateCurrencyString(item.ItemCost));
+
+                AddButton(startX + 196, startY + 90, 2152, 2154, itemButtonIndex, GumpButtonType.Reply, 0);
+                AddLabel(startX + 229, startY + 93, 63, "Purchase");
 
                 startY += itemSpacing;
             }
 
             //Categories
-            int startX = 120;
+            startX = 120;
             int categorySpacing = 100;
 
             int categoryCount = categoryEndIndex - categoryStartIndex;
@@ -312,14 +329,20 @@ namespace Server.Gumps
 
                 if (donationCategory == null)
                     continue;
-
-                AddLabel(Utility.CenteredTextOffset(startX + 45, category.CategoryName), 445, 149, category.CategoryName);
+               
                 AddItem(startX + category.CategoryIconOffsetX, 470 + category.CategoryIconOffsetY, category.CategoryIconItemId, category.CategoryIconHue);
 
                 if (categoryIndex == m_CategorySelected)
+                {
+                    AddLabel(Utility.CenteredTextOffset(startX + 45, category.CategoryName), 445, 149, category.CategoryName);
                     AddButton(startX + 45, 475, 9724, 9721, categoryButtonIndex, GumpButtonType.Reply, 0);
+                }
+
                 else
+                {
+                    AddLabel(Utility.CenteredTextOffset(startX + 45, category.CategoryName), 445, WhiteTextHue, category.CategoryName);
                     AddButton(startX + 45, 475, 9721, 9724, categoryButtonIndex, GumpButtonType.Reply, 0);
+                }
 
                 startX += categorySpacing;
             }
@@ -470,7 +493,7 @@ namespace Server.Gumps
                     return;
                 }
                 
-                if (item.ItemCost > donationCurrencyInBank)
+                if (item.ItemCost > donationCurrencyInBank && m_Player.AccessLevel < AccessLevel.GameMaster)
                 {
                     m_Player.SendMessage("You do not have enough " + DonationShop.DonationCurrencyName + " in your bank to purchase this item.");
 

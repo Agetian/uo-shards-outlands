@@ -237,7 +237,7 @@ namespace Server.Items
 		[Constructable]
 		public StreamerFountainAddonDeed()
 		{
-            Name = "a streamer fountain";
+            Name = "a palatial spa";
 		}
 
 		public StreamerFountainAddonDeed( Serial serial ) : base( serial )

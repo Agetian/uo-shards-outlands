@@ -48,6 +48,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Items\DonationShop\AddOns\" />
+    <Folder Include="Items\DonationShop\Decorations\" />
+    <Folder Include="Items\DonationShop\Misc\" />
+    <Folder Include="Items\DonationShop\MonthlySpecials\" />
     <Folder Include="Items\Quivers\.svn\prop-base\" />
     <Folder Include="Items\Quivers\.svn\props\" />
     <Folder Include="Items\Quivers\.svn\text-base\" />
@@ -177,6 +181,12 @@
     <Compile Include="Items\Armor\Chainmail\ChainmailGorget.cs" />
     <Compile Include="Items\Armor\Chainmail\ChainmailArms.cs" />
     <Compile Include="Items\Armor\Chainmail\ChainmailGloves.cs" />
+    <Compile Include="Items\DonationShop\Masks\BearMask.cs" />
+    <Compile Include="Items\DonationShop\Masks\AncestorMask.cs" />
+    <Compile Include="Items\DonationShop\Masks\OrcHelmMask.cs" />
+    <Compile Include="Items\DonationShop\Masks\TribalMask.cs" />
+    <Compile Include="Items\DonationShop\Masks\OrcMask.cs" />
+    <Compile Include="Items\DonationShop\Masks\DeerMask.cs" />
     <Compile Include="Items\Armor\Ringmail\RingmailGorget.cs" />
     <Compile Include="Items\Armor\Studded\StuddedCap.cs" />
     <Compile Include="Items\Champion Artifacts\Decorative\ArtifactLargeVase.cs" />
@@ -301,8 +311,8 @@
     <Compile Include="Items\Food\Vegetable\Onion.cs" />
     <Compile Include="Items\Food\Vegetable\Pumpkin.cs" />
     <Compile Include="Items\Food\Vegetable\Turnip.cs" />
-    <Compile Include="Items\Libraries\PowerScrollLibrary.cs" />
-    <Compile Include="Items\Libraries\TreasureMapLibrary.cs" />
+    <Compile Include="Items\DonationShop\Convenience\SkillMasteryScrollLibrary.cs" />
+    <Compile Include="Items\DonationShop\Convenience\TreasureMapLibrary.cs" />
     <Compile Include="Items\Resources\Fishing\RawLargeFish.cs" />
     <Compile Include="Items\Resources\Fishing\RawFish.cs" />
     <Compile Include="Items\KittyLantern.cs" />
@@ -485,8 +495,7 @@
     <Compile Include="Items\Special\Solen Items\PowderOfTranslocation.cs" />
     <Compile Include="Items\Special\Solen Items\ZoogiFungus.cs" />
     <Compile Include="Items\Special\SoulStone.cs" />
-    <Compile Include="Items\Special\Special Scrolls\PowerScroll.cs" />
-    <Compile Include="Items\Special\Special Scrolls\StatScroll.cs" />
+    <Compile Include="Items\SkillMastery\SkillMasteryScroll.cs" />
     <Compile Include="Items\Special\Valentines\2007\RedVelvetGiftBox.cs" />
     <Compile Include="Items\Special\Valentines\2007\RoseInAVase.cs" />
     <Compile Include="Items\Special\Valentines\2007\ValentinesCard.cs" />
@@ -727,7 +736,6 @@
     <Compile Include="Items\DungeonWeapon\Moulds\BlacksmithyDungeonMould.cs" />
     <Compile Include="Items\DungeonWeapon\Moulds\CarpentryDungeonMould.cs" />
     <Compile Include="Items\SkillItems\Magical\Potions\Misc Potions\IncognitoPotion.cs" />
-    <Compile Include="Items\Libraries\DungeonCoreLibrary.cs" />
     <Compile Include="Items\GreyZoneTotem.cs" />
     <Compile Include="Items\HouseBanListExpansionDeed.cs" />
     <Compile Include="Items\HalloweenCostumes\PrincessSuit.cs" />
@@ -768,19 +776,15 @@
     <Compile Include="Items\HuePlating\Wood\WoodHuePlating.cs" />
     <Compile Include="Items\HuePlating\Wood\YewWoodHuePlating.cs" />
     <Compile Include="Items\JewelryBlessDeed.cs" />
-    <Compile Include="Items\Libraries\PrestigeScrollLibrary.cs" />
-    <Compile Include="Items\Libraries\SpellScrollLibrary.cs" />
-    <Compile Include="Items\MasteryOrb\BaseMasteryOrb.cs" />
-    <Compile Include="Items\MasteryOrb\BronzeMasteryOrb.cs" />
-    <Compile Include="Items\MasteryOrb\GoldMasteryOrb.cs" />
-    <Compile Include="Items\MasteryOrb\SilverMasteryOrb.cs" />
+    <Compile Include="Items\DonationShop\Convenience\SpellScrollLibrary.cs" />
+    <Compile Include="Items\SkillMastery\SkillMasteryOrb.cs" />
     <Compile Include="Items\NewbieDungeonRune.cs" />
     <Compile Include="Items\ParagonDevolveWand.cs" />
     <Compile Include="Items\PetDyes\AmethystPetDye.cs" />
     <Compile Include="Items\PetDyes\SapphirePetDye.cs" />
     <Compile Include="Items\PetDyes\EmeraldPetDye.cs" />
     <Compile Include="Items\SkillItems\Magical\Potions\Misc Potions\PolymorphPotion.cs" />
-    <Compile Include="Items\PotionBarrelCreationDeed.cs" />
+    <Compile Include="Items\DonationShop\Convenience\PotionBarrelCreationDeed.cs" />
     <Compile Include="Items\SkillItems\Magical\Potions\Misc Potions\RabbitBomb.cs" />
     <Compile Include="Items\ResizableRugs\ResizableRugAddon.cs" />
     <Compile Include="Items\LanternLayerDeed.cs" />
@@ -981,10 +985,6 @@
     <Compile Include="InfluenceSystem\InfluenceMarker.cs" />
     <Compile Include="InfluenceSystem\InfluencePersistance.cs" />
     <Compile Include="InfluenceSystem\PrestigeScroll.cs" />
-    <Compile Include="Items\Lures\FaintLure.cs" />
-    <Compile Include="Items\Lures\IrresistableLure.cs" />
-    <Compile Include="Items\Lures\Lure.cs" />
-    <Compile Include="Items\Lures\PotentLure.cs" />
     <Compile Include="Items\ExplodingAnimals\ExplodingBullvore.cs" />
     <Compile Include="Items\ExplodingAnimals\ExplodingDragon.cs" />
     <Compile Include="Items\ExplodingAnimals\ExplodingLlama.cs" />
@@ -1150,7 +1150,7 @@
     <Compile Include="PlayerEnhancements\SpellHueDeed\SpellHuePacks\Icy\IcySpellHuePack3.cs" />
     <Compile Include="PlayerEnhancements\SpellHueDeed\SpellHuePacks\Icy\IcySpellHuePack2.cs" />
     <Compile Include="PlayerEnhancements\SpellHueDeed\SpellHuePacks\Icy\IcySpellHuePack1.cs" />
-    <Compile Include="Items\PotionKegCombiningDeed.cs" />
+    <Compile Include="Items\DonationShop\Convenience\PotionKegCombiningDeed.cs" />
     <Compile Include="PvELeaderboards\GoldCoinTracker.cs" />
     <Compile Include="Regions\TownRegion.cs" />
     <Compile Include="Skills\SkillCooldown.cs" />
@@ -2830,13 +2830,13 @@
     <Compile Include="Items\Decoration Artifacts\SEDecorationArtifacts.cs" />
     <Compile Include="Items\Decoration Artifacts\StealableArtifactsSpawner.cs" />
     <Compile Include="Items\Deeds\BarkeepContract.cs" />
-    <Compile Include="Items\Deeds\BeardRestylingDeed.cs" />
-    <Compile Include="Items\Deeds\ClothingBlessDeed.cs" />
+    <Compile Include="Items\DonationShop\Personalization\BeardRestylingDeed.cs" />
+    <Compile Include="Items\DonationShop\Clothing\ClothingBlessDeed.cs" />
     <Compile Include="Items\Deeds\CommodityDeed.cs" />
     <Compile Include="Items\Deeds\DragonBardingDeed.cs" />
-    <Compile Include="Items\Deeds\GenderChangeDeed.cs" />
-    <Compile Include="Items\Deeds\HairRestylingDeed.cs" />
-    <Compile Include="Items\Deeds\NameChangeDeed.cs" />
+    <Compile Include="Items\DonationShop\Personalization\GenderChangeDeed.cs" />
+    <Compile Include="Items\DonationShop\Personalization\HairRestylingDeed.cs" />
+    <Compile Include="Items\DonationShop\Personalization\NameChangeDeed.cs" />
     <Compile Include="Items\Deeds\NewPlayerTicket.cs" />
     <Compile Include="Items\Deeds\SashBlessDeed.cs" />
     <Compile Include="Items\Deeds\VendorRentalContract.cs" />

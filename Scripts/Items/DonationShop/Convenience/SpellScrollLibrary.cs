@@ -8,10 +8,11 @@ using System.Collections.Generic;
 using Server.Multis;
 using Server.Accounting;
 using Server.Gumps;
+using Server.Spells;
 
 namespace Server.Items
 {
-    public class PrestigeScrollLibrary : Item
+    public class SpellScrollLibrary : Item
     {
         public enum LockedDownAccessLevelType
         {
@@ -20,6 +21,93 @@ namespace Server.Items
             Friend,
             Anyone
         }
+
+        public static Type[] SpellScrolls = new Type[]
+        {
+            #region Spells 
+
+            //First
+            typeof(ClumsyScroll),
+            typeof(CreateFoodScroll),
+            typeof(FeeblemindScroll),
+            typeof(HealScroll),
+            typeof(MagicArrowScroll),
+            typeof(NightSightScroll),
+            typeof(ReactiveArmorScroll),
+            typeof(WeakenScroll),
+
+            //Second
+            typeof(AgilityScroll),
+            typeof(CunningScroll),
+            typeof(CureScroll),
+            typeof(HarmScroll),
+            typeof(MagicTrapScroll),
+            typeof(ProtectionScroll),
+            typeof(MagicUnTrapScroll),
+            typeof(StrengthScroll),
+
+            //Third
+            typeof(BlessScroll),
+            typeof(FireballScroll),
+            typeof(MagicLockScroll),
+            typeof(PoisonScroll),
+            typeof(TelekinisisScroll),
+            typeof(TeleportScroll),
+            typeof(UnlockScroll),
+            typeof(WallOfStoneScroll),
+
+            //Fourth
+            typeof(ArchCureScroll),
+            typeof(ArchProtectionScroll),
+            typeof(CurseScroll),
+            typeof(FireFieldScroll),
+            typeof(GreaterHealScroll),
+            typeof(LightningScroll),
+            typeof(ManaDrainScroll),
+            typeof(RecallScroll),
+
+            //Fifth
+            typeof(BladeSpiritsScroll),
+            typeof(DispelFieldScroll),
+            typeof(IncognitoScroll),
+            typeof(MagicReflectScroll),
+            typeof(MindBlastScroll),
+            typeof(ParalyzeScroll),
+            typeof(PoisonFieldScroll),
+            typeof(SummonCreatureScroll),
+
+            //Sixth
+            typeof(DispelScroll),
+            typeof(EnergyBoltScroll),
+            typeof(ExplosionScroll),
+            typeof(InvisibilityScroll),
+            typeof(MarkScroll),
+            typeof(MassCurseScroll),
+            typeof(ParalyzeFieldScroll),
+            typeof(RevealScroll),
+
+            //Seventh
+            typeof(ChainLightningScroll),
+            typeof(EnergyFieldScroll),
+            typeof(FlamestrikeScroll),
+            typeof(GateTravelScroll),
+            typeof(ManaVampireScroll),
+            typeof(MassDispelScroll),
+            typeof(MeteorSwarmScroll),
+            typeof(PolymorphScroll),
+
+            //Eighth
+            typeof(SummonAirElementalScroll),
+            typeof(SummonEarthElementalScroll),
+            typeof(EarthquakeScroll),
+            typeof(EnergyVortexScroll),
+            typeof(SummonFireElementalScroll),
+            typeof(ResurrectionScroll),
+            typeof(SummonDaemonScroll),
+            typeof(SummonWaterElementalScroll),
+
+            #endregion
+        };        
 
         private LockedDownAccessLevelType m_LockedDownAccessLevel = LockedDownAccessLevelType.Owner;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -39,7 +127,7 @@ namespace Server.Items
 
         public override bool AlwaysAllowDoubleClick { get { return true; } }
 
-        public List<PrestigeScrollLibraryEntry> m_LibraryEntries = new List<PrestigeScrollLibraryEntry>();
+        public List<SpellScrollLibraryEntry> m_LibraryEntries = new List<SpellScrollLibraryEntry>();
 
         public int openGumpSound = 0x055;
         public int changeGumpSound = 0x057;
@@ -47,16 +135,16 @@ namespace Server.Items
         public int addItemSound = 0x249;
 
         [Constructable]
-        public PrestigeScrollLibrary(): base(8793)
+        public SpellScrollLibrary(): base(8793)
         {
-            Name = "a prestige scroll library";
-            Hue = 2587;
+            Name = "a spell scroll library";
+            Hue = 2117;
             Weight = 5;
 
-            CreateLocationEntries();
+            CreateSpellEntries();
         }
 
-        public PrestigeScrollLibrary(Serial serial): base(serial)
+        public SpellScrollLibrary(Serial serial): base(serial)
         {
         }
 
@@ -64,22 +152,22 @@ namespace Server.Items
         {
             base.OnSingleClick(from);
 
+            LabelTo(from, "(" + GetTotalCount().ToString() + " scrolls)");
+
             if (IsLockedDown)
             {
                 switch (m_LockedDownAccessLevel)
                 {
-                    case LockedDownAccessLevelType.Owner: LabelTo(from, "(owner accessable)"); break;
-                    case LockedDownAccessLevelType.CoOwner: LabelTo(from, "(co-owner accessable)"); break;
-                    case LockedDownAccessLevelType.Friend: LabelTo(from, "(friend accessable)"); break;
-                    case LockedDownAccessLevelType.Anyone: LabelTo(from, "(freely access)"); break;
+                    case LockedDownAccessLevelType.Owner: LabelTo(from, "[owner accessable]"); break;
+                    case LockedDownAccessLevelType.CoOwner: LabelTo(from, "[co-owner accessable]"); break;
+                    case LockedDownAccessLevelType.Friend: LabelTo(from, "[friend accessable]"); break;
+                    case LockedDownAccessLevelType.Anyone: LabelTo(from, "[freely access]"); break;
                 }
             }
         }
 
         public override void OnDoubleClick(Mobile from)
         {
-            //base.OnDoubleClick(from);
-
             PlayerMobile player = from as PlayerMobile;
 
             if (player == null)
@@ -90,32 +178,76 @@ namespace Server.Items
 
             player.SendSound(openGumpSound);
             
-            from.CloseGump(typeof(PrestigeScrollLibraryGump));
-            from.SendGump(new PrestigeScrollLibraryGump(player, this, 1));
-        }        
+            from.CloseGump(typeof(SpellScrollLibraryGump));
+            from.SendGump(new SpellScrollLibraryGump(player, this, 1));
+        }
 
-        public void CreateLocationEntries()
+        public int GetTotalCount()
         {
-            for (int a = 0; a < InfluencePersistance.Regions.Length; a++)
+            int totalCount = 0;
+
+            foreach (SpellScrollLibraryEntry entry in m_LibraryEntries)
             {
-                PrestigeScrollLibraryEntry entry = new PrestigeScrollLibraryEntry();
-                entry.regionName = InfluencePersistance.Regions[a];
+                if (entry == null)
+                    continue;
+
+                totalCount += entry.Count;
+            }
+
+            return totalCount;
+        }
+
+        public void CreateSpellEntries()
+        {
+            for (int a = 0; a < SpellScrolls.Length; a++)
+            {
+                SpellScrollLibraryEntry entry = new SpellScrollLibraryEntry();
+                entry.SpellType = SpellScrolls[a];
 
                 m_LibraryEntries.Add(entry);
             }
         }
 
-        public PrestigeScrollLibraryEntry GetEntryDetail(IndexedRegionName regionName)
+        public SpellScrollLibraryEntry GetLibraryEntry(Type spellType)
         {
-            PrestigeScrollLibraryEntry targetEntry = null;
+            SpellScrollLibraryEntry targetEntry = null;
 
-            foreach (PrestigeScrollLibraryEntry entry in m_LibraryEntries)
+            foreach (SpellScrollLibraryEntry entry in m_LibraryEntries)
             {
-                if (entry.regionName == regionName)
+                if (entry.SpellType == spellType)
                     return entry;
             }
 
             return targetEntry;
+        }
+
+        public override bool OnDragDrop(Mobile from, Item dropped)
+        {
+            if (dropped is SpellScroll)
+            {
+                SpellScroll spellScroll = dropped as SpellScroll;
+                
+                SpellScrollLibraryEntry entry = GetLibraryEntry(spellScroll.GetType());
+                
+                if (entry != null)
+                {
+                    entry.Count += spellScroll.Amount;                    
+
+                    if (spellScroll.Amount == 1)
+                        from.SendMessage("You add a spell scroll to the library.");
+                    else
+                        from.SendMessage("You add a " + spellScroll.Amount.ToString() + " spell scrolls to the library.");
+
+                    from.SendSound(addItemSound);
+
+                    spellScroll.Delete();
+                }
+
+                return true;
+            }
+
+            else
+                return false;
         }
 
         public void AddAllScrollsInPack(Mobile from)
@@ -123,92 +255,62 @@ namespace Server.Items
             if (from == null) return;
             if (from.Backpack == null) return;
 
-            List<PrestigeScroll> m_PrestigeScrolls = from.Backpack.FindItemsByType<PrestigeScroll>();
+            List<SpellScroll> m_SpellScrolls = from.Backpack.FindItemsByType<SpellScroll>();
 
             int totalCount = 0;
 
             Queue m_Queue = new Queue();
 
-            foreach (PrestigeScroll prestigeScroll in m_PrestigeScrolls)
+            foreach (SpellScroll spellScroll in m_SpellScrolls)
             {
-                m_Queue.Enqueue(prestigeScroll);                
+                m_Queue.Enqueue(spellScroll);                
             }
 
             while (m_Queue.Count > 0)
             {
-                PrestigeScroll prestigeScroll = (PrestigeScroll)m_Queue.Dequeue();
-                PrestigeScrollLibraryEntry entry = GetEntryDetail(prestigeScroll.Region);
+                SpellScroll spellScroll = (SpellScroll)m_Queue.Dequeue();
+                SpellScrollLibraryEntry entry = GetLibraryEntry(spellScroll.GetType());
 
                 if (entry == null)
                     continue;
 
-                switch ((int)prestigeScroll.InfluenceAmount)
-                {
-                    case 1: entry.Value1++; break;
-                    case 2: entry.Value2++; break;
-                    case 3: entry.Value3++; break;
-                }
+                entry.Count += spellScroll.Amount;
 
-                totalCount++;
-                prestigeScroll.Delete();
+                totalCount += spellScroll.Amount;
+                spellScroll.Delete();
             }
 
             if (totalCount > 1)
             {
-                from.SendMessage("You add " + totalCount.ToString() + " prestige scrolls to the library.");
+                from.SendMessage("You add " + totalCount.ToString() + " spells scrolls to the library.");
                 from.SendSound(addItemSound);
             }
 
             else if (totalCount == 1)
             {
-                from.SendMessage("You add a prestige scroll to the library.");
+                from.SendMessage("You add a spell scroll to the library.");
                 from.SendSound(addItemSound);
             }
 
             else
-                from.SendMessage("You do not have any prestige scrolls in your backpack.");
+                from.SendMessage("You do not have any spell scrolls in your backpack.");
         }
 
-        public void EjectScroll(Mobile from, IndexedRegionName regionName, int value, bool removeAll)
+        public void EjectScroll(Mobile from, Type spellType, bool ejectAll)
         {
             if (from == null)
                 return;
 
-            PrestigeScrollLibraryEntry entry = GetEntryDetail(regionName);
+            SpellScrollLibraryEntry entry = GetLibraryEntry(spellType);
 
             if (entry == null)
                 return;
 
-            switch (value)
+            if (entry.Count == 0)
             {
-                case 1:
-                    if (entry.Value1 == 0)
-                    {
-                        from.SendMessage("The are no prestige scrolls of that type currently stored within.");
-                        return;
-                    }
-                break;
-
-                case 2:
-                    if (entry.Value2 == 0)
-                    {
-                        from.SendMessage("The are no prestige scrolls of that type currently stored within.");
-                        return;
-                    }
-                break;
-
-                case 3:
-                    if (entry.Value3 == 0)
-                    {
-                        from.SendMessage("The are no prestige scrolls of that type currently stored within.");
-                        return;
-                    }
-                break;
-
-                default:
-                    return;
-                break;
-            }
+                from.SendMessage("You do not have any copies of that spell currently stored within this library.");
+                return;
+            }            
 
             if (from.Backpack == null)
                 return;
@@ -218,81 +320,57 @@ namespace Server.Items
                 from.SendMessage("Your backpack is at maximum capacity. Please remove some items and try again.");
                 return;
             }
-
-            if (removeAll)
+           
+            if (ejectAll)
             {
-                int scrollCount = 0;
+                int amount = entry.Count;
 
-                for (int a = 0; a < 1000; a++)
+                SpellScroll spellScroll = (SpellScroll)Activator.CreateInstance(entry.SpellType);
+
+                if (spellScroll != null)
                 {
-                    bool outOfScrolls = false;
+                    spellScroll.Amount = amount;
+                    entry.Count = 0;
 
-                    switch (value)
-                    {
-                        case 1: if (entry.Value1 == 0) outOfScrolls = true; break;
-                        case 2: if (entry.Value2 == 0) outOfScrolls = true; break;
-                        case 3: if (entry.Value3 == 0) outOfScrolls = true; break;                       
-                    }
-
-                    if (from.Backpack.TotalItems == from.Backpack.MaxItems)
-                        break;
-
-                    if (outOfScrolls)
-                        break;
-
-                    PrestigeScroll prestigeScroll = new PrestigeScroll(regionName, value);
-
-                    if (prestigeScroll != null)
-                    {
-                        switch (value)
-                        {
-                            case 1: entry.Value1--; break;
-                            case 2: entry.Value2--; break;
-                            case 3: entry.Value3--; break;
-                        }
-
-                        from.Backpack.DropItem(prestigeScroll);
-                    }
-
-                    scrollCount++;
+                    from.Backpack.DropItem(spellScroll);
                 }
 
-                if (scrollCount > 1)
+                else
+                    amount = 0;                
+
+                if (amount > 1)
                 {
-                    from.SendMessage("You retrieve " + scrollCount.ToString() + " prestige scrolls from the library.");
+                    from.SendMessage("You retrieve several spell scrolls from the library.");
                     from.SendSound(addItemSound);
                 }
 
-                else if (scrollCount == 1)
+                else if (amount == 1)
                 {
-                    from.SendMessage("You retrieve a prestige scroll from the library.");
+                    from.SendMessage("You retrieve a spell scroll from the library.");
                     from.SendSound(addItemSound);
                 }
 
                 else
-                    from.SendMessage("You do not have any scrolls of that value in the library.");
+                    from.SendMessage("You do not have any scrolls of that in the library.");
             }
 
             else
-            {
-                PrestigeScroll prestigeScroll = new PrestigeScroll(regionName, value);
+            {                
+                SpellScroll spellScroll = (SpellScroll)Activator.CreateInstance(entry.SpellType);
 
-                if (prestigeScroll != null)
+                if (spellScroll != null)
                 {
+                    spellScroll.Amount = 1;
+                    entry.Count--;
 
-
-                    switch (value)
-                    {
-                        case 1: entry.Value1--; break;
-                        case 2: entry.Value2--; break;
-                        case 3: entry.Value3--; break;
-                    }
-
-                    from.Backpack.DropItem(prestigeScroll);
+                    from.Backpack.DropItem(spellScroll);
                     from.SendSound(addItemSound);
-                    from.SendMessage("You retrieve a prestige scroll from the library.");
+                    from.SendMessage("You retrieve a spell scroll from the library.");                        
                 }
-            } 
+
+                else
+                    from.SendMessage("You do not have any scrolls of that in the library.");                
+            }
         }
 
         public bool CanUse(Mobile from)
@@ -399,13 +477,11 @@ namespace Server.Items
             writer.Write(m_LibraryEntries.Count);
             for (int a = 0; a < m_LibraryEntries.Count; a++)
             {
-                PrestigeScrollLibraryEntry entry = m_LibraryEntries[a];
+                SpellScrollLibraryEntry entry = m_LibraryEntries[a];
 
-                writer.Write((int)entry.regionName);
+                writer.Write(entry.SpellType.ToString());
 
-                writer.Write(entry.Value1);
-                writer.Write(entry.Value2);
-                writer.Write(entry.Value3);
+                writer.Write(entry.Count);
             }
         }
 
@@ -424,44 +500,44 @@ namespace Server.Items
 
                 for (int a = 0; a < libraryEntryCount; a++)
                 {
-                    PrestigeScrollLibraryEntry entry = new PrestigeScrollLibraryEntry();
+                    SpellScrollLibraryEntry entry = new SpellScrollLibraryEntry();
 
-                    entry.regionName = (IndexedRegionName)reader.ReadInt();
+                    Type type = Type.GetType(reader.ReadString());
+                    int count = reader.ReadInt();
 
-                    entry.Value1 = reader.ReadInt();
-                    entry.Value2 = reader.ReadInt();
-                    entry.Value3 = reader.ReadInt();
+                    if (type != null)
+                    {
+                        entry.SpellType = type;
+                        entry.Count = count;
 
-                    m_LibraryEntries.Add(entry);
+                        m_LibraryEntries.Add(entry);
+                    }
                 }
             }
         }
     }
 
-    public class PrestigeScrollLibraryEntry
+    public class SpellScrollLibraryEntry
     {
-        public IndexedRegionName regionName = InfluencePersistance.Regions[0];
-
-        public int Value1 = 0;
-        public int Value2 = 0;
-        public int Value3 = 0;
+        public Type SpellType = typeof(ChainLightningScroll);
+        public int Count = 0;
     }
 
-    public class PrestigeScrollLibraryGump : Gump
+    public class SpellScrollLibraryGump : Gump
     {
         PlayerMobile m_Player;
-        PrestigeScrollLibrary m_Library;
+        SpellScrollLibrary m_Library;
 
         int m_PageNumber = 1;
         int m_TotalPages = 1;
         int m_TotalEntries = 1;
 
-        int EntriesPerSide = 4;
-        int EntriesPerPage = 8;
+        int EntriesPerSide = 8;
+        int EntriesPerPage = 16;
 
         int WhiteTextHue = 2499;
 
-        public PrestigeScrollLibraryGump(PlayerMobile player, PrestigeScrollLibrary library, int pageNumber): base(10, 10)
+        public SpellScrollLibraryGump(PlayerMobile player, SpellScrollLibrary library, int pageNumber): base(10, 10)
         {
             if (player == null) return;
             if (library == null) return;
@@ -469,17 +545,17 @@ namespace Server.Items
 
             m_Player = player;
             m_Library = library;
-            m_PageNumber = pageNumber;
+            m_PageNumber = pageNumber;            
 
             Closable = true;
             Disposable = true;
             Dragable = true;
             Resizable = false;
 
-            AddImage(205, 193, 11015, 2587);
-            AddImage(204, 1, 11015, 2587);
-            AddImage(3, 192, 11015, 2587);
-            AddImage(3, 1, 11015, 2587);
+            AddImage(205, 193, 11015);
+            AddImage(204, 1, 11015);
+            AddImage(3, 192, 11015);
+            AddImage(3, 1, 11015);
             AddImage(302, 75, 2081, 2499);
             AddImage(300, 270, 2081, 2499);
             AddImage(301, 141, 2081, 2499);
@@ -494,27 +570,27 @@ namespace Server.Items
             AddImage(43, 274, 2081, 2499);
             AddImageTiled(301, 2, 6, 405, 2701);
             AddImage(41, 338, 2081, 2499);
-            AddItem(152, 29, 8002, 2615);
+            AddItem(152, 29, 8002);
             AddImage(49, 80, 3001, 2615);
             AddImage(56, 80, 3001, 2615);
             AddImage(306, 80, 3001, 2615);
             AddImage(315, 80, 3001, 2615);
 
-            AddLabel(105, 5, 2615, "Prestige Scroll Library");
+            AddLabel(115, 5, 2560, "Spell Scroll Library");
 
             AddLabel(88, 53, WhiteTextHue, "Add All in Backpack into Library");
             AddButton(65, 56, 2118, 2118, 1, GumpButtonType.Reply, 0);
-
+            
             AddLabel(354, 5, 2615, "Locked Down Access Level");
 
             string accessName = "Owner";
 
             switch (m_Library.LockedDownAccessLevel)
             {
-                case PrestigeScrollLibrary.LockedDownAccessLevelType.Owner: accessName = "Owner"; break;
-                case PrestigeScrollLibrary.LockedDownAccessLevelType.CoOwner: accessName = "Co-Owner"; break;
-                case PrestigeScrollLibrary.LockedDownAccessLevelType.Friend: accessName = "Friend"; break;
-                case PrestigeScrollLibrary.LockedDownAccessLevelType.Anyone: accessName = "Anyone"; break;
+                case SpellScrollLibrary.LockedDownAccessLevelType.Owner: accessName = "Owner"; break;
+                case SpellScrollLibrary.LockedDownAccessLevelType.CoOwner: accessName = "Co-Owner"; break;
+                case SpellScrollLibrary.LockedDownAccessLevelType.Friend: accessName = "Friend"; break;
+                case SpellScrollLibrary.LockedDownAccessLevelType.Anyone: accessName = "Anyone"; break;
             }
 
             AddLabel(Utility.CenteredTextOffset(435, accessName), 25, 2562, accessName);
@@ -526,7 +602,7 @@ namespace Server.Items
             if (m_Library.RemoveAllOnSelection)
                 AddButton(313, 48, 2154, 2151, 4, GumpButtonType.Reply, 0);
             else
-                AddButton(313, 48, 2151, 2154, 4, GumpButtonType.Reply, 0); 
+                AddButton(313, 48, 2151, 2154, 4, GumpButtonType.Reply, 0);
 
             //-----
 
@@ -548,8 +624,8 @@ namespace Server.Items
             if (endIndex > m_TotalEntries)
                 endIndex = m_TotalEntries;
 
-            int leftStartY = 95;
-            int rightStartY = 95;
+            int leftStartY = 88;
+            int rightStartY = 88;
 
             int entryCount = 0;
 
@@ -557,50 +633,31 @@ namespace Server.Items
             {
                 if (a < m_Library.m_LibraryEntries.Count)
                 {
-                    PrestigeScrollLibraryEntry entry = m_Library.m_LibraryEntries[a];
+                    SpellScrollLibraryEntry entry = m_Library.m_LibraryEntries[a];
+
+                    int numberTextHue = WhiteTextHue;
+
+                    if (entry.Count > 0)
+                        numberTextHue = 2560;
 
                     //Left Side
                     if (entryCount < EntriesPerSide)
                     {
-                        string regionName = InfluencePersistance.GetRegionName(entry.regionName);
+                        AddLabel(60, leftStartY, 2560, MagerySpell.GetSpellName(entry.SpellType));
+                        AddButton(231, leftStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
+                        AddLabel(249, leftStartY, numberTextHue, entry.Count.ToString());
 
-                        AddLabel(Utility.CenteredTextOffset(180, regionName), leftStartY, 2615, regionName);
-
-                        AddLabel(110, leftStartY + 20, 149, "1");
-                        AddButton(90, leftStartY + 43, 2118, 2118, (10 * entryCount) + 10, GumpButtonType.Reply, 0);
-                        AddLabel(110, leftStartY + 40, WhiteTextHue, entry.Value1.ToString());
-
-                        AddLabel(170, leftStartY + 20, 149, "2");
-                        AddButton(150, leftStartY + 43, 2118, 2118, (10 * entryCount) + 11, GumpButtonType.Reply, 0);
-                        AddLabel(170, leftStartY + 40, WhiteTextHue, entry.Value2.ToString());
-
-                        AddLabel(230, leftStartY + 20, 149, "3");
-                        AddButton(210, leftStartY + 43, 2118, 2118, (10 * entryCount) + 12, GumpButtonType.Reply, 0);
-                        AddLabel(230, leftStartY + 40, WhiteTextHue, entry.Value3.ToString());
-
-                        leftStartY += 67;
+                        leftStartY += 38;
                     }
 
                     //Right Side
                     else
                     {
-                        string regionName = InfluencePersistance.GetRegionName(entry.regionName);
+                        AddLabel(317, rightStartY, 2560, MagerySpell.GetSpellName(entry.SpellType));
+                        AddButton(488, rightStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
+                        AddLabel(506, rightStartY, numberTextHue, entry.Count.ToString());
 
-                        AddLabel(Utility.CenteredTextOffset(435, regionName), rightStartY, 2615, regionName);
-
-                        AddLabel(370, rightStartY + 20, 149, "1");
-                        AddButton(350, rightStartY + 43, 2118, 2118, (10 * entryCount) + 10, GumpButtonType.Reply, 0);
-                        AddLabel(370, rightStartY + 40, WhiteTextHue, entry.Value1.ToString());
-
-                        AddLabel(430, rightStartY + 20, 149, "2");
-                        AddButton(410, rightStartY + 43, 2118, 2118, (10 * entryCount) + 11, GumpButtonType.Reply, 0);
-                        AddLabel(430, rightStartY + 40, WhiteTextHue, entry.Value2.ToString());
-
-                        AddLabel(490, rightStartY + 20, 149, "3");
-                        AddButton(470, rightStartY + 43, 2118, 2118, (10 * entryCount) + 12, GumpButtonType.Reply, 0);
-                        AddLabel(490, rightStartY + 40, WhiteTextHue, entry.Value3.ToString());
-
-                        rightStartY += 67;
+                        rightStartY += 38;
                     }
 
                     entryCount++;
@@ -624,7 +681,7 @@ namespace Server.Items
 
             if (!m_Library.CanUse(m_Player))
                 return;
-
+            
             m_TotalPages = (int)(Math.Ceiling((double)m_TotalEntries / (double)EntriesPerPage));
 
             if (m_TotalPages == 0)
@@ -658,10 +715,10 @@ namespace Server.Items
                     {
                         switch (m_Library.LockedDownAccessLevel)
                         {
-                            case PrestigeScrollLibrary.LockedDownAccessLevelType.Owner: m_Library.LockedDownAccessLevel = PrestigeScrollLibrary.LockedDownAccessLevelType.Anyone; break;
-                            case PrestigeScrollLibrary.LockedDownAccessLevelType.CoOwner: m_Library.LockedDownAccessLevel = PrestigeScrollLibrary.LockedDownAccessLevelType.Owner; break;
-                            case PrestigeScrollLibrary.LockedDownAccessLevelType.Friend: m_Library.LockedDownAccessLevel = PrestigeScrollLibrary.LockedDownAccessLevelType.CoOwner; break;
-                            case PrestigeScrollLibrary.LockedDownAccessLevelType.Anyone: m_Library.LockedDownAccessLevel = PrestigeScrollLibrary.LockedDownAccessLevelType.Friend; break;
+                            case SpellScrollLibrary.LockedDownAccessLevelType.Owner: m_Library.LockedDownAccessLevel = SpellScrollLibrary.LockedDownAccessLevelType.Anyone; break;
+                            case SpellScrollLibrary.LockedDownAccessLevelType.CoOwner: m_Library.LockedDownAccessLevel = SpellScrollLibrary.LockedDownAccessLevelType.Owner; break;
+                            case SpellScrollLibrary.LockedDownAccessLevelType.Friend: m_Library.LockedDownAccessLevel = SpellScrollLibrary.LockedDownAccessLevelType.CoOwner; break;
+                            case SpellScrollLibrary.LockedDownAccessLevelType.Anyone: m_Library.LockedDownAccessLevel = SpellScrollLibrary.LockedDownAccessLevelType.Friend; break;
                         }
                     }
 
@@ -677,10 +734,10 @@ namespace Server.Items
                     {
                         switch (m_Library.LockedDownAccessLevel)
                         {
-                            case PrestigeScrollLibrary.LockedDownAccessLevelType.Owner: m_Library.LockedDownAccessLevel = PrestigeScrollLibrary.LockedDownAccessLevelType.CoOwner; break;
-                            case PrestigeScrollLibrary.LockedDownAccessLevelType.CoOwner: m_Library.LockedDownAccessLevel = PrestigeScrollLibrary.LockedDownAccessLevelType.Friend; break;
-                            case PrestigeScrollLibrary.LockedDownAccessLevelType.Friend: m_Library.LockedDownAccessLevel = PrestigeScrollLibrary.LockedDownAccessLevelType.Anyone; break;
-                            case PrestigeScrollLibrary.LockedDownAccessLevelType.Anyone: m_Library.LockedDownAccessLevel = PrestigeScrollLibrary.LockedDownAccessLevelType.Owner; break;
+                            case SpellScrollLibrary.LockedDownAccessLevelType.Owner: m_Library.LockedDownAccessLevel = SpellScrollLibrary.LockedDownAccessLevelType.CoOwner; break;
+                            case SpellScrollLibrary.LockedDownAccessLevelType.CoOwner: m_Library.LockedDownAccessLevel = SpellScrollLibrary.LockedDownAccessLevelType.Friend; break;
+                            case SpellScrollLibrary.LockedDownAccessLevelType.Friend: m_Library.LockedDownAccessLevel = SpellScrollLibrary.LockedDownAccessLevelType.Anyone; break;
+                            case SpellScrollLibrary.LockedDownAccessLevelType.Anyone: m_Library.LockedDownAccessLevel = SpellScrollLibrary.LockedDownAccessLevelType.Owner; break;
                         }
                     }
 
@@ -718,42 +775,27 @@ namespace Server.Items
             //Eject Items
             if (info.ButtonID >= 10)
             {
-                int rootIndex = info.ButtonID - 10;
-                int baseIndex = (int)(Math.Floor((double)rootIndex / 10));
-                int remainder = info.ButtonID % 10;
-                int value = 0;
-
-                switch (remainder)
-                {
-                    case 0: value = 1; break;
-                    case 1: value = 2; break;
-                    case 2: value = 3; break;
-                }
-
-                if (value == 0)
-                    return;
-
-                int index = ((m_PageNumber - 1) * EntriesPerPage) + baseIndex;
+                int index = ((m_PageNumber - 1) * EntriesPerPage) + (info.ButtonID - 10);
 
                 if (index >= m_Library.m_LibraryEntries.Count || index < 0)
                     return;
 
-                PrestigeScrollLibraryEntry entry = m_Library.m_LibraryEntries[index];
+                SpellScrollLibraryEntry entry = m_Library.m_LibraryEntries[index];
 
                 if (entry == null)
                     return;
 
                 bool removeAll = m_Library.RemoveAllOnSelection;
 
-                m_Library.EjectScroll(m_Player, entry.regionName, value, removeAll);
+                m_Library.EjectScroll(m_Player, entry.SpellType, removeAll);
 
                 closeGump = false;
             }
 
             if (!closeGump)
             {
-                m_Player.CloseGump(typeof(PrestigeScrollLibraryGump));
-                m_Player.SendGump(new PrestigeScrollLibraryGump(m_Player, m_Library, m_PageNumber));
+                m_Player.CloseGump(typeof(SpellScrollLibraryGump));
+                m_Player.SendGump(new SpellScrollLibraryGump(m_Player, m_Library, m_PageNumber));
             }
 
             else

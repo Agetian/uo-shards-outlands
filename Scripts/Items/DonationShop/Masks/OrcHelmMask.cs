@@ -3,7 +3,7 @@ using Server;
 
 namespace Server.Items
 {
-	public class OrcHelm : BaseArmor
+	public class OrcHelmMask : BaseArmor
 	{
         public override int InitMinHits { get { return 40; } }
         public override int InitMaxHits { get { return 50; } }
@@ -16,19 +16,21 @@ namespace Server.Items
         public override int IconOffsetX { get { return -5; } }
         public override int IconOffsetY { get { return 5; } }
 
-        public override ArmorMaterialType MaterialType { get { return ArmorMaterialType.Ringmail; } }
-        public override CraftResource DefaultResource { get { return CraftResource.Iron; } }
+        public override ArmorMaterialType MaterialType { get { return ArmorMaterialType.Leather; } }
+        public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }
 
-        public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorMeditationAllowance.Half; } }
+        public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorMeditationAllowance.All; } }
 
 		[Constructable]
-		public OrcHelm() : base( 7947 )
+		public OrcHelmMask() : base( 7947 )
 		{
-            Name = "orc helm";
+            Name = "orc helm (mask)";
 			Weight = 2.0;
+
+            LootType = LootType.Blessed;
 		}
 
-		public OrcHelm( Serial serial ) : base( serial )
+		public OrcHelmMask( Serial serial ) : base( serial )
 		{
 		}
 		

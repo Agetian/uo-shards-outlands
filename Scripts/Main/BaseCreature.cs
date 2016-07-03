@@ -7805,7 +7805,7 @@ namespace Server.Mobiles
                         continue;
                     }
 
-                    PowerScroll powerscroll = new PowerScroll();
+                    SkillMasteryScroll powerscroll = new SkillMasteryScroll();
 
                     damager.m_Mobile.SendLocalizedMessage(1049524); // You have received a scroll of power!
 

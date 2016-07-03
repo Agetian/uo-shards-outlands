@@ -25,25 +25,81 @@ namespace Server
             CommandSystem.Register("Donation", AccessLevel.Player, new CommandEventHandler(DonationShop_OnCommand));
             CommandSystem.Register("DonationShop", AccessLevel.Player, new CommandEventHandler(DonationShop_OnCommand));
             
-            //Masks
-            DonationShopList.Add(new DonationCategory("Masks", 5445, 0, 0, 0), 
+            //Monthly Specials
+            DonationShopList.Add(new DonationCategory("Monthly Specials", 3103, 0, 10, -5),
             new List<DonationItem>()
             {
-                new DonationItem(typeof(BearMask), "Bear Mask", new List<string>{"A stylish piece of head protection.", "(equivalent to Leather Cap)"}, 500, 5445, 0, 0, -5),
-                new DonationItem(typeof(DeerMask), "Deer Mask", new List<string>{"A stylish piece of head protection.", "(equivalent to Leather Cap)"}, 500, 5447, 0, 0, -5),
-                new DonationItem(typeof(OrcMask), "Orc Mask", new List<string>{"A stylish piece of head protection.", "(equivalent to Leather Cap)"}, 500, 5147, 0, 5, 0),
-                new DonationItem(typeof(SavageMask), "Savage Mask", new List<string>{"A stylish piece of head protection.", "(equivalent to Leather Cap)"}, 500, 5451, 0, 5, 0),
-                new DonationItem(typeof(TribalMask), "Tribal Mask", new List<string>{"A stylish piece of head protection.", "(equivalent to Leather Cap)"}, 500, 5449, 0, 5, 0)
+                new DonationItem(typeof(BearMask), "Bear Mask", new List<string>{"A stylish piece of head protection.", "Equivalent to exceptional Leather Cap."}, 500, 5445, 0, 0, 0),                
+                //Launch Supporter Sash/Sandals/Hat
             });
 
-            //Organizers
-            DonationShopList.Add(new DonationCategory("Organizers", 8793, 0, 0, 0),
+            //Masks
+            DonationShopList.Add(new DonationCategory("Masks", 5445, 0, -2, 0), 
             new List<DonationItem>()
             {
-                new DonationItem(typeof(PowerScrollLibrary), "Power Scroll Library", new List<string>{"Store and organize Power Scrolls", "in this handy tome."}, 500, 8793, 2657, 5, -5),
-                new DonationItem(typeof(SpellScrollLibrary), "Spell Scroll Library", new List<string>{"Store and organize Spell Scrolls", "in this handy tome."}, 500, 8793, 2117, 5, -5),
-                new DonationItem(typeof(TreasureMapLibrary), "Treasure Map Library", new List<string>{"Store and organize Treasure Maps", "in this handy tome."}, 500, 8793, 2550, 5, -5),
-            });  
+                new DonationItem(typeof(BearMask), "Bear Mask", new List<string>{"A stylish piece of head protection.", "Equivalent to exceptional Leather Cap.", "(Blessed)"}, 1000, 5445, 0, 0, 0),
+                new DonationItem(typeof(DeerMask), "Deer Mask", new List<string>{"A stylish piece of head protection.", "Equivalent to exceptional Leather Cap.", "(Blessed)"}, 1000, 5447, 0, 0, 0),
+                new DonationItem(typeof(OrcMask), "Orc Mask", new List<string>{"A stylish piece of head protection.", "Equivalent to exceptional Leather Cap.", "(Blessed)"}, 1000, 5147, 0, 0, 0),
+                new DonationItem(typeof(OrcHelmMask), "Orc Helm (as Mask)", new List<string>{"A stylish piece of head protection.", "Equivalent to exceptional Leather Cap.", "(Blessed)"}, 1000, 7947, 0, 0, 0),
+                new DonationItem(typeof(TribalMask), "Tribal Mask", new List<string>{"A stylish piece of head protection.", "Equivalent to exceptional Leather Cap.", "(Blessed)"}, 1000, 5451, 0, 0, 0),
+                new DonationItem(typeof(AncestorMask), "Ancestor Mask", new List<string>{"A stylish piece of head protection.", "Equivalent to exceptional Leather Cap.", "(Blessed)"}, 1000, 5449, 0, 0, 0)
+            
+                //Mask Dye
+                //Mask Dye
+                //Mask Dye
+            });
+
+            //Clothing
+            DonationShopList.Add(new DonationCategory("Clothing", 8098, 2576, -5, 0),
+            new List<DonationItem>()
+            {
+                new DonationItem(typeof(ClothingBlessDeed), "Clothing Bless Deed", new List<string>{"Bless an article of clothing."}, 500, 5360, 2958, 0, 0),
+                //Sash Layering Deed  
+              
+                //Special Dye
+                //Special Dye
+                //Special Dye
+            });
+
+            //Convenience Items
+            DonationShopList.Add(new DonationCategory("Convenience", 8793, 2550, 0, 0),
+            new List<DonationItem>()
+            {
+                new DonationItem(typeof(PotionKegCombiningDeed), "Potion Keg Combining Deed", new List<string>{"Combine the capacities of two potion kegs."}, 500, 5360, 2500, 0, 0),
+                new DonationItem(typeof(PotionBarrelConversionDeed), "Potion Barrel Conversion Deed", new List<string>{"Convert a potion keg with 500 capacity", "or more into a potion barrel."}, 500, 5360, 2515, 0, 0),                
+                new DonationItem(typeof(SkillMasteryScrollLibrary), "Power Scroll Library", new List<string>{"Store and organize Power Scrolls", "in this handy tome."}, 500, 8793, 2657, 0, 0),
+                new DonationItem(typeof(SpellScrollLibrary), "Spell Scroll Library", new List<string>{"Store and organize Spell Scrolls", "in this handy tome."}, 500, 8793, 2117, 0, 0),
+                new DonationItem(typeof(TreasureMapLibrary), "Treasure Map Library", new List<string>{"Store and organize Treasure Maps", "in this handy tome."}, 500, 8793, 2550, 0, 0),            
+            
+                //Unlimited Use Crafting Tools (Blessed)
+                //Unlimited Use Harvesting Tools (Blessed)
+            });
+
+            //Personalization Items
+            DonationShopList.Add(new DonationCategory("Personalization", 5360, 0, 0, 0),
+            new List<DonationItem>()
+            {
+                //Name Change Deed
+                //Gender Change Deed                
+                //Hair Restyle Deed
+                //Beard Restyle Deed                
+                //Guild Rename Deed
+            });
+
+            //Misc Items
+            DonationShopList.Add(new DonationCategory("Misc", 5360, 0, 0, 0),
+            new List<DonationItem>()
+            {
+                //Runebook Dye Tub
+                //Bulk Order Dye Tub
+                //Backpack Dye Tub
+
+                //Trapped Pouch (Charges)
+            }); 
+
+            //Decorations
+
+            //Add-Ons            
         }
 
         [Usage("DonationShop")]
