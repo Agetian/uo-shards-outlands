@@ -52,7 +52,7 @@ namespace Server.Items
         public TreasureMapLibrary(): base(8793)
         {
             Name = "a treasure map library";
-            Hue = 2550;
+            Hue = 2503;
             Weight = 5;
 
             CreateEntries();
@@ -594,10 +594,11 @@ namespace Server.Items
 
             #region Images 
 
-            AddImage(205, 193, 11015, 2550);
-            AddImage(204, 1, 11015, 2550);
-            AddImage(3, 192, 11015, 2550);
-            AddImage(3, 1, 11015, 2550);
+            AddImage(205, 193, 11015, 2503);
+            AddImage(204, 1, 11015, 2503);
+            AddImage(3, 192, 11015, 2503);
+            AddImage(3, 1, 11015, 2503);
+
             AddImage(302, 75, 2081, 2499);
             AddImage(300, 270, 2081, 2499);
             AddImage(301, 141, 2081, 2499);
@@ -609,15 +610,15 @@ namespace Server.Items
             AddImage(43, 141, 2081, 2499);
             AddImage(43, 206, 2081, 2499);
             AddImage(41, 335, 2081);
-            AddImage(43, 274, 2081, 2499);
-            AddImageTiled(301, 2, 6, 405, 2701);
+            AddImage(43, 274, 2081, 2499);           
             AddImage(41, 338, 2081, 2499);            
             AddImage(49, 80, 3001, 2615);
             AddImage(56, 80, 3001, 2615);
             AddImage(306, 80, 3001, 2615);
             AddImage(315, 80, 3001, 2615);
+            AddImageTiled(301, 2, 6, 405, 2701);
 
-            AddItem(153, 25, 5356, 2550);
+            AddItem(153, 25, 5356, 0);
 
             #endregion
 
@@ -650,14 +651,14 @@ namespace Server.Items
 
             //-----
 
-            AddLabel(105, 5, 2550, "Treasure Map Library");
+            AddLabel(105, 5, 2415, "Treasure Map Library");
 
             int leftStartY = 90;
             int rightStartY = 90;
             int itemSpacing = 30;
             
             //Left Side: Undecoded
-            AddLabel(142, leftStartY, 2599, "Undecoded");
+            AddLabel(142, leftStartY, 2502, "Undecoded");
 
             leftStartY += itemSpacing;
 
@@ -668,11 +669,11 @@ namespace Server.Items
                 int numberTextHue = WhiteTextHue;
 
                 if (entry.Count > 0)
-                    numberTextHue = 2599;
+                    numberTextHue = 2502;
 
                 if (entry != null)
                 {
-                    AddLabel(60, leftStartY, 2599, TreasureMap.GetMapDisplayName(a));
+                    AddLabel(60, leftStartY, 2502, TreasureMap.GetMapDisplayName(a));
                     AddButton(230, leftStartY + 3, 2117, 2118, 10 + a, GumpButtonType.Reply, 0);
                     AddLabel(250, leftStartY, numberTextHue, entry.Count.ToString());
 
@@ -681,7 +682,7 @@ namespace Server.Items
             }
 
             //Right Side: Decoded
-            AddLabel(408, rightStartY, 63, "Decoded");
+            AddLabel(408, rightStartY, 2413, "Decoded");
 
             rightStartY += itemSpacing;
 
@@ -692,11 +693,11 @@ namespace Server.Items
                 int numberTextHue = WhiteTextHue;
 
                 if (entry.Count > 0)
-                    numberTextHue = 63;
+                    numberTextHue = 2413;
 
                 if (entry != null)
                 {
-                    AddLabel(325, rightStartY, 63, TreasureMap.GetMapDisplayName(a));
+                    AddLabel(325, rightStartY, 2413, TreasureMap.GetMapDisplayName(a));
                     AddButton(495, rightStartY + 3, 2117, 2118, 20 + a, GumpButtonType.Reply, 0);
                     AddLabel(515, rightStartY, numberTextHue, entry.Count.ToString());
 

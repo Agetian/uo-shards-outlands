@@ -567,14 +567,14 @@ namespace Server.Items
             AddImage(43, 141, 2081, 2499);
             AddImage(43, 206, 2081, 2499);
             AddImage(41, 335, 2081);
-            AddImage(43, 274, 2081, 2499);
-            AddImageTiled(301, 2, 6, 405, 2701);
+            AddImage(43, 274, 2081, 2499);           
             AddImage(41, 338, 2081, 2499);
             AddItem(152, 29, 8002);
             AddImage(49, 80, 3001, 2615);
             AddImage(56, 80, 3001, 2615);
             AddImage(306, 80, 3001, 2615);
             AddImage(315, 80, 3001, 2615);
+            AddImageTiled(301, 2, 6, 405, 2701);
 
             AddLabel(115, 5, 2560, "Spell Scroll Library");
 

@@ -15,8 +15,8 @@ namespace Server.Items
             Hue = 2966;
             Weight = 1;
 
-            Amount = 1;
             Stackable = true;
+            Amount = 1;           
         }
 
         [Constructable]
@@ -26,8 +26,8 @@ namespace Server.Items
             Hue = 2966;
             Weight = 1;
 
-            Amount = amount;
             Stackable = true;
+            Amount = amount;            
         }
 
         public SkillMasteryOrb(Serial serial): base(serial)
@@ -36,6 +36,22 @@ namespace Server.Items
 
         public override void OnDoubleClick(Mobile from)
         {
+            if (from == null)
+                return;
+
+            if (!IsChildOf(from.Backpack))
+            {
+                from.SendMessage("This must be in your backpack in order to use it.");
+                return;
+            }
+
+            from.SendSound(0x055);
+
+            from.CloseGump(typeof(SkillMasteryGump));
+            from.SendGump(new SkillMasteryGump(from, SkillMasteryPageType.Orb, this));
+		
+
+            /*
             base.OnDoubleClick(from);
 
             PlayerMobile player = from as PlayerMobile;
@@ -72,8 +88,7 @@ namespace Server.Items
 
             player.FixedParticles(0x373A, 10, 15, 5036, EffectLayer.Head);
             player.PlaySound(0x3BD);
-
-            Consume();
+            */
         }
 
         public override bool DropToMobile(Mobile from, Mobile target, Point3D p)

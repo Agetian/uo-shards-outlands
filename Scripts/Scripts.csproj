@@ -380,6 +380,7 @@
     <Compile Include="Items\SkillItems\Tools\RunicDovetailSaw.cs" />
     <Compile Include="Items\SkillItems\Tools\RunicHammer.cs" />
     <Compile Include="Items\SkillItems\Tools\RunicSewingKit.cs" />
+    <Compile Include="Items\SkillMastery\SkillMasteryGump.cs" />
     <Compile Include="Items\Special\8th Anniversary Items\Dawn%27s Music Box\DawnsMusicBox.cs" />
     <Compile Include="Items\Special\8th Anniversary Items\Dawn%27s Music Box\DawnsMusicGear.cs" />
     <Compile Include="Items\Special\8th Anniversary Items\Dawn%27s Music Box\DawnsMusicInfo.cs" />

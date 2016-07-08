@@ -1052,23 +1052,7 @@ namespace Server.Mobiles
         public WorldChatAccountEntry m_WorldChatAccountEntry = null;
 
         public static int SkillCap = 7000;
-        public static int MaxBonusSkillCap = 200;
-
-        private int m_BonusSkillCap = 0;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int BonusSkillCap
-        {
-            get { return m_BonusSkillCap; }
-            set
-            {
-                m_BonusSkillCap = value;
-
-                if (m_BonusSkillCap > MaxBonusSkillCap)
-                    m_BonusSkillCap = MaxBonusSkillCap;
-
-                SkillCap = SkillCap + m_BonusSkillCap;
-            }
-        }
+        public static int MaxSkillCap = 7200;
         
         private Food.SatisfactionLevelType m_SatisfactionLevel = Food.SatisfactionLevelType.None;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -5000,7 +4984,6 @@ namespace Server.Mobiles
             writer.Write(m_SatisfactionExpiration);
             writer.Write(m_FactionPlayerProfile);
             writer.Write(m_EventCalendarAccount);
-            writer.Write(m_BonusSkillCap);
             writer.Write(m_MHSPlayerEntry);
             writer.Write((int)m_ShowHealing);
             writer.Write(m_WorldChatAccountEntry);
@@ -5097,7 +5080,6 @@ namespace Server.Mobiles
                 m_SatisfactionExpiration = reader.ReadDateTime();
                 m_FactionPlayerProfile = (FactionPlayerProfile)reader.ReadItem() as FactionPlayerProfile;
                 m_EventCalendarAccount = (EventCalendarAccount)reader.ReadItem() as EventCalendarAccount;
-                m_BonusSkillCap = reader.ReadInt();
                 m_MHSPlayerEntry = (MHSPlayerEntry)reader.ReadItem() as MHSPlayerEntry;
                 m_ShowHealing = (DamageDisplayMode)reader.ReadInt();
                 m_WorldChatAccountEntry = (WorldChatAccountEntry)reader.ReadItem() as WorldChatAccountEntry;

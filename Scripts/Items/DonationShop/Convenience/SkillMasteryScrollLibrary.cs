@@ -51,7 +51,7 @@ namespace Server.Items
         public SkillMasteryScrollLibrary(): base(8793)
         {
             Name = "a skill mastery scroll library";
-            Hue = 2657;
+            Hue = 2963;
             Weight = 5;
 
             CreateSkillEntries();
@@ -477,10 +477,11 @@ namespace Server.Items
             Dragable = true;
             Resizable = false;
 
-            AddImage(205, 193, 11015, 2499);
-            AddImage(204, 1, 11015, 2499);
-            AddImage(3, 192, 11015, 2499);
-            AddImage(3, 1, 11015, 2499);
+            AddImage(205, 193, 11015, 2963);
+            AddImage(204, 1, 11015, 2963);
+            AddImage(3, 192, 11015, 2963);
+            AddImage(3, 1, 11015, 2963);
+
             AddImage(302, 75, 2081, 2499);
             AddImage(300, 270, 2081, 2499);
             AddImage(301, 141, 2081, 2499);
@@ -492,17 +493,17 @@ namespace Server.Items
             AddImage(43, 141, 2081, 2499);
             AddImage(43, 206, 2081, 2499);
             AddImage(41, 335, 2081);
-            AddImage(43, 274, 2081, 2499);
-            AddImageTiled(301, 2, 6, 405, 2701);
+            AddImage(43, 274, 2081, 2499);            
             AddImage(41, 338, 2081, 2499);
             AddImage(49, 80, 3001, 2615);
             AddImage(56, 80, 3001, 2615);
             AddImage(306, 80, 3001, 2615);
             AddImage(315, 80, 3001, 2615);
+            AddImageTiled(301, 2, 6, 405, 2701);
 
             AddItem(153, 24, 5360, 2963);
 
-            AddLabel(95, 5, 2590, "Skill Mastery Scroll Library");
+            AddLabel(95, 5, 2599, "Skill Mastery Scroll Library");
 
             AddLabel(88, 53, WhiteTextHue, "Add All in Backpack into Library");
             AddButton(65, 56, 2118, 2118, 1, GumpButtonType.Reply, 0);
@@ -572,12 +573,12 @@ namespace Server.Items
                     int numberTextHue = WhiteTextHue;
 
                     if (entry.Count > 0)
-                        numberTextHue = 2590;
+                        numberTextHue = 2963;
 
                     //Left Side
                     if (entryCount < EntriesPerSide)
                     {
-                        AddLabel(60, leftStartY, 2590, SkillCheck.GetSkillName(entry.skillName));
+                        AddLabel(60, leftStartY, 2599, SkillCheck.GetSkillName(entry.skillName));
                         AddButton(231, leftStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
                         AddLabel(249, leftStartY, numberTextHue, entry.Count.ToString());
 
@@ -587,7 +588,7 @@ namespace Server.Items
                     //Right Side
                     else
                     {
-                        AddLabel(317, rightStartY, 2590, SkillCheck.GetSkillName(entry.skillName));
+                        AddLabel(317, rightStartY, 2599, SkillCheck.GetSkillName(entry.skillName));
                         AddButton(488, rightStartY + 3, 2118, 2118, 10 + entryCount, GumpButtonType.Reply, 0);
                         AddLabel(506, rightStartY, numberTextHue, entry.Count.ToString());
 
