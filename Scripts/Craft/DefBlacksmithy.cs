@@ -263,7 +263,7 @@ namespace Server.Engines.Craft
             AddCraft(1, typeof(Halberd), "Swordmanship Weapons", "Halberd", 35, 60, typeof(IronIngot), 1044036, 12, 1044037);
 
             //Other Items
-            index = AddCraft(1, typeof(BlacksmithyDungeonMould), "Misc", "Blacksmithing Dungeon Mould", 90, 105, typeof(IronIngot), "Iron Ingot", 200, 1044037);
+            index = AddCraft(1, typeof(AspectMould), "Misc", "Blacksmithing Mould", 90, 105, typeof(IronIngot), "Iron Ingot", 200, 1044037);
             AddRes(index, typeof(FireEssence), "Fire Essence", 3, "You do not have the crafting components required to make this.");
             AddRes(index, typeof(Quartzstone), "Quartzstone", 3, "You do not have the crafting components required to make this.");
             AddRes(index, typeof(ObsidianShard), "Obsidian Shard", 3, "You do not have the crafting components required to make this.");

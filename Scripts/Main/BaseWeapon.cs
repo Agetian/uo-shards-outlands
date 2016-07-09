@@ -143,11 +143,11 @@ namespace Server.Items
             ScaleDurability();
         }        
 
-        public override void DungeonChange()
+        public override void AspectChange()
         {
-            if (Dungeon != DungeonEnum.None)
+            if (Aspect != AspectEnum.None)
             {
-                DungeonArmor.DungeonArmorDetail detail = new DungeonArmor.DungeonArmorDetail(Dungeon, TierLevel);
+                DungeonArmor.DungeonArmorDetail detail = new DungeonArmor.DungeonArmorDetail(Aspect, TierLevel);
 
                 if (detail != null)
                     Hue = detail.Hue;
@@ -1489,8 +1489,8 @@ namespace Server.Items
                 if (Quality == Quality.Exceptional)
                     mod += 10;
 
-                if (Dungeon != DungeonEnum.None && TierLevel > 0)
-                    mod += DungeonWeapon.BaseTactics + (TierLevel * DungeonWeapon.TacticsPerTier);
+                if (Aspect != AspectEnum.None && TierLevel > 0)
+                    mod += AspectGear.BaseTactics + (TierLevel * AspectGear.TacticsPerTier);
 
                 if (mod > 0)
                 {
@@ -2027,9 +2027,9 @@ namespace Server.Items
 
             else
             {
-                if (Dungeon != DungeonEnum.None && TierLevel > 0)
+                if (Aspect != AspectEnum.None && TierLevel > 0)
                 {
-                    bonus = DungeonWeapon.BaseAccuracy * (DungeonWeapon.AccuracyPerTier * (double)TierLevel);
+                    bonus = AspectGear.BaseAccuracy * (AspectGear.AccuracyPerTier * (double)TierLevel);
 
                     if (playerDefender)
                         bonus = 0;
@@ -2099,8 +2099,8 @@ namespace Server.Items
             //Remove Dungeon Weapon Tactics Bonus Impact in PvP
             if (playerVsPlayer)
             {
-                if (TierLevel > 0 && Dungeon != DungeonEnum.None)
-                    tacticsBonus -= DungeonWeapon.BaseTactics + (TierLevel * DungeonWeapon.TacticsPerTier);
+                if (TierLevel > 0 && Aspect != AspectEnum.None)
+                    tacticsBonus -= AspectGear.BaseTactics + (TierLevel * AspectGear.TacticsPerTier);
             }
 
             double tacticsScalar = .5 + (.5 * (tacticsBase / 100)) + (.01 * tacticsBonus);
@@ -2600,7 +2600,7 @@ namespace Server.Items
                         else if (UseSkillMod && Quality == Quality.Exceptional && Parent is Mobile)
                             OnEquip(Parent as Mobile);
 
-                        else if (UseSkillMod && (Dungeon != DungeonEnum.None && TierLevel > 0) && Parent is Mobile)
+                        else if (UseSkillMod && (Aspect != AspectEnum.None && TierLevel > 0) && Parent is Mobile)
                         {
                             OnEquip(Parent as Mobile);
                         }
@@ -2974,7 +2974,7 @@ namespace Server.Items
                 return;
 
             //Dungeon Weapon
-            if (Dungeon != DungeonEnum.None && TierLevel > 0)
+            if (Aspect != AspectEnum.None && TierLevel > 0)
             {
                 string name = "";
 
@@ -2986,8 +2986,8 @@ namespace Server.Items
                 else
                     base.OnSingleClick(from);
 
-                LabelTo(from, GetDungeonName(Dungeon) + " Dungeon: Tier " + TierLevel.ToString());
-                LabelTo(from, "(" + Experience.ToString() + "/" + DungeonWeapon.MaxDungeonExperience.ToString() + " xp) " + " Charges: " + ArcaneCharges.ToString());
+                LabelTo(from, AspectGear.GetAspectName(Aspect) + " Dungeon: Tier " + TierLevel.ToString());
+                LabelTo(from, "(" + Experience.ToString() + "/" + AspectGear.MaxDungeonExperience.ToString() + " xp) " + " Charges: " + ArcaneCharges.ToString());
 
                 return;
             }

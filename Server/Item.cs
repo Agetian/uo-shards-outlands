@@ -222,19 +222,20 @@ namespace Server
         Wood
     }
 
-    public enum DungeonEnum
+    public enum AspectEnum
     {
         None,
 
-        Shame,
-        Deceit,
-        Destard,
-        Hythloth,
-        Covetous,
-        Wrong,
-        Despise,
-        Ice,
-        Fire
+        Air,        
+        Command,
+        Earth,
+        Eldritch,
+        Fire,
+        Harmony,
+        Water,
+        Poison,
+        Shadow,
+        Void,
     }
 
     public enum ItemGroupType
@@ -1008,16 +1009,16 @@ namespace Server
             }
         }
 
-        private DungeonEnum m_Dungeon = DungeonEnum.None;
+        private AspectEnum m_Aspect = AspectEnum.None;
         [CommandProperty(AccessLevel.GameMaster)]
-        public DungeonEnum Dungeon
+        public AspectEnum Aspect
         {
-            get { return m_Dungeon; }
+            get { return m_Aspect; }
             set
             {
-                m_Dungeon = value;
+                m_Aspect = value;
 
-                DungeonChange();
+                AspectChange();
             }
         }
 
@@ -1029,7 +1030,7 @@ namespace Server
         {
         }
 
-        public virtual void DungeonChange()
+        public virtual void AspectChange()
         {
         }
 
@@ -1088,24 +1089,6 @@ namespace Server
             }
 
             return 0;
-        }
-
-        public static string GetDungeonName(DungeonEnum dungeon)
-        {
-            switch (dungeon)
-            {
-                case DungeonEnum.Shame: return "Shame";
-                case DungeonEnum.Deceit: return "Deceit";
-                case DungeonEnum.Destard: return "Destard";
-                case DungeonEnum.Hythloth: return "Hythloth";
-                case DungeonEnum.Covetous: return "Covetous";
-                case DungeonEnum.Wrong: return "Wrong";
-                case DungeonEnum.Despise: return "Despise";
-                case DungeonEnum.Ice: return "Ice";
-                case DungeonEnum.Fire: return "Fire";
-            }
-
-            return "";
         }
 
         /// <summary>
@@ -2493,7 +2476,7 @@ namespace Server
             writer.Write((int)m_ItemGroup);
             writer.Write((int)m_ItemRarity);
             writer.Write(m_Identified);
-            writer.Write((int)m_Dungeon);
+            writer.Write((int)m_Aspect);
             writer.Write(m_ArcaneRechargable);
             writer.Write(m_ArcaneCharges);
             writer.Write(m_ArcaneChargesMax);
@@ -2722,7 +2705,7 @@ namespace Server
                         m_ItemRarity = (ItemRarityType)reader.ReadInt();
 
                         m_Identified = reader.ReadBool();
-                        m_Dungeon = (DungeonEnum)reader.ReadInt();
+                        m_Aspect = (AspectEnum)reader.ReadInt();
                         m_ArcaneRechargable = reader.ReadBool();
                         m_ArcaneCharges = reader.ReadInt();
                         m_ArcaneChargesMax = reader.ReadInt();

@@ -182,6 +182,7 @@ namespace Server.Mobiles
             CommandSystem.Register("CreateTestLoadout", AccessLevel.GameMaster, new CommandEventHandler(CreateTestLoadout));
             CommandSystem.Register("Anim", AccessLevel.GameMaster, new CommandEventHandler(Anim));
             CommandSystem.Register("AnimationTest", AccessLevel.GameMaster, new CommandEventHandler(AnimationTest));
+            CommandSystem.Register("SetAllHues", AccessLevel.GameMaster, new CommandEventHandler(SetAllHues));
         }
 
         #region Commands
@@ -632,18 +633,18 @@ namespace Server.Mobiles
 
                     pm_Target.Backpack.DropItem(spellbook);
 
-                    int dungeonCount = Enum.GetNames(typeof(DungeonEnum)).Length;
+                    int dungeonCount = Enum.GetNames(typeof(AspectEnum)).Length;
 
-                    DungeonEnum dungeon = (DungeonEnum)Utility.RandomMinMax(1, dungeonCount - 1);
+                    AspectEnum dungeon = (AspectEnum)Utility.RandomMinMax(1, dungeonCount - 1);
 
                     DungeonArmor.DungeonArmorDetail dungeonArmorDetail = new DungeonArmor.DungeonArmorDetail(dungeon, 1);    
 
-                    pm_Target.AddItem(new PlateHelm() { Dungeon = dungeon, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateGorget() { Dungeon = dungeon, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateArms() { Dungeon = dungeon, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateGloves() { Dungeon = dungeon, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateChest() { Dungeon = dungeon, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateLegs() { Dungeon = dungeon, TierLevel = 1 });                    
+                    pm_Target.AddItem(new PlateHelm() { Aspect = dungeon, TierLevel = 1 });
+                    pm_Target.AddItem(new PlateGorget() { Aspect = dungeon, TierLevel = 1 });
+                    pm_Target.AddItem(new PlateArms() { Aspect = dungeon, TierLevel = 1 });
+                    pm_Target.AddItem(new PlateGloves() { Aspect = dungeon, TierLevel = 1 });
+                    pm_Target.AddItem(new PlateChest() { Aspect = dungeon, TierLevel = 1 });
+                    pm_Target.AddItem(new PlateLegs() { Aspect = dungeon, TierLevel = 1 });                    
 
                     pm_Target.AddItem(new Cloak(dungeonArmorDetail.Hue));
                 }
@@ -740,6 +741,78 @@ namespace Server.Mobiles
                     player.Say("Animation: " + animation.ToString());
                     player.Animate(animation, frameCount, 1, true, false, 0);
                 });
+            }
+        }
+
+        [Usage("SetAllHues <huecolor>")]
+        [Description("Sets All Equipped Items on Mobile to Hue Color")]
+        public static void SetAllHues(CommandEventArgs e)
+        {
+            PlayerMobile player = e.Mobile as PlayerMobile;
+
+            if (player == null)
+                return;
+
+            if (e.Length == 1)
+            {
+                int hue = e.GetInt32(0);
+
+                player.SendMessage("Target the mobile you wish to change item hues for.");
+                player.Target = new SetAllHuesTarget(player, hue);
+            }
+        }
+
+        private class SetAllHuesTarget : Target
+        {
+            public int m_Hue;
+
+            public SetAllHuesTarget(Mobile from, int hue): base(100, false, TargetFlags.None)
+            {
+                m_Hue = hue;
+            }
+
+            protected override void OnTarget(Mobile from, object target)
+            {
+                if (target is Mobile)
+                {
+                    Mobile mobile = target as Mobile;
+
+                    List<Layer> layers = new List<Layer>();
+
+                    layers.Add(Layer.Arms);
+                    layers.Add(Layer.Bracelet);
+                    layers.Add(Layer.Cloak);
+                    layers.Add(Layer.Earrings);
+                    layers.Add(Layer.Gloves);
+                    layers.Add(Layer.Helm);
+                    layers.Add(Layer.InnerLegs);
+                    layers.Add(Layer.InnerTorso);
+                    layers.Add(Layer.MiddleTorso);
+                    layers.Add(Layer.Neck);
+                    layers.Add(Layer.OneHanded);
+                    layers.Add(Layer.OuterLegs);
+                    layers.Add(Layer.OuterTorso);
+                    layers.Add(Layer.Pants);
+                    layers.Add(Layer.Ring);
+                    layers.Add(Layer.Shirt);
+                    layers.Add(Layer.Shoes);
+                    layers.Add(Layer.Talisman);
+                    layers.Add(Layer.TwoHanded);
+                    layers.Add(Layer.Waist);
+
+                    foreach (Layer layer in layers)
+                    {
+                        Item item = mobile.FindItemOnLayer(layer);
+
+                        if (item == null) continue;
+                        if (item.Deleted) continue;
+                        if (item == mobile.Backpack) continue;
+
+                        item.Hue = m_Hue;
+                    }
+
+                    mobile.Say("Hue: " + m_Hue.ToString());
+                }
             }
         }
 

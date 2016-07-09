@@ -266,11 +266,11 @@ namespace Server.Items
                 ((Mobile)Parent).UpdateResistances();
         }
 
-        public override void DungeonChange()
+        public override void AspectChange()
         {
-            if (Dungeon != DungeonEnum.None)
+            if (Aspect != AspectEnum.None)
             {
-                DungeonArmor.DungeonArmorDetail detail = new DungeonArmor.DungeonArmorDetail(Dungeon, TierLevel);
+                DungeonArmor.DungeonArmorDetail detail = new DungeonArmor.DungeonArmorDetail(Aspect, TierLevel);
 
                 if (detail != null)
                     Hue = detail.Hue;
@@ -1193,7 +1193,7 @@ namespace Server.Items
                     from.AddStatMod(new StatMod(StatType.Int, modName + "Int", intBonus, TimeSpan.Zero));
             }
 
-            if (Dungeon != DungeonEnum.None && TierLevel > 0)
+            if (Aspect != AspectEnum.None && TierLevel > 0)
                 DungeonArmor.OnEquip(from, this);
 
             return base.OnEquip(from);
@@ -1205,7 +1205,7 @@ namespace Server.Items
             {
                 Mobile mobile = (Mobile)parent;
 
-                if (Dungeon != DungeonEnum.None && TierLevel > 0)
+                if (Aspect != AspectEnum.None && TierLevel > 0)
                     DungeonArmor.OnRemoved(mobile, this);
 
                 string modName = this.Serial.ToString();
@@ -1528,7 +1528,7 @@ namespace Server.Items
             if (from == null)
                 return;
 
-            if (Dungeon != DungeonEnum.None && TierLevel > 0)
+            if (Aspect != AspectEnum.None && TierLevel > 0)
             {
                 string name = "";
 
@@ -1536,10 +1536,10 @@ namespace Server.Items
                     name = Name;
 
                 if (name != "")
-                    LabelTo(from, CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name));               
+                    LabelTo(from, CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name));
 
-                LabelTo(from, GetDungeonName(Dungeon) + " Dungeon: Tier " + TierLevel.ToString());
-                LabelTo(from, "(" + Experience.ToString() + "/" + DungeonWeapon.MaxDungeonExperience.ToString() + " xp) " + " Charges: " + ArcaneCharges.ToString());
+                LabelTo(from, AspectGear.GetAspectName(Aspect) + " : Tier " + TierLevel.ToString());
+                LabelTo(from, "(" + Experience.ToString() + "/" + AspectGear.MaxDungeonExperience.ToString() + " xp) " + " Charges: " + ArcaneCharges.ToString());
 
                 return;
             }

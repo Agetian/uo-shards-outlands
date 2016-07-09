@@ -393,7 +393,7 @@ namespace Server.Engines.Craft
             */
             
             //Misc
-            index = AddCraft(1, typeof(CarpentryDungeonMould), "Misc", "Carpentry Dungeon Mould", 90, 105, typeof(Board), "Board", 250, "You do not have the neccessary boards to construct that.");
+            index = AddCraft(1, typeof(AspectMould), "Misc", "Carpentry Mould", 90, 105, typeof(Board), "Board", 250, "You do not have the neccessary boards to construct that.");
             AddRes(index, typeof(GhoulHide), "Ghoul Hide", 3, "You do not have the crafting components required to make this.");
             AddRes(index, typeof(ShatteredCrystal), "Shattered Crystal", 3, "You do not have the crafting components required to make this.");
             AddRes(index, typeof(TrollFat), "Troll Fat", 3, "You do not have the crafting components required to make this.");

@@ -470,11 +470,7 @@ namespace Server.Engines.Craft
 
             //Guide
             if (info.ButtonID == 1000)
-            {
-                string url = "http://www.uoancorp.com";
-                sender.Mobile.LaunchBrowser(url);
-
-                m_From.SendGump(new CraftGump(m_From, m_CraftSystem, m_Tool, null, m_Page));
+            {               
                 return;
             }
 

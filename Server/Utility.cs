@@ -1053,7 +1053,19 @@ namespace Server
 
             double roundedValue = 100 * ((Math.Round(value * factor)) / factor);
 
-            return roundedValue.ToString() + "%";
+            string roundedText = roundedValue.ToString();
+
+            if (decimalPlaces >= 1 && roundedText.IndexOf(".") == -1)
+            {
+                roundedText += ".";
+                
+                for (int a = 0; a < decimalPlaces; a++)
+                {
+                    roundedText += "0";
+                }
+            }
+
+            return roundedText + "%";
         }
 
         public static string CreatePercentageString(double value)
