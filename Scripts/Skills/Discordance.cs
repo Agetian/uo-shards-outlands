@@ -181,10 +181,12 @@ namespace Server.SkillHandlers
 
                             double discordanceModifier = BaseInstrument.DiscordanceModifier;
 
-                            DungeonArmor.PlayerDungeonArmorProfile bardDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(from, null);
+                            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(from, null);
 
-                            if (bardDungeonArmor.MatchingSet && !bardDungeonArmor.InPlayerCombat)
-                                discordanceModifier += bardDungeonArmor.DungeonArmorDetail.DiscordanceEffectBonus;
+                            if (aspectArmor.MatchingSet && !from.RecentlyInPlayerCombat)
+                            {
+                                //discordanceModifier += aspectArmor.AspectArmorDetail.DiscordanceEffectBonus;
+                            }
 
                             DiscordanceInfo info = new DiscordanceInfo(from, bc_Target, discordanceModifier);
 

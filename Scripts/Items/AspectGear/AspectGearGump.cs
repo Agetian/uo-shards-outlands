@@ -59,7 +59,7 @@ namespace Server
                 return;
             }
 
-            if (!(targetItem.IsChildOf(m_Player.Backpack) || targetItem.RootParent != m_Player))
+            if (!(targetItem.IsChildOf(m_Player.Backpack) || targetItem.RootParent == m_Player))
             {
                 m_Player.SendMessage("The item you wish to improve must be equipped or in your backpack.");
                 return;
@@ -160,7 +160,7 @@ namespace Server
             {
                 if (!(targetItem.Quality == Quality.Exceptional && targetItem.DisplayCrafter))
                 {
-                    m_Player.SendMessage("Only master-marked items may be improved.");
+                    m_Player.SendMessage("Only mastermarked items may be improved.");
                     return;
                 }
             }
@@ -210,7 +210,27 @@ namespace Server
             if (targetItem.Aspect != AspectEnum.None && targetItem.TierLevel > 0)
                 m_SelectedAspect = targetItem.Aspect;
 
-            string mouldName = m_AspectMould.GetDisplayName();
+            int newTier = targetItem.TierLevel + 1;
+
+            string requiredMouldName = m_AspectMould.GetDisplayName();
+
+            switch (newTier)
+            {
+                case 1: requiredMouldName += ": Tier 1-2"; break;
+                case 2: requiredMouldName += ": Tier 1-2"; break;
+
+                case 3: requiredMouldName += ": Tier 3-4"; break;
+                case 4: requiredMouldName += ": Tier 3-4"; break;
+
+                case 5: requiredMouldName += ": Tier 5-6"; break;
+                case 6: requiredMouldName += ": Tier 5-6"; break;
+
+                case 7: requiredMouldName += ": Tier 7-8"; break;
+                case 8: requiredMouldName += ": Tier 7-8"; break;
+
+                case 9: requiredMouldName += ": Tier 9-10"; break;
+                case 10: requiredMouldName += ": Tier 9-10"; break;
+            }
 
             string itemName = "";
             string itemAspectName = "";
@@ -222,8 +242,6 @@ namespace Server
             int itemOffsetX = 0;
             int itemOffsetY = 0;
             int itemIconItemdId = 0;
-
-            int newTier = targetItem.TierLevel + 1;
 
             if (weapon != null)
             {
@@ -249,7 +267,7 @@ namespace Server
 
                 AddLabel(Utility.CenteredTextOffset(195, itemName), 49, aspectTextHue, itemName);
                 AddLabel(Utility.CenteredTextOffset(195, itemAspectName), 74, aspectTextHue, itemAspectName);
-                AddItem(170 + itemOffsetX, 110 + itemOffsetY, itemIconItemdId, aspectHue); //Image                
+                AddItem(175 + itemOffsetX, 125 + itemOffsetY, itemIconItemdId, aspectHue); //Image                
 
                 int newDurability = AspectGear.BaselineDurability + (AspectGear.IncreasedDurabilityPerTier * newTier);
 
@@ -260,7 +278,7 @@ namespace Server
 
                 double effectChance = AspectGear.BaseEffectChance + (AspectGear.BaseEffectChancePerTier * (double)newTier);
 
-                effectChance *= AspectGear.GetSpeedScalar(weapon.Speed);
+                effectChance *= AspectGear.GetSpecialEffectWeaponSpeedScalar(weapon.Speed);
                
                 AddLabel(137, 168, WhiteTextHue, "Durability:");
                 AddLabel(214, 168, aspectTextHue, newDurability.ToString() + "/" + newDurability.ToString());
@@ -299,6 +317,8 @@ namespace Server
                 AddLabel(Utility.CenteredTextOffset(200, itemName), 49, aspectTextHue, itemName);
                 AddLabel(Utility.CenteredTextOffset(200, itemAspectName), 74, aspectTextHue, itemAspectName);
                 AddItem(170 + itemOffsetX, 110 + itemOffsetY, itemIconItemdId, aspectHue); //Image
+
+                //TEST: FINISH!!!
 
                 //Armor Details
                 AddLabel(39, 165, WhiteTextHue, "Total Armor:");
@@ -343,7 +363,7 @@ namespace Server
             else
                 AddLabel(76, 436, 63, "Upgrade");
 
-            //Materials
+            //Materials Required
             int distillationNeeded = 0;
             int coresNeeded = 0;
             
@@ -381,7 +401,7 @@ namespace Server
             AddLabel(228, 347, 149, "Required Materials");
 
             AddItem(174, 368, 4323);
-            AddLabel(226, 373, 2550, mouldName);
+            AddLabel(226, 373, WhiteTextHue, requiredMouldName);
 
             AddItem(181, 403, 17686, aspectHue);
             AddLabel(225, 406, aspectTextHue, distillationNeeded.ToString() + " " + aspectName + " Distillation");
@@ -392,8 +412,8 @@ namespace Server
 
         public override void OnResponse(NetState sender, RelayInfo info)
         {
-            if (m_Player == null)
-                return;
+            if (m_Player == null) return;
+            if (m_Player.Backpack == null) return;
 
             Item targetItem = m_Item as Item;
 
@@ -415,7 +435,7 @@ namespace Server
                 return;
             }
 
-            if (!(targetItem.IsChildOf(m_Player.Backpack) || targetItem.RootParent != m_Player))
+            if (!(targetItem.IsChildOf(m_Player.Backpack) || targetItem.RootParent == m_Player))
             {
                 m_Player.SendMessage("The item you wish to improve must be equipped or in your backpack.");
                 return;
@@ -517,7 +537,7 @@ namespace Server
             {
                 if (!(targetItem.Quality == Quality.Exceptional && targetItem.DisplayCrafter))
                 {
-                    m_Player.SendMessage("Only master-marked items may be improved.");
+                    m_Player.SendMessage("Only mastermarked items may be improved.");
                     return;
                 }
             }
@@ -609,10 +629,219 @@ namespace Server
                         }
                     }
 
-                    //Check Materials
+                    if (isValid && targetItem.TierLevel >= 1 && targetItem.Experience < AspectGear.ExperienceNeededToUpgrade)
+                    {
+                        m_Player.SendMessage("That Aspect item has not accumulated enough experience neccessary to upgrade it's tier.");
+
+                        closeGump = false;
+                        isValid = false;
+                    }
+
+                    //Materials Required
+                    string aspectName = AspectGear.GetAspectName(m_SelectedAspect);
+
+                    int distillationNeeded = 0;
+                    int coresNeeded = 0;
+
+                    if (targetItem.TierLevel == 0)
+                    {
+                        if (weapon != null)
+                        {
+                            distillationNeeded = AspectGear.DistillationNeededForWeaponCreation;
+                            coresNeeded = AspectGear.CoresNeededForWeaponCreation;
+                        }
+
+                        if (armor != null)
+                        {
+                            distillationNeeded = AspectGear.DistillationNeededForArmorCreation;
+                            coresNeeded = AspectGear.CoresNeededForArmorCreation;
+                        }
+
+                    }
+
+                    else
+                    {
+                        if (weapon != null)
+                        {
+                            distillationNeeded = AspectGear.DistillationNeededForWeaponUpgrade;
+                            coresNeeded = AspectGear.CoresNeededForWeaponUpgrade;
+                        }
+
+                        if (armor != null)
+                        {
+                            distillationNeeded = AspectGear.DistillationNeededForArmorUpgrade;
+                            coresNeeded = AspectGear.CoresNeededForArmorUpgrade;
+                        }
+                    }
 
                     if (isValid)
                     {
+                        List<AspectDistillation> m_DistillationHeld = m_Player.Backpack.FindItemsByType<AspectDistillation>();
+                        List<AspectCore> m_AspectCoresHeld = m_Player.Backpack.FindItemsByType<AspectCore>();
+
+                        List<AspectDistillation> m_MatchingDistillationHeld = new List<AspectDistillation>();
+                        List<AspectCore> m_MatchingAspectCoresHeld = new List<AspectCore>();
+
+                        int totalMatchingDistillation = 0;
+                        int totalMatchingCores = 0;
+
+                        foreach (AspectDistillation aspectDistillation in m_DistillationHeld)
+                        {
+                            if (aspectDistillation.Aspect == m_SelectedAspect)
+                            {
+                                totalMatchingDistillation += aspectDistillation.Amount;
+                                m_MatchingDistillationHeld.Add(aspectDistillation);
+                            }
+                        }
+
+                        foreach (AspectCore aspectCore in m_AspectCoresHeld)
+                        {
+                            if (aspectCore.Aspect == m_SelectedAspect)
+                            {
+                                totalMatchingCores += aspectCore.Amount;
+                                m_MatchingAspectCoresHeld.Add(aspectCore);
+                            }
+                        }
+
+                        bool hasRequiredMaterials = true;
+
+                        if (distillationNeeded > totalMatchingDistillation)
+                        {
+                            hasRequiredMaterials = false;
+                            m_Player.SendMessage(distillationNeeded.ToString() + " " + aspectName + " Distillation is required to proceed.");
+
+                            closeGump = false;
+                        }
+
+                        else if (coresNeeded > totalMatchingCores)
+                        {
+                            hasRequiredMaterials = false;
+                            m_Player.SendMessage(coresNeeded.ToString() + " " + aspectName + " Cores are required to proceed.");
+
+                            closeGump = false;
+                        }
+
+                        else
+                        {
+                            Queue m_Queue = new Queue();
+
+                            foreach (AspectDistillation aspectDistillation in m_MatchingDistillationHeld)
+                            {
+                                if (aspectDistillation.Amount > distillationNeeded)
+                                {
+                                    aspectDistillation.Amount -= distillationNeeded;
+                                    distillationNeeded = 0;
+                                }
+
+                                else
+                                {
+                                    distillationNeeded -= aspectDistillation.Amount;
+                                    m_Queue.Enqueue(aspectDistillation);
+                                }
+
+                                if (distillationNeeded <= 0)
+                                    break;
+                            }
+
+                            while (m_Queue.Count > 0)
+                            {
+                                AspectDistillation aspectDistillation = (AspectDistillation)m_Queue.Dequeue();
+                                aspectDistillation.Delete();
+                            }
+
+                            m_Queue = new Queue();
+
+                            foreach (AspectCore aspectCore in m_MatchingAspectCoresHeld)
+                            {
+                                if (aspectCore.Amount > coresNeeded)
+                                {
+                                    aspectCore.Amount -= coresNeeded;
+                                    coresNeeded = 0;
+                                }
+
+                                else
+                                {
+                                    coresNeeded -= aspectCore.Amount;
+                                    m_Queue.Enqueue(aspectCore);
+                                }
+
+                                if (coresNeeded <= 0)
+                                    break;
+                            }
+
+                            while (m_Queue.Count > 0)
+                            {
+                                AspectCore aspectCore = (AspectCore)m_Queue.Dequeue();
+                                aspectCore.Delete();
+                            }
+
+                            if (m_AspectMould != null)
+                            {
+                                if (weapon != null)                                
+                                    m_AspectMould.Charges -= AspectMould.ChargesNeededForWeapon;
+
+                                else if (armor != null)
+                                    m_AspectMould.Charges -= AspectMould.ChargesNeededForArmor;
+
+                                if (m_AspectMould.Charges <= 0)
+                                    m_AspectMould.Delete();
+                            }
+
+                            //Creation
+                            if (targetItem.TierLevel == 0)
+                            {
+                                targetItem.Quality = Quality.Regular;
+                                targetItem.DisplayCrafter = false;
+                                targetItem.ArcaneCharges = AspectGear.AspectStartingArcaneCharges;
+                                targetItem.ArcaneChargesMax = AspectGear.ArcaneMaxCharges;
+                                targetItem.TierLevel = 1;
+                                targetItem.Aspect = m_SelectedAspect; 
+
+                                if (weapon != null)
+                                {
+                                    m_Player.SendMessage("You create a new Aspect weapon.");
+
+                                    weapon.MaxHitPoints = AspectGear.BaselineDurability + (AspectGear.IncreasedDurabilityPerTier * targetItem.TierLevel);
+                                    weapon.HitPoints = weapon.MaxHitPoints;
+                                }
+
+                                if (armor != null)
+                                {
+                                    m_Player.SendMessage("You create a new Aspect armor.");
+
+                                    armor.MaxHitPoints = AspectGear.BaselineDurability + (AspectGear.IncreasedDurabilityPerTier * targetItem.TierLevel);
+                                    armor.HitPoints = armor.MaxHitPoints;
+                                }                                
+                            }
+
+                            //Upgrade
+                            else
+                            {
+                                targetItem.TierLevel++;
+
+                                if (weapon != null)
+                                {
+                                    m_Player.SendMessage("You upgrade your Aspect weapon's tier.");
+
+                                    weapon.MaxHitPoints = AspectGear.BaselineDurability + (AspectGear.IncreasedDurabilityPerTier * targetItem.TierLevel);
+                                    weapon.HitPoints = weapon.MaxHitPoints;
+                                }
+
+                                if (armor != null)
+                                {
+                                    m_Player.SendMessage("You upgrade your Aspect armor's tier.");
+
+                                    armor.MaxHitPoints = AspectGear.BaselineDurability + (AspectGear.IncreasedDurabilityPerTier * targetItem.TierLevel);
+                                    armor.HitPoints = armor.MaxHitPoints;
+                                }                              
+                            }
+
+                            targetItem.Experience = 0;
+
+                            m_Player.PlaySound(0x64E);
+
+                            return;
+                        }
                     }                    
                 break;
             }

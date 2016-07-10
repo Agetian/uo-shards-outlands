@@ -262,12 +262,12 @@ namespace Server.Engines.Craft
             AddCraft(1, typeof(Bardiche), "Swordmanship Weapons", "Bardiche", 35, 60, typeof(IronIngot), 1044036, 12, 1044037);
             AddCraft(1, typeof(Halberd), "Swordmanship Weapons", "Halberd", 35, 60, typeof(IronIngot), 1044036, 12, 1044037);
 
-            //Other Items
-            index = AddCraft(1, typeof(AspectMould), "Misc", "Blacksmithing Mould", 90, 105, typeof(IronIngot), "Iron Ingot", 200, 1044037);
-            AddRes(index, typeof(FireEssence), "Fire Essence", 3, "You do not have the crafting components required to make this.");
-            AddRes(index, typeof(Quartzstone), "Quartzstone", 3, "You do not have the crafting components required to make this.");
-            AddRes(index, typeof(ObsidianShard), "Obsidian Shard", 3, "You do not have the crafting components required to make this.");
-            //AddRes(index, typeof(LuniteHeart), "Lunite Heart", 3, "You do not have the crafting components required to make this.");
+            //Tools
+            AddCraft(1, typeof(SmithingMouldTier2), "Tools", "Smithing Mould: Tier 1-2", 100, 100, typeof(IronIngot), "Iron Ingot", 150, 1044037);
+            AddCraft(1, typeof(SmithingMouldTier4), "Tools", "Smithing Mould: Tier 3-4", 105, 105, typeof(IronIngot), "Iron Ingot", 175, 1044037);
+            AddCraft(1, typeof(SmithingMouldTier6), "Tools", "Smithing Mould: Tier 5-6", 110, 110, typeof(IronIngot), "Iron Ingot", 200, 1044037);
+            AddCraft(1, typeof(SmithingMouldTier8), "Tools", "Smithing Mould: Tier 7-8", 115, 115, typeof(IronIngot), "Iron Ingot", 225, 1044037);
+            AddCraft(1, typeof(SmithingMouldTier10), "Tools", "Smithing Mould: Tier 9-10", 120, 120, typeof(IronIngot), "Iron Ingot", 250, 1044037);
 
             /*
             AddCraft(1, typeof(IronOreHuePlating), "Other", "iron ore hue plating", 70, 120, typeof(IronIngot), "iron ingot", 25, "You do not have the neccesary ingots to construct that.");
@@ -299,6 +299,8 @@ namespace Server.Engines.Craft
             index = AddCraft(1, typeof(LuniteOreHuePlating), "Other", "lunite ore hue plating", 70, 120, typeof(LuniteIngot), "lunite ingot", 25, "You do not have the neccesary ingots to construct that.");
             AddRes(index, typeof(LuniteHeart), "lunite heart", 5, "You do not have the neccessary crafting components to construct that.");
             */
+
+            //-----
 
             // Set the overridable material
             SetSubRes(typeof(IronIngot), "Iron");

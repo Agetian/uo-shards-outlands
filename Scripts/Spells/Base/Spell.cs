@@ -244,8 +244,8 @@ namespace Server.Spells
                 }
             }
 
-            DungeonArmor.PlayerDungeonArmorProfile casterDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(m_Caster, null);
-            DungeonArmor.PlayerDungeonArmorProfile targetDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(target, null);
+            AspectGear.AspectArmorProfile casterAspectArmor = new AspectGear.AspectArmorProfile(m_Caster, null);
+            AspectGear.AspectArmorProfile defenderAspectArmor = new AspectGear.AspectArmorProfile(target, null);
 
             double damageScalar = .75;
 
@@ -254,13 +254,17 @@ namespace Server.Spells
             double inscriptionBonus = (m_Caster.Skills[SkillName.Inscribe].Value / 100) * .1;
             double slayerBonus = GetSlayerDamageBonus(target); 
             double spellDamageInflictedBonus = 0;
-            double spellDamageReceivedBonus = 0;                       
-                       
-            if (casterDungeonArmor.MatchingSet && !casterDungeonArmor.InPlayerCombat)
-                spellDamageInflictedBonus = casterDungeonArmor.DungeonArmorDetail.SpellDamageInflictedBonus;
+            double spellDamageReceivedBonus = 0;
 
-            if (targetDungeonArmor.MatchingSet && !targetDungeonArmor.InPlayerCombat)
-                spellDamageReceivedBonus = targetDungeonArmor.DungeonArmorDetail.SpellDamageReceivedBonus; 
+            if (casterAspectArmor.MatchingSet && !m_Caster.RecentlyInPlayerCombat)
+            {
+                //spellDamageInflictedBonus = casterAspectArmor.AspectArmorDetail.SpellDamageInflictedBonus;
+            }
+
+            if (defenderAspectArmor.MatchingSet && !target.RecentlyInPlayerCombat)
+            {
+                //spellDamageReceivedBonus = defenderAspectArmor.AspectArmorDetail.SpellDamageReceivedBonus;
+            }
 
             m_Caster.CheckSkill(SkillName.SpiritSpeak, 0.0, 120.0, 1.0);
 
@@ -819,12 +823,13 @@ namespace Server.Spells
                     m_Caster.SendMessage("Backlash causes your spell to fizzle."); 
 
                     return false;
-                }                
+                }
 
-                DungeonArmor.PlayerDungeonArmorProfile casterDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(m_Caster, null);
+                AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(m_Caster, null);
 
-                if (casterDungeonArmor.MatchingSet && !casterDungeonArmor.InPlayerCombat)
+                if (aspectArmor.MatchingSet && !m_Caster.RecentlyInPlayerCombat)
                 {
+                    /*
                     if (Utility.RandomDouble() <= casterDungeonArmor.DungeonArmorDetail.ReducedSpellManaCostChance)
                     {
                         mana = (int)(Math.Round((double)mana * casterDungeonArmor.DungeonArmorDetail.ReducedSpellManaCostScalar));
@@ -832,7 +837,8 @@ namespace Server.Spells
 
                         Effects.PlaySound(Caster.Location, Caster.Map, 0x64B);
                         Effects.SendLocationParticles(EffectItem.Create(Caster.Location, Caster.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, casterDungeonArmor.DungeonArmorDetail.EffectHue, 0, 5005, 0);
-                    }                    
+                    }      
+                    */
                 }
 
                 m_Caster.Mana -= mana;

@@ -268,13 +268,7 @@ namespace Server.Items
 
         public override void AspectChange()
         {
-            if (Aspect != AspectEnum.None)
-            {
-                DungeonArmor.DungeonArmorDetail detail = new DungeonArmor.DungeonArmorDetail(Aspect, TierLevel);
-
-                if (detail != null)
-                    Hue = detail.Hue;
-            }
+            Hue = AspectGear.GetAspectHue(Aspect);
         }
         
         public override int GetArcaneEssenceValue()
@@ -1194,7 +1188,7 @@ namespace Server.Items
             }
 
             if (Aspect != AspectEnum.None && TierLevel > 0)
-                DungeonArmor.OnEquip(from, this);
+                AspectGear.OnArmorEquip(from, this);
 
             return base.OnEquip(from);
         }
@@ -1206,7 +1200,7 @@ namespace Server.Items
                 Mobile mobile = (Mobile)parent;
 
                 if (Aspect != AspectEnum.None && TierLevel > 0)
-                    DungeonArmor.OnRemoved(mobile, this);
+                    AspectGear.OnArmorRemoved(mobile, this);
 
                 string modName = this.Serial.ToString();
 
@@ -1214,7 +1208,8 @@ namespace Server.Items
                 mobile.RemoveStatMod(modName + "Dex");
                 mobile.RemoveStatMod(modName + "Int");
                 
-                ((Mobile)parent).Delta(MobileDelta.Armor); // Tell them armor rating has changed
+                ((Mobile)parent).Delta(MobileDelta.Armor);
+
                 mobile.CheckStatTimers();
             }
 
@@ -1530,16 +1525,20 @@ namespace Server.Items
 
             if (Aspect != AspectEnum.None && TierLevel > 0)
             {
-                string name = "";
+                if (Name == null)
+                {
+                    base.OnSingleClick(from);
+                    return;
+                }  
 
-                if (Name != null)
-                    name = Name;
+                string itemName = Name;                
+              
+                itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName);
+                                
+                LabelTo(from, "Tier " + TierLevel.ToString() + " " + AspectGear.GetAspectName(Aspect) + " " + itemName);
 
-                if (name != "")
-                    LabelTo(from, CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name));
-
-                LabelTo(from, AspectGear.GetAspectName(Aspect) + " : Tier " + TierLevel.ToString());
-                LabelTo(from, "(" + Experience.ToString() + "/" + AspectGear.MaxDungeonExperience.ToString() + " xp) " + " Charges: " + ArcaneCharges.ToString());
+                LabelTo(from, "(" + ArcaneCharges.ToString() + " Arcane Charges)");
+                LabelTo(from, "[" + Experience.ToString() + "/" + AspectGear.ExperienceNeededToUpgrade.ToString() + " xp]");
 
                 return;
             }

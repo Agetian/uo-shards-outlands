@@ -132,34 +132,16 @@ namespace Server.Misc
             PlayerMobile player = from as PlayerMobile;
              
             if (player == null)
-                return effectiveMeditationScalar;
-
-            DungeonArmor.PlayerDungeonArmorProfile playerDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(player, null);
-
-            //Player Is Wearing Dungeon Armor
-            if (playerDungeonArmor.MatchingSet)
-            {
-                switch (playerDungeonArmor.DungeonArmorDetail.MeditationAllowance)
-                {
-                    case ArmorMeditationAllowance.All: armorPenaltyPercent = 0; break;
-                    case ArmorMeditationAllowance.ThreeQuarter: armorPenaltyPercent = .25; break; break;
-                    case ArmorMeditationAllowance.Half: armorPenaltyPercent = .5; break;
-                    case ArmorMeditationAllowance.Quarter: armorPenaltyPercent = .75; break;
-                    case ArmorMeditationAllowance.None: armorPenaltyPercent = 1.0; break;
-                }
-            }
-
-            else
-            {
-                //m_ArmorScalars = { 0.07, 0.07, 0.14, 0.15, 0.22, 0.35 };
-                //Each Layer of Armor Has Different "Effect Amount" on How Much It Can Penalize Meditation
-                armorPenaltyPercent += GetArmorMeditationValue(from.NeckArmor as BaseArmor) * BaseArmor.ArmorScalars[0];
-                armorPenaltyPercent += GetArmorMeditationValue(from.HandArmor as BaseArmor) * BaseArmor.ArmorScalars[1];
-                armorPenaltyPercent += GetArmorMeditationValue(from.HeadArmor as BaseArmor) * BaseArmor.ArmorScalars[2];
-                armorPenaltyPercent += GetArmorMeditationValue(from.ArmsArmor as BaseArmor) * BaseArmor.ArmorScalars[3];
-                armorPenaltyPercent += GetArmorMeditationValue(from.LegsArmor as BaseArmor) * BaseArmor.ArmorScalars[4];
-                armorPenaltyPercent += GetArmorMeditationValue(from.ChestArmor as BaseArmor) * BaseArmor.ArmorScalars[5];
-            }
+                return effectiveMeditationScalar;            
+            
+            //m_ArmorScalars = { 0.07, 0.07, 0.14, 0.15, 0.22, 0.35 };
+            //Each Layer of Armor Has Different "Effect Amount" on How Much It Can Penalize Meditation
+            armorPenaltyPercent += GetArmorMeditationValue(from.NeckArmor as BaseArmor) * BaseArmor.ArmorScalars[0];
+            armorPenaltyPercent += GetArmorMeditationValue(from.HandArmor as BaseArmor) * BaseArmor.ArmorScalars[1];
+            armorPenaltyPercent += GetArmorMeditationValue(from.HeadArmor as BaseArmor) * BaseArmor.ArmorScalars[2];
+            armorPenaltyPercent += GetArmorMeditationValue(from.ArmsArmor as BaseArmor) * BaseArmor.ArmorScalars[3];
+            armorPenaltyPercent += GetArmorMeditationValue(from.LegsArmor as BaseArmor) * BaseArmor.ArmorScalars[4];
+            armorPenaltyPercent += GetArmorMeditationValue(from.ChestArmor as BaseArmor) * BaseArmor.ArmorScalars[5];            
 
             armorPenaltyPercent += GetArmorMeditationValue(from.ShieldArmor as BaseArmor) * .25;
 

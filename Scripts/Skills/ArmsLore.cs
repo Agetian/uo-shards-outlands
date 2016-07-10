@@ -195,7 +195,7 @@ namespace Server.SkillHandlers
                 string weaponTypeText = "";      
           
                 if (weapon.TierLevel > 0 && weapon.Aspect != AspectEnum.None)
-                    weaponTypeText = AspectGear.GetAspectName(weapon.Aspect) + " : Tier " + weapon.TierLevel.ToString();
+                    weaponTypeText = AspectGear.GetAspectName(weapon.Aspect) + " Tier " + weapon.TierLevel.ToString();
 
                 else if (!(weapon.Resource == CraftResource.Iron || weapon.Resource == CraftResource.RegularWood))
                     weaponTypeText = CraftResources.GetCraftResourceName(weapon.Resource);
@@ -446,7 +446,7 @@ namespace Server.SkillHandlers
                 string armorTypeText = "";
 
                 if (armor.TierLevel > 0 && armor.Aspect != AspectEnum.None)
-                    armorTypeText = AspectGear.GetAspectName(weapon.Aspect) + " : Tier " + armor.TierLevel.ToString();
+                    armorTypeText = AspectGear.GetAspectName(weapon.Aspect) + " Tier " + armor.TierLevel.ToString();
 
                 else if (!(armor.Resource == CraftResource.Iron || armor.Resource == CraftResource.RegularWood || armor.Resource == CraftResource.RegularLeather))
                     armorTypeText = CraftResources.GetCraftResourceName(armor.Resource);
@@ -610,7 +610,7 @@ namespace Server.SkillHandlers
                 string shieldTypeText = "";
 
                 if (shield.TierLevel > 0 && shield.Aspect != AspectEnum.None)
-                    shieldTypeText = AspectGear.GetAspectName(weapon.Aspect) + " : Tier " + shield.TierLevel.ToString();
+                    shieldTypeText = AspectGear.GetAspectName(weapon.Aspect) + " Tier " + shield.TierLevel.ToString();
 
                 else if (!(shield.Resource == CraftResource.Iron || shield.Resource == CraftResource.RegularWood))
                     shieldTypeText = CraftResources.GetCraftResourceName(shield.Resource);
@@ -752,7 +752,7 @@ namespace Server.SkillHandlers
                 string instrumentTypeText = "";
 
                 if (instrument.TierLevel > 0 && instrument.Aspect != AspectEnum.None)
-                    instrumentTypeText = AspectGear.GetAspectName(instrument.Aspect) + " : Tier " + instrument.TierLevel.ToString();
+                    instrumentTypeText = AspectGear.GetAspectName(instrument.Aspect) + " Tier " + instrument.TierLevel.ToString();
 
                 else if (instrument.Resource != CraftResource.RegularWood)
                     instrumentTypeText = CraftResources.GetCraftResourceName(instrument.Resource);

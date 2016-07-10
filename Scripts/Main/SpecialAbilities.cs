@@ -712,19 +712,6 @@ namespace Server.Mobiles
             if (bc_Defender != null)
                 value *= bc_Defender.SpecialEffectReduction;
 
-            DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(pm_Defender, null);
-
-            if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat && attacker is BaseCreature && pm_Defender != null)
-            {
-                if (Utility.RandomDouble() <= defenderDungeonArmor.DungeonArmorDetail.SpecialEffectAvoidanceChance)
-                {
-                    Effects.PlaySound(pm_Defender.Location, pm_Defender.Map, 0x64B);
-                    Effects.SendLocationParticles(EffectItem.Create(pm_Defender.Location, pm_Defender.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, defenderDungeonArmor.DungeonArmorDetail.EffectHue, 0, 5005, 0);
-
-                    return;
-                }
-            }
-
             if (showEffect)
                 defender.FixedEffect(0x5683, 10, 20);
 
@@ -765,19 +752,6 @@ namespace Server.Mobiles
 
             if (bc_Defender != null)
                 value *= bc_Defender.SpecialEffectReduction;
-
-            DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(pm_Defender, null);
-
-            if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat && attacker is BaseCreature && pm_Defender != null)
-            {
-                if (Utility.RandomDouble() <= defenderDungeonArmor.DungeonArmorDetail.SpecialEffectAvoidanceChance)
-                {
-                    Effects.PlaySound(pm_Defender.Location, pm_Defender.Map, 0x64B);
-                    Effects.SendLocationParticles(EffectItem.Create(pm_Defender.Location, pm_Defender.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, defenderDungeonArmor.DungeonArmorDetail.EffectHue, 0, 5005, 0);
-
-                    return;
-                }
-            }
 
             if (showEffect)
                 defender.FixedEffect(0x5683, 10, 20);
@@ -841,10 +815,12 @@ namespace Server.Mobiles
                     value *= bc_Attacker.PvPAbilityDamageScalar;
             }
 
-            DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(defender, null);
+            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(defender, null);
 
-            if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat)
-                value *= defenderDungeonArmor.DungeonArmorDetail.BleedDamageReceivedScalar;
+            if (aspectArmor.MatchingSet && !defender.RecentlyInPlayerCombat)
+            {
+                //value *= aspectArmor.AspectArmorDetail.BleedDamageReceivedScalar;
+            }
 
             int intervalFrequency = 2;
             int numberOfIntervals = (int)(Math.Floor(expirationSeconds / intervalFrequency));
@@ -1008,20 +984,7 @@ namespace Server.Mobiles
 
             BaseCreature bc_Defender = defender as BaseCreature;
             PlayerMobile pm_Defender = defender as PlayerMobile;
-
-            DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(pm_Defender, null);
-
-            if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat && attacker is BaseCreature && pm_Defender != null)
-            {
-                if (Utility.RandomDouble() <= defenderDungeonArmor.DungeonArmorDetail.SpecialEffectAvoidanceChance)
-                {
-                    Effects.PlaySound(pm_Defender.Location, pm_Defender.Map, 0x64B);
-                    Effects.SendLocationParticles(EffectItem.Create(pm_Defender.Location, pm_Defender.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, defenderDungeonArmor.DungeonArmorDetail.EffectHue, 0, 5005, 0);
-
-                    return;
-                }
-            }
-
+            
             bool immune = false;
 
             if (bc_Defender != null)
@@ -1148,20 +1111,7 @@ namespace Server.Mobiles
 
             BaseCreature bc_Defender = defender as BaseCreature;
             PlayerMobile pm_Defender = defender as PlayerMobile;
-
-            DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(pm_Defender, null);
-
-            if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat && attacker is BaseCreature && pm_Defender != null)
-            {
-                if (Utility.RandomDouble() <= defenderDungeonArmor.DungeonArmorDetail.SpecialEffectAvoidanceChance)
-                {
-                    Effects.PlaySound(pm_Defender.Location, pm_Defender.Map, 0x64B);
-                    Effects.SendLocationParticles(EffectItem.Create(pm_Defender.Location, pm_Defender.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, defenderDungeonArmor.DungeonArmorDetail.EffectHue, 0, 5005, 0);
-
-                    return;
-                }
-            }
-
+            
             if (bc_Defender != null)
             {
                 expirationSeconds *= bc_Defender.SpecialEffectReduction;
@@ -1299,19 +1249,6 @@ namespace Server.Mobiles
 
             if (bc_Defender != null)
                 value *= bc_Defender.SpecialEffectReduction;
-
-            DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(pm_Defender, null);
-
-            if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat && attacker is BaseCreature && pm_Defender != null)
-            {
-                if (Utility.RandomDouble() <= defenderDungeonArmor.DungeonArmorDetail.SpecialEffectAvoidanceChance)
-                {
-                    Effects.PlaySound(pm_Defender.Location, pm_Defender.Map, 0x64B);
-                    Effects.SendLocationParticles(EffectItem.Create(pm_Defender.Location, pm_Defender.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, defenderDungeonArmor.DungeonArmorDetail.EffectHue, 0, 5005, 0);
-
-                    return;
-                }
-            }
 
             if (showEffect)
                 defender.FixedEffect(0x5683, 10, 20);
@@ -1606,10 +1543,12 @@ namespace Server.Mobiles
                     value *= bc_Attacker.PvPAbilityDamageScalar;
             }
 
-            DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(defender, null);
+            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(defender, null);
 
-            if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat)
-                value *= defenderDungeonArmor.DungeonArmorDetail.DiseaseDamageReceivedScalar;
+            if (aspectArmor.MatchingSet && !defender.RecentlyInPlayerCombat)
+            {
+                //value *= aspectArmor.AspectArmorDetail.DiseaseDamageReceivedScalar;
+            }
 
             int intervalFrequency = 6;
             int numberOfIntervals = (int)(Math.Floor(expirationSeconds / intervalFrequency));
@@ -1721,20 +1660,7 @@ namespace Server.Mobiles
         {
             if (Utility.RandomDouble() > chance) return;
             if (!SpecialAbilities.Exists(defender)) return;
-
-            DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(defender, null);
-
-            if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat)
-            {
-                if (Utility.RandomDouble() <= defenderDungeonArmor.DungeonArmorDetail.SpecialEffectAvoidanceChance)
-                {
-                    Effects.PlaySound(defender.Location, defender.Map, 0x64B);
-                    Effects.SendLocationParticles(EffectItem.Create(defender.Location, defender.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, defenderDungeonArmor.DungeonArmorDetail.EffectHue, 0, 5005, 0);
-
-                    return;
-                }
-            }
-
+            
             if (showEffect)
                 defender.FixedEffect(0x91B, 10, 20, 2593, 0);
 
@@ -2111,10 +2037,12 @@ namespace Server.Mobiles
                                 damage *= BaseCreature.BreathDamageToCreatureScalar;
                         }
 
-                        DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(mobile, null);
+                        AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(mobile, null);
 
-                        if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat)
-                            damage *= defenderDungeonArmor.DungeonArmorDetail.BreathDamageReceivedScalar;
+                        if (aspectArmor.MatchingSet && !mobile.RecentlyInPlayerCombat)
+                        {
+                            //damage *= aspectArmor.AspectArmorDetail.BreathDamageReceivedScalar;
+                        }
 
                         if (creature != null)
                             creature.DoHarmful(mobile);

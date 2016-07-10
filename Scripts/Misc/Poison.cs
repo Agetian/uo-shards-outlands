@@ -113,16 +113,18 @@ namespace Server
                 BaseCreature bc_Target = m_Mobile as BaseCreature;
 
                 if (bc_Target != null)                
-                    bc_Target.m_TakenDamageFromPoison = true;                
+                    bc_Target.m_TakenDamageFromPoison = true;
 
                 if (pm_From != null && bc_Target != null)
                 {
                     double poisonDamageScalar = 1.0;
 
-                    DungeonArmor.PlayerDungeonArmorProfile poisonerDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(pm_From, null);
+                    AspectGear.AspectArmorProfile poisonerAspectArmor = new AspectGear.AspectArmorProfile(pm_From, null);
 
-                    if (poisonerDungeonArmor.MatchingSet && !poisonerDungeonArmor.InPlayerCombat)
-                        poisonDamageScalar = poisonerDungeonArmor.DungeonArmorDetail.PoisonDamageInflictedScalar;
+                    if (poisonerAspectArmor.MatchingSet && !pm_From.RecentlyInPlayerCombat)
+                    {
+                        //poisonDamageScalar = poisonerAspectArmor.AspectArmorDetail.PoisonDamageInflictedScalar;
+                    }
 
                     minimum = (double)minimum * 1.5 * poisonDamageScalar;
                     maximum = (double)maximum * 1.5 * poisonDamageScalar;
@@ -132,19 +134,21 @@ namespace Server
                 {
                     double poisonDamageScalar = 1.0;
 
-                    DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(pm_Target, null);
+                    AspectGear.AspectArmorProfile defenderAspectArmor = new AspectGear.AspectArmorProfile(pm_Target, null);
 
-                    if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat)                    
-                        poisonDamageScalar = defenderDungeonArmor.DungeonArmorDetail.PoisonDamageReceivedScalar;
+                    if (defenderAspectArmor.MatchingSet && !pm_Target.RecentlyInPlayerCombat)
+                    {
+                        //poisonDamageScalar = defenderAspectArmor.AspectArmorDetail.PoisonDamageReceivedScalar;
+                    }
 
                     if (bc_From.Controlled && bc_From.ControlMaster is PlayerMobile)
                     {
                         minimum = (double)minimum * bc_From.PvPAbilityDamageScalar;
                         maximum = (double)maximum * bc_From.PvPAbilityDamageScalar;
-                    }                    
-                                        
-                    minimum *= defenderDungeonArmor.DungeonArmorDetail.PoisonDamageReceivedScalar;
-                    maximum *= defenderDungeonArmor.DungeonArmorDetail.PoisonDamageReceivedScalar;                    
+                    }
+
+                    minimum *= poisonDamageScalar;
+                    maximum *= poisonDamageScalar;               
                 }
 
                 if (damage < minimum)

@@ -17,8 +17,7 @@ namespace Server.Items
             Amount = 1;
             Weight = 1;
 
-            int aspectCount = Enum.GetNames(typeof(AspectEnum)).Length;
-            Aspect = (AspectEnum)Utility.RandomMinMax(1, aspectCount - 1);
+            Aspect = AspectGear.GetRandomAspect();
 		}
 
         [Constructable]
@@ -30,8 +29,7 @@ namespace Server.Items
             Amount = amount;
             Weight = 1;
 
-            int aspectCount = Enum.GetNames(typeof(AspectEnum)).Length;
-            Aspect = (AspectEnum)Utility.RandomMinMax(1, aspectCount - 1);
+            Aspect = AspectGear.GetRandomAspect();
 		}
 
         public override void AspectChange()
@@ -42,10 +40,10 @@ namespace Server.Items
         public override void OnSingleClick(Mobile from)
         {
             if (Amount > 1)
-                LabelTo(from, AspectGear.GetAspectName(Aspect).ToLower() + " core : " + Amount.ToString());
+                LabelTo(from, AspectGear.GetAspectName(Aspect) + " Aspect Core : " + Amount.ToString());
 
             else
-                LabelTo(from, AspectGear.GetAspectName(Aspect).ToLower() + " core");
+                LabelTo(from, AspectGear.GetAspectName(Aspect) + " Aspect Core");
 
         }
 
@@ -53,7 +51,7 @@ namespace Server.Items
         {
             base.OnDoubleClick(from);
 
-            from.SendMessage("Use this with a mould and distillations of a matching aspect to create or upgrade aspect weapons and armor.");
+            from.SendMessage("Use a smithing, carpentry, or tailoring mould and distillations of a matching Aspect to create or upgrade Aspect weapons and armor.");
         }
 
         public AspectCore(Serial serial): base(serial)
@@ -79,6 +77,48 @@ namespace Server.Items
     }
 
     #region Specific Cores
+
+    public class AffinityCore : AspectCore
+    {
+        [Constructable]
+        public AffinityCore(): base()
+        {
+            Name = "affinity Core";
+
+            Aspect = AspectEnum.Affinity;
+        }
+
+        [Constructable]
+        public AffinityCore(int amount): base(amount)
+        {
+            Name = "affinity Core";
+
+            Amount = amount;
+
+            Aspect = AspectEnum.Affinity;
+        }
+
+        public AffinityCore(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
 
     public class AirCore : AspectCore
     {
@@ -288,49 +328,7 @@ namespace Server.Items
             {
             }
         }
-    }
-
-    public class HarmonyCore : AspectCore
-    {
-        [Constructable]
-        public HarmonyCore(): base()
-        {
-            Name = "harmony Core";
-
-            Aspect = AspectEnum.Harmony;
-        }
-
-        [Constructable]
-        public HarmonyCore(int amount): base(amount)
-        {
-            Name = "harmony Core";
-
-            Amount = amount;
-
-            Aspect = AspectEnum.Harmony;
-        }
-
-        public HarmonyCore(Serial serial): base(serial)
-        {
-        }
-
-        public override void Serialize(GenericWriter writer)
-        {
-            base.Serialize(writer);
-            writer.Write((int)0); //version   
-        }
-
-        public override void Deserialize(GenericReader reader)
-        {
-            base.Deserialize(reader);
-            int version = reader.ReadInt();
-
-            //Version 0
-            if (version >= 0)
-            {
-            }
-        }
-    }
+    }    
 
     public class PoisonCore : AspectCore
     {

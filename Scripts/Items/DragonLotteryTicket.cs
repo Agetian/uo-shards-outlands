@@ -93,11 +93,7 @@ namespace Server.Items
                 text = "You win a pouch with many pockets!";
                 i = new PouchWithManyPockets();
             }
-            else if (seed < 60)
-            {
-                text = "You win an item rename deed!";
-                i = new ItemRenameDeed();
-            }
+
             else if (seed < 65)
             {
                 text = "You win a magical weapon!";

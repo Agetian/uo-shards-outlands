@@ -183,6 +183,8 @@ namespace Server.Mobiles
             CommandSystem.Register("Anim", AccessLevel.GameMaster, new CommandEventHandler(Anim));
             CommandSystem.Register("AnimationTest", AccessLevel.GameMaster, new CommandEventHandler(AnimationTest));
             CommandSystem.Register("SetAllHues", AccessLevel.GameMaster, new CommandEventHandler(SetAllHues));
+            CommandSystem.Register("SetAllAspect", AccessLevel.GameMaster, new CommandEventHandler(SetAllAspect));
+            CommandSystem.Register("SetAllExceptional", AccessLevel.GameMaster, new CommandEventHandler(SetAllExceptional));
         }
 
         #region Commands
@@ -634,19 +636,20 @@ namespace Server.Mobiles
                     pm_Target.Backpack.DropItem(spellbook);
 
                     int dungeonCount = Enum.GetNames(typeof(AspectEnum)).Length;
+                    AspectEnum aspect = (AspectEnum)Utility.RandomMinMax(1, dungeonCount - 1);
 
-                    AspectEnum dungeon = (AspectEnum)Utility.RandomMinMax(1, dungeonCount - 1);
+                    int aspectHue = AspectGear.GetAspectHue(aspect);
 
-                    DungeonArmor.DungeonArmorDetail dungeonArmorDetail = new DungeonArmor.DungeonArmorDetail(dungeon, 1);    
+                    pm_Target.AddItem(new PlateHelm() { Aspect = aspect, TierLevel = 1 });
+                    pm_Target.AddItem(new PlateGorget() { Aspect = aspect, TierLevel = 1 });
+                    pm_Target.AddItem(new PlateArms() { Aspect = aspect, TierLevel = 1 });
+                    pm_Target.AddItem(new PlateGloves() { Aspect = aspect, TierLevel = 1 });
+                    pm_Target.AddItem(new PlateChest() { Aspect = aspect, TierLevel = 1 });
+                    pm_Target.AddItem(new PlateLegs() { Aspect = aspect, TierLevel = 1 });
 
-                    pm_Target.AddItem(new PlateHelm() { Aspect = dungeon, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateGorget() { Aspect = dungeon, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateArms() { Aspect = dungeon, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateGloves() { Aspect = dungeon, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateChest() { Aspect = dungeon, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateLegs() { Aspect = dungeon, TierLevel = 1 });                    
+                    pm_Target.AddItem(new Cloak(aspectHue));
 
-                    pm_Target.AddItem(new Cloak(dungeonArmorDetail.Hue));
+                    AspectGear.CheckForAndUpdateAspectArmorProperties(pm_Target);
                 }
 
                 else
@@ -773,10 +776,10 @@ namespace Server.Mobiles
 
             protected override void OnTarget(Mobile from, object target)
             {
-                if (target is Mobile)
-                {
-                    Mobile mobile = target as Mobile;
+                PlayerMobile pm_Target = target as PlayerMobile;
 
+                if (pm_Target != null)
+                {
                     List<Layer> layers = new List<Layer>();
 
                     layers.Add(Layer.Arms);
@@ -802,16 +805,170 @@ namespace Server.Mobiles
 
                     foreach (Layer layer in layers)
                     {
-                        Item item = mobile.FindItemOnLayer(layer);
+                        Item item = pm_Target.FindItemOnLayer(layer);
 
                         if (item == null) continue;
                         if (item.Deleted) continue;
-                        if (item == mobile.Backpack) continue;
+                        if (item == pm_Target.Backpack) continue;
 
                         item.Hue = m_Hue;
                     }
 
-                    mobile.Say("Hue: " + m_Hue.ToString());
+                    from.SendMessage("Setting Hue: " + m_Hue.ToString());
+                }
+            }
+        }
+
+        [Usage("SetAllAspect <aspect> <tierlevel")]
+        [Description("Sets All Equipped Items on Mobile to be of <aspect> and <tierLevel>")]
+        public static void SetAllAspect(CommandEventArgs e)
+        {
+            PlayerMobile player = e.Mobile as PlayerMobile;
+
+            if (player == null)
+                return;
+
+            if (e.Length == 2)
+            {
+                AspectEnum aspect = AspectEnum.Air;
+
+                Enum.TryParse(e.GetString(0), true, out aspect);
+                int tierLevel = e.GetInt32(1);
+
+                player.SendMessage("Target the mobile you wish to change item aspects for.");
+                player.Target = new SetAllAspectTarget(player, aspect, tierLevel);
+            }
+        }
+
+        private class SetAllAspectTarget : Target
+        {
+            public AspectEnum m_Aspect;
+            public int m_TierLevel;
+
+            public SetAllAspectTarget(Mobile from, AspectEnum aspect, int tierLevel): base(100, false, TargetFlags.None)
+            {
+                m_Aspect = aspect;
+                m_TierLevel = tierLevel;
+            }
+
+            protected override void OnTarget(Mobile from, object target)
+            {
+                PlayerMobile pm_Target = target as PlayerMobile;
+
+                if (pm_Target != null)
+                {
+                    if (m_TierLevel >= AspectGear.MaxAspectTier)
+                        m_TierLevel = AspectGear.MaxAspectTier;
+
+                    if (m_TierLevel < 1)
+                        m_TierLevel = 1;
+
+                    List<Layer> layers = new List<Layer>();
+
+                    layers.Add(Layer.Arms);
+                    layers.Add(Layer.Bracelet);
+                    layers.Add(Layer.Cloak);
+                    layers.Add(Layer.Earrings);
+                    layers.Add(Layer.Gloves);
+                    layers.Add(Layer.Helm);
+                    layers.Add(Layer.InnerLegs);
+                    layers.Add(Layer.InnerTorso);
+                    layers.Add(Layer.MiddleTorso);
+                    layers.Add(Layer.Neck);
+                    layers.Add(Layer.OneHanded);
+                    layers.Add(Layer.OuterLegs);
+                    layers.Add(Layer.OuterTorso);
+                    layers.Add(Layer.Pants);
+                    layers.Add(Layer.Ring);
+                    layers.Add(Layer.Shirt);
+                    layers.Add(Layer.Shoes);
+                    layers.Add(Layer.Talisman);
+                    layers.Add(Layer.Waist);
+
+                    layers.Add(Layer.OneHanded);
+                    layers.Add(Layer.TwoHanded);
+
+                    foreach (Layer layer in layers)
+                    {
+                        Item item = pm_Target.FindItemOnLayer(layer);
+
+                        if (item == null) continue;
+                        if (item.Deleted) continue;
+                        if (item == pm_Target.Backpack) continue;
+
+                        if (item is BaseWeapon || item is BaseArmor && !(item is BaseShield))
+                        {
+                            item.Aspect = m_Aspect;
+                            item.TierLevel = m_TierLevel;
+                        }
+
+                        else
+                            item.Hue = AspectGear.GetAspectHue(m_Aspect);                        
+                    }
+
+                    AspectGear.CheckForAndUpdateAspectArmorProperties(pm_Target);
+
+                    from.SendMessage("Setting Aspect: " + AspectGear.GetAspectName(m_Aspect));
+                }
+            }
+        }
+
+        [Usage("SetAllExceptional")]
+        [Description("Sets All Equipped Items on Mobile to be of exceptional quality")]
+        public static void SetAllExceptional(CommandEventArgs e)
+        {
+            PlayerMobile player = e.Mobile as PlayerMobile;
+
+            if (player == null)
+                return;
+
+            player.SendMessage("Target the mobile you wish to set all items as exceptional for.");
+            player.Target = new SetAllExceptionalTarget(player);
+            
+        }
+
+        private class SetAllExceptionalTarget : Target
+        {
+            public SetAllExceptionalTarget(Mobile from): base(100, false, TargetFlags.None)
+            {
+            }
+
+            protected override void OnTarget(Mobile from, object target)
+            {
+                PlayerMobile pm_Target = target as PlayerMobile;
+
+                if (pm_Target != null)
+                {
+                    List<Layer> layers = new List<Layer>();
+
+                    layers.Add(Layer.Helm);
+                    layers.Add(Layer.Neck);
+                    layers.Add(Layer.Arms);
+                    layers.Add(Layer.Gloves);
+                    layers.Add(Layer.InnerTorso);
+                    layers.Add(Layer.Pants); 
+
+                    layers.Add(Layer.OneHanded);
+                    layers.Add(Layer.TwoHanded);
+
+                    foreach (Layer layer in layers)
+                    {
+                        Item item = pm_Target.FindItemOnLayer(layer);
+
+                        if (item == null) continue;
+                        if (item.Deleted) continue;
+                        if (item == pm_Target.Backpack) continue;
+
+                        if (item is BaseWeapon || item is BaseArmor)
+                        {
+                            item.LootType = LootType.Regular;
+
+                            item.Quality = Quality.Exceptional;
+                            item.DisplayCrafter = true;
+                            item.CraftedBy = pm_Target;
+                            item.CrafterName = pm_Target.RawName;
+                        }
+                    }
                 }
             }
         }
@@ -885,7 +1042,7 @@ namespace Server.Mobiles
             EventCalendarPersistance.CheckAndCreateEventCalendarAccount(pm_From);
 
             //Dungeon Armor
-            DungeonArmor.CheckForAndUpdateDungeonArmorProperties(pm_From);
+            AspectGear.CheckForAndUpdateAspectArmorProperties(pm_From);
 
             //OverloadProtectionSystem
             pm_From.SystemOverloadActions = 0;
@@ -3698,7 +3855,7 @@ namespace Server.Mobiles
 
                 if (!m_Player.RecentlyInPlayerCombat)
                 {
-                    DungeonArmor.CheckForAndUpdateDungeonArmorProperties(m_Player);
+                    AspectGear.CheckForAndUpdateAspectArmorProperties(m_Player);
                     Stop();
                 }
             }
@@ -4679,14 +4836,15 @@ namespace Server.Mobiles
 
         public virtual void OnGaveMeleeAttack(Mobile defender)
         {
-            DungeonArmor.PlayerDungeonArmorProfile attackerDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(this, null);
+            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(this, null);
 
-            if (attackerDungeonArmor.MatchingSet && !attackerDungeonArmor.InPlayerCombat && defender is BaseCreature)
+            if (aspectArmor.MatchingSet && !this.RecentlyInPlayerCombat && defender is BaseCreature)
             {
-                double flamestrikeChance = attackerDungeonArmor.DungeonArmorDetail.FlamestrikeOnMeleeAttackChance;
-                double energySiphonChance = attackerDungeonArmor.DungeonArmorDetail.EnergySiphonOnMeleeAttackChance;
+                /*
+                double flamestrikeChance = aspectArmor.AspectArmorDetail.FlamestrikeOnMeleeAttackChance;
+                double energySiphonChance = aspectArmor.AspectArmorDetail.EnergySiphonOnMeleeAttackChance;
 
-                int effectHue = effectHue = attackerDungeonArmor.DungeonArmorDetail.EffectHue;
+                int effectHue = AspectGear.GetAspectHue(aspectArmor.AspectArmorDetail.m_Aspect);
 
                 BaseWeapon weapon = Weapon as BaseWeapon;
 
@@ -4719,16 +4877,18 @@ namespace Server.Mobiles
                     Effects.SendLocationParticles(EffectItem.Create(Location, Map, EffectItem.DefaultDuration), 0x376A, 9, 32, effectHue, 0, 5005, 0);
                     SpecialAbilities.EnergySiphonSpecialAbility(1.0, this, defender, 1.0, 1, -1, true, "You siphon energy from your target.", "");
                 }
+                */
             }
         }
 
         public virtual void OnGotMeleeAttack(Mobile attacker)
         {
-            DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(this, null);
+            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(this, null);
 
-            if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat && attacker is BaseCreature)
+            if (aspectArmor.MatchingSet && !this.RecentlyInPlayerCombat && attacker is BaseCreature)
             {
-                double flamestrikeChance = defenderDungeonArmor.DungeonArmorDetail.FlamestrikeOnReceiveMeleeHitChance;
+                /*
+                double flamestrikeChance = aspectArmor.AspectArmorDetail.FlamestrikeOnReceiveMeleeHitChance;
 
                 int damage = Utility.RandomMinMax(40, 60);
 
@@ -4738,6 +4898,7 @@ namespace Server.Mobiles
 
                     SpecialAbilities.FlamestrikeSpecialAbility(1.0, null, attacker, damage, 0, -1, true, "", "");
                 }
+                */
             }
         }
 
@@ -4772,7 +4933,8 @@ namespace Server.Mobiles
             LastPlayerCombatTime = DateTime.UtcNow;
             pm_From.LastPlayerCombatTime = DateTime.UtcNow;
 
-            DungeonArmor.CheckForAndUpdateDungeonArmorProperties(this);
+            AspectGear.CheckForAndUpdateAspectArmorProperties(this);
+
             CapStatMods(this);
 
             if (m_PlayerCombatTimer == null)
@@ -5513,10 +5675,12 @@ namespace Server.Mobiles
             bool leaveFootsteps = false;
             double footstepChance = .33;
 
-            DungeonArmor.PlayerDungeonArmorProfile stealtherDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(this, null);
+            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(this, null);
 
-            if (stealtherDungeonArmor.MatchingSet && stealtherDungeonArmor.DungeonArmorDetail.StealthLeavesFootprints)
+            /*
+            if (aspectArmor.MatchingSet && aspectArmor.AspectArmorDetail.StealthLeavesFootprints)
                 leaveFootsteps = true;
+            */
 
             if (Hidden && DesignContext.Find(this) == null)	//Hidden & NOT customizing a house
             {

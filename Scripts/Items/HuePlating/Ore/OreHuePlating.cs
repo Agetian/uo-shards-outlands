@@ -81,11 +81,11 @@ namespace Server.Items
                         return;
                     }                    
 
-                    if (item is BaseWeapon || item is BaseArmor || item is BaseShield)
+                    if (item is BaseWeapon || item is BaseArmor)
                     {
-                        if (item is DungeonArmor)
+                        if (item.Aspect != AspectEnum.None)
                         {
-                            from.SendMessage("Dungeon armor may not be hued with this item.");
+                            from.SendMessage("Aspect armor may not be hued with this item.");
                             return;
                         }
 

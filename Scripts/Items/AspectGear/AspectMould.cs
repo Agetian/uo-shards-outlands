@@ -11,7 +11,7 @@ using Server.Engines.Craft;
 
 namespace Server.Items
 {
-    public class AspectMould : Item
+    public class AspectMould : Item, ICraftable
     {
         public enum MouldSkillType
         {
@@ -32,8 +32,8 @@ namespace Server.Items
                 switch (m_MouldType)
                 {
                     case MouldSkillType.Blacksmithy: Hue = 2500; break;
-                    case MouldSkillType.Carpentry: Hue = 2311; break;
-                    case MouldSkillType.Tailoring: Hue = 2498; break;
+                    case MouldSkillType.Carpentry: Hue = 0; break;
+                    case MouldSkillType.Tailoring: Hue = 1846; break;
                 }
             }
         }
@@ -57,50 +57,20 @@ namespace Server.Items
             Name = "aspect mould";
 
             RandomizeCraftType();
-            TierLevel = 1;
-        }
-
-        [Constructable]
-        public AspectMould(MouldSkillType mouldType): base(0x14F0)
-        {
-            Name = "aspect mould";
-
-            m_MouldType = mouldType;
-            TierLevel = 1;
-        }
-
-        [Constructable]
-        public AspectMould(int tierLevel): base(0x14F0)
-        {
-            Name = "aspect mould";
-
-            RandomizeCraftType();
-            TierLevel = tierLevel;
-
-            if (TierLevel > 10)
-                TierLevel = 10;
-
-            if (TierLevel < 1)
-                TierLevel = 1;
-        }
-
-        [Constructable]
-        public AspectMould(MouldSkillType mouldType, int tierLevel): base(0x14F0)
-        {
-            Name = "aspect mould";
-
-            m_MouldType = mouldType;
-            TierLevel = tierLevel;
-
-            if (TierLevel > 10)
-                TierLevel = 10;
-
-            if (TierLevel < 1)
-                TierLevel = 1;
+            TierLevel = 2;
         }
 
         public AspectMould(Serial serial): base(serial)
         {
+        }
+
+        public void CheckMaxTierLevel()
+        {
+            if (TierLevel > AspectGear.MaxAspectTier)
+                TierLevel = AspectGear.MaxAspectTier;
+
+            if (TierLevel < 1)
+                TierLevel = 1; 
         }
 
         public void RandomizeCraftType()
@@ -113,19 +83,45 @@ namespace Server.Items
             }
         }
 
-        public override void OnSingleClick(Mobile from)
+        public int OnCraft(int quality, bool makersMark, Mobile from, CraftSystem craftSystem, Type typeRes, BaseTool tool, CraftItem craftItem, int resHue)
         {
-            LabelTo(from, GetDisplayName());
-            LabelTo(from, "[Uses Remaining: " + m_Charges.ToString() + "/" + MaxCharges + "]");           
+            Quality = Quality.Regular;
+
+            double craftingSkill = 0;
+
+            switch (MouldType)
+            {
+                case MouldSkillType.Blacksmithy: craftingSkill = from.Skills.Blacksmith.Value; break;
+                case MouldSkillType.Carpentry: craftingSkill = from.Skills.Carpentry.Value; break;
+                case MouldSkillType.Tailoring: craftingSkill = from.Skills.Tailoring.Value; break;
+            }
+
+            double skillBase = craftingSkill - 100;
+
+            if (skillBase > 20)
+                skillBase = 20;
+
+            if (skillBase < 0)
+                skillBase = 0;
+
+            int tierLevel = (int)(Math.Ceiling(skillBase / 2));
+
+            return quality;
         }
 
+        public override void OnSingleClick(Mobile from)
+        {
+            LabelTo(from, GetDisplayName() + ": Tier " + (TierLevel -1).ToString() + "-" + TierLevel.ToString());
+            LabelTo(from, "[Uses Remaining: " + m_Charges.ToString() + "/" + MaxCharges + "]");           
+        }
+        
         public string GetDisplayName()
         {
             switch (m_MouldType)
             {
-                case MouldSkillType.Blacksmithy: return "Smithing Mould: Tier " + TierLevel.ToString(); break;
-                case MouldSkillType.Carpentry: return "Carpentry Mould: Tier " + TierLevel.ToString(); break;
-                case MouldSkillType.Tailoring: return "Tailoring Mould: Tier " + TierLevel.ToString(); break;
+                case MouldSkillType.Blacksmithy: return "Smithing Mould"; break;
+                case MouldSkillType.Carpentry: return "Carpentry Mould"; break;
+                case MouldSkillType.Tailoring: return "Tailoring Mould"; break;
             }
 
             return "Aspect Mould";
@@ -144,15 +140,15 @@ namespace Server.Items
             switch (m_MouldType)
             {
                 case MouldSkillType.Blacksmithy:
-                    from.SendMessage("Target a master-marked blacksmith-based weapon or armor to create a new Aspect item. Or target an existing Aspect item to upgrade it's tier.");
+                    from.SendMessage("Target a mastermarked blacksmith-based weapon or armor to create a new Aspect item, or an existing Aspect item to upgrade it's tier.");
                 break;
                     
                 case MouldSkillType.Carpentry:
-                    from.SendMessage("Target a master-marked carpenty-based weapon or armor to create a new Aspect item. Or target an existing Aspect item to upgrade it's tier.");
+                    from.SendMessage("Target a mastermarked carpenty-based weapon or armor to create a new Aspect item, or an existing Aspect item to upgrade it's tier.");
                 break;
 
                 case MouldSkillType.Tailoring:
-                    from.SendMessage("Target a master-marked tailoring-based armor to create a new Aspect item. Or target an existing Aspect item to upgrade it's tier.");
+                    from.SendMessage("Target a mastermarked tailoring-based armor to create a new Aspect item, or an existing Aspect item to upgrade it's tier.");
                 break;
             }                 
             
@@ -205,7 +201,7 @@ namespace Server.Items
                     return;
                 }
 
-                if (!(targetItem.IsChildOf(m_Player.Backpack) || targetItem.RootParent != m_Player))
+                if (!(targetItem.IsChildOf(m_Player.Backpack) || targetItem.RootParent == m_Player))
                 {
                     from.SendMessage("The item you wish to improve must be equipped or in your backpack.");
                     return;
@@ -304,7 +300,7 @@ namespace Server.Items
                     m_Player.SendSound(0x055);
 
                     m_Player.CloseGump(typeof(AspectGearGump));
-                    m_Player.SendGump(new AspectGearGump(m_Player, m_AspectMould, targetItem, AspectEnum.Air));
+                    m_Player.SendGump(new AspectGearGump(m_Player, m_AspectMould, targetItem, AspectEnum.Affinity));
 
                     return;
                 }
@@ -313,14 +309,14 @@ namespace Server.Items
                 {
                     if (!(targetItem.Quality == Quality.Exceptional && targetItem.DisplayCrafter))
                     {
-                        m_Player.SendMessage("Only master-marked items may be improved.");
+                        m_Player.SendMessage("Only mastermarked items may be improved.");
                         return;
                     }
 
                     m_Player.SendSound(0x055);
 
                     m_Player.CloseGump(typeof(AspectGearGump));
-                    m_Player.SendGump(new AspectGearGump(m_Player, m_AspectMould, targetItem, AspectEnum.Air));
+                    m_Player.SendGump(new AspectGearGump(m_Player, m_AspectMould, targetItem, AspectEnum.Affinity));
 
                     return;
                 }
@@ -350,835 +346,511 @@ namespace Server.Items
             }
         }
     }
-}
 
-/*
-        public static bool HasRequiredMaterials(Mobile from, Mobile mobileTarget, DungeonMould dungeonMould, bool newWeapon, DungeonEnum dungeon)
-        {
-            if (from == null) return false;
-            if (from.Backpack == null) return false;
-            if (mobileTarget == null) return false;
-            if (mobileTarget.Backpack == null) return false;
+    #region Smithing Moulds
 
-            if (dungeonMould == null) return false;
-            if (dungeonMould.Deleted) return false;
-
-            if (!dungeonMould.IsChildOf(from.Backpack))            
-                return false;
-
-            List<DungeonCore> m_DungeonCores = mobileTarget.Backpack.FindItemsByType<DungeonCore>();
-            List<DungeonDistillation> m_DungeonDistillations = mobileTarget.Backpack.FindItemsByType<DungeonDistillation>();
-
-            List<DungeonCore> m_MatchingDungeonCores = new List<DungeonCore>();
-            List<DungeonDistillation> m_MatchingDungeonDistillations = new List<DungeonDistillation>();
-
-            int totalMatchingDungeonCores = 0;
-
-            foreach (DungeonCore dungeonCore in m_DungeonCores)
-            {
-                if (dungeonCore.Dungeon == dungeon)
-                {
-                    totalMatchingDungeonCores += dungeonCore.Amount;
-                    m_MatchingDungeonCores.Add(dungeonCore);
-                }
-            }
-
-            foreach (DungeonDistillation dungeonDistillation in m_DungeonDistillations)
-            {
-                if (dungeonDistillation.Dungeon == dungeon)
-                    m_MatchingDungeonDistillations.Add(dungeonDistillation);
-            }
-
-            if (newWeapon)
-            {
-                if (totalMatchingDungeonCores >= DungeonWeapon.CoresNeededForCreation && m_MatchingDungeonDistillations.Count >= DungeonWeapon.DistillationNeededForCreation)
-                    return true;
-            }
-
-            else
-            {
-                if (totalMatchingDungeonCores >= DungeonWeapon.CoresNeededForUpgrade && m_MatchingDungeonDistillations.Count >= DungeonWeapon.DistillationNeededForUpgrade)
-                    return true;
-            }
-
-            return false;
-        }
-
-        public static void ConsumeMaterials(Mobile from, Mobile mobileTarget, DungeonMould dungeonMould, bool newWeapon, DungeonEnum dungeon)
-        {
-            if (from == null || mobileTarget == null)
-                return;
-
-            List<DungeonCore> m_DungeonCores = mobileTarget.Backpack.FindItemsByType<DungeonCore>();
-            List<DungeonDistillation> m_DungeonDistillations = mobileTarget.Backpack.FindItemsByType<DungeonDistillation>();
-
-            List<DungeonCore> m_MatchingDungeonCores = new List<DungeonCore>();
-            List<DungeonDistillation> m_MatchingDungeonDistillations = new List<DungeonDistillation>();
-
-            int coresNeeded = DungeonWeapon.CoresNeededForUpgrade;
-            int distillationsNeeded = DungeonWeapon.DistillationNeededForUpgrade;
-
-            if (newWeapon)
-            {
-                coresNeeded = DungeonWeapon.CoresNeededForCreation;
-                distillationsNeeded = DungeonWeapon.DistillationNeededForCreation;
-            }
-
-            Queue m_Queue = new Queue();    
-                    
-            foreach (DungeonCore dungeonCore in m_DungeonCores)
-            {
-                if (dungeonCore.Dungeon == dungeon)
-                {
-                    if (dungeonCore.Amount > coresNeeded)
-                    {
-                        dungeonCore.Amount -= coresNeeded;
-                        coresNeeded = 0;
-                    }
-
-                    else
-                    {
-                        //Queue for Deletion
-                        coresNeeded -= dungeonCore.Amount;
-
-                        m_Queue.Enqueue(dungeonCore);   
-                    }           
-                }
-
-                if (coresNeeded <= 0)
-                    break;
-            }
-
-            while (m_Queue.Count > 0)
-            {
-                DungeonCore dungeonCore = (DungeonCore)m_Queue.Dequeue();
-                dungeonCore.Delete();
-            }            
-
-            m_Queue = new Queue();
-
-            foreach (DungeonDistillation dungeonDistillation in m_DungeonDistillations)
-            {
-                if (dungeonDistillation.Dungeon == dungeon)
-                {
-                    m_Queue.Enqueue(dungeonDistillation);
-                    distillationsNeeded--;
-                }
-
-                if (distillationsNeeded <= 0)
-                    break;
-            }
-
-            while (m_Queue.Count > 0)
-            {
-                DungeonDistillation dungeonDistillation = (DungeonDistillation)m_Queue.Dequeue();
-                dungeonDistillation.Delete();
-            }
-
-            if (dungeonMould != null)
-                dungeonMould.Delete();
-        }
-
-        public static BaseWeapon CreateDungeonWeapon(BaseWeapon weapon, DungeonEnum dungeon)
-        {
-            weapon.Quality = Quality.Regular;
-            weapon.ArcaneCharges = DungeonWeapon.ArcaneMaxCharges;
-            weapon.ArcaneChargesMax = DungeonWeapon.ArcaneMaxCharges;
-            weapon.Dungeon = dungeon;
-            weapon.TierLevel = 1;
-            weapon.Experience = 0;
-
-            return weapon;
-        }
-        */
-
-/*
-public class DungeonMouldWeaponGump : Gump
-{
-    public Mobile m_GumpTarget;
-    public Mobile m_Crafter;
-    public Mobile m_MobileTarget;
-    public DungeonMould m_DungeonMould;
-    public bool m_NewWeapon;
-    public BaseWeapon m_Weapon;
-    public DungeonEnum m_Dungeon;
-    public int m_AmountDemanded;
-    public bool m_Confirmed;
-
-    public DungeonMouldWeaponGump(Mobile gumpTarget, Mobile crafter, Mobile mobileTarget, DungeonMould mould, bool newWeapon, BaseWeapon weapon, DungeonEnum dungeon, int amountDemanded, bool confirmed): base(10, 10)
+    public class SmithingMouldTier2 : AspectMould
     {
-        m_GumpTarget = gumpTarget;
-        m_Crafter = crafter;
-        m_MobileTarget = mobileTarget;
-        m_DungeonMould = mould;
-        m_NewWeapon = newWeapon;
-        m_Weapon = weapon;
-        m_Dungeon = dungeon;
-
-        m_AmountDemanded = amountDemanded;
-        m_Confirmed = confirmed;
-
-        bool selfCraft = (m_Crafter == m_MobileTarget);
-
-        Closable = true;
-        Disposable = true;
-        Dragable = true;
-        Resizable = false;
-
-        AddImage(70, 100, 103);
-        AddImage(5, 100, 103);
-        AddImage(70, 5, 103);
-        AddImage(5, 5, 103);
-        AddImage(200, 100, 103);
-        AddImage(200, 5, 103);
-        AddImage(70, 281, 103);
-        AddImage(5, 281, 103);
-        AddImage(70, 186, 103);
-        AddImage(5, 186, 103);
-        AddImage(200, 281, 103);
-        AddImage(200, 186, 103);
-        AddImage(70, 374, 103);
-        AddImage(5, 374, 103);
-        AddImage(200, 374, 103);
-        AddImage(17, 18, 3604, 2052);
-        AddImage(76, 18, 3604, 2052);
-        AddImage(204, 18, 3604, 2052);
-        AddImage(17, 140, 3604, 2052);
-        AddImage(76, 140, 3604, 2052);
-        AddImage(204, 140, 3604, 2052);
-        AddImage(17, 262, 3604, 2052);
-        AddImage(76, 262, 3604, 2052);
-        AddImage(204, 262, 3604, 2052);
-        AddImage(17, 335, 3604, 2052);
-        AddImage(76, 335, 3604, 2052);
-        AddImage(204, 335, 3604, 2052);			   
-			    
-        //-----
-        int WhiteTextHue = 2655;
-        int EffectHue = WhiteTextHue;
-
-        string offerText = "";
-
-        if (!selfCraft)
+        [Constructable]
+        public SmithingMouldTier2(): base()
         {
-            if (m_GumpTarget == m_MobileTarget)
+            Name = "Smithing Mould: Tier 2";
+
+            TierLevel = 2;
+            MouldType = MouldSkillType.Blacksmithy;
+        }
+
+        public SmithingMouldTier2(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
             {
-                offerText = "Offer from " + m_Crafter.Name;
-                AddLabel(Utility.CenteredTextOffset(175, offerText), 17, 149, offerText);
             }
         }
-
-        if (m_NewWeapon)
-        {
-            offerText = "Create Dungeon Weapon";
-
-            if (selfCraft || m_GumpTarget == m_Crafter)
-                AddLabel(Utility.CenteredTextOffset(175, offerText), 17, WhiteTextHue, offerText);
-            else
-                AddLabel(Utility.CenteredTextOffset(175, offerText), 37, WhiteTextHue, offerText);
-        }
-
-        else
-        {
-            offerText = "Upgrade Dungeon Weapon";
-
-            if (selfCraft || m_GumpTarget == m_Crafter)
-                AddLabel(Utility.CenteredTextOffset(175, offerText), 17, WhiteTextHue, offerText);
-            else
-                AddLabel(Utility.CenteredTextOffset(175, offerText), 37, WhiteTextHue, offerText);
-        }
-
-        //Weapon Info
-        int weaponTier = m_Weapon.TierLevel;
-        string dungeonName = GetDungeonName(m_Dungeon) + " Dungeon";
-        string weaponName = m_Weapon.Name;
-
-        if (weaponName == null)
-            weaponName = "";
-
-        weaponName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(weaponName);
-        int newDurability = DungeonWeapon.BaselineDurability + (DungeonWeapon.IncreasedDurabilityPerTier * weaponTier);
-
-        int adjustedBlessedCharges = DungeonWeapon.ArcaneMaxCharges;
-
-        double accuracy = 100 * (DungeonWeapon.BaseAccuracy + (DungeonWeapon.AccuracyPerTier * (double)weaponTier));
-        double tactics = DungeonWeapon.BaseTactics + (DungeonWeapon.TacticsPerTier * (double)weaponTier);
-                
-        double effectChance = DungeonWeapon.BaseEffectChance + (DungeonWeapon.BaseEffectChancePerTier * (double)weaponTier);
-
-        effectChance *= DungeonWeapon.GetSpeedScalar(m_Weapon.Speed);
-
-        DungeonArmor.DungeonArmorDetail detail = new DungeonArmor.DungeonArmorDetail(m_Dungeon, 1);
-
-        EffectHue = detail.Hue - 1;
-
-        int itemId = weapon.ItemID;
-        int itemHue = EffectHue;
-        int offsetX = 0;
-        int offsetY = 0;
-
-        AddLabel(Utility.CenteredTextOffset(120, dungeonName) , 60, EffectHue, dungeonName);
-        AddLabel(Utility.CenteredTextOffset(120, weaponName), 80, EffectHue, weaponName);
-        AddItem(103 + m_Weapon.IconOffsetX, 115 + m_Weapon.IconOffsetY, m_Weapon.IconItemId, itemHue);
-        AddLabel(97, 165, EffectHue, "Tier " + weaponTier.ToString());                
-
-        AddLabel(71, 190, WhiteTextHue, "Charges:");
-        AddLabel(135, 190, EffectHue, adjustedBlessedCharges.ToString());
-
-        AddLabel(55, 210, WhiteTextHue, "Experience:");
-        AddLabel(135, 210, EffectHue, "0/" + DungeonWeapon.MaxDungeonExperience.ToString());
-
-        AddLabel(60, 230, WhiteTextHue, "Durability:");
-        AddLabel(135, 230, EffectHue, newDurability.ToString() + "/" + newDurability.ToString());
-			    
-        AddLabel(65, 250, WhiteTextHue, "Accuracy:");
-        AddLabel(135, 250, EffectHue, "+" + accuracy.ToString() + "%");
-
-        AddLabel(74, 270, WhiteTextHue, "Tactics:");
-        AddLabel(135, 270, EffectHue, "+" + tactics.ToString());                
-
-        AddLabel(31, 290, WhiteTextHue, "Effect Chance:");
-        AddLabel(135, 290, EffectHue, Utility.CreateDecimalPercentageString(effectChance, 1));	
-        AddLabel(30, 310, WhiteTextHue, "(scaled for weapon speed)");
-
-        DungeonWeaponDetail weaponDetail = DungeonWeapon.GetDungeonWeaponDetail(m_Dungeon);
-
-        AddLabel(70, 335, WhiteTextHue, "Special Effect:");
-        AddButton(78, 359, 1210, 1209, 4, GumpButtonType.Reply, 0);
-        AddLabel(98, 355, EffectHue, weaponDetail.m_EffectDisplayName);
-
-        //-----
-
-        if (newWeapon)
-        {
-            if (selfCraft || m_GumpTarget == m_MobileTarget)
-            {
-                AddLabel(225, 60, WhiteTextHue, "Choose Dungeon");
-
-                AddLabel(265, 95, WhiteTextHue, "Covetous");
-                AddLabel(265, 130, WhiteTextHue, "Deceit");
-                AddLabel(265, 165, WhiteTextHue, "Despise");
-                AddLabel(265, 200, WhiteTextHue, "Destard");
-                AddLabel(265, 235, WhiteTextHue, "Fire");
-                AddLabel(265, 270, WhiteTextHue, "Hythloth");
-                AddLabel(265, 305, WhiteTextHue, "Ice");
-                AddLabel(265, 340, WhiteTextHue, "Shame");
-                AddLabel(265, 375, WhiteTextHue, "Wrong");
-
-                if (m_Dungeon == DungeonEnum.Covetous)
-                    AddButton(228, 90, 9724, 9721, 10, GumpButtonType.Reply, 0);
-                else
-                    AddButton(228, 90, 9721, 9724, 10, GumpButtonType.Reply, 0);
-
-                if (m_Dungeon == DungeonEnum.Deceit)
-                    AddButton(228, 125, 9724, 9721, 11, GumpButtonType.Reply, 0);
-                else
-                    AddButton(228, 125, 9721, 9724, 11, GumpButtonType.Reply, 0);
-
-                if (m_Dungeon == DungeonEnum.Despise)
-                    AddButton(228, 160, 9724, 9721, 12, GumpButtonType.Reply, 0);
-                else
-                    AddButton(228, 160, 9721, 9724, 12, GumpButtonType.Reply, 0);
-
-                if (m_Dungeon == DungeonEnum.Destard)
-                    AddButton(228, 195, 9724, 9721, 13, GumpButtonType.Reply, 0);
-                else
-                    AddButton(228, 195, 9721, 9724, 13, GumpButtonType.Reply, 0);
-
-                if (m_Dungeon == DungeonEnum.Fire)
-                    AddButton(228, 230, 9724, 9721, 14, GumpButtonType.Reply, 0);
-                else
-                    AddButton(228, 230, 9721, 9724, 14, GumpButtonType.Reply, 0);
-
-                if (m_Dungeon == DungeonEnum.Hythloth)
-                    AddButton(228, 265, 9724, 9721, 15, GumpButtonType.Reply, 0);
-                else
-                    AddButton(228, 265, 9721, 9724, 15, GumpButtonType.Reply, 0);
-
-                if (m_Dungeon == DungeonEnum.Ice)
-                    AddButton(228, 300, 9724, 9721, 16, GumpButtonType.Reply, 0);
-                else
-                    AddButton(228, 300, 9721, 9724, 16, GumpButtonType.Reply, 0);
-
-                if (m_Dungeon == DungeonEnum.Shame)
-                    AddButton(228, 335, 9724, 9721, 17, GumpButtonType.Reply, 0);
-                else
-                    AddButton(228, 335, 9721, 9724, 17, GumpButtonType.Reply, 0);
-
-                if (m_Dungeon == DungeonEnum.Wrong)
-                    AddButton(228, 370, 9724, 9721, 18, GumpButtonType.Reply, 0); 
-                else
-                    AddButton(228, 370, 9721, 9724, 18, GumpButtonType.Reply, 0); 
-            }
-        }
-
-        if (!selfCraft)
-        {
-            if (m_GumpTarget == m_Crafter)
-            {
-                AddLabel(26, 388, 149, "Price");
-                AddItem(57, 386, 3823);
-                AddImage(103, 387, 2445);
-                AddTextEntry(108, 388, 95, 20, WhiteTextHue, 4, m_AmountDemanded.ToString());
-                AddButton(214, 392, 1209, 1210, 3, GumpButtonType.Reply, 0);                 
-            }
-
-            else
-            {
-                AddLabel(26, 388, 149, "Price");
-                AddItem(57, 386, 3823);
-                AddLabel(103, 388, WhiteTextHue, m_AmountDemanded.ToString());
-            }
-        }
-
-        if (selfCraft)
-        {                    
-            AddButton(24, 423, 2151, 2154, 1, GumpButtonType.Reply, 0);
-            AddLabel(57, 426, WhiteTextHue, "Confirm");
-        }
-
-        else
-        {
-            if (m_GumpTarget == m_Crafter)
-            {
-                if (m_Confirmed)
-                    AddButton(191, 423, 2154, 2151, 2, GumpButtonType.Reply, 0);
-                else
-                    AddButton(191, 423, 2151, 2154, 2, GumpButtonType.Reply, 0);
-
-                AddLabel(227, 427, WhiteTextHue, "Confirm Offer");
-            }
-
-            else
-            {
-                AddButton(24, 423, 2151, 2154, 1, GumpButtonType.Reply, 0);
-                AddLabel(57, 426, WhiteTextHue, "Accept Their Offer");
-
-                if (m_Confirmed)
-                    AddImage(191, 423, 9729);
-                else
-                    AddImage(191, 423, 9731);
-
-                AddLabel(227, 427, WhiteTextHue, "They Are Ready");	
-            }                    
-        }                		   
     }
 
-    public override void OnResponse(NetState sender, RelayInfo info)
+    public class SmithingMouldTier4 : AspectMould
     {
-        #region Validate Mobiles Involved
-
-        //Validate Mobiles
-        bool crafterValid = true;
-        bool mobileTargetValid = true;
-
-        if (m_Crafter == null)
-            crafterValid = false;
-
-        else if (m_Crafter.Deleted || !m_Crafter.Alive)
-            crafterValid = false;
-
-        if (m_MobileTarget == null)
-            mobileTargetValid = false;
-
-        else if (m_MobileTarget.Deleted || !m_MobileTarget.Alive)
-            mobileTargetValid = false;
-
-        if (!crafterValid || !mobileTargetValid)
+        [Constructable]
+        public SmithingMouldTier4(): base()
         {
-            if (m_Crafter != null)
-            {
-                if (m_Crafter.HasGump(typeof(DungeonMouldWeaponGump)))
-                    m_Crafter.CloseGump(typeof(DungeonMouldWeaponGump));
+            Name = "Smithing Mould: Tier 4";
 
-                m_Crafter.SendMessage("You can no longer proceed with the crafting of that dungeon weapon.");
-            }
-
-            if (m_MobileTarget != null && m_Crafter != m_MobileTarget)
-            {
-                if (m_MobileTarget.HasGump(typeof(DungeonMouldWeaponGump)))
-                    m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-
-                m_MobileTarget.SendMessage("You can no longer proceed with the crafting of that dungeon weapon.");
-            }
-
-            return;
+            TierLevel = 4;
+            MouldType = MouldSkillType.Blacksmithy;
         }
 
-        if (crafterValid && mobileTargetValid && m_Crafter != m_MobileTarget)
+        public SmithingMouldTier4(Serial serial): base(serial)
         {
-            if (Utility.GetDistance(m_Crafter.Location, m_MobileTarget.Location) > 2)
-            {
-                if (m_Crafter.HasGump(typeof(DungeonMouldWeaponGump)))
-                    m_Crafter.CloseGump(typeof(DungeonMouldWeaponGump));
-
-                m_Crafter.SendMessage("You are too far away from the target to proceed with the crafting.");
-
-                if (m_MobileTarget.HasGump(typeof(DungeonMouldWeaponGump)))
-                    m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-
-                m_MobileTarget.SendMessage("You are too far away from the crafter to proceed with the crafting.");
-
-                return;
-            }
-
-            if (!m_Crafter.InLOS(m_MobileTarget))
-            {
-                if (m_Crafter.HasGump(typeof(DungeonMouldWeaponGump)))
-                    m_Crafter.CloseGump(typeof(DungeonMouldWeaponGump));
-
-                m_Crafter.SendMessage("You are out of sight of the target and cannot continue crafting.");
-
-                if (m_MobileTarget.HasGump(typeof(DungeonMouldWeaponGump)))
-                    m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-
-                m_MobileTarget.SendMessage("You are out of sight of the crafter and cannot continue crafting.");
-
-                return;
-            }
         }
 
-        #endregion
-
-        bool selfCraft = (m_Crafter == m_MobileTarget);
-        bool attemptCraft = false;
-
-        //Close Gumps For Other Player if One Party Closes Theirs
-        if (info.ButtonID == 0)
+        public override void Serialize(GenericWriter writer)
         {
-            if (!selfCraft)
-            {
-                if (m_GumpTarget == m_Crafter)
-                {
-                    if (m_MobileTarget.HasGump(typeof(DungeonMouldWeaponGump)))
-                    {
-
-                        m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-                        m_MobileTarget.SendMessage("They have canceled the offer.");
-
-                        return;
-                    }                            
-                }
-                        
-                if (m_GumpTarget == m_MobileTarget)
-                {
-                    if (m_Crafter.HasGump(typeof(DungeonMouldWeaponGump)))
-                    {
-
-                        m_Crafter.CloseGump(typeof(DungeonMouldWeaponGump));
-                        m_Crafter.SendMessage("They have declined the offer.");
-
-                        return;
-                    }
-                }
-
-            }
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
         }
 
-        //Confirm / Accept
-        if (info.ButtonID == 1)
+        public override void Deserialize(GenericReader reader)
         {
-            if (selfCraft)
-                attemptCraft = true;
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
 
-            else if (m_GumpTarget == m_MobileTarget)
+            //Version 0
+            if (version >= 0)
             {
-                if (!m_Confirmed)
-                {
-                    if (m_Crafter != null)
-                        m_MobileTarget.SendMessage(m_Crafter.Name + " has not confirmed their offer price yet.");
-
-                    m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-                    m_MobileTarget.SendGump(new DungeonMouldWeaponGump(m_MobileTarget, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));
-
-                    return;
-                }
-
-                else
-                    attemptCraft = true;
-            }
-
-            else
-            {
-                m_GumpTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-                m_GumpTarget.SendGump(new DungeonMouldWeaponGump(m_Crafter, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));
-
-                return;
             }
         }
+    }
 
-        //Ready
-        if (info.ButtonID == 2)
+    public class SmithingMouldTier6 : AspectMould
+    {
+        [Constructable]
+        public SmithingMouldTier6(): base()
         {
-            if (!selfCraft && m_GumpTarget == m_Crafter)
-            {
-                m_Confirmed = !m_Confirmed;                        
+            Name = "Smithing Mould: Tier 6";
 
-                m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-                m_MobileTarget.SendGump(new DungeonMouldWeaponGump(m_MobileTarget, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));                                              
-            }
-
-            m_GumpTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-            m_GumpTarget.SendGump(new DungeonMouldWeaponGump(m_Crafter, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));
-
-            return;
+            TierLevel = 6;
+            MouldType = MouldSkillType.Blacksmithy;
         }
 
-        //Adjust Price
-        if (info.ButtonID == 3)
+        public SmithingMouldTier6(Serial serial): base(serial)
         {
-            if (!selfCraft && m_GumpTarget == m_Crafter)
-            {
-                //Set Gold Amount
-                TextRelay demandAmountTextRelay = info.GetTextEntry(4);
-                string demandAmountText = demandAmountTextRelay.Text.Trim();
-
-                try { m_AmountDemanded = Convert.ToInt32(demandAmountText); }
-                catch (Exception e) { m_AmountDemanded = 0; }
-
-                if (m_AmountDemanded > 500000)
-                    m_AmountDemanded = 500000;
-
-                if (m_AmountDemanded < 0)
-                    m_AmountDemanded = 0;
-
-                m_Confirmed = false;
-
-                m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-                m_MobileTarget.SendGump(new DungeonMouldWeaponGump(m_MobileTarget, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));
-
-                m_MobileTarget.SendMessage("They have changed the asking price for their service.");
-                m_GumpTarget.SendMessage("You change the asking price for your services. Click 'Confirm' to proceed.");
-            }
-
-            m_GumpTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-            m_GumpTarget.SendGump(new DungeonMouldWeaponGump(m_Crafter, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));
-                            
-            return;
         }
 
-        //Special Effect
-        if (info.ButtonID == 4)
+        public override void Serialize(GenericWriter writer)
         {
-            DungeonWeaponDetail weaponDetail = DungeonWeapon.GetDungeonWeaponDetail(m_Dungeon);
-
-            m_GumpTarget.SendMessage(weaponDetail.m_EffectDisplayName + ": " + weaponDetail.m_EffectDescription);
-
-            m_GumpTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-            m_GumpTarget.SendGump(new DungeonMouldWeaponGump(m_Crafter, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));
-
-            return;
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
         }
 
-        //Dungeon Selection
-        if (info.ButtonID >= 10 && info.ButtonID <= 18)
+        public override void Deserialize(GenericReader reader)
         {
-            if (m_NewWeapon)
-            {
-                if (selfCraft || m_GumpTarget == m_MobileTarget)
-                {
-                    switch (info.ButtonID)
-                    {
-                        case 10: m_Dungeon = DungeonEnum.Covetous; break;
-                        case 11: m_Dungeon = DungeonEnum.Deceit; break;
-                        case 12: m_Dungeon = DungeonEnum.Despise; break;
-                        case 13: m_Dungeon = DungeonEnum.Destard; break;
-                        case 14: m_Dungeon = DungeonEnum.Fire; break;
-                        case 15: m_Dungeon = DungeonEnum.Hythloth; break;
-                        case 16: m_Dungeon = DungeonEnum.Ice; break;
-                        case 17: m_Dungeon = DungeonEnum.Shame; break;
-                        case 18: m_Dungeon = DungeonEnum.Wrong; break;
-                    }
-                }                      
-            }
-                   
-            m_Crafter.CloseGump(typeof(DungeonMouldWeaponGump));
-            m_Crafter.SendGump(new DungeonMouldWeaponGump(m_Crafter, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));
-                    
-            if (m_Crafter != m_MobileTarget)
-            {
-                m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-                m_MobileTarget.SendGump(new DungeonMouldWeaponGump(m_MobileTarget, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));
-            }
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
 
-            return;
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class SmithingMouldTier8 : AspectMould
+    {
+        [Constructable]
+        public SmithingMouldTier8(): base()
+        {
+            Name = "Smithing Mould: Tier 8";
+
+            TierLevel = 8;
+            MouldType = MouldSkillType.Blacksmithy;
         }
 
-        //Attempt Crafting
-        if (attemptCraft)
+        public SmithingMouldTier8(Serial serial): base(serial)
         {
-            bool mouldValid = true;
-
-            if (m_DungeonMould == null)
-                mouldValid = false;
-
-            else if (m_DungeonMould.Deleted)
-                mouldValid = false;
-
-            if (m_DungeonMould.RootParent != m_Crafter)
-                mouldValid = false;
-
-            if (!mouldValid)
-            {
-                m_Crafter.CloseGump(typeof(DungeonMouldWeaponGump));
-                m_Crafter.SendMessage("The dungeon mould being used is no longer accessible.");
-
-                if (m_Crafter != m_MobileTarget)
-                {
-                    m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-                    m_MobileTarget.SendMessage("The dungeon mould being used is no longer accessible.");
-                }
-
-                return;
-            }
-
-            bool weaponValid = true;
-
-            if (m_Weapon == null)
-                weaponValid = false;
-
-            else if (m_Weapon.Deleted)
-                weaponValid = false;
-
-            if (selfCraft)
-            {
-                if (m_Weapon.RootParent != m_Crafter)
-                    weaponValid = false;
-            }
-
-            else
-            {
-                if (m_Weapon.RootParent != m_MobileTarget)
-                    weaponValid = false;
-            }
-
-            if (m_Weapon.TierLevel == DungeonWeapon.MaxDungeonTier)
-                weaponValid = false;
-
-            if (m_NewWeapon)
-            {
-                if (m_Weapon.TierLevel > 0)
-                    weaponValid = false;
-
-                if (m_Weapon.CrafterName == "" || m_Weapon.Quality != Quality.Exceptional)
-                    weaponValid = false;
-
-                if (m_Weapon.DamageLevel != WeaponDamageLevel.Regular || m_Weapon.AccuracyLevel != WeaponAccuracyLevel.Regular || m_Weapon.DurabilityLevel != WeaponDurabilityLevel.Regular)
-                    weaponValid = false;
-            }
-
-            if (!weaponValid)
-            {
-                m_Crafter.CloseGump(typeof(DungeonMouldWeaponGump));
-                m_Crafter.SendMessage("The weapon being targeted is no longer accessible.");
-
-                if (m_Crafter != m_MobileTarget)
-                {
-                    m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-                    m_MobileTarget.SendMessage("The weapon being targeted is no longer accessible.");
-                }
-
-                return;
-            }
-
-            if (!selfCraft && m_AmountDemanded > 0)
-            {
-                if (Banker.GetBalance(m_MobileTarget) < m_AmountDemanded)
-                {
-                    m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-                    m_MobileTarget.SendGump(new DungeonMouldWeaponGump(m_MobileTarget, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));
-
-                    m_MobileTarget.SendMessage("You do not have the gold amount requested for this transaction in your bankbox.");
-
-                    return;
-                }
-            }
-
-            if (!HasRequiredMaterials(m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Dungeon))
-            {
-                m_MobileTarget.CloseGump(typeof(DungeonMouldWeaponGump));
-                m_MobileTarget.SendGump(new DungeonMouldWeaponGump(m_MobileTarget, m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Weapon, m_Dungeon, m_AmountDemanded, m_Confirmed));
-
-                if (m_NewWeapon)
-                    m_MobileTarget.SendMessage("You must have " + DungeonWeapon.CoresNeededForCreation.ToString() + " dungeon cores and " + DungeonWeapon.DistillationNeededForCreation.ToString() + " dungeon distillation of the matching dungeon in your backpack to create this dungeon weapon.");
-
-                else
-                    m_MobileTarget.SendMessage("You must have " + DungeonWeapon.CoresNeededForUpgrade.ToString() + " dungeon cores and " + DungeonWeapon.DistillationNeededForUpgrade.ToString() + " dungeon distillation of the matching dungeon in your backpack to upgrade it's tier.");
-
-                return;
-            }
-
-            ConsumeMaterials(m_Crafter, m_MobileTarget, m_DungeonMould, m_NewWeapon, m_Dungeon);
-
-            if (!selfCraft && m_AmountDemanded > 0)
-            {
-                Banker.Withdraw(m_MobileTarget, m_AmountDemanded);
-                Banker.Deposit(m_Crafter, m_AmountDemanded);
-
-                m_MobileTarget.SendSound(0x037);
-
-                if (m_NewWeapon)
-                {
-                    m_Crafter.SendMessage("You convert their weapon into a dungeon weapon and receive " + m_AmountDemanded.ToString() + " gold for your services.");
-                    m_MobileTarget.SendMessage("You pay " + m_AmountDemanded.ToString() + " gold for them to create a dungeon weapon for you.");
-                }
-
-                else
-                {
-                    m_Crafter.SendMessage("You upgrade their dugneon weapon's tier and receive " + m_AmountDemanded.ToString() + " gold for your services.");
-                    m_MobileTarget.SendMessage("You pay " + m_AmountDemanded.ToString() + " gold for them to upgrade your dungeon weapon.");
-                }
-            }
-
-            else
-            {
-                if (selfCraft)
-                {
-                    if (m_NewWeapon)
-                        m_Crafter.SendMessage("You convert your weapon into a dungeon weapon.");
-
-                    else
-                        m_Crafter.SendMessage("You upgrade your dungeon weapon's tier.");                            
-                }
-
-                else
-                {
-                    if (m_NewWeapon)
-                    {
-                        m_Crafter.SendMessage("You convert their weapon into a dungeon weapon.");
-                        m_MobileTarget.SendMessage("They create a dungeon weapon for you.");
-                    }
-
-                    else
-                    {
-                        m_Crafter.SendMessage("You upgrade their dungeon weapon's tier.");
-                        m_MobileTarget.SendMessage("They upgrade your dungeon weapon's tier for you.");
-
-                    }
-                }                         
-            }
-
-            m_Crafter.PlaySound(0x2A);
-
-            if (m_NewWeapon)
-            {
-                m_Weapon.Quality = Quality.Regular;
-                m_Weapon.ArcaneCharges = DungeonWeapon.ArcaneMaxCharges;
-                m_Weapon.ArcaneChargesMax = DungeonWeapon.ArcaneMaxCharges;
-                m_Weapon.Dungeon = m_Dungeon;
-                m_Weapon.TierLevel = 1;                                       
-            }
-
-            else
-                m_Weapon.TierLevel++;
-
-            m_Weapon.Experience = 0;
-
-            m_Weapon.MaxHitPoints = DungeonWeapon.BaselineDurability + (DungeonWeapon.IncreasedDurabilityPerTier * m_Weapon.TierLevel);
-            m_Weapon.HitPoints = m_Weapon.MaxHitPoints;
-
-            return;
         }
-    }               
-}        
-*/
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class SmithingMouldTier10 : AspectMould
+    {
+        [Constructable]
+        public SmithingMouldTier10(): base()
+        {
+            Name = "Smithing Mould: Tier 10";
+
+            TierLevel = 10;
+            MouldType = MouldSkillType.Blacksmithy;
+        }
+
+        public SmithingMouldTier10(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    #endregion
+
+    #region Carpentry Moulds
+
+    public class CarpentryMouldTier2 : AspectMould
+    {
+        [Constructable]
+        public CarpentryMouldTier2(): base()
+        {
+            Name = "Carpentry Mould: Tier 2";
+
+            TierLevel = 2;
+            MouldType = MouldSkillType.Carpentry;
+        }
+
+        public CarpentryMouldTier2(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class CarpentryMouldTier4 : AspectMould
+    {
+        [Constructable]
+        public CarpentryMouldTier4(): base()
+        {
+            Name = "Carpentry Mould: Tier 4";
+
+            TierLevel = 4;
+            MouldType = MouldSkillType.Carpentry;
+        }
+
+        public CarpentryMouldTier4(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class CarpentryMouldTier6 : AspectMould
+    {
+        [Constructable]
+        public CarpentryMouldTier6(): base()
+        {
+            Name = "Carpentry Mould: Tier 6";
+
+            TierLevel = 6;
+            MouldType = MouldSkillType.Carpentry;
+        }
+
+        public CarpentryMouldTier6(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class CarpentryMouldTier8 : AspectMould
+    {
+        [Constructable]
+        public CarpentryMouldTier8(): base()
+        {
+            Name = "Carpentry Mould: Tier 8";
+
+            TierLevel = 8;
+            MouldType = MouldSkillType.Carpentry;
+        }
+
+        public CarpentryMouldTier8(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class CarpentryMouldTier10 : AspectMould
+    {
+        [Constructable]
+        public CarpentryMouldTier10(): base()
+        {
+            Name = "Carpentry Mould: Tier 10";
+
+            TierLevel = 10;
+            MouldType = MouldSkillType.Carpentry;
+        }
+
+        public CarpentryMouldTier10(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    #endregion
+
+    #region Tailoring Moulds
+
+    public class TailoringMouldTier2 : AspectMould
+    {
+        [Constructable]
+        public TailoringMouldTier2(): base()
+        {
+            Name = "Tailoring Mould: Tier 2";
+
+            TierLevel = 2;
+            MouldType = MouldSkillType.Tailoring;
+        }
+
+        public TailoringMouldTier2(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class TailoringMouldTier4 : AspectMould
+    {
+        [Constructable]
+        public TailoringMouldTier4(): base()
+        {
+            Name = "Tailoring Mould: Tier 4";
+
+            TierLevel = 4;
+            MouldType = MouldSkillType.Tailoring;
+        }
+
+        public TailoringMouldTier4(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class TailoringMouldTier6 : AspectMould
+    {
+        [Constructable]
+        public TailoringMouldTier6(): base()
+        {
+            Name = "Tailoring Mould: Tier 6";
+
+            TierLevel = 6;
+            MouldType = MouldSkillType.Tailoring;
+        }
+
+        public TailoringMouldTier6(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class TailoringMouldTier8 : AspectMould
+    {
+        [Constructable]
+        public TailoringMouldTier8() : base()
+        {
+            Name = "Tailoring Mould: Tier 8";
+
+            TierLevel = 8;
+            MouldType = MouldSkillType.Tailoring;
+        }
+
+        public TailoringMouldTier8(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class TailoringMouldTier10 : AspectMould
+    {
+        [Constructable]
+        public TailoringMouldTier10(): base()
+        {
+            Name = "Tailoring Mould: Tier 10";
+
+            TierLevel = 10;
+            MouldType = MouldSkillType.Tailoring;
+        }
+
+        public TailoringMouldTier10(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    #endregion
+}

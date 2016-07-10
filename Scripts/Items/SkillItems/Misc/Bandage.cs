@@ -277,12 +277,12 @@ namespace Server.Items
 
             int effectHue = 0;
 
-            DungeonArmor.PlayerDungeonArmorProfile bandagerDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(m_Healer, null);
+            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(m_Healer, null);
 
-            if (bandagerDungeonArmor.MatchingSet && !bandagerDungeonArmor.InPlayerCombat)
+            if (aspectArmor.MatchingSet && !m_Healer.RecentlyInPlayerCombat)
             {
-                BandageHealThroughPoisonScalar += bandagerDungeonArmor.DungeonArmorDetail.BandageHealThroughPoisonScalar;
-                effectHue = bandagerDungeonArmor.DungeonArmorDetail.EffectHue;                
+                //BandageHealThroughPoisonScalar += aspectArmor.AspectArmorDetail.BandageHealThroughPoisonScalar;
+                //effectHue = bandagerDungeonArmor.DungeonArmorDetail.EffectHue;                
             }
 
             if (!m_Healer.Alive)
@@ -598,10 +598,12 @@ namespace Server.Items
                 {
                     seconds = SkillCooldown.HealingSelfCooldown;
 
-                    DungeonArmor.PlayerDungeonArmorProfile bandagerDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(healer, null);
+                    AspectGear.AspectArmorProfile aspectGear = new AspectGear.AspectArmorProfile(healer, null);
 
-                    if (bandagerDungeonArmor.MatchingSet && !bandagerDungeonArmor.InPlayerCombat)                    
-                        seconds -= bandagerDungeonArmor.DungeonArmorDetail.BandageSelfTimeReduction;                    
+                    if (aspectGear.MatchingSet && !healer.RecentlyInPlayerCombat)
+                    {
+                        //seconds -= aspectGear.AspectArmorDetail.BandageSelfTimeReduction;
+                    }
                 }
 
                 else

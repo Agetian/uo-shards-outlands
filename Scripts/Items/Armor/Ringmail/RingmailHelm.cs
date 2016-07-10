@@ -25,7 +25,7 @@ namespace Server.Items
 		public RingmailHelm() : base( 5131 )
 		{
             Name = "ringmail helm";
-            Hue = 1812;
+            Hue = 0; //1812
 
 			Weight = 2.0;
 		}

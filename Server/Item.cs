@@ -226,16 +226,16 @@ namespace Server
     {
         None,
 
-        Air,        
-        Command,
+        Affinity,
+        Air,
+        Command,       
         Earth,
         Eldritch,
         Fire,
-        Harmony,
-        Water,
         Poison,
         Shadow,
         Void,
+        Water,
     }
 
     public enum ItemGroupType

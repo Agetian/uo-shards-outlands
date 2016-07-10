@@ -391,17 +391,18 @@ namespace Server.Engines.Craft
             index = AddCraft(1, typeof(PirateThemeUpgrade), "Ship Items", "Ship Theme: Pirate", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 4, "You do not have the neccessary number of ship parts to construct that upgrade.");
             index = AddCraft(1, typeof(UndeadThemeUpgrade), "Ship Items", "Ship Theme: Undead", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 4, "You do not have the neccessary number of ship parts to construct that upgrade.");
             */
-            
-            //Misc
-            index = AddCraft(1, typeof(AspectMould), "Misc", "Carpentry Mould", 90, 105, typeof(Board), "Board", 250, "You do not have the neccessary boards to construct that.");
-            AddRes(index, typeof(GhoulHide), "Ghoul Hide", 3, "You do not have the crafting components required to make this.");
-            AddRes(index, typeof(ShatteredCrystal), "Shattered Crystal", 3, "You do not have the crafting components required to make this.");
-            AddRes(index, typeof(TrollFat), "Troll Fat", 3, "You do not have the crafting components required to make this.");
-            //AddRes(index, typeof(CockatriceEgg), "Cockatrice Egg", 3, "You do not have the crafting components required to make this.");
 
+            AddCraft(1, typeof(CarpentryMouldTier2), "Tools", "Carpentry Mould: Tier 1-2", 100, 100, typeof(Board), 1044041, 200, 1044351);
+            AddCraft(1, typeof(CarpentryMouldTier4), "Tools", "Carpentry Mould: Tier 3-4", 105, 105, typeof(Board), 1044041, 225, 1044351);
+            AddCraft(1, typeof(CarpentryMouldTier6), "Tools", "Carpentry Mould: Tier 5-6", 110, 110, typeof(Board), 1044041, 250, 1044351);
+            AddCraft(1, typeof(CarpentryMouldTier8), "Tools", "Carpentry Mould: Tier 7-8", 115, 115, typeof(Board), 1044041, 275, 1044351);
+            AddCraft(1, typeof(CarpentryMouldTier10), "Tools", "Carpentry Mould: Tier 9-10", 120, 120, typeof(Board), 1044041, 300, 1044351);
+            
+            /*
             index = AddCraft(1, typeof(CampingFirepit), "Misc", "Camping Firepit", 80.0, 120, typeof(Board), 1044041, 50, 1044351);
             AddRes(index, typeof(IronIngot), "Iron Ingot", 25, 1044037);
             AddRes(index, typeof(TrollFat), "Troll Fat", 1, "You do not have the neccesary crafting component needed to make this");
+            */
 
             //Hue Plating
             /*
@@ -425,6 +426,8 @@ namespace Server.Engines.Craft
             index = AddCraft(1, typeof(FrostWoodHuePlating), "Other", "frostwood hue plating", 70, 120, typeof(FrostwoodBoard), "frostwood board", 25, "You do not have the neccesary boards to construct that.");
             AddRes(index, typeof(BluecapMushroom), "bluecap mushroom", 5, "You do not have the neccessary crafting components to construct that.");
             */
+
+            //-----
 
             Recycle = true;
             MarkOption = true;

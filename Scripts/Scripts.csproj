@@ -822,7 +822,6 @@
     <Compile Include="Mobiles\Bosses\Minions\DeepWater.cs" />
     <Compile Include="Mobiles\Bosses\TheDeepOne.cs" />
     <Compile Include="Items\DragonLotteryTicket.cs" />
-    <Compile Include="Items\ItemRenameDeed.cs" />
     <Compile Include="Items\MaskDye.cs" />
     <Compile Include="Items\PetDye.cs" />
     <Compile Include="Items\Spyglasses\Spyglass.cs" />
@@ -865,7 +864,6 @@
     <Compile Include="BreakableObjects\Items\BreakableStoneWall.cs" />
     <Compile Include="Items\AstralLeash.cs" />
     <Compile Include="Items\BeverageKeg.cs" />
-    <Compile Include="Items\AspectGear\DungeonArmor.cs" />
     <Compile Include="Items\KinPaints\CaveMoss.cs" />
     <Compile Include="Items\KinPaints\Bonemeal.cs" />
     <Compile Include="Items\KinPaints\StrangeMushrooms.cs" />

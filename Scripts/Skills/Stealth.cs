@@ -74,10 +74,12 @@ namespace Server.SkillHandlers
                         }
                     }
 
-                    DungeonArmor.PlayerDungeonArmorProfile stealtherDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(mobile, null);
+                    AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(mobile, null);
 
-                    if (stealtherDungeonArmor.MatchingSet && !stealtherDungeonArmor.InPlayerCombat)                    
-                        steps += 6 + stealtherDungeonArmor.DungeonArmorDetail.BonusStealthSteps;                    
+                    if (aspectArmor.MatchingSet && !mobile.RecentlyInPlayerCombat)
+                    {
+                        //steps += 6 + aspectArmor.AspectArmorDetail.BonusStealthSteps;      
+                    }
 
                     if (steps < 1)
                         steps = 1;

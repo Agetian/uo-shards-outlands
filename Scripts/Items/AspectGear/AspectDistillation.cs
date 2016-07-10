@@ -17,8 +17,7 @@ namespace Server.Items
             Weight = .1;
             Amount = 1;
 
-            int aspectCount = Enum.GetNames(typeof(AspectEnum)).Length;
-            Aspect = (AspectEnum)Utility.RandomMinMax(1, aspectCount - 1);
+            Aspect = AspectGear.GetRandomAspect();
         }
 
         [Constructable]
@@ -30,8 +29,7 @@ namespace Server.Items
             Weight = .1;
             Amount = amount;
 
-            int aspectCount = Enum.GetNames(typeof(AspectEnum)).Length;
-            Aspect = (AspectEnum)Utility.RandomMinMax(1, aspectCount - 1);
+            Aspect = AspectGear.GetRandomAspect();
         }
 
         public AspectDistillation(Serial serial): base(serial)
@@ -46,17 +44,17 @@ namespace Server.Items
         public override void OnSingleClick(Mobile from)
         {
             if (Amount > 1)
-                LabelTo(from, AspectGear.GetAspectName(Aspect).ToLower() + " distillation : " + Amount.ToString());
+                LabelTo(from, AspectGear.GetAspectName(Aspect) + " Aspect Distillation : " + Amount.ToString());
 
             else
-                LabelTo(from, AspectGear.GetAspectName(Aspect).ToLower() + " distillation");
+                LabelTo(from, AspectGear.GetAspectName(Aspect) + " Aspect Distillation");
         }
 
         public override void OnDoubleClick(Mobile from)
         {
             base.OnDoubleClick(from);
 
-            from.SendMessage("Use this with a mould and cores of a matching aspect to create or upgrade aspect weapons and armor.");
+            from.SendMessage("Use a smithing, carpentry, or tailoring mould and distillations of a matching Aspect to create or upgrade Aspect weapons and armor.");
         }
 
         public override void Serialize(GenericWriter writer)
@@ -80,6 +78,49 @@ namespace Server.Items
     }
 
     #region Specific Distillations
+
+    public class AffinityDistillation : AspectDistillation
+    {
+        [Constructable]
+        public AffinityDistillation(): base()
+        {
+            Name = "affinity distillation";
+
+            Aspect = AspectEnum.Affinity;
+        }
+
+        [Constructable]
+        public AffinityDistillation(int amount)
+            : base(amount)
+        {
+            Name = "affinity distillation";
+
+            Amount = amount;
+
+            Aspect = AspectEnum.Affinity;
+        }
+
+        public AffinityDistillation(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
 
     public class AirDistillation : AspectDistillation
     {
@@ -168,8 +209,7 @@ namespace Server.Items
     public class EarthDistillation : AspectDistillation
     {
         [Constructable]
-        public EarthDistillation()
-            : base()
+        public EarthDistillation(): base()
         {
             Name = "earth distillation";
 
@@ -271,49 +311,6 @@ namespace Server.Items
         }
 
         public FireDistillation(Serial serial): base(serial)
-        {
-        }
-
-        public override void Serialize(GenericWriter writer)
-        {
-            base.Serialize(writer);
-            writer.Write((int)0); //version   
-        }
-
-        public override void Deserialize(GenericReader reader)
-        {
-            base.Deserialize(reader);
-            int version = reader.ReadInt();
-
-            //Version 0
-            if (version >= 0)
-            {
-            }
-        }
-    }
-
-    public class HarmonyDistillation : AspectDistillation
-    {
-        [Constructable]
-        public HarmonyDistillation(): base()
-        {
-            Name = "harmony distillation";
-
-            Aspect = AspectEnum.Harmony;
-        }
-
-        [Constructable]
-        public HarmonyDistillation(int amount)
-            : base(amount)
-        {
-            Name = "harmony distillation";
-
-            Amount = amount;
-
-            Aspect = AspectEnum.Harmony;
-        }
-
-        public HarmonyDistillation(Serial serial): base(serial)
         {
         }
 

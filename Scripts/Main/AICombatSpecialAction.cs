@@ -414,10 +414,12 @@ namespace Server.Mobiles
                                 baseDamage *= BaseCreature.BreathDamageToCreatureScalar;
                         }
 
-                        DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(target, null);
+                        AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(target, null);
 
-                        if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat)
-                            baseDamage *= defenderDungeonArmor.DungeonArmorDetail.BreathDamageReceivedScalar;
+                        if (aspectArmor.MatchingSet && !target.RecentlyInPlayerCombat)
+                        {
+                            //baseDamage *= aspectArmor.AspectArmorDetail.BreathDamageReceivedScalar;
+                        }
 
                         switch (breathType)
                         {

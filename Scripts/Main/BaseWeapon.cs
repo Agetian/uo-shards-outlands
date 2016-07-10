@@ -144,14 +144,8 @@ namespace Server.Items
         }        
 
         public override void AspectChange()
-        {
-            if (Aspect != AspectEnum.None)
-            {
-                DungeonArmor.DungeonArmorDetail detail = new DungeonArmor.DungeonArmorDetail(Aspect, TierLevel);
-
-                if (detail != null)
-                    Hue = detail.Hue;
-            }
+        {       
+            Hue = AspectGear.GetAspectHue(Aspect);   
         }
         
         public override int GetArcaneEssenceValue()
@@ -646,16 +640,16 @@ namespace Server.Items
             UOACZPersistance.CheckAndCreateUOACZAccountEntry(pm_Attacker);
             UOACZPersistance.CheckAndCreateUOACZAccountEntry(pm_Defender);
 
-            DungeonArmor.PlayerDungeonArmorProfile attackerDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(attacker, null);
-            DungeonArmor.PlayerDungeonArmorProfile defenderDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(defender, null);
+            AspectGear.AspectArmorProfile attackerAspectArmor = new AspectGear.AspectArmorProfile(attacker, null);
+            AspectGear.AspectArmorProfile defenderAspectArmor = new AspectGear.AspectArmorProfile(defender, null);
 
             bool dungeonArmorStealth = false;
             int effectHue = 0;
 
-            if (attackerDungeonArmor.MatchingSet && !attackerDungeonArmor.InPlayerCombat)
+            if (attackerAspectArmor.MatchingSet && !attacker.RecentlyInPlayerCombat)
             {
                 dungeonArmorStealth = true;
-                effectHue = attackerDungeonArmor.DungeonArmorDetail.EffectHue;
+                effectHue = AspectGear.GetAspectHue(attackerAspectArmor.AspectArmorDetail.m_Aspect);
             }
 
             #region Attack Visuals and Sound
@@ -745,9 +739,11 @@ namespace Server.Items
 
                     stealthBonus = 3.5;
                     stealthBonus += 4.5 * (double)speedBonus * speedScalar;
-
-                    if (attackerDungeonArmor.MatchingSet && !attackerDungeonArmor.InPlayerCombat)
-                        stealthWeaponBonus *= attackerDungeonArmor.DungeonArmorDetail.BackstabDamageInflictedBonus;
+                    
+                    if (attackerAspectArmor.MatchingSet && !attacker.RecentlyInPlayerCombat)
+                    {
+                        //stealthWeaponBonus *= attackerAspectArmor.AspectArmorDetail.BackstabDamageInflictedBonus;
+                    }
 
                     //Player Attacking
                     if (pm_Attacker != null)
@@ -810,8 +806,10 @@ namespace Server.Items
                 if (!doStealthAttack)
                     stealthAttackBonus = 0;
 
-                if (attackerDungeonArmor.MatchingSet && !attackerDungeonArmor.InPlayerCombat && defender is BaseCreature)
-                    dungeonArmorBonus = attackerDungeonArmor.DungeonArmorDetail.SpecialWeaponAttackBonus;
+                if (attackerAspectArmor.MatchingSet && !attacker.RecentlyInPlayerCombat && defender is BaseCreature)
+                {
+                    //dungeonArmorBonus = attackerAspectArmor.AspectArmorDetail.SpecialWeaponAttackBonus;
+                }
 
                 double result = Utility.RandomDouble();
                 double totalChance = baseChance + armsLoreSkillBonus + stealthAttackBonus + dungeonArmorBonus + prowessBonus;
@@ -1052,22 +1050,28 @@ namespace Server.Items
             double MeleeDamageInflictedBonus = 0;
             double ProvokedCreatureDamageInflictedBonus = 0;
 
-            double MeleeDamageReceivedBonus = 0;            
+            double MeleeDamageReceivedBonus = 0;
 
-            if (attackerDungeonArmor.MatchingSet && !attackerDungeonArmor.InPlayerCombat)
-                MeleeDamageInflictedBonus = attackerDungeonArmor.DungeonArmorDetail.MeleeDamageInflictedBonus;
+            if (attackerAspectArmor.MatchingSet && !attacker.RecentlyInPlayerCombat)
+            {
+                //MeleeDamageInflictedBonus = attackerAspectArmor.AspectArmorDetail.MeleeDamageInflictedBonus;
+            }
 
-            if (defenderDungeonArmor.MatchingSet && !defenderDungeonArmor.InPlayerCombat)
-                MeleeDamageReceivedBonus = defenderDungeonArmor.DungeonArmorDetail.MeleeDamageReceivedBonus;
+            if (defenderAspectArmor.MatchingSet && !defender.RecentlyInPlayerCombat)
+            {
+                //MeleeDamageReceivedBonus = defenderAspectArmor.AspectArmorDetail.MeleeDamageReceivedBonus;
+            }
 
             if (bc_Attacker != null)
             {
                 if (bc_Attacker.BardMaster != null)
                 {
-                    DungeonArmor.PlayerDungeonArmorProfile bardMasterDungeonArmor = new DungeonArmor.PlayerDungeonArmorProfile(bc_Attacker.BardMaster, null);
+                    AspectGear.AspectArmorProfile bardMasterAspectArmor = new AspectGear.AspectArmorProfile(bc_Attacker.BardMaster, null);
 
-                    if (bardMasterDungeonArmor.MatchingSet && !bardMasterDungeonArmor.InPlayerCombat)
-                        ProvokedCreatureDamageInflictedBonus = bardMasterDungeonArmor.DungeonArmorDetail.ProvokedCreatureDamageInflictedBonus;
+                    if (bardMasterAspectArmor.MatchingSet && !bc_Attacker.BardMaster.RecentlyInPlayerCombat)
+                    {
+                        //ProvokedCreatureDamageInflictedBonus = bardMasterAspectArmor.AspectArmorDetail.ProvokedCreatureDamageInflictedBonus;
+                    }
                 }
             }
 
@@ -2976,18 +2980,32 @@ namespace Server.Items
             //Dungeon Weapon
             if (Aspect != AspectEnum.None && TierLevel > 0)
             {
-                string name = "";
-
-                if (Name != null)
-                    name = Name;
-
-                if (name != "")
-                    LabelTo(from, CultureInfo.CurrentCulture.TextInfo.ToTitleCase(name));
-                else
+                if (Name == null)
+                {
                     base.OnSingleClick(from);
+                    return;
+                }  
 
-                LabelTo(from, AspectGear.GetAspectName(Aspect) + " Dungeon: Tier " + TierLevel.ToString());
-                LabelTo(from, "(" + Experience.ToString() + "/" + AspectGear.MaxDungeonExperience.ToString() + " xp) " + " Charges: " + ArcaneCharges.ToString());
+                string itemName = Name;
+
+                if (Name == null)
+                    itemName = "";
+
+                itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName);
+
+                LabelTo(from, "Tier " + TierLevel.ToString() + " " + AspectGear.GetAspectName(Aspect) + " " + itemName);
+
+                if (m_Poison != null && m_PoisonCharges > 0)
+                {
+                    LabelTo(from, "(" + Experience.ToString() + " xp and " + ArcaneCharges.ToString() + " Arcane Charges)");
+                    LabelTo(from, "[" + m_PoisonCharges.ToString() + " " + m_Poison.Name + " Poison Charges]");
+                }
+
+                else
+                {
+                    LabelTo(from, "(" + ArcaneCharges.ToString() + " Arcane Charges)");
+                    LabelTo(from, "[" + Experience.ToString() + "/" + AspectGear.ExperienceNeededToUpgrade.ToString() + " xp]");
+                }
 
                 return;
             }
