@@ -1534,8 +1534,8 @@ namespace Server.Items
                 string itemName = Name;                
               
                 itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName);
-                                
-                LabelTo(from, "Tier " + TierLevel.ToString() + " " + AspectGear.GetAspectName(Aspect) + " " + itemName);
+
+                LabelTo(from, itemName + ": " + AspectGear.GetAspectName(Aspect) + " Aspect Tier " + TierLevel.ToString());
 
                 LabelTo(from, "(" + ArcaneCharges.ToString() + " Arcane Charges)");
                 LabelTo(from, "[" + Experience.ToString() + "/" + AspectGear.ExperienceNeededToUpgrade.ToString() + " xp]");

@@ -1,5 +1,5 @@
 #if Framework_4_0
-using System.Threading.Tasks;
+    using System.Threading.Tasks;
 #endif
 
 using System;
@@ -16,10 +16,7 @@ using Server.Items;
 using Server.Mobiles;
 using Server.ContextMenus;
 using Server.Engines.PartySystem;
-
 using Server.SkillHandlers;
-
-
 using Server.Commands;
 using System.Linq;
 using Server.Engines.Craft;
@@ -497,8 +494,7 @@ namespace Server.Mobiles
         public static double GoldDropVariation = .10;
         public static double NewbieRegionGoldDropScalar = .5;
 
-        public List<Item> ArcaneItems = new List<Item>();
-        public List<ArcaneItemExperienceEntry> ArcaneItemExperienceEntries = new List<ArcaneItemExperienceEntry>();
+        public List<AspectGearExperienceEntry> m_AspectGearExperienceEntries = new List<AspectGearExperienceEntry>();
 
         public virtual void SetRare()
         {
@@ -3211,14 +3207,14 @@ namespace Server.Mobiles
             if (ControlMaster is PlayerMobile)
             {
                 pm_Master = ControlMaster as PlayerMobile;
-
+                
                 DamageTracker.RecordDamage(pm_Master, from, this, DamageTracker.DamageType.FollowerDamageTaken, finalDamage);  
             }
 
             else if (SummonMaster is PlayerMobile)
             {
                 pm_Master = SummonMaster as PlayerMobile;
-
+                
                 DamageTracker.RecordDamage(pm_Master, from, this, DamageTracker.DamageType.FollowerDamageTaken, finalDamage);  
             }
 
@@ -3228,6 +3224,7 @@ namespace Server.Mobiles
                 {
                     pm_Master = bc_Source.ControlMaster as PlayerMobile;
 
+                    AspectGear.RecordDamage(pm_Master, this, finalDamage);
                     DamageTracker.RecordDamage(pm_Master, from, this, DamageTracker.DamageType.FollowerDamage, finalDamage);
                 }
 
@@ -3235,6 +3232,7 @@ namespace Server.Mobiles
                 {
                     pm_Master = bc_Source.SummonMaster as PlayerMobile;
 
+                    AspectGear.RecordDamage(pm_Master, this, finalDamage);
                     DamageTracker.RecordDamage(pm_Master, from, this, DamageTracker.DamageType.FollowerDamage, finalDamage);
                 }
 
@@ -3242,17 +3240,15 @@ namespace Server.Mobiles
                 {
                     pm_Master = bc_Source.BardMaster as PlayerMobile;
 
+                    AspectGear.RecordDamage(pm_Master, this, finalDamage);
                     DamageTracker.RecordDamage(pm_Master, from, this, DamageTracker.DamageType.ProvocationDamage, finalDamage);  
                 }
-            }            
+            }
+
+            else if (pm_Source != null)            
+                AspectGear.RecordDamage(pm_Source, this, finalDamage);            
 
             base.Damage(finalDamage, from);
-
-            if (SubdueBeforeTame && !Controlled)
-            {
-                if ((oldHits > (this.HitsMax / 10)) && (this.Hits <= (this.HitsMax / 10)))
-                    PublicOverheadMessage(MessageType.Regular, 0x3B2, false, "* The creature has been beaten into subjugation! *");
-            }
         }
 
         public virtual bool DeleteCorpseOnDeath
@@ -3783,6 +3779,9 @@ namespace Server.Mobiles
             }
         }
 
+        public DateTime NextCheckExpiredDamageEntries = DateTime.UtcNow;
+        public static TimeSpan CheckExpiredDamageEntriesInterval = TimeSpan.FromMinutes(5);
+
         public override TimeSpan DamageEntryExpiration
         {
             get
@@ -3797,7 +3796,7 @@ namespace Server.Mobiles
                     return TimeSpan.FromMinutes(10);
 
                 if (IsEventBoss())
-                    return TimeSpan.FromMinutes(10);
+                    return TimeSpan.FromMinutes(15);
 
                 return TimeSpan.FromMinutes(2);
             }
@@ -4090,7 +4089,7 @@ namespace Server.Mobiles
             return true;
         }
 
-        public virtual double ExperienceChance()
+        public virtual double FollowerExperienceChanceOnKill()
         {
             double minTamingExpGainScalar = GetCreatureMinTamingExpGainScalar(MinTameSkill); 
             double experienceChance = (InitialDifficulty * .01) * minTamingExpGainScalar;
@@ -4114,6 +4113,75 @@ namespace Server.Mobiles
                 experienceChance = 1;
 
             return experienceChance;
+        }
+
+        public virtual double AspectGearExperienceChanceOnKill()
+        {
+            double experienceChance = (InitialDifficulty * .025);
+
+            if (experienceChance < .01)
+                experienceChance = .01;
+
+            if (Rare)
+                experienceChance = 1;
+
+            if (IsChamp())
+                experienceChance = 1;
+
+            if (IsLoHBoss())
+                experienceChance = 1;
+
+            if (IsBoss())
+                experienceChance = 1;
+
+            if (IsEventBoss())
+                experienceChance = 1;
+
+            return experienceChance;
+        }
+
+        public virtual int FollowerExperienceEarnedOnKill()
+        {
+            int experienceValue = 1;
+
+            if (Rare)
+                experienceValue = 10;
+
+            if (IsChamp())
+                experienceValue = 10;
+
+            if (IsLoHBoss())
+                experienceValue = 10;
+
+            if (IsBoss())
+                experienceValue = 25;
+
+            if (IsEventBoss())
+                experienceValue = 50;
+
+            return experienceValue;
+        }
+
+        public virtual int AspectGearExperienceEarnedOnKill()
+        {
+            int experienceValue = 1;
+
+            if (Rare)
+                experienceValue = 10;
+
+            if (IsChamp())
+                experienceValue = 10;
+
+            if (IsLoHBoss())
+                experienceValue = 10;
+
+            if (IsBoss())
+                experienceValue = 25;
+
+            if (IsEventBoss())
+                experienceValue = 50;
+
+            return experienceValue;
         }
 
         public static double GetCreatureMinTamingExpGainScalar(double minTaming)
@@ -4148,28 +4216,6 @@ namespace Server.Mobiles
                                                         4.0, 2.0,    //90-95, 95-100
                                                         1.75, 1.5,    //100-105, 105-110
                                                         1.25, 1.0};   //110-115, 115-120
-
-        public virtual int ExperienceValue()
-        {
-            int experienceValue = 1;
-
-            if (Rare)
-                experienceValue = 10;
-
-            if (IsChamp())
-                experienceValue = 10;
-
-            if (IsLoHBoss())
-                experienceValue = 15;
-
-            if (IsBoss())
-                experienceValue = 25;            
-
-            if (IsEventBoss())
-                experienceValue = 40;
-
-            return experienceValue;
-        }
 
         public double PassiveTamingSkillGainChance(PlayerMobile player)
         {
@@ -7992,6 +8038,8 @@ namespace Server.Mobiles
 
         public override void OnDeath(Container c)
         {
+            ClearExpiredDamageEntries();
+
             if (ResurrectionsRemaining == 0)
                 IsBonded = false;            
                         
@@ -8002,90 +8050,91 @@ namespace Server.Mobiles
 
             int totalDamage = 0;
 
-            Dictionary<PlayerMobile, int> damageInflicted = new Dictionary<PlayerMobile, int>();
-
             List<PlayerMobile> passiveTamingSkillGainPlayers = new List<PlayerMobile>();
+
+            Dictionary<PlayerMobile, int> damageInflicted = new Dictionary<PlayerMobile, int>();            
 
             //Determine Total Damaged Inflicted and Per Player
             foreach (DamageEntry entry in DamageEntries)
             {
-                if (!entry.HasExpired)
-                {                    
-                    BaseCreature bc_Creature = entry.Damager as BaseCreature;
-                    PlayerMobile playerDamager = entry.Damager as PlayerMobile;
-                    PlayerMobile creatureOwner = null;
+                if (entry.HasExpired)
+                    continue;
+                                   
+                BaseCreature bc_Creature = entry.Damager as BaseCreature;
+                PlayerMobile playerDamager = entry.Damager as PlayerMobile;
+                PlayerMobile creatureOwner = null;
 
-                    bool passiveTamingSkillGainValid = false;
+                bool passiveTamingSkillGainValid = false;
                    
-                    if (bc_Creature != null)
+                if (bc_Creature != null)
+                {
+                    if (bc_Creature.Controlled && bc_Creature.ControlMaster is PlayerMobile && bc_Creature.Tameable)
                     {
-                        if (bc_Creature.Controlled && bc_Creature.ControlMaster is PlayerMobile && bc_Creature.Tameable)
+                        creatureOwner = bc_Creature.ControlMaster as PlayerMobile;
+
+                        //Experience Gain
+                        if (bc_Creature.AllowExperienceGain(this, creatureOwner))
                         {
-                            creatureOwner = bc_Creature.ControlMaster as PlayerMobile;
+                            double experienceChance = FollowerExperienceChanceOnKill();
+                            int experienceValue = FollowerExperienceEarnedOnKill();
 
-                            //Experience Gain
-                            if (bc_Creature.AllowExperienceGain(this, creatureOwner))
-                            {
-                                double experienceChance = ExperienceChance();
-                                int experienceValue = ExperienceValue();
+                            if (Utility.RandomDouble() <= experienceChance)
+                                bc_Creature.Experience += experienceValue;
+                        }                               
 
-                                if (Utility.RandomDouble() <= experienceChance)
-                                    bc_Creature.Experience += experienceValue;
-                            }                               
-
-                            //Passive Taming Skill Gain Allowed
-                            if (bc_Creature.AllowPassiveTamingSkillGain(this, creatureOwner))
-                            {
-                                if (!passiveTamingSkillGainPlayers.Contains(creatureOwner))
-                                    passiveTamingSkillGainPlayers.Add(creatureOwner);
-                            }
-
-                            bc_Creature.CreaturesKilled++;
-                        }
-                    }
-
-                    totalDamage += entry.DamageGiven;
-
-                    if (playerDamager != null)
-                    {
-                        if (damageInflicted.ContainsKey(playerDamager))
-                            damageInflicted[playerDamager] += entry.DamageGiven;
-
-                        else
-                            damageInflicted.Add(playerDamager, entry.DamageGiven);
-                    }
-
-                    else if (bc_Creature != null)
-                    {
-                        if (bc_Creature.Summoned && bc_Creature.SummonMaster != null)
+                        //Passive Taming Skill Gain Allowed
+                        if (bc_Creature.AllowPassiveTamingSkillGain(this, creatureOwner))
                         {
-                            if (bc_Creature.SummonMaster is PlayerMobile)
-                                creatureOwner = bc_Creature.SummonMaster as PlayerMobile;
+                            if (!passiveTamingSkillGainPlayers.Contains(creatureOwner))
+                                passiveTamingSkillGainPlayers.Add(creatureOwner);
                         }
 
-                        else if (bc_Creature.Controlled && bc_Creature.ControlMaster != null)
-                        {
-                            if (bc_Creature.ControlMaster is PlayerMobile)
-                                creatureOwner = bc_Creature.ControlMaster as PlayerMobile;
-                        }
-
-                        else if (bc_Creature.BardProvoked && bc_Creature.BardMaster != null)
-                        {
-                            if (bc_Creature.BardMaster is PlayerMobile)
-                                creatureOwner = bc_Creature.BardMaster as PlayerMobile;
-                        }
-
-                        //Creature is Controlled by Player in Some Fashion
-                        if (creatureOwner != null)
-                        {
-                            if (damageInflicted.ContainsKey(creatureOwner))
-                                damageInflicted[creatureOwner] += entry.DamageGiven;
-
-                            else
-                                damageInflicted.Add(creatureOwner, entry.DamageGiven);
-                        }
+                        bc_Creature.CreaturesKilled++;
                     }
                 }
+
+                totalDamage += entry.DamageGiven;
+
+                if (playerDamager != null)
+                {
+                    if (damageInflicted.ContainsKey(playerDamager))
+                        damageInflicted[playerDamager] += entry.DamageGiven;
+
+                    else
+                        damageInflicted.Add(playerDamager, entry.DamageGiven);
+                }
+
+                else if (bc_Creature != null)
+                {
+                    if (bc_Creature.Summoned && bc_Creature.SummonMaster != null)
+                    {
+                        if (bc_Creature.SummonMaster is PlayerMobile)
+                            creatureOwner = bc_Creature.SummonMaster as PlayerMobile;
+                    }
+
+                    else if (bc_Creature.Controlled && bc_Creature.ControlMaster != null)
+                    {
+                        if (bc_Creature.ControlMaster is PlayerMobile)
+                            creatureOwner = bc_Creature.ControlMaster as PlayerMobile;
+                    }
+
+                    else if (bc_Creature.BardProvoked && bc_Creature.BardMaster != null)
+                    {
+                        if (bc_Creature.BardMaster is PlayerMobile)
+                            creatureOwner = bc_Creature.BardMaster as PlayerMobile;
+                    }
+
+                    //Creature is Controlled by Player in Some Fashion
+                    if (creatureOwner != null)
+                    {
+                        if (damageInflicted.ContainsKey(creatureOwner))
+                            damageInflicted[creatureOwner] += entry.DamageGiven;
+
+                        else
+                            damageInflicted.Add(creatureOwner, entry.DamageGiven);
+                    }
+                }
+                
             }
 
             if (IsBonded)
@@ -8137,7 +8186,8 @@ namespace Server.Mobiles
 
             else
             {
-                if (!Summoned && !m_NoKillAwards && !DiedByShipSinking)
+                //Rewards
+                if (!Summoned && !m_NoKillAwards && !DiedByShipSinking && !(ControlMaster is PlayerMobile))
                 {
                     int totalFame = ComputedFame / 100;
                     int totalKarma = -Karma / 100;
@@ -8163,91 +8213,13 @@ namespace Server.Mobiles
                         if (givenQuestKill)
                             continue;
                     }
-                }
 
-                //Passive Taming
-                /*
-                BaseCreature bc_TamedCreature = from as BaseCreature;
+                    List<Item> m_AspectGearExperienceAssigned = new List<Item>();
 
-                if (bc_TamedCreature != null && !(Region is UOACZRegion))
-                {
-                    PlayerMobile pm_Tamer = bc_TamedCreature.ControlMaster as PlayerMobile;
-
-                    if (pm_Tamer != null && bc_TamedCreature.Controlled && !bc_TamedCreature.Summoned)
-                    {
-                        bool passiveTamingValid = true;
-
-                        if (bc_TamedCreature.IsHenchman)
-                            passiveTamingValid = false;
-
-                        if (NoKillAwards || Summoned || ControlMaster is PlayerMobile)
-                            passiveTamingValid = false;
-
-                        if (!bc_TamedCreature.AllowPassiveTamingSkillGain(pm_Tamer))
-                            passiveTamingValid = false;
-
-                        if (pm_Tamer.m_PassiveSkillGainRemaining <= 0)
-                            passiveTamingValid = false;
-
-                        TimeSpan PassiveTamingSkillGainDelay = TimeSpan.FromMinutes(pm_Tamer.Skills[SkillName.AnimalTaming].Value / 2);
-
-                        if (DateTime.UtcNow < pm_Tamer.m_LastPassiveTamingSkillGain + PassiveTamingSkillGainDelay)
-                            passiveTamingValid = false;
-
-                        if (passiveTamingValid)
-                        {
-                            Skill skill = from.Skills[SkillName.AnimalTaming];
-
-                            pm_Tamer.m_PassiveSkillGainRemaining -= .1;
-
-                            SkillCheck.GainSkill(pm_Tamer, skill, 1);
-
-                            pm_Tamer.m_LastPassiveTamingSkillGain = DateTime.UtcNow;
-                            pm_Tamer.m_LastPassiveTamingSkillAttacked = this;
-                        }
-
-                        double randomResult = Utility.RandomDouble();
-
-                        //Experience Gain                   
-                        if (pm_Tamer.m_LastPassiveTamingSkillAttacked != this && !(Controlled && ControlMaster is PlayerMobile) && !Summoned && !NoKillAwards && bc_TamedCreature.m_NextExperienceGain < DateTime.UtcNow && bc_TamedCreature.ExperienceLevel < BaseCreature.MaxExperienceLevel)
-                        {
-                            double nextExperienceGain = (double)MinExpGainActiveDelay;
-
-                            double gainChance = .2;
-
-                            if (randomResult <= gainChance)
-                            {
-                                bc_TamedCreature.Experience++;
-                                bc_TamedCreature.m_NextExperienceGain = DateTime.UtcNow + TimeSpan.FromMinutes(nextExperienceGain);
-
-                                pm_Tamer.m_LastPassiveExpAttacked = this;
-                            }
-                        }
-
-                        //Passive Experience Gain: Same Creature
-                        else if (bc_TamedCreature.m_NextExperienceGain < DateTime.UtcNow && !NoKillAwards && bc_TamedCreature.ExperienceLevel < BaseCreature.MaxExperienceLevel)
-                        {
-                            double gainChance = .01;
-
-                            if (randomResult <= gainChance)
-                            {
-                                bc_TamedCreature.Experience++;
-                                bc_TamedCreature.m_NextExperienceGain = DateTime.UtcNow + TimeSpan.FromMinutes(MinExpGainMacroDelay);
-
-                                pm_Tamer.m_LastPassiveExpAttacked = this;
-                            }
-                        }
-
-                    }
-                }
-                */
-
-                //Rewards
-                if (!(ControlMaster is PlayerMobile) && !DiedByShipSinking)
-                {        
-                    foreach (KeyValuePair<PlayerMobile, int> pair in damageInflicted)
+                    foreach (KeyValuePair<PlayerMobile, int> pair in damageInflicted.OrderByDescending(key => key.Value))
                     {
                         PlayerMobile playerDamager = pair.Key;
+                        int amount = pair.Value;
 
                         if (playerDamager == null) continue;
                         if (playerDamager.Deleted) continue;
@@ -8258,9 +8230,10 @@ namespace Server.Mobiles
                         if (passiveTamingSkillGainPlayers.Contains(playerDamager))
                         {
                             double passiveTamingSkillGainChance = PassiveTamingSkillGainChance(playerDamager);
-
+                            
+                            //TEST: FINISH THIS
                             if (Utility.RandomDouble() <= passiveTamingSkillGainChance)
-                            {                               
+                            {
                                 Skill skill = playerDamager.Skills[SkillName.AnimalTaming];
 
                                 playerDamager.m_PassiveSkillGainRemaining -= .1;
@@ -8271,11 +8244,170 @@ namespace Server.Mobiles
                             }
                         }
 
-                        //Arcane Item Experience Handling
+                        #region Aspect Gear Experience
+
+                        AspectGearExperienceEntry playerAspectGearEntry = AspectGear.GetAspectGearExperienceEntry(playerDamager, this);
+
+                        if (playerAspectGearEntry != null)
+                        {
+                            int previousExperience = 0;                            
+                            bool upgradeAvailable = false;
+
+                            int experienceYield = 0;
+                            int previousArcaneCharges = 0;
+                            int currentArcaneCharges = 0;
+
+                            bool issueArcaneChargesCaution = false;
+                            bool issueArcaneChargesWarning = false;                            
+
+                            if (playerAspectGearEntry.m_Weapon != null && !m_AspectGearExperienceAssigned.Contains(playerAspectGearEntry.m_Weapon))
+                            {
+                                previousExperience = playerAspectGearEntry.m_Weapon.Experience;
+                                m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Weapon);
+
+                                previousArcaneCharges = playerAspectGearEntry.m_Weapon.ArcaneCharges;
+                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Weapon);
+                                currentArcaneCharges = playerAspectGearEntry.m_Weapon.ArcaneCharges;
+
+                                if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
+                                    issueArcaneChargesCaution = true;
+
+                                if (previousArcaneCharges > 0 && currentArcaneCharges == 0)
+                                    issueArcaneChargesWarning = true;
+
+                                if (playerAspectGearEntry.m_Weapon.TierLevel < AspectGear.MaxTierLevel && playerAspectGearEntry.m_Weapon.Experience >= AspectGear.ExperienceNeededToUpgrade && previousExperience < AspectGear.ExperienceNeededToUpgrade)
+                                    upgradeAvailable = true;
+                            }
+
+                            if (playerAspectGearEntry.m_Helm != null && !m_AspectGearExperienceAssigned.Contains(playerAspectGearEntry.m_Helm))
+                            {
+                                previousExperience = playerAspectGearEntry.m_Helm.Experience;
+                                m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Helm);
+
+                                previousArcaneCharges = playerAspectGearEntry.m_Helm.ArcaneCharges;
+                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Helm);
+                                currentArcaneCharges = playerAspectGearEntry.m_Helm.ArcaneCharges;
+
+                                if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
+                                    issueArcaneChargesCaution = true;
+
+                                if (previousArcaneCharges > 0 && currentArcaneCharges == 0)
+                                    issueArcaneChargesWarning = true;
+
+                                if (playerAspectGearEntry.m_Helm.TierLevel < AspectGear.MaxTierLevel && playerAspectGearEntry.m_Helm.Experience >= AspectGear.ExperienceNeededToUpgrade && previousExperience < AspectGear.ExperienceNeededToUpgrade)
+                                    upgradeAvailable = true;
+                            }
+
+                            if (playerAspectGearEntry.m_Gorget != null && !m_AspectGearExperienceAssigned.Contains(playerAspectGearEntry.m_Gorget))
+                            {
+                                previousExperience = playerAspectGearEntry.m_Gorget.Experience;
+                                m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Gorget);
+
+                                previousArcaneCharges = playerAspectGearEntry.m_Gorget.ArcaneCharges;
+                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Gorget);
+                                currentArcaneCharges = playerAspectGearEntry.m_Gorget.ArcaneCharges;
+
+                                if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
+                                    issueArcaneChargesCaution = true;
+
+                                if (previousArcaneCharges > 0 && currentArcaneCharges == 0)
+                                    issueArcaneChargesWarning = true;
+
+                                if (playerAspectGearEntry.m_Gorget.TierLevel < AspectGear.MaxTierLevel && playerAspectGearEntry.m_Gorget.Experience >= AspectGear.ExperienceNeededToUpgrade && previousExperience < AspectGear.ExperienceNeededToUpgrade)
+                                    upgradeAvailable = true;
+                            }
+
+                            if (playerAspectGearEntry.m_Arms != null && !m_AspectGearExperienceAssigned.Contains(playerAspectGearEntry.m_Arms))
+                            {
+                                previousExperience = playerAspectGearEntry.m_Arms.Experience;
+                                m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Arms);
+
+                                previousArcaneCharges = playerAspectGearEntry.m_Arms.ArcaneCharges;
+                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Arms);
+                                currentArcaneCharges = playerAspectGearEntry.m_Arms.ArcaneCharges;
+
+                                if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
+                                    issueArcaneChargesCaution = true;
+
+                                if (previousArcaneCharges > 0 && currentArcaneCharges == 0)
+                                    issueArcaneChargesWarning = true;
+
+                                if (playerAspectGearEntry.m_Arms.TierLevel < AspectGear.MaxTierLevel && playerAspectGearEntry.m_Arms.Experience >= AspectGear.ExperienceNeededToUpgrade && previousExperience < AspectGear.ExperienceNeededToUpgrade)
+                                    upgradeAvailable = true;
+                            }
+
+                            if (playerAspectGearEntry.m_Gloves != null && !m_AspectGearExperienceAssigned.Contains(playerAspectGearEntry.m_Gloves))
+                            {
+                                previousExperience = playerAspectGearEntry.m_Gloves.Experience;
+                                m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Gloves);
+
+                                previousArcaneCharges = playerAspectGearEntry.m_Gloves.ArcaneCharges;
+                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Gloves);
+                                currentArcaneCharges = playerAspectGearEntry.m_Gloves.ArcaneCharges;
+
+                                if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
+                                    issueArcaneChargesCaution = true;
+
+                                if (previousArcaneCharges > 0 && currentArcaneCharges == 0)
+                                    issueArcaneChargesWarning = true;
+
+                                if (playerAspectGearEntry.m_Gloves.TierLevel < AspectGear.MaxTierLevel && playerAspectGearEntry.m_Gloves.Experience >= AspectGear.ExperienceNeededToUpgrade && previousExperience < AspectGear.ExperienceNeededToUpgrade)
+                                    upgradeAvailable = true;
+                            }
+
+                            if (playerAspectGearEntry.m_Chest != null && !m_AspectGearExperienceAssigned.Contains(playerAspectGearEntry.m_Chest))
+                            {
+                                previousExperience = playerAspectGearEntry.m_Chest.Experience;
+                                m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Chest);
+
+                                previousArcaneCharges = playerAspectGearEntry.m_Chest.ArcaneCharges;
+                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Chest);
+                                currentArcaneCharges = playerAspectGearEntry.m_Chest.ArcaneCharges;
+
+                                if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
+                                    issueArcaneChargesCaution = true;
+
+                                if (previousArcaneCharges > 0 && currentArcaneCharges == 0)
+                                    issueArcaneChargesWarning = true;
+
+                                if (playerAspectGearEntry.m_Chest.TierLevel < AspectGear.MaxTierLevel && playerAspectGearEntry.m_Chest.Experience >= AspectGear.ExperienceNeededToUpgrade && previousExperience < AspectGear.ExperienceNeededToUpgrade)
+                                    upgradeAvailable = true;
+                            }
+
+                            if (playerAspectGearEntry.m_Legs != null && !m_AspectGearExperienceAssigned.Contains(playerAspectGearEntry.m_Legs))
+                            {
+                                previousExperience = playerAspectGearEntry.m_Legs.Experience;
+                                m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Legs);
+
+                                previousArcaneCharges = playerAspectGearEntry.m_Legs.ArcaneCharges;
+                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Legs);
+                                currentArcaneCharges = playerAspectGearEntry.m_Legs.ArcaneCharges;
+
+                                if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
+                                    issueArcaneChargesCaution = true;
+
+                                if (previousArcaneCharges > 0 && currentArcaneCharges == 0)
+                                    issueArcaneChargesWarning = true;
+
+                                if (playerAspectGearEntry.m_Legs.TierLevel < AspectGear.MaxTierLevel && playerAspectGearEntry.m_Legs.Experience >= AspectGear.ExperienceNeededToUpgrade && previousExperience < AspectGear.ExperienceNeededToUpgrade)
+                                    upgradeAvailable = true;
+                            }
+
+                            if (upgradeAvailable)
+                                AspectGear.TierUpgradeAvailable(playerDamager);
+
+                            if (issueArcaneChargesWarning)
+                                AspectGear.IssueWarning(playerDamager);
+
+                            else if (issueArcaneChargesCaution)
+                                AspectGear.IssueCaution(playerDamager);
+                        }
+
+                        #endregion
 
                         //Monster Hunter Society
                         MHSCreatures.CreatureKilled(this, playerDamager, damagePercent, TakenDamageFromPoison, TakenDamageFromCreature);
-                        
+
                         //Doubloons
                         if (DoubloonValue > 0)
                         {
@@ -8772,6 +8904,42 @@ namespace Server.Mobiles
         }
         #endregion
 
+        public void ClearExpiredDamageEntries()
+        {
+            Queue m_Queue = new Queue();
+
+            foreach (DamageEntry damageEntry in DamageEntries)
+            {
+                if (damageEntry == null) continue;
+
+                if (damageEntry.HasExpired)
+                    m_Queue.Enqueue(damageEntry);
+            }
+
+            while (m_Queue.Count > 0)
+            {
+                DamageEntry damageEntry = (DamageEntry)m_Queue.Dequeue();
+                DamageEntries.Remove(damageEntry);
+            }
+
+            m_Queue = new Queue();
+
+            foreach (AspectGearExperienceEntry aspectGearExperienceEntry in m_AspectGearExperienceEntries)
+            {
+                if (aspectGearExperienceEntry == null)
+                    continue;
+
+                if (aspectGearExperienceEntry.m_LastDamage + DamageEntryExpiration <= DateTime.UtcNow)
+                    m_Queue.Enqueue(aspectGearExperienceEntry);
+            }
+
+            while (m_Queue.Count > 0)
+            {
+                AspectGearExperienceEntry aspectGearExperienceEntry = (AspectGearExperienceEntry)m_Queue.Dequeue();
+                m_AspectGearExperienceEntries.Remove(aspectGearExperienceEntry);
+            }
+        }
+
         public virtual void OnThink()
         {
             long tc = Core.TickCount;
@@ -8780,6 +8948,12 @@ namespace Server.Mobiles
             {
                 m_TakenDamageFromPoison = false;
                 m_TakenDamageFromCreature = false;
+            }
+
+            if (DateTime.UtcNow >= NextCheckExpiredDamageEntries)
+            {
+                ClearExpiredDamageEntries();
+                NextCheckExpiredDamageEntries = DateTime.UtcNow + CheckExpiredDamageEntriesInterval;
             }
 
             if (EnableRummaging && CanRummageCorpses && !Summoned && !Controlled && tc >= m_NextRummageTime)

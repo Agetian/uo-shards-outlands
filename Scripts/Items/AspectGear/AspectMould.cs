@@ -66,8 +66,8 @@ namespace Server.Items
 
         public void CheckMaxTierLevel()
         {
-            if (TierLevel > AspectGear.MaxAspectTier)
-                TierLevel = AspectGear.MaxAspectTier;
+            if (TierLevel > AspectGear.MaxTierLevel)
+                TierLevel = AspectGear.MaxTierLevel;
 
             if (TierLevel < 1)
                 TierLevel = 1; 

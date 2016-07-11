@@ -41,6 +41,9 @@ namespace Server.Mobiles
 
         public static void TimerTick(Mobile mobile)
         {
+            if (mobile == null) return;
+            if (mobile.Deleted || !mobile.Alive) return;
+
             List<SpecialAbilityEffectEntry> entriesToRemove = new List<SpecialAbilityEffectEntry>();
 
             int entries = mobile.m_SpecialAbilityEffectEntries.Count;

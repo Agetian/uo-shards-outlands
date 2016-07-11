@@ -2993,7 +2993,7 @@ namespace Server.Items
 
                 itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName);
 
-                LabelTo(from, "Tier " + TierLevel.ToString() + " " + AspectGear.GetAspectName(Aspect) + " " + itemName);
+                LabelTo(from, itemName + ": " + AspectGear.GetAspectName(Aspect) + " Aspect Tier " + TierLevel.ToString());
 
                 if (m_Poison != null && m_PoisonCharges > 0)
                 {

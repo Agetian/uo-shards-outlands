@@ -922,6 +922,14 @@ namespace Server
             set { m_ArcaneChargesMax = value; }
         }
 
+        private DateTime m_NextArcaneRechargeAllowed = DateTime.UtcNow;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public DateTime NextArcaneRechargeAllowed
+        {
+            get { return m_NextArcaneRechargeAllowed; }
+            set { m_NextArcaneRechargeAllowed = value; }
+        }
+
         private int m_TierLevel = 0;
         [CommandProperty(AccessLevel.GameMaster)]
         public int TierLevel
@@ -2480,6 +2488,7 @@ namespace Server
             writer.Write(m_ArcaneRechargable);
             writer.Write(m_ArcaneCharges);
             writer.Write(m_ArcaneChargesMax);
+            writer.Write(m_NextArcaneRechargeAllowed);
             writer.Write(m_TierLevel);
             writer.Write(m_Experience);
             writer.Write((int)m_Resource);
@@ -2709,6 +2718,7 @@ namespace Server
                         m_ArcaneRechargable = reader.ReadBool();
                         m_ArcaneCharges = reader.ReadInt();
                         m_ArcaneChargesMax = reader.ReadInt();
+                        m_NextArcaneRechargeAllowed = reader.ReadDateTime();
                         m_TierLevel = reader.ReadInt();
                         m_Experience = reader.ReadInt();
 

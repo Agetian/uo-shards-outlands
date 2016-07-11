@@ -39,12 +39,25 @@ namespace Server.Items
         public static int BaseCraftingSkillNeeded = 100;
         public static int ExtraCraftingSkillNeededPerTier = 2;
 
-        public static int MaxAspectTier = 10;
+        public static int MaxTierLevel = 10;
         public static int ExperienceNeededToUpgrade = 250;
 
         public static int AspectStartingArcaneCharges = 50;
         public static int ArcaneMaxCharges = 500;
 
+        public static int ArcaneChargesCautionThreshold = 25;
+
+        public static int ArcaneChargesUpgradeSound = 0x655;
+        public static int ArcaneChargesCautionSound = 0x5D1;
+        public static int ArcaneChargesWarningSound = 0x659;
+
+        public static int ArcaneChargesUpgradeTextHue = 63;
+        public static int ArcaneChargesCautionTextHue = 1256;
+        public static int ArcaneChargesWarningTextHue = 2117;
+
+        public static TimeSpan ArcaneChargesRechargeDelay = TimeSpan.FromMinutes(30);
+
+        //Stats
         public static double BaseAccuracy = .05;
         public static double AccuracyPerTier = .02;
 
@@ -134,6 +147,161 @@ namespace Server.Items
             }
 
             return 1154;
+        }
+
+        public static void RecordDamage(PlayerMobile player, BaseCreature creature, int amount)
+        {
+            if (player == null || creature == null) return;
+            if (amount == 0) return;
+            if (creature.Summoned || creature.ControlMaster is PlayerMobile || creature.NoKillAwards) return;
+
+            AspectGearExperienceEntry entry = GetAspectGearExperienceEntry(player, creature);
+
+            if (entry == null)
+            {
+                entry = new AspectGearExperienceEntry(player);
+                creature.m_AspectGearExperienceEntries.Add(entry);
+            }
+
+            entry.m_LastDamage = DateTime.UtcNow;
+            entry.m_TotalDamage += amount;
+
+            BaseWeapon oneHandWeapon = player.FindItemOnLayer(Layer.OneHanded) as BaseWeapon;
+            BaseWeapon twoHandWeapon = player.FindItemOnLayer(Layer.TwoHanded) as BaseWeapon;
+
+            BaseArmor helm = player.FindItemOnLayer(Layer.Helm) as BaseArmor;
+            BaseArmor gorget = player.FindItemOnLayer(Layer.Neck) as BaseArmor;
+            BaseArmor arms = player.FindItemOnLayer(Layer.Arms) as BaseArmor;
+            BaseArmor gloves = player.FindItemOnLayer(Layer.Gloves) as BaseArmor;
+            BaseArmor chest = player.FindItemOnLayer(Layer.InnerTorso) as BaseArmor;
+            BaseArmor legs = player.FindItemOnLayer(Layer.Pants) as BaseArmor;
+
+            #region Layers
+
+            if (oneHandWeapon != null)
+            {
+                if (oneHandWeapon.Aspect != AspectEnum.None && oneHandWeapon.TierLevel > 0)
+                    entry.m_Weapon = oneHandWeapon;
+            }
+
+            if (twoHandWeapon != null)
+            {
+                if (twoHandWeapon.Aspect != AspectEnum.None && twoHandWeapon.TierLevel > 0)
+                    entry.m_Weapon = twoHandWeapon;
+            }
+
+            if (helm != null)
+            {
+                if (helm.Aspect != AspectEnum.None && helm.TierLevel > 0)
+                    entry.m_Helm = helm;
+            }
+
+            if (gorget != null)
+            {
+                if (gorget.Aspect != AspectEnum.None && gorget.TierLevel > 0)
+                    entry.m_Gorget = gorget;
+            }
+
+            if (arms != null)
+            {
+                if (arms.Aspect != AspectEnum.None && arms.TierLevel > 0)
+                    entry.m_Arms = arms;
+            }
+
+            if (gloves != null)
+            {
+                if (gloves.Aspect != AspectEnum.None && gloves.TierLevel > 0)
+                    entry.m_Gloves = gloves;
+            }
+
+            if (chest != null)
+            {
+                if (chest.Aspect != AspectEnum.None && chest.TierLevel > 0)
+                    entry.m_Chest = chest;
+            }
+
+            if (legs != null)
+            {
+                if (legs.Aspect != AspectEnum.None && legs.TierLevel > 0)
+                    entry.m_Legs = legs;
+            }
+
+            #endregion
+        }
+
+        public static int ResolveExperienceGainChargeLoss(PlayerMobile player, BaseCreature creature, Item item)
+        {
+            if (player == null || creature == null || item == null) return 0;
+            if (item.Deleted) return 0;
+
+            if (item.Aspect == AspectEnum.None) return 0;
+
+            double experienceChance = creature.AspectGearExperienceChanceOnKill();
+            int experienceValue = creature.AspectGearExperienceEarnedOnKill();
+
+            if (Utility.RandomDouble() <= experienceChance)
+            {
+                int previousArcaneCharges = item.ArcaneCharges;
+
+                item.ArcaneCharges -= experienceValue;                
+
+                if (item.ArcaneCharges < 0)
+                    item.ArcaneCharges = 0;
+
+                if (previousArcaneCharges > 0 && item.ArcaneCharges == 0)                
+                    item.NextArcaneRechargeAllowed = DateTime.UtcNow + ArcaneChargesRechargeDelay;                
+
+                if (item.TierLevel > 0 && item.TierLevel < MaxTierLevel)
+                {
+                    item.Experience += experienceValue;
+
+                    if (item.Experience > ExperienceNeededToUpgrade)
+                        item.Experience = ExperienceNeededToUpgrade;
+                }
+
+                return experienceValue;
+            }
+
+            return 0;
+        }
+
+        public static void TierUpgradeAvailable(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            player.SendSound(ArcaneChargesUpgradeSound); //0x650
+            player.SendMessage(AspectGear.ArcaneChargesUpgradeTextHue, "One or more of your Aspect items has reached enough experience to be upgraded.");
+        }
+
+        public static void IssueCaution(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            player.SendSound(ArcaneChargesCautionSound);
+            player.SendMessage(AspectGear.ArcaneChargesCautionTextHue, "Caution: One or more of your Aspect items is low on arcane charges.");
+        }
+
+        public static void IssueWarning(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            player.SendSound(ArcaneChargesWarningSound);
+            player.SendMessage(AspectGear.ArcaneChargesWarningTextHue, "Warning: One or more of your Aspect items is out of arcane charges and is no longer blessed!");
+        }
+
+        public static AspectGearExperienceEntry GetAspectGearExperienceEntry(PlayerMobile player, BaseCreature creature)
+        {
+            foreach (AspectGearExperienceEntry entry in creature.m_AspectGearExperienceEntries)
+            {
+                if (entry == null) continue;
+                if (entry.m_Player == player)
+                    return entry;
+            }
+
+            return null;
         }
 
         #region Aspect Weapons
@@ -471,6 +639,10 @@ namespace Server.Items
         public AspectGear.WeaponSpecialEffectType m_SpecialEffect = AspectGear.WeaponSpecialEffectType.LightningStorm;
         public string m_EffectDisplayName = "Effect Name";
         public string m_EffectDescription = "Effect Description";
+
+        public AspectWeaponDetail()
+        {
+        }
     }
 
     public class AspectArmorDetail
@@ -519,6 +691,26 @@ namespace Server.Items
                 case AspectEnum.Water:
                 break;
             }
+        }
+    }
+
+    public class AspectGearExperienceEntry
+    {
+        public PlayerMobile m_Player;
+        public int m_TotalDamage;
+        public DateTime m_LastDamage;
+
+        public BaseWeapon m_Weapon;
+        public BaseArmor m_Helm;
+        public BaseArmor m_Gorget;       
+        public BaseArmor m_Arms;
+        public BaseArmor m_Gloves;
+        public BaseArmor m_Chest;
+        public BaseArmor m_Legs;
+
+        public AspectGearExperienceEntry(PlayerMobile player)
+        {
+            m_Player = player;
         }
     }
 }

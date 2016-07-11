@@ -857,8 +857,8 @@ namespace Server.Mobiles
 
                 if (pm_Target != null)
                 {
-                    if (m_TierLevel >= AspectGear.MaxAspectTier)
-                        m_TierLevel = AspectGear.MaxAspectTier;
+                    if (m_TierLevel >= AspectGear.MaxTierLevel)
+                        m_TierLevel = AspectGear.MaxTierLevel;
 
                     if (m_TierLevel < 1)
                         m_TierLevel = 1;
