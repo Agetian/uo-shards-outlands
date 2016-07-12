@@ -13,9 +13,12 @@ namespace Server.Engines.Craft
 
     public enum CraftRecycleOption
     {
-        RecycleItem,
-        RecycleAllNonExceptional,
-        RecycleAll
+        RecycleSingle,
+        RecycleRegularByType,
+        RecycleExceptionalByType,
+        RecycleMagicalByType,
+        RecycleAnyByType,
+        RecycleEverything
     }
 
 	public class CraftContext

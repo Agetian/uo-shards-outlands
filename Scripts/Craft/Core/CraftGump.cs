@@ -80,9 +80,12 @@ namespace Server.Engines.Craft
 
                 switch (context.RecycleOption)
                 {
-                    case CraftRecycleOption.RecycleItem: AddLabel(50, 345, textHue, "Recycle Mode: Single Item"); break;
-                    case CraftRecycleOption.RecycleAllNonExceptional: AddLabel(50, 345, textHue, "Recycle Mode: All Non-Exceptional"); break;
-                    case CraftRecycleOption.RecycleAll: AddLabel(50, 345, textHue, "Recycle Mode: All"); break;
+                    case CraftRecycleOption.RecycleSingle: AddLabel(50, 345, textHue, "Recycle Mode: Single Item"); break;
+                    case CraftRecycleOption.RecycleRegularByType: AddLabel(50, 345, textHue, "Recycle Mode: Regular (of Type)"); break;
+                    case CraftRecycleOption.RecycleExceptionalByType: AddLabel(50, 345, textHue, "Recycle Mode: Exceptional (of Type)"); break;
+                    case CraftRecycleOption.RecycleMagicalByType: AddLabel(50, 345, textHue, "Recycle Mode: Magical (of Type)"); break;
+                    case CraftRecycleOption.RecycleAnyByType: AddLabel(50, 345, textHue, "Recycle Mode: Any (of Type)"); break;
+                    case CraftRecycleOption.RecycleEverything: AddLabel(50, 345, textHue, "Recycle Mode: Entire Backpack"); break;
                 }                
             }
 
@@ -91,10 +94,18 @@ namespace Server.Engines.Craft
             {
                 AddButton(15, 362, 4005, 4007, GetButtonID(6, 1), GumpButtonType.Reply, 0);
 
-                if (context.RecycleOption == CraftRecycleOption.RecycleItem)
-                    AddLabel(50, 365, textHue, "Recycle Item");
+                AddLabel(50, 365, textHue, "Begin Recycling");
+
+                /*
+                if (context.RecycleOption == CraftRecycleOption.RecycleSingle)
+                    AddLabel(50, 365, textHue, "Begin Recycling");
+
+                else if (context.RecycleOption == CraftRecycleOption.RecycleEverything)
+                    AddLabel(50, 365, textHue, "Recycle Entire Backpack");
+
                 else
-                    AddLabel(50, 365, textHue, "Recyle Items (Select Type)");
+                    AddLabel(50, 365, textHue, "Recyle (Select Target Type)");
+                */
             }
 
             //Repair Button
@@ -701,9 +712,12 @@ namespace Server.Engines.Craft
 
                                 switch (context.RecycleOption)
                                 {
-                                    case CraftRecycleOption.RecycleItem: context.RecycleOption = CraftRecycleOption.RecycleAllNonExceptional; break;
-                                    case CraftRecycleOption.RecycleAllNonExceptional: context.RecycleOption = CraftRecycleOption.RecycleAll; break;
-                                    case CraftRecycleOption.RecycleAll: context.RecycleOption = CraftRecycleOption.RecycleItem; break;
+                                    case CraftRecycleOption.RecycleSingle: context.RecycleOption = CraftRecycleOption.RecycleRegularByType; break;
+                                    case CraftRecycleOption.RecycleRegularByType: context.RecycleOption = CraftRecycleOption.RecycleExceptionalByType; break;
+                                    case CraftRecycleOption.RecycleExceptionalByType: context.RecycleOption = CraftRecycleOption.RecycleMagicalByType; break;
+                                    case CraftRecycleOption.RecycleMagicalByType: context.RecycleOption = CraftRecycleOption.RecycleAnyByType; break;
+                                    case CraftRecycleOption.RecycleAnyByType: context.RecycleOption = CraftRecycleOption.RecycleEverything; break;
+                                    case CraftRecycleOption.RecycleEverything: context.RecycleOption = CraftRecycleOption.RecycleSingle; break;
                                 }
 
                                 m_From.SendGump(new CraftGump(m_From, m_CraftSystem, m_Tool, null, m_Page));

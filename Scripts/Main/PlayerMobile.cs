@@ -611,7 +611,7 @@ namespace Server.Mobiles
                     pm_Target.DeleteAllEquipment();
 
                     pm_Target.Backpack.DropItem(new Arrow(1000));
-                    pm_Target.AddItem(new Bow());
+                    
 
                     TotalRefreshPotion potion = new TotalRefreshPotion();
                     potion.Amount = 50;
@@ -640,12 +640,14 @@ namespace Server.Mobiles
 
                     int aspectHue = AspectGear.GetAspectHue(aspect);
 
-                    pm_Target.AddItem(new PlateHelm() { Aspect = aspect, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateGorget() { Aspect = aspect, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateArms() { Aspect = aspect, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateGloves() { Aspect = aspect, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateChest() { Aspect = aspect, TierLevel = 1 });
-                    pm_Target.AddItem(new PlateLegs() { Aspect = aspect, TierLevel = 1 });
+                    pm_Target.AddItem(new Bow() { Aspect = aspect, TierLevel = 1, ArcaneCharges = AspectGear.AspectStartingArcaneCharges, ArcaneChargesMax = AspectGear.ArcaneMaxCharges });
+
+                    pm_Target.AddItem(new PlateHelm() { Aspect = aspect, TierLevel = 1, ArcaneCharges = AspectGear.AspectStartingArcaneCharges, ArcaneChargesMax = AspectGear.ArcaneMaxCharges });
+                    pm_Target.AddItem(new PlateGorget() { Aspect = aspect, TierLevel = 1, ArcaneCharges = AspectGear.AspectStartingArcaneCharges, ArcaneChargesMax = AspectGear.ArcaneMaxCharges });
+                    pm_Target.AddItem(new PlateArms() { Aspect = aspect, TierLevel = 1, ArcaneCharges = AspectGear.AspectStartingArcaneCharges, ArcaneChargesMax = AspectGear.ArcaneMaxCharges });
+                    pm_Target.AddItem(new PlateGloves() { Aspect = aspect, TierLevel = 1, ArcaneCharges = AspectGear.AspectStartingArcaneCharges, ArcaneChargesMax = AspectGear.ArcaneMaxCharges });
+                    pm_Target.AddItem(new PlateChest() { Aspect = aspect, TierLevel = 1, ArcaneCharges = AspectGear.AspectStartingArcaneCharges, ArcaneChargesMax = AspectGear.ArcaneMaxCharges });
+                    pm_Target.AddItem(new PlateLegs() { Aspect = aspect, TierLevel = 1, ArcaneCharges = AspectGear.AspectStartingArcaneCharges, ArcaneChargesMax = AspectGear.ArcaneMaxCharges });
 
                     pm_Target.AddItem(new Cloak(aspectHue));
 
@@ -3904,6 +3906,8 @@ namespace Server.Mobiles
 
             if (reborn)
                 CustomizationAbilities.Reborn(this);
+
+            AspectGear.PlayerResurrected(this);
         }
 
         public override void Resurrect()

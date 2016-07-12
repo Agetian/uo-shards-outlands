@@ -270,6 +270,62 @@ namespace Server.Items
         {
             Hue = AspectGear.GetAspectHue(Aspect);
         }
+
+        public override bool ArcaneRechargeable
+        {
+            get
+            {
+                if (TierLevel > 0 && Aspect != AspectEnum.None)
+                    return true;
+
+                return base.ArcaneRechargeable;
+            }
+        }        
+
+        public override bool IsArcaneRechargeRestricted(Mobile from)
+        {
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
+                return true;
+
+            if (DateTime.UtcNow < NextArcaneRechargeAllowed)
+            {
+                string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, NextArcaneRechargeAllowed, false, true, true, true, true);
+                from.SendMessage("That item has recently hit zero charges and you must wait " + timeRemaining + " before you may recharge it.");
+
+                return true;
+            }
+
+            if (player.RecentlyInPlayerCombat)
+            {
+                string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, player.PlayerCombatExpiration, false, true, true, true, true);
+                from.SendMessage("You have been in combat with another player recently and must wait " + timeRemaining + " before you are able to recharge that item.");
+
+                return true;
+            } 
+
+            if (player.RecentlyInCombat)
+            {
+                string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, player.CombatExpiration, false, true, true, true, true);
+                from.SendMessage("You have been in combat recently and must wait " + timeRemaining + " before you are able to recharge that item.");
+
+                return true;
+            }                       
+
+            return base.IsArcaneRechargeRestricted(from);
+        }
+
+        public override double ArcaneChargesPerArcaneEssence
+        {
+            get
+            {
+                if (TierLevel > 0 && Aspect != AspectEnum.None)
+                    return 6.0;
+
+                return base.ArcaneChargesPerArcaneEssence;
+            }
+        }
         
         public override int GetArcaneEssenceValue()
         {
@@ -1162,6 +1218,15 @@ namespace Server.Items
 
         public override bool CheckBlessed(Mobile m, bool isOnDeath = false)
         {
+            if (TierLevel > 0 && Aspect != AspectEnum.None)
+            {
+                if (ArcaneCharges > 0)
+                    return true;
+
+                else
+                    return false;
+            }
+
             return base.CheckBlessed(m);
         }
 
@@ -1517,6 +1582,17 @@ namespace Server.Items
             if (m_HitPoints >= 0 && m_MaxHitPoints > 0)
                 list.Add(1060639, "{0}\t{1}", m_HitPoints, m_MaxHitPoints); // durability ~1_val~ / ~2_val~
         }
+
+        public override bool IsMagical
+        {
+            get
+            {
+                if (DurabilityLevel != ArmorDurabilityLevel.Regular || ProtectionLevel != ArmorProtectionLevel.Regular)
+                    return true;
+
+                return base.IsMagical;
+            }
+        }
         
         public override void DisplayLabelName(Mobile from)
         {
@@ -1542,12 +1618,10 @@ namespace Server.Items
 
                 return;
             }
-
-            bool isMagical = DurabilityLevel != ArmorDurabilityLevel.Regular || ProtectionLevel != ArmorProtectionLevel.Regular;
-
+            
             string displayName = "";
 
-            if (isMagical && !Identified && from.AccessLevel == AccessLevel.Player)
+            if (IsMagical && !Identified && from.AccessLevel == AccessLevel.Player)
                 LabelTo(from, "unidentified " + Name);
 
             else

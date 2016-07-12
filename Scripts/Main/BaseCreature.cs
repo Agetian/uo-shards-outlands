@@ -8266,7 +8266,9 @@ namespace Server.Mobiles
                                 m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Weapon);
 
                                 previousArcaneCharges = playerAspectGearEntry.m_Weapon.ArcaneCharges;
-                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Weapon);
+
+                                AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Weapon);
+
                                 currentArcaneCharges = playerAspectGearEntry.m_Weapon.ArcaneCharges;
 
                                 if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
@@ -8285,7 +8287,9 @@ namespace Server.Mobiles
                                 m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Helm);
 
                                 previousArcaneCharges = playerAspectGearEntry.m_Helm.ArcaneCharges;
-                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Helm);
+
+                                AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Helm);
+
                                 currentArcaneCharges = playerAspectGearEntry.m_Helm.ArcaneCharges;
 
                                 if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
@@ -8304,7 +8308,9 @@ namespace Server.Mobiles
                                 m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Gorget);
 
                                 previousArcaneCharges = playerAspectGearEntry.m_Gorget.ArcaneCharges;
-                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Gorget);
+
+                                AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Gorget);
+
                                 currentArcaneCharges = playerAspectGearEntry.m_Gorget.ArcaneCharges;
 
                                 if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
@@ -8323,7 +8329,9 @@ namespace Server.Mobiles
                                 m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Arms);
 
                                 previousArcaneCharges = playerAspectGearEntry.m_Arms.ArcaneCharges;
-                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Arms);
+
+                                AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Arms);
+
                                 currentArcaneCharges = playerAspectGearEntry.m_Arms.ArcaneCharges;
 
                                 if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
@@ -8342,7 +8350,9 @@ namespace Server.Mobiles
                                 m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Gloves);
 
                                 previousArcaneCharges = playerAspectGearEntry.m_Gloves.ArcaneCharges;
-                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Gloves);
+
+                                AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Gloves);
+
                                 currentArcaneCharges = playerAspectGearEntry.m_Gloves.ArcaneCharges;
 
                                 if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
@@ -8361,7 +8371,9 @@ namespace Server.Mobiles
                                 m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Chest);
 
                                 previousArcaneCharges = playerAspectGearEntry.m_Chest.ArcaneCharges;
-                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Chest);
+
+                                AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Chest);
+
                                 currentArcaneCharges = playerAspectGearEntry.m_Chest.ArcaneCharges;
 
                                 if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
@@ -8380,7 +8392,9 @@ namespace Server.Mobiles
                                 m_AspectGearExperienceAssigned.Add(playerAspectGearEntry.m_Legs);
 
                                 previousArcaneCharges = playerAspectGearEntry.m_Legs.ArcaneCharges;
-                                experienceYield = AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Legs);
+
+                                AspectGear.ResolveExperienceGainChargeLoss(playerDamager, this, playerAspectGearEntry.m_Legs);
+
                                 currentArcaneCharges = playerAspectGearEntry.m_Legs.ArcaneCharges;
 
                                 if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)

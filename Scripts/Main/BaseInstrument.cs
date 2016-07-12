@@ -468,16 +468,25 @@ namespace Server.Items
                 Timer.DelayCall(TimeSpan.Zero, new TimerCallback(InvalidateProperties));
         }
 
+        public override bool IsMagical
+        {
+            get
+            {
+                if (SlayerGroup != SlayerGroupType.None || m_DurabilityLevel != InstrumentDurabilityLevel.Regular || m_ArtistryLevel != InstrumentArtistryLevel.Regular)
+                    return true;
+
+                return base.IsMagical;
+            }
+        }
+
         public override void DisplayLabelName(Mobile from)
         {
             if (from == null)
                 return;
 
-            bool isMagical = SlayerGroup != SlayerGroupType.None || m_DurabilityLevel != InstrumentDurabilityLevel.Regular || m_ArtistryLevel != InstrumentArtistryLevel.Regular;
-
             string displayName = "";
 
-            if (isMagical && !Identified && from.AccessLevel == AccessLevel.Player)
+            if (IsMagical && !Identified && from.AccessLevel == AccessLevel.Player)
                 LabelTo(from, "unidentified " + Name);
 
             else

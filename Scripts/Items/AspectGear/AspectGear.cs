@@ -43,9 +43,10 @@ namespace Server.Items
         public static int ExperienceNeededToUpgrade = 250;
 
         public static int AspectStartingArcaneCharges = 50;
-        public static int ArcaneMaxCharges = 500;
+        public static int ArcaneMaxCharges = 250;
 
         public static int ArcaneChargesCautionThreshold = 25;
+        public static int ArcaneChargesLostOnDeath = 50;
 
         public static int ArcaneChargesUpgradeSound = 0x655;
         public static int ArcaneChargesCautionSound = 0x5D1;
@@ -149,6 +150,41 @@ namespace Server.Items
             return 1154;
         }
 
+        public static void PlayerResurrected(PlayerMobile player)
+        {
+            List<Item> m_Items = player.Backpack.FindItemsByType<Item>();
+
+            bool issueArcaneChargesCaution = false;
+            bool issueArcaneChargesWarning = false;
+
+            int previousArcaneCharges = 0;
+            int currentArcaneCharges = 0;
+
+            foreach (Item item in m_Items)
+            {
+                if (item is BaseWeapon || item is BaseArmor && item.TierLevel > 0 && item.Aspect != AspectEnum.None)
+                {
+                    previousArcaneCharges = item.ArcaneCharges;
+
+                    ArcaneChargeLoss(item, AspectGear.ArcaneChargesLostOnDeath);
+
+                    currentArcaneCharges = item.ArcaneCharges;
+
+                    if (previousArcaneCharges > AspectGear.ArcaneChargesCautionThreshold && currentArcaneCharges <= AspectGear.ArcaneChargesCautionThreshold)
+                        issueArcaneChargesCaution = true;
+
+                    if (previousArcaneCharges > 0 && currentArcaneCharges == 0)
+                        issueArcaneChargesWarning = true;
+                }
+            }
+
+            if (issueArcaneChargesWarning)
+                AspectGear.IssueWarning(player);
+
+            else if (issueArcaneChargesCaution)
+                AspectGear.IssueCaution(player);
+        }
+
         public static void RecordDamage(PlayerMobile player, BaseCreature creature, int amount)
         {
             if (player == null || creature == null) return;
@@ -229,12 +265,11 @@ namespace Server.Items
             #endregion
         }
 
-        public static int ResolveExperienceGainChargeLoss(PlayerMobile player, BaseCreature creature, Item item)
+        public static void ResolveExperienceGainChargeLoss(PlayerMobile player, BaseCreature creature, Item item)
         {
-            if (player == null || creature == null || item == null) return 0;
-            if (item.Deleted) return 0;
-
-            if (item.Aspect == AspectEnum.None) return 0;
+            if (player == null || creature == null || item == null) return;
+            if (item.Deleted) return;
+            if (item.Aspect == AspectEnum.None) return;
 
             double experienceChance = creature.AspectGearExperienceChanceOnKill();
             int experienceValue = creature.AspectGearExperienceEarnedOnKill();
@@ -243,13 +278,7 @@ namespace Server.Items
             {
                 int previousArcaneCharges = item.ArcaneCharges;
 
-                item.ArcaneCharges -= experienceValue;                
-
-                if (item.ArcaneCharges < 0)
-                    item.ArcaneCharges = 0;
-
-                if (previousArcaneCharges > 0 && item.ArcaneCharges == 0)                
-                    item.NextArcaneRechargeAllowed = DateTime.UtcNow + ArcaneChargesRechargeDelay;                
+                ArcaneChargeLoss(item, experienceValue);               
 
                 if (item.TierLevel > 0 && item.TierLevel < MaxTierLevel)
                 {
@@ -258,13 +287,22 @@ namespace Server.Items
                     if (item.Experience > ExperienceNeededToUpgrade)
                         item.Experience = ExperienceNeededToUpgrade;
                 }
-
-                return experienceValue;
             }
-
-            return 0;
         }
 
+        public static void ArcaneChargeLoss(Item item, int amount)
+        {
+            if (item == null)
+                return;
+
+            int previousChargeAmount = item.ArcaneCharges;
+
+            item.ArcaneCharges -= amount;
+
+            if (previousChargeAmount > 0 && item.ArcaneCharges == 0)
+                item.NextArcaneRechargeAllowed = DateTime.UtcNow + AspectGear.ArcaneChargesRechargeDelay;
+        }
+        
         public static void TierUpgradeAvailable(PlayerMobile player)
         {
             if (player == null)
@@ -280,7 +318,7 @@ namespace Server.Items
                 return;
 
             player.SendSound(ArcaneChargesCautionSound);
-            player.SendMessage(AspectGear.ArcaneChargesCautionTextHue, "Caution: One or more of your Aspect items is low on arcane charges.");
+            player.SendMessage(AspectGear.ArcaneChargesCautionTextHue, "Caution: One or more of your Aspect items is low on arcane charges. It will become un-Blessed at zero charges)");
         }
 
         public static void IssueWarning(PlayerMobile player)
@@ -540,7 +578,7 @@ namespace Server.Items
                         player.SendMessage("Your Aspect armor reveals you.");
                     }
 
-                    player.PlaySound(0x5AA);                    
+                    player.PlaySound(0x56B);                    
                     //player.PublicOverheadMessage(MessageType.Emote, 0, false, "*Aspect Fades*");
                 }
             }

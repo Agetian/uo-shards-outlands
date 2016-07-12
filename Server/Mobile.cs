@@ -4690,6 +4690,18 @@ namespace Server
             }
         }
 
+        public DateTime CombatExpiration
+        {
+            get
+            {
+                if (m_LastCombatTime + CombatExpirationDelay >= DateTime.UtcNow)
+                    return m_LastCombatTime + CombatExpirationDelay;
+
+                else
+                    return DateTime.UtcNow;
+            }
+        }
+
         public bool RecentlyInPlayerCombat
         {
             get
@@ -4698,6 +4710,18 @@ namespace Server
                     return true;
 
                 return false;
+            }
+        }
+
+        public DateTime PlayerCombatExpiration
+        {
+            get
+            {
+                if (m_LastPlayerCombatTime + PlayerCombatExpirationDelay >= DateTime.UtcNow)
+                    return m_LastPlayerCombatTime + PlayerCombatExpirationDelay;
+
+                else
+                    return DateTime.UtcNow;
             }
         }
 

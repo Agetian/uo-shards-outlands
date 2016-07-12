@@ -890,6 +890,8 @@ namespace Server
 
         #region Arcane Charges
 
+        public virtual bool IsMagical { get { return false; } }
+
         private bool m_Identified;
         [CommandProperty(AccessLevel.GameMaster)]
         public bool Identified
@@ -898,20 +900,18 @@ namespace Server
             set { m_Identified = value; InvalidateProperties(); }
         }
 
-        private bool m_ArcaneRechargable = false;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public bool ArcaneRechargable
-        {
-            get { return m_ArcaneRechargable; }
-            set { m_ArcaneRechargable = value; }
-        }
-
         private int m_ArcaneCharges = 0;
         [CommandProperty(AccessLevel.GameMaster)]
         public int ArcaneCharges
         {
             get { return m_ArcaneCharges; }
-            set { m_ArcaneCharges = value; }
+            set
+            { 
+                m_ArcaneCharges = value;
+
+                if (m_ArcaneCharges < 0)
+                    m_ArcaneCharges = 0;
+            }
         }
 
         private int m_ArcaneChargesMax = 0;
@@ -919,7 +919,21 @@ namespace Server
         public int ArcaneChargesMax
         {
             get { return m_ArcaneChargesMax; }
-            set { m_ArcaneChargesMax = value; }
+            set
+            { 
+                m_ArcaneChargesMax = value;
+
+                if (m_ArcaneChargesMax < 0)
+                    m_ArcaneChargesMax = 0;
+            }
+        }
+
+        public virtual bool ArcaneRechargeable { get { return false; } }
+        public virtual double ArcaneChargesPerArcaneEssence { get { return 1.0; } }
+
+        public virtual bool IsArcaneRechargeRestricted(Mobile from)
+        {
+            return false;
         }
 
         private DateTime m_NextArcaneRechargeAllowed = DateTime.UtcNow;
@@ -1041,7 +1055,7 @@ namespace Server
         public virtual void AspectChange()
         {
         }
-
+        
         public virtual int GetArcaneEssenceValue()
         {
             return 0;
@@ -2485,7 +2499,6 @@ namespace Server
             writer.Write((int)m_ItemRarity);
             writer.Write(m_Identified);
             writer.Write((int)m_Aspect);
-            writer.Write(m_ArcaneRechargable);
             writer.Write(m_ArcaneCharges);
             writer.Write(m_ArcaneChargesMax);
             writer.Write(m_NextArcaneRechargeAllowed);
@@ -2715,7 +2728,6 @@ namespace Server
 
                         m_Identified = reader.ReadBool();
                         m_Aspect = (AspectEnum)reader.ReadInt();
-                        m_ArcaneRechargable = reader.ReadBool();
                         m_ArcaneCharges = reader.ReadInt();
                         m_ArcaneChargesMax = reader.ReadInt();
                         m_NextArcaneRechargeAllowed = reader.ReadDateTime();
