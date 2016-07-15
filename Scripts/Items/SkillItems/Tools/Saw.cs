@@ -7,17 +7,22 @@ namespace Server.Items
 	[FlipableAttribute( 0x1034, 0x1035 )]
 	public class Saw : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override CraftSystem CraftSystem{ get{ return DefCarpentry.CraftSystem; } }
 
 		[Constructable]
 		public Saw() : base( 0x1034 )
 		{
+            Name = "saw";
 			Weight = 2.0;
 		}
 
 		[Constructable]
 		public Saw( int uses ) : base( uses, 0x1034 )
 		{
+            Name = "saw";
 			Weight = 2.0;
 		}
 

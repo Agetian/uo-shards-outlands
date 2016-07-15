@@ -6,6 +6,9 @@ namespace Server.Items
 	[Flipable]
 	public class LeatherGloves : BaseArmor, IArcaneEquip
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int InitMinHits{ get{ return 31; } }
 		public override int InitMaxHits{ get{ return 37; } }		
 

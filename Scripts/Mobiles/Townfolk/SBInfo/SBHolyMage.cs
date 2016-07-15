@@ -19,7 +19,8 @@ namespace Server.Mobiles
 		public class InternalBuyInfo : List<GenericBuyInfo>
 		{
 			public InternalBuyInfo()
-			{
+			{          
+                /*
 				Type[] types = Loot.RegularScrollTypes;
 
 				for ( int i = 0; i < types.Length && i < 8; ++i )
@@ -58,13 +59,15 @@ namespace Server.Mobiles
 
 				Add( new GenericBuyInfo( typeof( ScribesPen ), 8, 10, 0xFBF, 0 ) );
 				Add( new GenericBuyInfo( typeof( BlankScroll ), 6, 20, 0x0E34, 0 ) );
+                */                
 			}
 		}
 
 		public class InternalSellInfo : GenericSellInfo
 		{
 			public InternalSellInfo()
-			{
+			{          
+                /*
 				Add( typeof( BlackPearl ), 3 ); 
 				Add( typeof( Bloodmoss ), 3 ); 
 				Add( typeof( MandrakeRoot ), 2 ); 
@@ -103,8 +106,9 @@ namespace Server.Mobiles
                     int level = ((i + 1) / 8) / 2;
 
                     //old system + limiting factor of (cost of blankscroll + 3gp per reg + level / 2) (Sean)
-                    Add(type, Math.Min(6 + ((i / 8) * 5), 6 + (level * 3 / 2) + 9 * (Math.Max(0, count - 1))));
+                    Add(type, Math.Min(6 + ((i / 8) * 5), 6 + (level * 3 / 2) + 9 * (Math.Max(0, count - 1))));                
                 }
+                */
 			}
 		}
 	}

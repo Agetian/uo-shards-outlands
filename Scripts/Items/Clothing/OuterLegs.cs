@@ -19,14 +19,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -37,12 +35,14 @@ namespace Server.Items
 		[Constructable]
 		public FurSarong() : this( 0 )
 		{
+            Name = "fur sarong";
 		}
 
 		[Constructable]
 		public FurSarong( int hue ) : base( 0x230C, hue )
 		{
-			Weight = 3.0;
+            Name = "fur sarong";
+			Weight = 1.0;
 		}
 
 		public FurSarong( Serial serial ) : base( serial )
@@ -52,18 +52,13 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
-
-			if ( Weight == 4.0 )
-				Weight = 3.0;
 		}
 	}
 
@@ -73,12 +68,14 @@ namespace Server.Items
 		[Constructable]
 		public Skirt() : this( 0 )
 		{
+            Name = "skirt";
 		}
 
 		[Constructable]
 		public Skirt( int hue ) : base( 0x1516, hue )
 		{
-			Weight = 4.0;
+            Name = "skirt";
+			Weight = 1.0;
 		}
 
 		public Skirt( Serial serial ) : base( serial )
@@ -88,14 +85,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -106,12 +101,14 @@ namespace Server.Items
 		[Constructable]
 		public Kilt() : this( 0 )
 		{
+            Name = "kilt";
 		}
 
 		[Constructable]
 		public Kilt( int hue ) : base( 0x1537, hue )
 		{
-			Weight = 2.0;
+            Name = "kilt";
+			Weight = 1.0;
 		}
 
 		public Kilt( Serial serial ) : base( serial )
@@ -121,14 +118,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -139,12 +134,13 @@ namespace Server.Items
 		[Constructable]
 		public Hakama() : this( 0 )
 		{
+            Name = "hakama";
 		}
 
 		[Constructable]
 		public Hakama( int hue ) : base( 0x279A, hue )
 		{
-			Weight = 2.0;
+			Weight = 1.0;
 		}
 
 		public Hakama( Serial serial ) : base( serial )
@@ -154,14 +150,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}

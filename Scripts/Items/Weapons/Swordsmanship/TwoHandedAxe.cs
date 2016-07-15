@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x1443, 0x1442 )]
 	public class TwoHandedAxe : BaseAxe
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 17; } }
         public override int BaseMaxDamage { get { return 34; } }
         public override int BaseSpeed { get { return 42; } }
@@ -22,7 +25,7 @@ namespace Server.Items
 		[Constructable]
 		public TwoHandedAxe() : base( 0x1443 )
 		{
-            Name = "two handed axe";
+            Name = "two-handed axe";
 			Weight = 7.0;
 		}
 

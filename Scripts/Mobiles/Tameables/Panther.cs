@@ -6,6 +6,9 @@ namespace Server.Mobiles
     [CorpseName("a panther corpse")]
     public class Panther : BaseCreature
     {
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         [Constructable]
         public Panther(): base(AIType.AI_Animal, FightMode.Aggressor, 10, 1, 0.2, 0.4)
         {

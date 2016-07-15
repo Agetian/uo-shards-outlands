@@ -21,18 +21,19 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-                Add(new AnimalBuyInfo(1, typeof(Eagle), 402, 10, 0x5, 0));
-                Add(new AnimalBuyInfo(1, typeof(Cat), 138, 10, 0xC9, 0));
-                Add(new AnimalBuyInfo(1, typeof(Horse), 602, 10, 0xC8, 0));
-                Add(new AnimalBuyInfo(1, typeof(Rabbit), 78, 10, 0xCD, 0));
-                Add(new AnimalBuyInfo(1, typeof(BrownBear), 855, 10, 0xA7, 0));
-                Add(new AnimalBuyInfo(1, typeof(GrizzlyBear), 1767, 10, 0xD4, 0));
-                Add(new AnimalBuyInfo(1, typeof(Panther), 1271, 10, 0xD6, 0));
-                Add(new AnimalBuyInfo(1, typeof(Dog), 181, 10, 0xD9, 0));
-                Add(new AnimalBuyInfo(1, typeof(TimberWolf), 768, 10, 0xE1, 0));
-                Add(new AnimalBuyInfo(1, typeof(PackHorse), 606, 10, 0x123, 0));
-                Add(new AnimalBuyInfo(1, typeof(PackLlama), 491, 10, 0x124, 0));
-                Add(new AnimalBuyInfo(1, typeof(Rat), 107, 10, 0xEE, 0));
+                Add(new AnimalBuyInfo(1, "Pack Horse", typeof(PackHorse), PackHorse.GetSBPurchaseValue(), 10, 0x123, 0));
+                Add(new AnimalBuyInfo(1, "Pack Horse", typeof(PackLlama), PackLlama.GetSBPurchaseValue(), 10, 0x124, 0));
+
+                Add(new AnimalBuyInfo(1, "Rat", typeof(Rat), Rat.GetSBPurchaseValue(), 10, 0xEE, 0));
+                Add(new AnimalBuyInfo(1, "Rabbit", typeof(Rabbit), Rabbit.GetSBPurchaseValue(), 10, 0xCD, 0));
+                Add(new AnimalBuyInfo(1, "Cat", typeof(Cat), Cat.GetSBPurchaseValue(), 10, 0xC9, 0));
+                Add(new AnimalBuyInfo(1, "Dog", typeof(Dog), Dog.GetSBPurchaseValue(), 10, 0xD9, 0));
+                Add(new AnimalBuyInfo(1, "Eagle", typeof(Eagle), Eagle.GetSBPurchaseValue(), 10, 0x5, 0));
+                Add(new AnimalBuyInfo(1, "Horse", typeof(Horse), Horse.GetSBPurchaseValue(), 10, 0xC8, 0));
+                Add(new AnimalBuyInfo(1, "Panther", typeof(Panther), Panther.GetSBPurchaseValue(), 10, 0xD6, 0));
+                Add(new AnimalBuyInfo(1, "Timber Wolf", typeof(TimberWolf), TimberWolf.GetSBPurchaseValue(), 10, 0xE1, 0));
+                Add(new AnimalBuyInfo(1, "Brown Bear", typeof(BrownBear), BrownBear.GetSBPurchaseValue(), 10, 0xA7, 0));
+                Add(new AnimalBuyInfo(1, "Grizzly Bear", typeof(GrizzlyBear), GrizzlyBear.GetSBPurchaseValue(), 10, 0xD4, 0));
 			}
 		}
 

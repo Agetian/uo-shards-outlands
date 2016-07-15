@@ -6,17 +6,22 @@ namespace Server.Items
 {
 	public class Froe : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override CraftSystem CraftSystem{ get{ return DefCarpentry.CraftSystem; } }
 
 		[Constructable]
 		public Froe() : base( 0x10E5 )
 		{
+            Name = "froe";
 			Weight = 1.0;
 		}
 
 		[Constructable]
 		public Froe( int uses ) : base( uses, 0x10E5 )
 		{
+            Name = "froe";
 			Weight = 1.0;
 		}
 

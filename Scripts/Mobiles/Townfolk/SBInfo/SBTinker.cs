@@ -32,7 +32,7 @@ namespace Server.Mobiles
 				Add( new GenericBuyInfo( typeof( Key ), 3, 20, 0x100E, 0 ) );
 
 				Add( new GenericBuyInfo( typeof( DovetailSaw ), 14, 20, 0x1028, 0 ) );
-				Add( new GenericBuyInfo( typeof( MouldingPlane ), 13, 20, 0x102C, 0 ) );
+				Add( new GenericBuyInfo( typeof( WoodenPlane ), 13, 20, 0x102C, 0 ) );
 				Add( new GenericBuyInfo( typeof( Nails ), 3, 20, 0x102E, 0 ) );
 				Add( new GenericBuyInfo( typeof( JointingPlane ), 13, 20, 0x1030, 0 ) );
 				Add( new GenericBuyInfo( typeof( SmoothingPlane ), 12, 20, 0x1032, 0 ) );
@@ -80,7 +80,7 @@ namespace Server.Mobiles
 				Add( typeof( Key ), 1 );
 
 				Add( typeof( DovetailSaw ), 4 );
-				Add( typeof( MouldingPlane ), 4 );
+				Add( typeof( WoodenPlane ), 4 );
 				Add( typeof( Nails ), 1 );
 				Add( typeof( JointingPlane ), 4 );
 				Add( typeof( SmoothingPlane ), 4 );

@@ -5,11 +5,13 @@ namespace Server.Items
 {
 	public class CheckerBoard : BaseBoard
 	{
-		public override int LabelNumber{ get{ return 1016449; } } // a checker board
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
 
 		[Constructable]
 		public CheckerBoard() : base( 0xFA6 )
 		{
+            Name = "checker board";
 		}
 
 		public override void CreatePieces()

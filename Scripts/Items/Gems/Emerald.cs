@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class Emerald : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override double DefaultWeight
 		{
 			get { return 0.1; }
@@ -13,11 +16,14 @@ namespace Server.Items
 		[Constructable]
 		public Emerald() : this( 1 )
 		{
+            Name = "emerald";
 		}
 
 		[Constructable]
 		public Emerald( int amount ) : base( 0xF10 )
 		{
+            Name = "emerald";
+
 			Stackable = true;
 			Amount = amount;
 		}

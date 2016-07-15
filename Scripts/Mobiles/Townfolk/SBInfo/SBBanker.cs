@@ -21,9 +21,8 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new GenericBuyInfo( "1047016", typeof( CommodityDeed ), 5, 20, 0x14F0, 0x47 ) );
-                //Add( new GenericBuyInfo( "1041243", typeof( ContractOfEmployment ), 1025, 20, 0x14F0, 0 ) );
-                Add(new GenericBuyInfo("1062332", typeof(VendorRentalContract), 1025, 20, 0x14F0, 0));
+                Add(new GenericBuyInfo("Commodity Deed",  typeof(CommodityDeed), CommodityDeed.GetSBPurchaseValue(), 25, 0x14F0, 0x47));
+                Add(new GenericBuyInfo("Vendor Rental Contract", typeof(VendorRentalContract), VendorRentalContract.GetSBPurchaseValue(), 25, 0x14F0, 0));             
 			}
 		}
 
@@ -31,6 +30,8 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
+                Add(typeof(CommodityDeed), CommodityDeed.GetSBSellValue());
+                Add(typeof(VendorRentalContract), VendorRentalContract.GetSBSellValue());		
 			}
 		}
 	}

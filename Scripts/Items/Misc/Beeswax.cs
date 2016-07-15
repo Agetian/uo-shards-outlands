@@ -4,14 +4,20 @@ namespace Server.Items
 {
 	public class Beeswax : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		[Constructable]
 		public Beeswax() : this( 1 )
 		{
+            Name = "beeswax";
 		}
 
 		[Constructable]
 		public Beeswax( int amount ) : base( 0x1422 )
 		{
+            Name = "beeswax";
+
 			Weight = 1.0;
 			Stackable = true;
 			Amount = amount;

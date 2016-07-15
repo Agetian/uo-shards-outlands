@@ -31,41 +31,28 @@ namespace Server.Mobiles
 
 					if ( i == 6 )
 						itemID = 0x1F2D;
+
 					else if ( i > 6 )
 						--itemID;
 
+                    //TEST: DETERMINE SCROLL PRICES
 					Add( new GenericBuyInfo( types[i], 12 + ((i / 3) * 10), 20, itemID, 0 ) );
 				}
 
-                Add(new GenericBuyInfo(typeof(BlackPearl), 6, 100, 0xF7A, 0));
-				Add(new GenericBuyInfo(typeof(Bloodmoss), 5, 100, 0xF7B, 0));
-				Add(new GenericBuyInfo(typeof(MandrakeRoot), 3, 100, 0xF86, 0));
-				Add(new GenericBuyInfo(typeof(Garlic), 3, 100, 0xF84, 0));
-				Add(new GenericBuyInfo(typeof(Ginseng), 3, 100, 0xF85, 0));
-				Add(new GenericBuyInfo(typeof(Nightshade), 3, 100, 0xF88, 0));
-				Add(new GenericBuyInfo(typeof(SpidersSilk), 3, 100, 0xF8D, 0));
-				Add(new GenericBuyInfo(typeof(SulfurousAsh), 3, 100, 0xF8C, 0)); 
+                Add(new GenericBuyInfo("Black Pearl", typeof(BlackPearl), BlackPearl.GetSBPurchaseValue(), 500, 0xF7A, 0));
+                Add(new GenericBuyInfo("Bloodmoss", typeof(Bloodmoss), Bloodmoss.GetSBPurchaseValue(), 500, 0xF7B, 0));
+                Add(new GenericBuyInfo("Mandrake Root", typeof(MandrakeRoot), MandrakeRoot.GetSBPurchaseValue(), 500, 0xF86, 0));
+                Add(new GenericBuyInfo("Garlic", typeof(Garlic), Garlic.GetSBPurchaseValue(), 500, 0xF84, 0));
+                Add(new GenericBuyInfo("Ginseng", typeof(Ginseng), Ginseng.GetSBPurchaseValue(), 500, 0xF85, 0));
+                Add(new GenericBuyInfo("Nightshade", typeof(Nightshade), Nightshade.GetSBPurchaseValue(), 500, 0xF88, 0));
+                Add(new GenericBuyInfo("Spider Silk", typeof(SpidersSilk), SpidersSilk.GetSBPurchaseValue(), 500, 0xF8D, 0));
+                Add(new GenericBuyInfo("Sulfurous Ash", typeof(SulfurousAsh), SulfurousAsh.GetSBPurchaseValue(), 500, 0xF8C, 0));
 
-				if ( Core.AOS )
-				{
-					Add( new GenericBuyInfo( typeof( BatWing ), 3, 999, 0xF78, 0 ) );
-					Add( new GenericBuyInfo( typeof( GraveDust ), 3, 999, 0xF8F, 0 ) );
-					Add( new GenericBuyInfo( typeof( DaemonBlood ), 6, 999, 0xF7D, 0 ) );
-					Add( new GenericBuyInfo( typeof( NoxCrystal ), 6, 999, 0xF8E, 0 ) );
-					Add( new GenericBuyInfo( typeof( PigIron ), 5, 999, 0xF8A, 0 ) );
-
-					Add( new GenericBuyInfo( typeof( NecromancerSpellbook ), 115, 10, 0x2253, 0 ) );
-				}
-
-				Add( new GenericBuyInfo( "1041072", typeof( MagicWizardsHat ), 11, 10, 0x1718, 0 ) );
-
-				//Add( new GenericBuyInfo( "1041267", typeof( Runebook ), 2500, 10, 0xEFA, 0x461 ) );
-
-				Add( new GenericBuyInfo( typeof( RecallRune ), 15, 10, 0x1f14, 0 ) );
-				Add( new GenericBuyInfo( typeof( Spellbook ), 18, 10, 0xEFA, 0 ) );
-
-				Add( new GenericBuyInfo( typeof( ScribesPen ), 8, 10, 0xFBF, 0 ) );
-				Add( new GenericBuyInfo( typeof( BlankScroll ), 6, 20, 0x0E34, 0 ) );
+                Add(new GenericBuyInfo("Recall Rune", typeof(RecallRune), RecallRune.GetSBPurchaseValue(), 50, 0x1f14, 0));
+                Add(new GenericBuyInfo("Blank Scroll", typeof(BlankScroll), BlankScroll.GetSBPurchaseValue(), 500, 0x0E34, 0));
+                Add(new GenericBuyInfo("Spellbook", typeof(Spellbook), Spellbook.GetSBPurchaseValue(), 25, 0xEFA, 0));
+                Add(new GenericBuyInfo("Scribe's Pen", typeof(ScribesPen), ScribesPen.GetSBPurchaseValue(), 50, 0xFBF, 0));
+                Add(new GenericBuyInfo("Magical Wizard's Hat", typeof(MagicWizardsHat), MagicWizardsHat.GetSBPurchaseValue(), 25, 0x1718, 0));
 			}
 		}
 
@@ -73,29 +60,8 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
-			//	Add( typeof( Runebook ), 1250 );
-				Add( typeof( BlackPearl ), 3 ); 
-				Add( typeof( Bloodmoss ), 3 ); 
-				Add( typeof( MandrakeRoot ), 2 ); 
-				Add( typeof( Garlic ), 2 ); 
-				Add( typeof( Ginseng ), 2 ); 
-				Add( typeof( Nightshade ), 2 ); 
-				Add( typeof( SpidersSilk ), 2 ); 
-				Add( typeof( SulfurousAsh ), 2 ); 
-				Add( typeof( RecallRune ), 8 );
-				Add( typeof( Spellbook ), 9 );
-				Add( typeof( BlankScroll ), 3 );
-
-				if ( Core.AOS )
-				{
-					Add( typeof( BatWing ), 2 );
-					Add( typeof( GraveDust ), 2 );
-					Add( typeof( DaemonBlood ), 3 );
-					Add( typeof( NoxCrystal ), 3 );
-					Add( typeof( PigIron ), 3 );
-				}
-
-				Type[] types = Loot.RegularScrollTypes;
+                //TEST: DETERMINE SPELL SCROLL PRICES
+                Type[] types = Loot.RegularScrollTypes;
 
                 for (int i = 0; i < types.Length; ++i)
                 {
@@ -121,21 +87,40 @@ namespace Server.Mobiles
 
                     int count = res.Count;
 
-                    //old system + limiting factor of (cost of blankscroll + 3gp per reg + level / 2) (Sean)
+                    //TEST: DETERMINE SCROLL SELL PRICES
                     Add(type, Math.Min(6 + ((i / 8) * 5), cost));
                 }
+
+                Add(typeof(BlackPearl), BlackPearl.GetSBSellValue());
+                Add(typeof(Bloodmoss), Bloodmoss.GetSBSellValue());
+                Add(typeof(MandrakeRoot), MandrakeRoot.GetSBSellValue());
+                Add(typeof(Garlic), Garlic.GetSBSellValue());
+                Add(typeof(Ginseng), Ginseng.GetSBSellValue());
+                Add(typeof(Nightshade), Nightshade.GetSBSellValue());
+                Add(typeof(SpidersSilk), SpidersSilk.GetSBSellValue());
+                Add(typeof(SulfurousAsh), SulfurousAsh.GetSBSellValue());
+
+                Add(typeof(RecallRune), RecallRune.GetSBSellValue());
+                Add(typeof(BlankScroll), BlankScroll.GetSBSellValue());
+                Add(typeof(Spellbook), Spellbook.GetSBSellValue());
+                Add(typeof(ScribesPen), ScribesPen.GetSBSellValue());
+                Add(typeof(MagicWizardsHat), MagicWizardsHat.GetSBSellValue());
 			}
 
             public static int CostOfResource(Type type)
             {
                 if (type == typeof(BlankScroll))
                     return 2;
+
                 else if (type == typeof(MandrakeRoot))
                     return 2;
+
                 else if (type == typeof(BlackPearl))
                     return 3;
+
                 else if (type == typeof(Bloodmoss))
                     return 2;
+
                 else
                     return 1;
             }
@@ -144,8 +129,10 @@ namespace Server.Mobiles
             {
                 if (level < 4)
                     return 0;
+
                 else if (level < 7)
                     return 1;
+
                 else
                     return 2;
             }

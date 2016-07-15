@@ -928,6 +928,11 @@ namespace Server
             }
         }
 
+        public virtual int GetArcaneEssenceValue()
+        { 
+            return 0; 
+        }
+
         public virtual bool ArcaneRechargeable { get { return false; } }
         public virtual double ArcaneChargesPerArcaneEssence { get { return 1.0; } }
 
@@ -1056,12 +1061,12 @@ namespace Server
         {
         }
         
-        public virtual int GetArcaneEssenceValue()
+        public virtual double SellPriceToPurchasePriceScalar()
         {
-            return 0;
-        }
+            return .25;
+        }  
 
-        public virtual double GetSellValueScalar()
+        public virtual double GetSBSellValueScalar()
         {
             return 1.0;
         }

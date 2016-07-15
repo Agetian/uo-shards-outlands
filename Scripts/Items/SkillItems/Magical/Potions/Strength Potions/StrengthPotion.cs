@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class StrengthPotion : BaseStrengthPotion
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int StrOffset{ get{ return 10; } }
 		public override TimeSpan Duration{ get{ return TimeSpan.FromMinutes( 2.0 ); } }
 

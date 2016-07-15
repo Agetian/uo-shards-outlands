@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x1439, 0x1438 )]
 	public class WarHammer : BaseBashing
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 19; } }
         public override int BaseMaxDamage { get { return 38; } }
         public override int BaseSpeed { get { return 30; } }

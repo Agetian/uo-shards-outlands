@@ -217,11 +217,7 @@ namespace Server
         public static readonly LootPackItem[] BossClothHues = new LootPackItem[] {
             new LootPackItem(typeof(BossCloth), 1),
         };
-
-        public static readonly LootPackItem[] BossSandalHues = new LootPackItem[] {
-            new LootPackItem(typeof(RareSandals), 1),
-        };
-
+        
         public static readonly LootPackItem[] BossMaskDyeHues = new LootPackItem[] {
             new LootPackItem(typeof(MaskDye), 1),
         };
@@ -297,11 +293,7 @@ namespace Server
         public static readonly LootPack BossCloth = new LootPack(new LootPackEntry[] {
             new LootPackEntry(false, BossClothHues, 1, 5),
         });
-
-        public static readonly LootPack BossSandals = new LootPack(new LootPackEntry[] {
-            new LootPackEntry(false, BossSandalHues, 1, 1),
-        });
-
+        
         public static readonly LootPack BossMaskDye = new LootPack(new LootPackEntry[] {
             new LootPackEntry(false, BossMaskDyeHues, 1, 1),
         });

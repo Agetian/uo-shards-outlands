@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xF61, 0xF60 )]
 	public class Longsword : BaseSword
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 14; } }
         public override int BaseMaxDamage { get { return 24; } }
         public override int BaseSpeed { get { return 50; } }

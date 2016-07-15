@@ -19,195 +19,152 @@ namespace Server.Mobiles
 		public class InternalBuyInfo : List<GenericBuyInfo> 
 		{ 
 			public InternalBuyInfo() 
-			{ 	
-				//Add( new GenericBuyInfo( typeof( IronIngot ), 5, 16, 0x1BF2, 0 ) );
-				Add( new GenericBuyInfo( typeof( Tongs ), 9, 14, 0xFBB, 0 ) ); 
- 
-				Add( new GenericBuyInfo( typeof( BronzeShield ), 66, 20, 0x1B72, 0 ) );
-				Add( new GenericBuyInfo( typeof( Buckler ), 50, 20, 0x1B73, 0 ) );
-				Add( new GenericBuyInfo( typeof( MetalKiteShield ), 123, 20, 0x1B74, 0 ) );
-				Add( new GenericBuyInfo( typeof( HeaterShield ), 231, 20, 0x1B76, 0 ) );
-				Add( new GenericBuyInfo( typeof( WoodenKiteShield ), 70, 20, 0x1B78, 0 ) );
-				Add( new GenericBuyInfo( typeof( MetalShield ), 121, 20, 0x1B7B, 0 ) );
+			{
+                //Tools
+                Add(new GenericBuyInfo("Tongs", typeof(Tongs), Tongs.GetSBPurchaseValue(), 50, 0xFBB, 0));
+                Add(new GenericBuyInfo("Smith's Hammer", typeof(SmithHammer), SmithHammer.GetSBPurchaseValue(), 50, 0x13E3, 0));
 
-				Add( new GenericBuyInfo( typeof( WoodenShield ), 30, 20, 0x1B7A, 0 ) );
+                //Armor
+                Add(new GenericBuyInfo("Ringmail Helm", typeof(RingmailHelm), RingmailHelm.GetSBPurchaseValue(), 25, 5131, 0));
+                Add(new GenericBuyInfo("Ringmail Gorget", typeof(RingmailGorget), RingmailGorget.GetSBPurchaseValue(), 25, 5078, 1812));
+                Add(new GenericBuyInfo("Ringmail Arms", typeof(RingmailArms), RingmailArms.GetSBPurchaseValue(), 25, 0x13EE, 0));
+                Add(new GenericBuyInfo("Ringmail Gloves", typeof(RingmailGloves), RingmailGloves.GetSBPurchaseValue(), 25, 0x13eb, 0));
+                Add(new GenericBuyInfo("Ringmail Chest", typeof(RingmailChest), RingmailChest.GetSBPurchaseValue(), 25, 0x13ec, 0));
+                Add(new GenericBuyInfo("Ringmail Legs", typeof(RingmailLegs), RingmailLegs.GetSBPurchaseValue(), 25, 0x13F0, 0));
 
-				Add( new GenericBuyInfo( typeof( PlateGorget ), 104, 20, 0x1413, 0 ) );
-				Add( new GenericBuyInfo( typeof( PlateChest ), 243, 20, 0x1415, 0 ) );
-				Add( new GenericBuyInfo( typeof( PlateLegs ), 218, 20, 0x1411, 0 ) );
-				Add( new GenericBuyInfo( typeof( PlateArms ), 188, 20, 0x1410, 0 ) );
-				Add( new GenericBuyInfo( typeof( PlateGloves ), 155, 20, 0x1414, 0 ) );
+                Add(new GenericBuyInfo("Chainmail Coif", typeof(ChainmailCoif), ChainmailCoif.GetSBPurchaseValue(), 25, 0x13BB, 0));
+                Add(new GenericBuyInfo("Chainmail Gorget", typeof(ChainmailGorget), ChainmailGorget.GetSBPurchaseValue(), 25, 5063, 2500));
+                Add(new GenericBuyInfo("Chainmail Arms", typeof(ChainmailArms), ChainmailArms.GetSBPurchaseValue(), 25, 5103, 2500));
+                Add(new GenericBuyInfo("Chainmail Gloves", typeof(ChainmailGloves), ChainmailGloves.GetSBPurchaseValue(), 25, 5106, 2500));
+                Add(new GenericBuyInfo("Chainmail Chest", typeof(ChainmailChest), ChainmailChest.GetSBPurchaseValue(), 25, 0x13BF, 0));
+                Add(new GenericBuyInfo("Chainmail Legs", typeof(ChainmailLegs), ChainmailLegs.GetSBPurchaseValue(), 25, 0x13BE, 0));
 
-				Add( new GenericBuyInfo( typeof( PlateHelm ), 21, 20, 0x1412, 0 ) );
-				Add( new GenericBuyInfo( typeof( CloseHelm ), 18, 20, 0x1408, 0 ) );
-				Add( new GenericBuyInfo( typeof( CloseHelm ), 18, 20, 0x1409, 0 ) );
-				Add( new GenericBuyInfo( typeof( RingmailHelm ), 31, 20, 0x140A, 0 ) );
-				Add( new GenericBuyInfo( typeof( RingmailHelm ), 18, 20, 0x140B, 0 ) );
-				Add( new GenericBuyInfo( typeof( NorseHelm ), 18, 20, 0x140E, 0 ) );
-				Add( new GenericBuyInfo( typeof( NorseHelm ), 18, 20, 0x140F, 0 ) );
-				Add( new GenericBuyInfo( typeof( Bascinet ), 18, 20, 0x140C, 0 ) );
-				Add( new GenericBuyInfo( typeof( PlateHelm ), 21, 20, 0x1419, 0 ) );
+                Add(new GenericBuyInfo("Platemail Helm", typeof(PlateHelm), PlateHelm.GetSBPurchaseValue(), 25, 0x1412, 0));
+                Add(new GenericBuyInfo("Platemail Gorget", typeof(PlateGorget), PlateGorget.GetSBPurchaseValue(), 25, 0x1413, 0));
+                Add(new GenericBuyInfo("Platemail Arms", typeof(PlateArms), PlateArms.GetSBPurchaseValue(), 25, 0x1410, 0));
+                Add(new GenericBuyInfo("Platemail Gloves", typeof(PlateGloves), PlateGloves.GetSBPurchaseValue(), 25, 0x1414, 0));
+                Add(new GenericBuyInfo("Platemail PlateChest", typeof(PlateChest), PlateChest.GetSBPurchaseValue(), 25, 0x1415, 0));
+                Add(new GenericBuyInfo("Female Plate Chest", typeof(FemalePlateChest), FemalePlateChest.GetSBPurchaseValue(), 25, 7173, 0));
+                Add(new GenericBuyInfo("Platemail Legs", typeof(PlateLegs), PlateLegs.GetSBPurchaseValue(), 25, 0x1411, 0));
 
-				Add( new GenericBuyInfo( typeof( ChainmailCoif ), 17, 20, 0x13BB, 0 ) );
-				Add( new GenericBuyInfo( typeof( ChainmailChest ), 143, 20, 0x13BF, 0 ) );
-				Add( new GenericBuyInfo( typeof( ChainmailLegs ), 149, 20, 0x13BE, 0 ) );
+                Add(new GenericBuyInfo("Bascinet", typeof(Bascinet), Bascinet.GetSBPurchaseValue(), 25, 5132, 0));
+                Add(new GenericBuyInfo("Close Helm", typeof(CloseHelm), CloseHelm.GetSBPurchaseValue(), 25, 5129, 0));
+                Add(new GenericBuyInfo("Norse Helm", typeof(NorseHelm), NorseHelm.GetSBPurchaseValue(), 25, 5135, 0));
 
-				Add( new GenericBuyInfo( typeof( RingmailChest ), 121, 20, 0x13ec, 0 ) );
-				Add( new GenericBuyInfo( typeof( RingmailLegs ), 90, 20, 0x13F0, 0 ) );
-				Add( new GenericBuyInfo( typeof( RingmailArms ), 85, 20, 0x13EE, 0 ) );
-				Add( new GenericBuyInfo( typeof( RingmailGloves ), 93, 20, 0x13eb, 0 ) );
+                Add(new GenericBuyInfo("Buckler", typeof(Buckler), Buckler.GetSBPurchaseValue(), 25, 0x1B73, 0));
+                Add(new GenericBuyInfo("Metal Shield", typeof(MetalShield), MetalShield.GetSBPurchaseValue(), 25, 0x1B7B, 0));
+                Add(new GenericBuyInfo("Bronze Shield", typeof(BronzeShield), BronzeShield.GetSBPurchaseValue(), 25, 0x1B72, 0));
+                Add(new GenericBuyInfo("Metal Kite Shield", typeof(MetalKiteShield), MetalKiteShield.GetSBPurchaseValue(), 25, 0x1B74, 0));
+                Add(new GenericBuyInfo("Heater Shield", typeof(HeaterShield), HeaterShield.GetSBPurchaseValue(), 25, 0x1B76, 0)); 
+                
+                //Weapons
+                Add(new GenericBuyInfo("Dagger", typeof(Dagger), Dagger.GetSBPurchaseValue(), 25, 0xF52, 0));
+                Add(new GenericBuyInfo("Kryss", typeof(Kryss), Kryss.GetSBPurchaseValue(), 25, 0x1401, 0));
+                Add(new GenericBuyInfo("War Fork", typeof(WarFork), WarFork.GetSBPurchaseValue(), 25, 0x1405, 0));
+                Add(new GenericBuyInfo("Short Spear", typeof(ShortSpear), ShortSpear.GetSBPurchaseValue(), 25, 0x1403, 0));
+                Add(new GenericBuyInfo("Pitchfork", typeof(Pitchfork), Pitchfork.GetSBPurchaseValue(), 25, 0xE87, 0));
+                Add(new GenericBuyInfo("Spear", typeof(Spear), Spear.GetSBPurchaseValue(), 25, 0xF62, 0));
 
-				Add( new GenericBuyInfo( typeof( ExecutionersAxe ), 30, 20, 0xF45, 0 ) );
-				Add( new GenericBuyInfo( typeof( Bardiche ), 60, 20, 0xF4D, 0 ) );
-				Add( new GenericBuyInfo( typeof( BattleAxe ), 26, 20, 0xF47, 0 ) );
-				Add( new GenericBuyInfo( typeof( TwoHandedAxe ), 32, 20, 0x1443, 0 ) );
-				Add( new GenericBuyInfo( typeof( Bow ), 35, 20, 0x13B2, 0 ) );
-				Add( new GenericBuyInfo( typeof( ButcherKnife ), 14, 20, 0x13F6, 0 ) );
-				Add( new GenericBuyInfo( typeof( Crossbow ), 46, 20, 0xF50, 0 ) );
-				Add( new GenericBuyInfo( typeof( HeavyCrossbow ), 55, 20, 0x13FD, 0 ) );
-				Add( new GenericBuyInfo( typeof( Cutlass ), 24, 20, 0x1441, 0 ) );
-				Add( new GenericBuyInfo( typeof( Dagger ), 21, 20, 0xF52, 0 ) );
-				Add( new GenericBuyInfo( typeof( Halberd ), 42, 20, 0x143E, 0 ) );
-				Add( new GenericBuyInfo( typeof( HammerPick ), 26, 20, 0x143D, 0 ) );
-				Add( new GenericBuyInfo( typeof( Katana ), 33, 20, 0x13FF, 0 ) );
-				Add( new GenericBuyInfo( typeof( Kryss ), 32, 20, 0x1401, 0 ) );
-				Add( new GenericBuyInfo( typeof( Broadsword ), 35, 20, 0xF5E, 0 ) );
-				Add( new GenericBuyInfo( typeof( Longsword ), 55, 20, 0xF61, 0 ) );
-				Add( new GenericBuyInfo( typeof( ThinLongsword ), 27, 20, 0x13B8, 0 ) );
-				Add( new GenericBuyInfo( typeof( VikingSword ), 55, 20, 0x13B9, 0 ) );
-				Add( new GenericBuyInfo( typeof( Cleaver ), 15, 20, 0xEC3, 0 ) );
-				Add( new GenericBuyInfo( typeof( Axe ), 40, 20, 0xF49, 0 ) );
-				Add( new GenericBuyInfo( typeof( DoubleAxe ), 52, 20, 0xF4B, 0 ) );
-				Add( new GenericBuyInfo( typeof( Pickaxe ), 22, 20, 0xE86, 0 ) );
-				Add( new GenericBuyInfo( typeof( Pitchfork ), 19, 20, 0xE87, 0 ) );
-				Add( new GenericBuyInfo( typeof( Scimitar ), 36, 20, 0x13B6, 0 ) );
-				Add( new GenericBuyInfo( typeof( SkinningKnife ), 14, 20, 0xEC4, 0 ) );
-				Add( new GenericBuyInfo( typeof( LargeBattleAxe ), 33, 20, 0x13FB, 0 ) );
-				Add( new GenericBuyInfo( typeof( WarAxe ), 29, 20, 0x13B0, 0 ) );
+                Add(new GenericBuyInfo("Hammer Pick", typeof(HammerPick), HammerPick.GetSBPurchaseValue(), 25, 0x143D, 0));
+                Add(new GenericBuyInfo("War Axe", typeof(WarAxe), WarAxe.GetSBPurchaseValue(), 25, 0x13B0, 0));
+                Add(new GenericBuyInfo("Mace", typeof(Mace), Mace.GetSBPurchaseValue(), 25, 0xF5C, 0));
+                Add(new GenericBuyInfo("Maul", typeof(Maul), Maul.GetSBPurchaseValue(), 25, 0x143B, 0));
+                Add(new GenericBuyInfo("WarHammer", typeof(WarHammer), WarHammer.GetSBPurchaseValue(), 25, 0x1439, 0));
+                Add(new GenericBuyInfo("War Mace", typeof(WarMace), WarMace.GetSBPurchaseValue(), 25, 0x1407, 0));
 
-				if ( Core.AOS )
-				{
-					Add( new GenericBuyInfo( typeof( BoneHarvester ), 35, 20, 0x26BB, 0 ) );
-					Add( new GenericBuyInfo( typeof( CrescentBlade ), 37, 20, 0x26C1, 0 ) );
-					Add( new GenericBuyInfo( typeof( DoubleBladedStaff ), 35, 20, 0x26BF, 0 ) );
-					Add( new GenericBuyInfo( typeof( Lance ), 34, 20, 0x26C0, 0 ) );
-					Add( new GenericBuyInfo( typeof( Pike ), 39, 20, 0x26BE, 0 ) );
-					Add( new GenericBuyInfo( typeof( Scythe ), 39, 20, 0x26BA, 0 ) );
-					Add( new GenericBuyInfo( typeof( CompositeBow ), 50, 20, 0x26C2, 0 ) );
-					Add( new GenericBuyInfo( typeof( RepeatingCrossbow ), 57, 20, 0x26C3, 0 ) );
-				}
-
-				Add( new GenericBuyInfo( typeof( BlackStaff ), 22, 20, 0xDF1, 0 ) );
-				Add( new GenericBuyInfo( typeof( Club ), 16, 20, 0x13B4, 0 ) );
-				Add( new GenericBuyInfo( typeof( GnarledStaff ), 16, 20, 0x13F8, 0 ) );
-				Add( new GenericBuyInfo( typeof( Mace ), 28, 20, 0xF5C, 0 ) );
-				Add( new GenericBuyInfo( typeof( Maul ), 21, 20, 0x143B, 0 ) );
-				Add( new GenericBuyInfo( typeof( QuarterStaff ), 19, 20, 0xE89, 0 ) );
-				Add( new GenericBuyInfo( typeof( ShepherdsCrook ), 20, 20, 0xE81, 0 ) );
-				Add( new GenericBuyInfo( typeof( SmithHammer ), 21, 20, 0x13E3, 0 ) );
-				Add( new GenericBuyInfo( typeof( ShortSpear ), 23, 20, 0x1403, 0 ) );
-				Add( new GenericBuyInfo( typeof( Spear ), 31, 20, 0xF62, 0 ) );
-				Add( new GenericBuyInfo( typeof( WarHammer ), 25, 20, 0x1439, 0 ) );
-				Add( new GenericBuyInfo( typeof( WarMace ), 31, 20, 0x1407, 0 ) );
-
-				if( Core.AOS )
-				{
-					Add( new GenericBuyInfo( typeof( Scepter ), 39, 20, 0x26BC, 0 ) );
-					Add( new GenericBuyInfo( typeof( BladedStaff ), 40, 20, 0x26BD, 0 ) );
-				}
+                Add(new GenericBuyInfo("Butcher Knife", typeof(ButcherKnife), ButcherKnife.GetSBPurchaseValue(), 25, 0x13F6, 0));
+                Add(new GenericBuyInfo("Skinning Knife", typeof(SkinningKnife), SkinningKnife.GetSBPurchaseValue(), 25, 0xEC4, 0));
+                Add(new GenericBuyInfo("Cleaver", typeof(Cleaver), Cleaver.GetSBPurchaseValue(), 25, 0xEC3, 0));
+                Add(new GenericBuyInfo("Cutlass", typeof(Cutlass), Cutlass.GetSBPurchaseValue(), 25, 0x1441, 0));
+                Add(new GenericBuyInfo("Katana", typeof(Katana), Katana.GetSBPurchaseValue(), 25, 0x13FF, 0));
+                Add(new GenericBuyInfo("Scimitar", typeof(Scimitar), Scimitar.GetSBPurchaseValue(), 25, 0x13B6, 0));
+                Add(new GenericBuyInfo("Broadsword", typeof(Broadsword), Broadsword.GetSBPurchaseValue(), 25, 0xF5E, 0));
+                Add(new GenericBuyInfo("Longsword", typeof(Longsword), Longsword.GetSBPurchaseValue(), 25, 0xF61, 0));
+                Add(new GenericBuyInfo("Viking Sword", typeof(VikingSword), VikingSword.GetSBPurchaseValue(), 25, 0x13B9, 0));
+                Add(new GenericBuyInfo("Axe", typeof(Axe), Axe.GetSBPurchaseValue(), 25, 0xF49, 0));
+                Add(new GenericBuyInfo("Battle Axe", typeof(BattleAxe), BattleAxe.GetSBPurchaseValue(), 25, 0xF47, 0));
+                Add(new GenericBuyInfo("Double Axe", typeof(DoubleAxe), DoubleAxe.GetSBPurchaseValue(), 25, 0xF4B, 0));
+                Add(new GenericBuyInfo("Executioner's Axe", typeof(ExecutionersAxe), ExecutionersAxe.GetSBPurchaseValue(), 25, 0xF45, 0));
+                Add(new GenericBuyInfo("Large Battle Axe", typeof(LargeBattleAxe), LargeBattleAxe.GetSBPurchaseValue(), 25, 0x13FB, 0));
+                Add(new GenericBuyInfo("Two-Handed Axe", typeof(TwoHandedAxe), TwoHandedAxe.GetSBPurchaseValue(), 25, 0x1443, 0));
+                Add(new GenericBuyInfo("Bardiche", typeof(Bardiche), Bardiche.GetSBPurchaseValue(), 25, 0xF4D, 0));
+                Add(new GenericBuyInfo("Halberd", typeof(Halberd), Halberd.GetSBPurchaseValue(), 25, 0x143E, 0));               
 			} 
 		} 
 
 		public class InternalSellInfo : GenericSellInfo 
 		{ 
 			public InternalSellInfo() 
-			{ 
-				Add( typeof( Tongs ), 1 ); 
-				//Add( typeof( IronIngot ), 3 ); 
+			{
+                //Tools
+                Add(typeof(Tongs), Tongs.GetSBSellValue());
+                Add(typeof(SmithHammer), SmithHammer.GetSBSellValue());
 
-				Add( typeof( Buckler ), 30 );
-				Add( typeof( BronzeShield ), 36 );
-				Add( typeof( MetalShield ), 42 );
-				Add( typeof( MetalKiteShield ), 48 );
-				Add( typeof( HeaterShield ), 54 );
-				Add( typeof( WoodenKiteShield ), 30 );
+                //Armor
+                Add(typeof(RingmailHelm), RingmailHelm.GetSBSellValue());
+                Add(typeof(RingmailGorget), RingmailGorget.GetSBSellValue());
+                Add(typeof(RingmailArms), RingmailArms.GetSBSellValue());
+                Add(typeof(RingmailGloves), RingmailGloves.GetSBSellValue());
+                Add(typeof(RingmailChest), RingmailChest.GetSBSellValue());
+                Add(typeof(RingmailLegs), RingmailLegs.GetSBSellValue());
 
-				Add( typeof( WoodenShield ), 16 );
+                Add(typeof(ChainmailCoif), ChainmailCoif.GetSBSellValue());
+                Add(typeof(ChainmailGorget), ChainmailGorget.GetSBSellValue());
+                Add(typeof(ChainmailArms), ChainmailArms.GetSBSellValue());
+                Add(typeof(ChainmailGloves), ChainmailGloves.GetSBSellValue());
+                Add(typeof(ChainmailChest), ChainmailChest.GetSBSellValue());
+                Add(typeof(ChainmailLegs), ChainmailLegs.GetSBSellValue());
 
-				Add( typeof( PlateArms ), 54 );
-				Add( typeof( PlateChest ), 75 );
-				Add( typeof( PlateGloves ), 36 );
-				Add( typeof( PlateGorget ), 30 );
-				Add( typeof( PlateLegs ), 60 );
+                Add(typeof(PlateHelm), PlateHelm.GetSBSellValue());
+                Add(typeof(PlateGorget), PlateGorget.GetSBSellValue());
+                Add(typeof(PlateArms), PlateArms.GetSBSellValue());
+                Add(typeof(PlateGloves), PlateGloves.GetSBSellValue());
+                Add(typeof(PlateChest), PlateChest.GetSBSellValue());
+                Add(typeof(FemalePlateChest), FemalePlateChest.GetSBSellValue());
+                Add(typeof(PlateLegs), PlateLegs.GetSBSellValue());
 
-				Add( typeof( FemalePlateChest ), 60 );
-				Add( typeof( FemaleLeatherChest ), 36 );
-				Add( typeof( FemaleStuddedChest ), 50 );
-				Add( typeof( LeatherShorts ), 28 );
-				Add( typeof( LeatherSkirt ), 22 );
-				Add( typeof( LeatherBustier ), 22 );
-				Add( typeof( StuddedBustier ), 54 );
+                Add(typeof(Bascinet), Bascinet.GetSBSellValue());
+                Add(typeof(CloseHelm), CloseHelm.GetSBSellValue());
+                Add(typeof(NorseHelm), NorseHelm.GetSBSellValue());
 
-				Add( typeof( Bascinet ), 45 );
-				Add( typeof( CloseHelm ), 45 );
-				Add( typeof( RingmailHelm ), 45 );
-				Add( typeof( NorseHelm ),45 );
-				Add( typeof( PlateHelm ), 45 );
+                Add(typeof(Buckler), Buckler.GetSBSellValue());
+                Add(typeof(MetalShield), MetalShield.GetSBSellValue());
+                Add(typeof(BronzeShield), BronzeShield.GetSBSellValue());
+                Add(typeof(MetalKiteShield), MetalKiteShield.GetSBSellValue());
+                Add(typeof(HeaterShield), HeaterShield.GetSBSellValue());
 
-				Add( typeof( ChainmailCoif ), 30 );
-				Add( typeof( ChainmailChest ), 60 );
-				Add( typeof( ChainmailLegs ), 54 );
+                //Weapons
+                Add(typeof(Dagger), Dagger.GetSBSellValue());
+                Add(typeof(Kryss), Kryss.GetSBSellValue());
+                Add(typeof(WarFork), WarFork.GetSBSellValue());
+                Add(typeof(ShortSpear), ShortSpear.GetSBSellValue());
+                Add(typeof(Pitchfork), Pitchfork.GetSBSellValue());
+                Add(typeof(Spear), Spear.GetSBSellValue());
 
-				Add( typeof( RingmailArms ), 42 );
-				Add( typeof( RingmailChest ), 54 );
-				Add( typeof( RingmailGloves ), 30 );
-				Add( typeof( RingmailLegs ), 48 );
+                Add(typeof(HammerPick), HammerPick.GetSBSellValue());
+                Add(typeof(WarAxe), WarAxe.GetSBSellValue());
+                Add(typeof(Mace), Mace.GetSBSellValue());
+                Add(typeof(Maul), Maul.GetSBSellValue());
+                Add(typeof(WarHammer), WarHammer.GetSBSellValue());
+                Add(typeof(WarMace), WarMace.GetSBSellValue());
 
-				Add( typeof( BattleAxe ), 13 );
-				Add( typeof( DoubleAxe ), 26 );
-				Add( typeof( ExecutionersAxe ), 15 );
-				Add( typeof( LargeBattleAxe ),16 );
-				Add( typeof( Pickaxe ), 11 );
-				Add( typeof( TwoHandedAxe ), 16 );
-				Add( typeof( WarAxe ), 14 );
-				Add( typeof( Axe ), 20 );
-
-				Add( typeof( Bardiche ), 30 );
-				Add( typeof( Halberd ), 21 );
-
-				Add( typeof( ButcherKnife ), 7 );
-				Add( typeof( Cleaver ), 7 );
-				Add( typeof( Dagger ), 10 );
-				Add( typeof( SkinningKnife ), 7 );
-
-				Add( typeof( Club ), 8 );
-				Add( typeof( HammerPick ), 13 );
-				Add( typeof( Mace ), 14 );
-				Add( typeof( Maul ), 10 );
-				Add( typeof( WarHammer ), 12 );
-				Add( typeof( WarMace ), 15 );
-
-				Add( typeof( HeavyCrossbow ), 33 );
-				Add( typeof( Bow ), 11 );
-				Add( typeof( Crossbow ), 23 ); 
-
-				Add( typeof( Spear ), 15 );
-				Add( typeof( Pitchfork ), 9 );
-				Add( typeof( ShortSpear ), 11 );
-
-				Add( typeof( BlackStaff ), 11 );
-				Add( typeof( GnarledStaff ), 8 );
-				Add( typeof( QuarterStaff ), 9 );
-				Add( typeof( ShepherdsCrook ), 10 );
-
-				Add( typeof( Broadsword ), 17 );
-				Add( typeof( Cutlass ), 12 );
-				Add( typeof( Katana ), 16 );
-				Add( typeof( Kryss ), 16 );
-				Add( typeof( Longsword ), 27 );
-				Add( typeof( Scimitar ), 18 );
-				Add( typeof( ThinLongsword ), 13 );
-				Add( typeof( VikingSword ), 27 );
+                Add(typeof(ButcherKnife), ButcherKnife.GetSBSellValue());
+                Add(typeof(SkinningKnife), SkinningKnife.GetSBSellValue());
+                Add(typeof(Cleaver), Cleaver.GetSBSellValue());
+                Add(typeof(Cutlass), Cutlass.GetSBSellValue());
+                Add(typeof(Katana), Katana.GetSBSellValue());
+                Add(typeof(Scimitar), Scimitar.GetSBSellValue());
+                Add(typeof(Broadsword), Broadsword.GetSBSellValue());
+                Add(typeof(Longsword), Longsword.GetSBSellValue());
+                Add(typeof(VikingSword), VikingSword.GetSBSellValue());
+                Add(typeof(Axe), Axe.GetSBSellValue());
+                Add(typeof(BattleAxe), BattleAxe.GetSBSellValue());
+                Add(typeof(DoubleAxe), DoubleAxe.GetSBSellValue());
+                Add(typeof(ExecutionersAxe), ExecutionersAxe.GetSBSellValue());
+                Add(typeof(LargeBattleAxe), LargeBattleAxe.GetSBSellValue());
+                Add(typeof(TwoHandedAxe), TwoHandedAxe.GetSBSellValue());
+                Add(typeof(Bardiche), Bardiche.GetSBSellValue());
+                Add(typeof(Halberd), Halberd.GetSBSellValue());
 			} 
 		} 
 	} 

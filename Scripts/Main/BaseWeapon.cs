@@ -137,8 +137,15 @@ namespace Server.Items
 
         public override void ResourceChange()
         {
+            if (CraftItem.RetainsColor(this.GetType()))
+            {
+                int resourceHue = CraftResources.GetHue(Resource);
+
+                if (resourceHue != 0)
+                    Hue = resourceHue;
+            }
+
             UnscaleDurability();
-            Hue = CraftResources.GetHue(Resource);
             InvalidateProperties();
             ScaleDurability();
         }        
@@ -241,7 +248,7 @@ namespace Server.Items
             return arcaneEssenceValue;
         }
 
-        public override double GetSellValueScalar()
+        public override double GetSBSellValueScalar()
         {
             double scalar = 1.0;
 

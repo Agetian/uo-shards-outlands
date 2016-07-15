@@ -6,6 +6,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x1c0a, 0x1c0b )]
 	public class LeatherBustier : BaseArmor
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int InitMinHits{ get{ return 30; } }
 		public override int InitMaxHits{ get{ return 40; } }
 

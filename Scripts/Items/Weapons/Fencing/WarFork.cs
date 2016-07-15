@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x1405, 0x1404 )]
 	public class WarFork : BaseSpear
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 13; } }
         public override int BaseMaxDamage { get { return 22; } }
         public override int BaseSpeed { get { return 52; } }

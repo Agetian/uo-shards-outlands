@@ -8,6 +8,9 @@ namespace Server.Items
 {
 	public class BarkeepContract : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override string DefaultName
 		{
 			get { return "a barkeep contract"; }
@@ -16,6 +19,8 @@ namespace Server.Items
 		[Constructable]
 		public BarkeepContract() : base( 0x14F0 )
 		{
+            Name = "a barkeep contract";
+
 			Weight = 1.0;
 			LootType = LootType.Blessed;
 		}

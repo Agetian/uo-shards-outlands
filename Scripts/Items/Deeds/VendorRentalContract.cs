@@ -12,6 +12,9 @@ namespace Server.Items
 {
 	public class VendorRentalContract : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int LabelNumber{ get{ return 1062332; } } // a vendor rental contract
 
 		private VendorRentalDuration m_Duration;
@@ -71,6 +74,8 @@ namespace Server.Items
 		[Constructable]
 		public VendorRentalContract() : base( 0x14F0 )
 		{
+            Name = "vendor rental contract";
+
 			Weight = 1.0;
 			Hue = 0x672;
 

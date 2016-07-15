@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x1407, 0x1406 )]
 	public class WarMace : BaseBashing
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 15; } }
         public override int BaseMaxDamage { get { return 26; } }
         public override int BaseSpeed { get { return 48; } }

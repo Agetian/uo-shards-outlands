@@ -7,17 +7,22 @@ namespace Server.Items
 	[Flipable( 0x1030, 0x1031 )]
 	public class JointingPlane : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override CraftSystem CraftSystem{ get{ return DefCarpentry.CraftSystem; } }
 
 		[Constructable]
 		public JointingPlane() : base( 0x1030 )
 		{
+            Name = "jointing plane";
 			Weight = 2.0;
 		}
 
 		[Constructable]
 		public JointingPlane( int uses ) : base( uses, 0x1030 )
 		{
+            Name = "jointing plane";
 			Weight = 2.0;
 		}
 

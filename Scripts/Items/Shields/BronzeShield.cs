@@ -5,17 +5,12 @@ namespace Server.Items
 {
     public class BronzeShield : BaseShield
     {
-        public override int BasePhysicalResistance { get { return 0; } }
-        public override int BaseFireResistance { get { return 0; } }
-        public override int BaseColdResistance { get { return 1; } }
-        public override int BasePoisonResistance { get { return 0; } }
-        public override int BaseEnergyResistance { get { return 0; } }
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
 
         public override int InitMinHits { get { return 85; } }
         public override int InitMaxHits { get { return 85; } }
-
-        public override int AosStrReq { get { return 35; } }
-
+        
         public override int ArmorBase { get { return 18; } }
         public override int OldDexBonus { get { return -4; } }
 

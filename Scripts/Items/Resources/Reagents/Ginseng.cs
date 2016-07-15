@@ -5,7 +5,10 @@ using Server.Items;
 namespace Server.Items
 {
 	public class Ginseng : BaseReagent, ICommodity
-	{
+    {
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		int ICommodity.DescriptionNumber { get { return LabelNumber; } }
 		bool ICommodity.IsDeedable { get { return true; } }
 

@@ -21,8 +21,8 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new GenericBuyInfo( "1041280", typeof( InteriorDecorator ), 10000, 20, 0xFC1, 0 ) );
-                Add(new GenericBuyInfo("1060651", typeof(HousePlacementTool), 601, 20, 0x14F6, 0));
+                //Add(new GenericBuyInfo("1041280", typeof(InteriorDecorator), InteriorDecorator.GetSBPurchaseValue(), 25, 0xFC1, 0));
+                //Add(new GenericBuyInfo("1060651", typeof(HousePlacementTool), HousePlacementTool.GetSBPurchaseValue(), 25, 0x14F6, 0));
 			}
 		}
 
@@ -30,8 +30,8 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
-				Add( typeof( InteriorDecorator ), 5000 );
-                Add(typeof(HousePlacementTool), 301);
+                //Add(typeof(InteriorDecorator), InteriorDecorator.GetSBSellValue());
+                //Add(typeof(HousePlacementTool), HousePlacementTool.GetSBSellValue());
 			}
 		}
 	}

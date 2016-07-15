@@ -20,26 +20,18 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new BeverageBuyInfo( typeof( BeverageBottle ), BeverageType.Ale, 7, 20, 0x99F, 0 ) );
-				Add( new BeverageBuyInfo( typeof( BeverageBottle ), BeverageType.Wine, 7, 20, 0x9C7, 0 ) );
-				Add( new BeverageBuyInfo( typeof( BeverageBottle ), BeverageType.Liquor, 7, 20, 0x99B, 0 ) );
-				Add( new BeverageBuyInfo( typeof( Jug ), BeverageType.Cider, 13, 20, 0x9C8, 0 ) );
-				Add( new BeverageBuyInfo( typeof( Pitcher ), BeverageType.Milk, 7, 20, 0x9F0, 0 ) );
-				Add( new BeverageBuyInfo( typeof( Pitcher ), BeverageType.Ale, 11, 20, 0x1F95, 0 ) );
-				Add( new BeverageBuyInfo( typeof( Pitcher ), BeverageType.Cider, 11, 20, 0x1F97, 0 ) );
-				Add( new BeverageBuyInfo( typeof( Pitcher ), BeverageType.Liquor, 11, 20, 0x1F99, 0 ) );
-				Add( new BeverageBuyInfo( typeof( Pitcher ), BeverageType.Wine, 11, 20, 0x1F9B, 0 ) );
-				Add( new BeverageBuyInfo( typeof( Pitcher ), BeverageType.Water, 11, 20, 0x1F9D, 0 ) );			
-				Add( new GenericBuyInfo( typeof( Torch ), 7, 20, 0xF6B, 0 ) );
-				Add( new GenericBuyInfo( typeof( Candle ), 6, 20, 0xA28, 0 ) );
-				Add( new GenericBuyInfo( typeof( Beeswax ), 1, 20, 0x1422, 0 ) );
-				Add( new GenericBuyInfo( typeof( Backpack ), 15, 20, 0x9B2, 0 ) );
-				Add( new GenericBuyInfo( "1016450", typeof( Chessboard ), 2, 20, 0xFA6, 0 ) );
-				Add( new GenericBuyInfo( "1016449", typeof( CheckerBoard ), 2, 20, 0xFA6, 0 ) );
-				Add( new GenericBuyInfo( typeof( Backgammon ), 2, 20, 0xE1C, 0 ) );
-				Add( new GenericBuyInfo( typeof( Dices ), 2, 20, 0xFA7, 0 ) );
-                Add(new GenericBuyInfo("1062332", typeof(VendorRentalContract), 2575, 20, 0x14F0, 0));
-				Add( new GenericBuyInfo( "a barkeep contract", typeof( BarkeepContract ), 9250, 20, 0x14F0, 0 ) );
+                Add(new GenericBuyInfo("Vendor Rental Contract", typeof(VendorRentalContract), VendorRentalContract.GetSBPurchaseValue(), 25, 0x14F0, 0));
+
+                Add(new GenericBuyInfo("Torch", typeof(Torch), Torch.GetSBPurchaseValue(), 25, 0xF6B, 0));
+                Add(new GenericBuyInfo("Candle", typeof(Candle), Candle.GetSBPurchaseValue(), 25, 0xA28, 0));
+                Add(new GenericBuyInfo("Backpack", typeof(Backpack), Backpack.GetSBPurchaseValue(), 25, 0x9B2, 0));
+                Add(new GenericBuyInfo("Bag", typeof(Bag), Bag.GetSBPurchaseValue(), 25, 0xE76, 0));
+                Add(new GenericBuyInfo("Pouch", typeof(Pouch), Pouch.GetSBPurchaseValue(), 25, 0xE79, 0));
+
+                Add(new GenericBuyInfo("Chess Board", typeof(Chessboard), Chessboard.GetSBPurchaseValue(), 25, 0xFA6, 0));
+                Add(new GenericBuyInfo("Checker Board", typeof(CheckerBoard), CheckerBoard.GetSBPurchaseValue(), 25, 0xFA6, 0));
+                Add(new GenericBuyInfo("Backgammon", typeof(Backgammon), Backgammon.GetSBPurchaseValue(), 25, 0xE1C, 0));
+                Add(new GenericBuyInfo("Dice", typeof(Dices), Dices.GetSBPurchaseValue(), 25, 0xFA7, 0));
 			}
 		}
 
@@ -47,18 +39,18 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
-				Add( typeof( BeverageBottle ), 3 );
-				Add( typeof( Jug ), 6 );
-				Add( typeof( Pitcher ), 5 );
-				Add( typeof( GlassMug ), 1 );				
-				Add( typeof( Torch ), 3 );
-				Add( typeof( Candle ), 3 );
-				Add( typeof( Chessboard ), 1 );
-				Add( typeof( CheckerBoard ), 1 );
-				Add( typeof( Backgammon ), 1 );
-				Add( typeof( Dices ), 1 );
-				Add( typeof( ContractOfEmployment ), 512 );
-				Add( typeof( Beeswax ), 1 );
+                Add(typeof(VendorRentalContract), VendorRentalContract.GetSBSellValue());
+
+                Add(typeof(Torch), Torch.GetSBSellValue());
+                Add(typeof(Candle), Candle.GetSBSellValue());
+                Add(typeof(Backpack), Backpack.GetSBSellValue());
+                Add(typeof(Bag), Bag.GetSBSellValue());
+                Add(typeof(Pouch), Pouch.GetSBSellValue());
+
+                Add(typeof(Chessboard), Chessboard.GetSBSellValue());
+                Add(typeof(CheckerBoard), CheckerBoard.GetSBSellValue());
+                Add(typeof(Backgammon), Backgammon.GetSBSellValue());
+                Add(typeof(Dices), Dices.GetSBSellValue());
 			}
 		}
 	}

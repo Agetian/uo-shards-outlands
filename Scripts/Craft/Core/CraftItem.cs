@@ -1228,18 +1228,19 @@ namespace Server.Engines.Craft
 
                 else
                     item = Activator.CreateInstance(ItemType) as Item;
-
+                
                 if (item != null)
                 {
                     if (item is ICraftable)
                     {
                         endquality = ((ICraftable)item).OnCraft(quality, makersMark, from, craftSystem, typeRes, tool, this, resHue);
                         
+                        //TEST: CHECK THIS
                         if (craftSystem is DefCarpentry)
                             item.Hue = resHue;
                     }
 
-                    else if (item.Hue == 0)
+                    else if (item.Hue == 0 && resHue != 0)
                         item.Hue = resHue;
                     
                     if (maxAmount > 0)
@@ -1247,15 +1248,8 @@ namespace Server.Engines.Craft
                         if (!item.Stackable && item is IUsesRemaining)
                             ((IUsesRemaining)item).UsesRemaining *= maxAmount;
 
-                        else
-                        {
-                            //TEST: FIX THIS
-                            //Items That Are Made in Multiples
-                            if (item is Arrow || item is Bolt)
-                                maxAmount *= 2;
-
-                            item.Amount = maxAmount;
-                        }
+                        else                        
+                            item.Amount = maxAmount;                        
                     }
 
                     item.Acquisition = Item.AcquisitionType.Crafted;
@@ -1285,45 +1279,6 @@ namespace Server.Engines.Craft
 
                     else
                         from.AddToBackpack(item);
-
-                    PlayerMobile player = from as PlayerMobile;
-                    
-                    double bonusValue;
-                    double chance = 0;
-
-                    if (player != null)
-                    {
-                        if (craftSystem is UOACZDefCooking)
-                        {
-                            bonusValue = player.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Provider);
-
-                            chance = bonusValue * (player.Skills.Cooking.Value / 100);
-                        }
-
-                        if (craftSystem is UOACZDefAlchemy)
-                        {
-                            bonusValue = player.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Scientist);
-
-                            chance = bonusValue * (player.Skills.Alchemy.Value / 100);
-                        }
-
-                        if (craftSystem is UOACZDefTinkering)
-                        {
-                            bonusValue = player.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Technician);
-
-                            chance = bonusValue * (player.Skills.Tinkering.Value / 100);
-                        }
-
-                        if (Utility.RandomDouble() <= chance)
-                        {
-                            Item itemCopy = Utility.Dupe(item);
-
-                            if (itemCopy != null)
-                                from.AddToBackpack(itemCopy);
-
-                            from.SendMessage("Through your expertise you craft an additional item.");
-                        }
-                    }
 
                     if (from.AccessLevel > AccessLevel.Player)
                         CommandLogging.WriteLine(from, "Crafting {0} with craft system {1}", CommandLogging.Format(item), craftSystem.GetType().Name);                    
@@ -1366,8 +1321,10 @@ namespace Server.Engines.Craft
                 {
                     if (tool != null && !tool.Deleted && tool.UsesRemaining > 0)
                         from.SendGump(new CraftGump(from, craftSystem, tool, message));
+
                     else if (message is int && (int)message > 0)
                         from.SendLocalizedMessage((int)message);
+
                     else if (message is string)
                         from.SendMessage((string)message);
 
@@ -1382,7 +1339,6 @@ namespace Server.Engines.Craft
                 if (toolBroken)                
                     tool.Delete();                
 
-                // SkillCheck failed.
                 int num = craftSystem.PlayEndingEffect(from, true, true, toolBroken, endquality, false, this);
 
                 if (tool != null && !tool.Deleted && tool.UsesRemaining > 0)

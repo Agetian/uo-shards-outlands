@@ -20,30 +20,35 @@ namespace Server.Mobiles
 		{ 
 			public InternalBuyInfo() 
 			{
-                Add(new GenericBuyInfo(typeof(BlackPearl), 6, 100, 0xF7A, 0));
-				Add(new GenericBuyInfo(typeof(Bloodmoss), 5, 100, 0xF7B, 0));
-				Add(new GenericBuyInfo(typeof(MandrakeRoot), 3, 100, 0xF86, 0));
-				Add(new GenericBuyInfo(typeof(Garlic), 3, 100, 0xF84, 0));
-				Add(new GenericBuyInfo(typeof(Ginseng), 3, 100, 0xF85, 0));
-				Add(new GenericBuyInfo(typeof(Nightshade), 3, 100, 0xF88, 0));
-				Add(new GenericBuyInfo(typeof(SpidersSilk), 3, 100, 0xF8D, 0));
-				Add(new GenericBuyInfo(typeof(SulfurousAsh), 3, 100, 0xF8C, 0)); 
-				Add( new GenericBuyInfo( typeof( Bottle ), 15, 35, 0xF0E, 0 ) ); 
-				Add( new GenericBuyInfo( typeof( MortarPestle ), 25, 25, 0xE9B, 0 ) ); 
+                Add(new GenericBuyInfo("Bottle", typeof(Bottle), Bottle.GetSBPurchaseValue(), 200, 0xF0E, 0));
+                Add(new GenericBuyInfo("Mortar and Pestle", typeof(MortarPestle), MortarPestle.GetSBPurchaseValue(), 10, 0xE9B, 0));
+
+                Add(new GenericBuyInfo("Black Pearl", typeof(BlackPearl), BlackPearl.GetSBPurchaseValue(), 500, 0xF7A, 0));
+                Add(new GenericBuyInfo("Bloodmoss", typeof(Bloodmoss), Bloodmoss.GetSBPurchaseValue(), 500, 0xF7B, 0));
+                Add(new GenericBuyInfo("Mandrake Root", typeof(MandrakeRoot), MandrakeRoot.GetSBPurchaseValue(), 500, 0xF86, 0));
+                Add(new GenericBuyInfo("Garlic", typeof(Garlic), Garlic.GetSBPurchaseValue(), 500, 0xF84, 0));
+                Add(new GenericBuyInfo("Ginseng", typeof(Ginseng), Ginseng.GetSBPurchaseValue(), 500, 0xF85, 0));
+                Add(new GenericBuyInfo("Nightshade", typeof(Nightshade), Nightshade.GetSBPurchaseValue(), 500, 0xF88, 0));
+                Add(new GenericBuyInfo("Spider Silk", typeof(SpidersSilk), SpidersSilk.GetSBPurchaseValue(), 500, 0xF8D, 0));
+                Add(new GenericBuyInfo("Sulfurous Ash", typeof(SulfurousAsh), SulfurousAsh.GetSBPurchaseValue(), 500, 0xF8C, 0));
 			} 
 		} 
 
 		public class InternalSellInfo : GenericSellInfo 
 		{ 
 			public InternalSellInfo() 
-			{ 
-				Add( typeof( Bloodmoss ), 1 ); 
-				Add( typeof( MandrakeRoot ), 1 ); 
-				Add( typeof( Garlic ), 1 ); 
-				Add( typeof( Ginseng ), 1 ); 
-				Add( typeof( Nightshade ), 1 ); 
-				Add( typeof( Bottle ), 1 ); 
-				Add( typeof( MortarPestle ), 1 ); 
+			{
+                Add(typeof(Bottle), Bottle.GetSBSellValue());
+                Add(typeof(MortarPestle), MortarPestle.GetSBSellValue());
+
+                Add(typeof(BlackPearl), BlackPearl.GetSBSellValue());
+                Add(typeof(Bloodmoss), Bloodmoss.GetSBSellValue());
+                Add(typeof(MandrakeRoot), MandrakeRoot.GetSBSellValue());
+                Add(typeof(Garlic), Garlic.GetSBSellValue());
+                Add(typeof(Ginseng), Ginseng.GetSBSellValue());
+                Add(typeof(Nightshade), Nightshade.GetSBSellValue());
+                Add(typeof(SpidersSilk), SpidersSilk.GetSBSellValue());
+                Add(typeof(SulfurousAsh), SulfurousAsh.GetSBSellValue());    
 			} 
 		} 
 	} 

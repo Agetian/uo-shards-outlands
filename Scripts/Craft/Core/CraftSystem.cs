@@ -203,14 +203,7 @@ namespace Server.Engines.Craft
 			else			
 				m_CraftGroups.GetAt( index ).AddCraftItem( craftItem );			
 		}
-
-
-		public void SetItemHue( int index, int hue )
-		{
-			CraftItem craftItem = m_CraftItems.GetAt( index );
-			craftItem.ItemHue = hue;
-		}
-
+        
 		public void SetManaReq( int index, int mana )
 		{
 			CraftItem craftItem = m_CraftItems.GetAt( index );

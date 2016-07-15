@@ -20,7 +20,7 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new GenericBuyInfo( typeof( Bandage ), 5, 20, 0xE21, 0 ) );
+                Add(new GenericBuyInfo("Dice", typeof(Dices), Dices.GetSBPurchaseValue(), 25, 0xFA7, 0));
 			}
 		}
 
@@ -28,7 +28,7 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
-				Add( typeof( Bandage ), 2 );
+                Add(typeof(Dices), Dices.GetSBSellValue());
 			}
 		}
 	}

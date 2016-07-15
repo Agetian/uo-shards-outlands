@@ -6,6 +6,9 @@ namespace Server.Mobiles
     [CorpseName("a grizzly bear corpse")]
     public class GrizzlyBear : BaseCreature
     {
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         [Constructable]
         public GrizzlyBear(): base(AIType.AI_Animal, FightMode.Aggressor, 10, 1, 0.2, 0.4)
         {

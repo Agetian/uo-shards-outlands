@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x13F6, 0x13F7 )]
 	public class ButcherKnife : BaseKnife
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 1; } }
         public override int BaseMaxDamage { get { return 2; } }
         public override int BaseSpeed { get { return 60; } }
@@ -24,6 +27,7 @@ namespace Server.Items
 		[Constructable]
 		public ButcherKnife() : base( 0x13F6 )
 		{
+            Name = "butcher's knife";
 			Weight = 1.0;
 		}
 

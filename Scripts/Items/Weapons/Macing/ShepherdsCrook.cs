@@ -11,6 +11,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xE81, 0xE82 )]
 	public class ShepherdsCrook : BaseStaff
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 1; } }
         public override int BaseMaxDamage { get { return 2; } }
         public override int BaseSpeed { get { return 50; } }
@@ -26,6 +29,7 @@ namespace Server.Items
 		[Constructable]
 		public ShepherdsCrook() : base( 0xE81 )
 		{
+            Name = "shepherd's crook";
 			Weight = 4.0;
 		}
 

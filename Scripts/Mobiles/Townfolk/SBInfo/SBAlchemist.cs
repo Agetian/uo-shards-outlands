@@ -20,29 +20,28 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add(new GenericBuyInfo(typeof(BlackPearl), 6, 100, 0xF7A, 0));
-				Add(new GenericBuyInfo(typeof(Bloodmoss), 5, 100, 0xF7B, 0));
-				Add(new GenericBuyInfo(typeof(MandrakeRoot), 3, 100, 0xF86, 0));
-				Add(new GenericBuyInfo(typeof(Garlic), 3, 100, 0xF84, 0));
-				Add(new GenericBuyInfo(typeof(Ginseng), 3, 100, 0xF85, 0));
-				Add(new GenericBuyInfo(typeof(Nightshade), 3, 100, 0xF88, 0));
-				Add(new GenericBuyInfo(typeof(SpidersSilk), 3, 100, 0xF8D, 0));
-				Add(new GenericBuyInfo(typeof(SulfurousAsh), 3, 100, 0xF8C, 0)); 
+                Add(new GenericBuyInfo("Bottle", typeof(Bottle), Bottle.GetSBPurchaseValue(), 200, 0xF0E, 0));
+                Add(new GenericBuyInfo("Mortar and Pestle", typeof(MortarPestle), MortarPestle.GetSBPurchaseValue(), 10, 0xE9B, 0));
 
-				Add( new GenericBuyInfo( typeof( Bottle ), 5, 200, 0xF0E, 0 ) ); 
+                Add(new GenericBuyInfo("Black Pearl", typeof(BlackPearl), BlackPearl.GetSBPurchaseValue(), 500, 0xF7A, 0));
+                Add(new GenericBuyInfo("Bloodmoss", typeof(Bloodmoss), Bloodmoss.GetSBPurchaseValue(), 500, 0xF7B, 0));
+                Add(new GenericBuyInfo("Mandrake Root", typeof(MandrakeRoot), MandrakeRoot.GetSBPurchaseValue(), 500, 0xF86, 0));
+                Add(new GenericBuyInfo("Garlic", typeof(Garlic), Garlic.GetSBPurchaseValue(), 500, 0xF84, 0));
+                Add(new GenericBuyInfo("Ginseng", typeof(Ginseng), Ginseng.GetSBPurchaseValue(), 500, 0xF85, 0));
+                Add(new GenericBuyInfo("Nightshade", typeof(Nightshade), Nightshade.GetSBPurchaseValue(), 500, 0xF88, 0));
+                Add(new GenericBuyInfo("Spider Silk", typeof(SpidersSilk), SpidersSilk.GetSBPurchaseValue(), 500, 0xF8D, 0));
+                Add(new GenericBuyInfo("Sulfurous Ash", typeof(SulfurousAsh), SulfurousAsh.GetSBPurchaseValue(), 500, 0xF8C, 0));
 
-				Add( new GenericBuyInfo( "1041060", typeof( HairDye ), 2500, 10, 0xEFF, 0 ) );
+                Add(new GenericBuyInfo("Lesser Heal Potion", typeof(LesserHealPotion), LesserHealPotion.GetSBPurchaseValue(), 10, 0xF0C, 0));
+                Add(new GenericBuyInfo("Lesser Cure Potion", typeof(LesserCurePotion), LesserCurePotion.GetSBPurchaseValue(), 10, 0xF07, 0));               
+                Add(new GenericBuyInfo("Refresh Potion", typeof(RefreshPotion), RefreshPotion.GetSBPurchaseValue(), 10, 0xF0B, 0));
+                Add(new GenericBuyInfo("Agility Potion", typeof(AgilityPotion), AgilityPotion.GetSBPurchaseValue(), 10, 0xF08, 0));
+                Add(new GenericBuyInfo("Strength Potion", typeof(StrengthPotion), StrengthPotion.GetSBPurchaseValue(), 10, 0xF09, 0));
+                Add(new GenericBuyInfo("Lesser Magic Resist Potion", typeof(LesserMagicResistPotion), LesserMagicResistPotion.GetSBPurchaseValue(), 10, 0xF06, 0));
+                Add(new GenericBuyInfo("Lesser Poison Potion", typeof(LesserPoisonPotion), LesserPoisonPotion.GetSBPurchaseValue(), 10, 0xF0A, 0));
+                Add(new GenericBuyInfo("Lesser Explosion Potion", typeof(LesserExplosionPotion), LesserExplosionPotion.GetSBPurchaseValue(), 10, 0xF0D, 0));                
 
-				Add( new GenericBuyInfo( typeof( MortarPestle ), 8, 10, 0xE9B, 0 ) );
-
-                Add( new GenericBuyInfo( typeof( LesserMagicResistPotion), 15, 10, 0xF06, 0)); 
-				Add( new GenericBuyInfo( typeof( AgilityPotion ), 15, 10, 0xF08, 0 ) );
-				Add( new GenericBuyInfo( typeof( StrengthPotion ), 15, 10, 0xF09, 0 ) );
-				Add( new GenericBuyInfo( typeof( RefreshPotion ), 15, 10, 0xF0B, 0 ) );
-				Add( new GenericBuyInfo( typeof( LesserCurePotion ), 15, 10, 0xF07, 0 ) );
-				Add( new GenericBuyInfo( typeof( LesserHealPotion ), 15, 10, 0xF0C, 0 ) );
-				Add( new GenericBuyInfo( typeof( LesserPoisonPotion ), 15, 10, 0xF0A, 0 ) );
-				Add( new GenericBuyInfo( typeof( LesserExplosionPotion ), 41, 10, 0xF0D, 0 ) );
+                Add(new GenericBuyInfo("Hair Dye", typeof(HairDye), HairDye.GetSBPurchaseValue(), 10, 0xEFF, 0));               
 			}
 		}
 
@@ -50,26 +49,28 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
-				Add( typeof( BlackPearl ), 3 ); 
-				Add( typeof( Bloodmoss ), 3 ); 
-				Add( typeof( MandrakeRoot ), 2 ); 
-				Add( typeof( Garlic ), 2 ); 
-				Add( typeof( Ginseng ), 2 ); 
-				Add( typeof( Nightshade ), 2 ); 
-				Add( typeof( SpidersSilk ), 2 ); 
-				Add( typeof( SulfurousAsh ), 2 ); 
-				Add( typeof( Bottle ), 3 );
-				Add( typeof( MortarPestle ), 4 );
-				Add( typeof( HairDye ), 19 );
+                Add(typeof(Bottle), Bottle.GetSBSellValue());
+                Add(typeof(MortarPestle), MortarPestle.GetSBSellValue());
 
-                Add( typeof( LesserMagicResistPotion), 3);
-				Add( typeof( AgilityPotion ), 3 );
-				Add( typeof( StrengthPotion ), 3 );
-				Add( typeof( RefreshPotion ), 3 );
-				Add( typeof( LesserCurePotion ), 3 );
-				Add( typeof( LesserHealPotion ), 3 );
-				Add( typeof( LesserPoisonPotion ), 3 );
-				Add( typeof( LesserExplosionPotion ), 10 );
+                Add(typeof(BlackPearl), BlackPearl.GetSBSellValue());
+                Add(typeof(Bloodmoss), Bloodmoss.GetSBSellValue());
+                Add(typeof(MandrakeRoot), MandrakeRoot.GetSBSellValue());
+                Add(typeof(Garlic), Garlic.GetSBSellValue());
+                Add(typeof(Ginseng), Ginseng.GetSBSellValue());
+                Add(typeof(Nightshade), Nightshade.GetSBSellValue());
+                Add(typeof(SpidersSilk), SpidersSilk.GetSBSellValue());
+                Add(typeof(SulfurousAsh), SulfurousAsh.GetSBSellValue());               
+
+                Add(typeof(LesserMagicResistPotion), LesserMagicResistPotion.GetSBSellValue());
+                Add(typeof(AgilityPotion), AgilityPotion.GetSBSellValue());
+                Add(typeof(StrengthPotion), StrengthPotion.GetSBSellValue());
+                Add(typeof(RefreshPotion), RefreshPotion.GetSBSellValue());
+                Add(typeof(LesserCurePotion), LesserCurePotion.GetSBSellValue());
+                Add(typeof(LesserHealPotion), LesserHealPotion.GetSBSellValue());
+                Add(typeof(LesserPoisonPotion), LesserPoisonPotion.GetSBSellValue());
+                Add(typeof(LesserExplosionPotion), LesserExplosionPotion.GetSBSellValue());
+
+                Add(typeof(HairDye), HairDye.GetSBSellValue()); 
 			}
 		}
 	}

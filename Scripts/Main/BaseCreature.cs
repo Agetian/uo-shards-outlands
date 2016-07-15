@@ -1036,7 +1036,7 @@ namespace Server.Mobiles
         #endregion
 
         public virtual int DoubloonValue { get { return 0; } }
-
+        
         public virtual bool IsOceanCreature { get { return false; } }
 
         public bool DiedByShipSinking = false;
@@ -7139,7 +7139,7 @@ namespace Server.Mobiles
                             break;
 
                             case LootDropModeType.Hides:
-                                int hideAmount = (int)(Math.Round((double)gold / (double)Hide.GoldValue));
+                                int hideAmount = (int)(Math.Round((double)gold / (double)Hide.GetSBSellValue()));
 
                                 if (hideAmount < 1)
                                     hideAmount = 1;

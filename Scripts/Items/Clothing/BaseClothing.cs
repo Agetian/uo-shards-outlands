@@ -48,6 +48,34 @@ namespace Server.Items
         private AosSkillBonuses m_AosSkillBonuses;
         private AosElementAttributes m_AosResistances;
 
+        public virtual int BasePhysicalResistance { get { return 0; } }
+        public virtual int BaseFireResistance { get { return 0; } }
+        public virtual int BaseColdResistance { get { return 0; } }
+        public virtual int BasePoisonResistance { get { return 0; } }
+        public virtual int BaseEnergyResistance { get { return 0; } }
+
+        public override int PhysicalResistance { get { return BasePhysicalResistance + m_AosResistances.Physical; } }
+        public override int FireResistance { get { return BaseFireResistance + m_AosResistances.Fire; } }
+        public override int ColdResistance { get { return BaseColdResistance + m_AosResistances.Cold; } }
+        public override int PoisonResistance { get { return BasePoisonResistance + m_AosResistances.Poison; } }
+        public override int EnergyResistance { get { return BaseEnergyResistance + m_AosResistances.Energy; } }
+
+        public virtual int ArtifactRarity { get { return 0; } }
+
+        public virtual int BaseStrBonus { get { return 0; } }
+        public virtual int BaseDexBonus { get { return 0; } }
+        public virtual int BaseIntBonus { get { return 0; } }
+
+        public virtual int AosStrReq { get { return 10; } }
+        public virtual int OldStrReq { get { return 0; } }
+
+        public virtual int InitMinHits { get { return 25; } }
+        public virtual int InitMaxHits { get { return 25; } }
+
+        public virtual bool AllowMaleWearer { get { return true; } }
+        public virtual bool AllowFemaleWearer { get { return true; } }
+        public virtual bool CanBeBlessed { get { return true; } }
+
         [CommandProperty(AccessLevel.GameMaster)]
         public int MaxHitPoints
         {
@@ -62,6 +90,7 @@ namespace Server.Items
             {
                 return m_HitPoints;
             }
+
             set
             {
                 if (value != m_HitPoints && MaxHitPoints > 0)
@@ -70,6 +99,7 @@ namespace Server.Items
 
                     if (m_HitPoints < 0)
                         Delete();
+
                     else if (m_HitPoints > MaxHitPoints)
                         m_HitPoints = MaxHitPoints;
 
@@ -127,25 +157,7 @@ namespace Server.Items
         {
             get { return m_AosResistances; }
             set { }
-        }
-
-        public virtual int BasePhysicalResistance { get { return 0; } }
-        public virtual int BaseFireResistance { get { return 0; } }
-        public virtual int BaseColdResistance { get { return 0; } }
-        public virtual int BasePoisonResistance { get { return 0; } }
-        public virtual int BaseEnergyResistance { get { return 0; } }
-
-        public override int PhysicalResistance { get { return BasePhysicalResistance + m_AosResistances.Physical; } }
-        public override int FireResistance { get { return BaseFireResistance + m_AosResistances.Fire; } }
-        public override int ColdResistance { get { return BaseColdResistance + m_AosResistances.Cold; } }
-        public override int PoisonResistance { get { return BasePoisonResistance + m_AosResistances.Poison; } }
-        public override int EnergyResistance { get { return BaseEnergyResistance + m_AosResistances.Energy; } }
-
-        public virtual int ArtifactRarity { get { return 0; } }
-
-        public virtual int BaseStrBonus { get { return 0; } }
-        public virtual int BaseDexBonus { get { return 0; } }
-        public virtual int BaseIntBonus { get { return 0; } }
+        }       
 
         public override bool AllowSecureTrade(Mobile from, Mobile to, Mobile newOwner, bool accepted)
         {
@@ -172,6 +184,7 @@ namespace Server.Items
                 {
                     if (AllowFemaleWearer)
                         from.SendLocalizedMessage(1010388); // Only females can wear this.
+
                     else
                         from.SendMessage("You may not wear this.");
 
@@ -182,6 +195,7 @@ namespace Server.Items
                 {
                     if (AllowMaleWearer)
                         from.SendLocalizedMessage(1063343); // Only males can wear this.
+
                     else
                         from.SendMessage("You may not wear this.");
 
@@ -202,23 +216,12 @@ namespace Server.Items
             }
 
             return base.CanEquip(from);
-        }
-
-        public virtual int AosStrReq { get { return 10; } }
-        public virtual int OldStrReq { get { return 0; } }
-
-        public virtual int InitMinHits { get { return 0; } }
-        public virtual int InitMaxHits { get { return 0; } }
-
-        public virtual bool AllowMaleWearer { get { return true; } }
-        public virtual bool AllowFemaleWearer { get { return true; } }
-        public virtual bool CanBeBlessed { get { return true; } }
+        }      
 
         public int ComputeStatReq(StatType type)
         {
             int v;
 
-            //if ( type == StatType.Str )
             v = StrRequirement;
 
             return AOS.Scale(v, 100 - GetLowerStatReq());
@@ -228,8 +231,10 @@ namespace Server.Items
         {
             if (type == StatType.Str)
                 return BaseStrBonus + Attributes.BonusStr;
+
             else if (type == StatType.Dex)
                 return BaseDexBonus + Attributes.BonusDex;
+
             else
                 return BaseIntBonus + Attributes.BonusInt;
         }
@@ -275,6 +280,7 @@ namespace Server.Items
                     {
                         if (clothing.RequiredRace == Race.Elf)
                             m.SendLocalizedMessage(1072203); // Only Elves may use this.
+
                         else
                             m.SendMessage("Only {0} may use this.", clothing.RequiredRace.PluralName);
 
@@ -592,7 +598,109 @@ namespace Server.Items
             base.OnSingleClick(from);
         }
 
-        #region Serialization
+        public virtual bool Dye(Mobile from, DyeTub sender)
+        {
+            if (Deleted)
+                return false;
+
+            else if (RootParent is Mobile && from != RootParent)
+                return false;
+
+            Hue = sender.DyedHue;
+
+            return true;
+        }
+
+        public virtual bool Scissor(Mobile from, Scissors scissors)
+        {
+            if (!IsChildOf(from.Backpack))
+            {
+                from.SendLocalizedMessage(502437); // Items you wish to cut must be in your backpack.
+                return false;
+            }
+
+            CraftSystem system = DefTailoring.CraftSystem;
+
+            CraftItem item = system.CraftItems.SearchFor(GetType());
+
+            if (item != null && item.Resources.Count == 1 && item.Resources.GetAt(0).Amount >= 2)
+            {
+                try
+                {
+                    Type resourceType = null;
+
+                    CraftResourceInfo info = CraftResources.GetInfo(m_Resource);
+
+                    if (info != null && info.ResourceTypes.Length > 0)
+                        resourceType = info.ResourceTypes[0];
+
+                    if (resourceType == null)
+                        resourceType = item.Resources.GetAt(0).ItemType;
+
+                    Item res = (Item)Activator.CreateInstance(resourceType);
+
+                    ScissorHelper(from, res, m_PlayerConstructed ? (item.Resources.GetAt(0).Amount / 2) : 1);
+
+                    res.LootType = LootType.Regular;
+
+                    return true;
+                }
+
+                catch
+                {
+                }
+            }
+
+            from.SendLocalizedMessage(502440); // Scissors can not be used on that to produce anything.
+            return false;
+        }
+
+        public void DistributeBonuses(int amount)
+        {
+            for (int i = 0; i < amount; ++i)
+            {
+                switch (Utility.Random(5))
+                {
+                    case 0: ++m_AosResistances.Physical; break;
+                    case 1: ++m_AosResistances.Fire; break;
+                    case 2: ++m_AosResistances.Cold; break;
+                    case 3: ++m_AosResistances.Poison; break;
+                    case 4: ++m_AosResistances.Energy; break;
+                }
+            }
+
+            InvalidateProperties();
+        }
+        
+        public virtual int OnCraft(int quality, bool makersMark, Mobile from, CraftSystem craftSystem, Type typeRes, BaseTool tool, CraftItem craftItem, int resHue)
+        {
+            Quality = (Quality)quality;
+
+            if (makersMark)
+                DisplayCrafter = true;
+            
+            if (DefaultResource != CraftResource.None)
+            {
+                Type resourceType = typeRes;
+
+                if (resourceType == null)
+                    resourceType = craftItem.Resources.GetAt(0).ItemType;
+
+                Resource = CraftResources.GetFromType(resourceType);
+            }
+
+            else
+                Hue = resHue;            
+
+            PlayerConstructed = true;
+
+            CraftContext context = craftSystem.GetContext(from);
+
+            if (context != null && context.DoNotColor)
+                Hue = 0;
+
+            return quality;
+        }
 
         private static void SetSaveFlag(ref SaveFlag flags, SaveFlag toSet, bool setIf)
         {
@@ -664,7 +772,7 @@ namespace Server.Items
 
             if (GetSaveFlag(flags, SaveFlag.HitPoints))
                 writer.WriteEncodedInt((int)m_HitPoints);
-            
+
             if (GetSaveFlag(flags, SaveFlag.StrReq))
                 writer.WriteEncodedInt((int)m_StrReq);
         }
@@ -711,7 +819,7 @@ namespace Server.Items
 
                         if (GetSaveFlag(flags, SaveFlag.HitPoints))
                             m_HitPoints = reader.ReadEncodedInt();
-                        
+
                         if (GetSaveFlag(flags, SaveFlag.StrReq))
                             m_StrReq = reader.ReadEncodedInt();
                         else
@@ -745,11 +853,11 @@ namespace Server.Items
                         goto case 1;
                     }
                 case 1:
-                    {      
+                    {
                         break;
                     }
                 case 0:
-                    {                      
+                    {
                         break;
                     }
             }
@@ -782,113 +890,5 @@ namespace Server.Items
                 parent.CheckStatTimers();
             }
         }
-        #endregion
-
-        public virtual bool Dye(Mobile from, DyeTub sender)
-        {
-            if (Deleted)
-                return false;
-            else if (RootParent is Mobile && from != RootParent)
-                return false;
-
-            Hue = sender.DyedHue;
-
-            return true;
-        }
-
-        public virtual bool Scissor(Mobile from, Scissors scissors)
-        {
-            if (!IsChildOf(from.Backpack))
-            {
-                from.SendLocalizedMessage(502437); // Items you wish to cut must be in your backpack.
-                return false;
-            }
-
-            CraftSystem system = DefTailoring.CraftSystem;
-
-            CraftItem item = system.CraftItems.SearchFor(GetType());
-
-            if (item != null && item.Resources.Count == 1 && item.Resources.GetAt(0).Amount >= 2)
-            {
-                try
-                {
-                    Type resourceType = null;
-
-                    CraftResourceInfo info = CraftResources.GetInfo(m_Resource);
-
-                    if (info != null && info.ResourceTypes.Length > 0)
-                        resourceType = info.ResourceTypes[0];
-
-                    if (resourceType == null)
-                        resourceType = item.Resources.GetAt(0).ItemType;
-
-                    Item res = (Item)Activator.CreateInstance(resourceType);
-
-                    ScissorHelper(from, res, m_PlayerConstructed ? (item.Resources.GetAt(0).Amount / 2) : 1);
-
-                    res.LootType = LootType.Regular;
-
-                    return true;
-                }
-                catch
-                {
-                }
-            }
-
-            from.SendLocalizedMessage(502440); // Scissors can not be used on that to produce anything.
-            return false;
-        }
-
-        public void DistributeBonuses(int amount)
-        {
-            for (int i = 0; i < amount; ++i)
-            {
-                switch (Utility.Random(5))
-                {
-                    case 0: ++m_AosResistances.Physical; break;
-                    case 1: ++m_AosResistances.Fire; break;
-                    case 2: ++m_AosResistances.Cold; break;
-                    case 3: ++m_AosResistances.Poison; break;
-                    case 4: ++m_AosResistances.Energy; break;
-                }
-            }
-
-            InvalidateProperties();
-        }
-
-        #region ICraftable Members
-
-        public virtual int OnCraft(int quality, bool makersMark, Mobile from, CraftSystem craftSystem, Type typeRes, BaseTool tool, CraftItem craftItem, int resHue)
-        {
-            Quality = (Quality)quality;
-
-            if (makersMark)
-                DisplayCrafter = true;
-            
-            if (DefaultResource != CraftResource.None)
-            {
-                Type resourceType = typeRes;
-
-                if (resourceType == null)
-                    resourceType = craftItem.Resources.GetAt(0).ItemType;
-
-                Resource = CraftResources.GetFromType(resourceType);
-            }
-            else
-            {
-                Hue = resHue;
-            }
-
-            PlayerConstructed = true;
-
-            CraftContext context = craftSystem.GetContext(from);
-
-            if (context != null && context.DoNotColor)
-                Hue = 0;
-
-            return quality;
-        }
-
-        #endregion
     }
 }

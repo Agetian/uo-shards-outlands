@@ -4,7 +4,8 @@ using Server.Engines.Craft;
 
 namespace Server.Items
 {
-	public class Hammer : BaseTool
+	[Flipable( 0x102C, 0x102D )]
+	public class WoodenPlane : BaseTool
 	{
         public static int GetSBPurchaseValue() { return 1; }
         public static int GetSBSellValue() { return 1; }
@@ -12,20 +13,20 @@ namespace Server.Items
 		public override CraftSystem CraftSystem{ get{ return DefCarpentry.CraftSystem; } }
 
 		[Constructable]
-		public Hammer() : base( 0x102A )
+		public WoodenPlane() : base( 0x102C )
 		{
-            Name = "hammer";
+            Name = "wooden plane";
 			Weight = 2.0;
 		}
 
 		[Constructable]
-		public Hammer( int uses ) : base( uses, 0x102A )
+		public WoodenPlane( int uses ) : base( uses, 0x102C )
 		{
-            Name = "hammer";
+            Name = "wooden plane";
 			Weight = 2.0;
 		}
 
-		public Hammer( Serial serial ) : base( serial )
+		public WoodenPlane( Serial serial ) : base( serial )
 		{
 		}
 

@@ -6,6 +6,9 @@ namespace Server.Mobiles
 	[CorpseName( "a horse corpse" )]
 	public class Horse : BaseMount
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		private static int[] m_IDs = new int[]
 			{
 				0xC8, 0x3E9F,

@@ -627,11 +627,11 @@ namespace Server.Engines.Craft
                                 break;
                             }
 
-                            //Smelt Item
+                            //Recyle Item
                             case 1:
                             {
                                 if (system.Recycle)
-                                    Recycle.Do(m_From, system, m_Tool);
+                                    Recycle.RecyclePrompt(m_From, system, m_Tool);
 
                                 break;
                             }

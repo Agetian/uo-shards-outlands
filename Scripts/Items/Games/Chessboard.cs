@@ -5,11 +5,13 @@ namespace Server.Items
 {
 	public class Chessboard : BaseBoard
 	{
-		public override int LabelNumber{ get{ return 1016450; } } // a chessboard
-
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+        
 		[Constructable]
 		public Chessboard() : base( 0xFA6 )
 		{
+            Name = "chess board";
 		}
 
 		public override void CreatePieces()

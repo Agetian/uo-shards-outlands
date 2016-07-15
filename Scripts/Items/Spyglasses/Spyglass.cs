@@ -116,7 +116,10 @@ namespace Server.Items
 
         public override void ResourceChange()
         {
-            Hue = CraftResources.GetCraftResourceHue(Resource);
+            int resourceHue = CraftResources.GetHue(Resource);
+
+            if (resourceHue != 0)
+                Hue = resourceHue;
 
             DetermineUses();
         }  

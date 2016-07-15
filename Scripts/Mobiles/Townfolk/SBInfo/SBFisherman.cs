@@ -20,17 +20,17 @@ namespace Server.Mobiles
 		public class InternalBuyInfo : List<GenericBuyInfo> 
 		{ 
 			public InternalBuyInfo() 
-			{ 
-				Add( new GenericBuyInfo( typeof( FishingPole ), 15, 20, 0xDC0, 0 ) );
+			{
+                Add(new GenericBuyInfo("Fishing Pole", typeof(FishingPole), FishingPole.GetSBPurchaseValue(), 50, 0xDC0, 0));
 			} 
 		} 
 
 		public class InternalSellInfo : GenericSellInfo 
 		{ 
 			public InternalSellInfo() 
-			{ 
-                Add( typeof( FishCommissionCompletedDeed ), 500);
-				Add( typeof( FishingPole ), 7 );
+			{
+                Add(typeof(FishingPole), FishingPole.GetSBSellValue());
+                //Add(typeof(FishCommissionCompletedDeed), FishCommissionCompletedDeed.GetSBSellValue());
 			} 
 		} 
 	} 

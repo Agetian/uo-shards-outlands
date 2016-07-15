@@ -6,17 +6,22 @@ namespace Server.Items
 {
 	public class Inshave : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override CraftSystem CraftSystem{ get{ return DefCarpentry.CraftSystem; } }
 
 		[Constructable]
 		public Inshave() : base( 0x10E6 )
 		{
+            Name = "inshave";
 			Weight = 1.0;
 		}
 
 		[Constructable]
 		public Inshave( int uses ) : base( uses, 0x10E6 )
 		{
+            Name = "inshave";
 			Weight = 1.0;
 		}
 

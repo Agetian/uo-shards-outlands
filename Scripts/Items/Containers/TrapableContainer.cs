@@ -1,4 +1,3 @@
-using Server.ArenaSystem;
 using System;
 
 namespace Server.Items

@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x143E, 0x143F )]
 	public class Halberd : BasePoleArm
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 22; } }
         public override int BaseMaxDamage { get { return 44; } }
         public override int BaseSpeed { get { return 25; } }

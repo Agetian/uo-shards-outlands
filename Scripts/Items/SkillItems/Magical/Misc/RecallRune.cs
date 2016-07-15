@@ -9,6 +9,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x1f14, 0x1f15, 0x1f16, 0x1f17 )]
 	public class RecallRune : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		private string m_Description;
 		private bool m_Marked;
 		private Point3D m_Target;
@@ -317,6 +320,8 @@ namespace Server.Items
 		[Constructable]
 		public RecallRune() : base( 0x1F14 )
 		{
+            Name = "recall rune";
+
 			Weight = 1.0;
 			CalculateHue();
 		}

@@ -12,7 +12,9 @@ namespace Server.Engines.Craft
 	public enum RecycleResult
 	{
 		Success,
+        SuccessMultiple,
 		Invalid,
+        InvalidEntireBackpack,
 		NoSkill
 	}
 
@@ -21,6 +23,47 @@ namespace Server.Engines.Craft
 		public Recycle()
 		{
 		}
+
+        public static List<CraftSystem> GetRecyclableCraftSystems()
+        {
+            List<CraftSystem> m_CraftSystems = new List<CraftSystem>();
+
+            #region CraftSystem Definitions
+
+            if (DefAlchemy.CraftSystem.Recycle)
+                m_CraftSystems.Add(DefAlchemy.CraftSystem);
+
+            if (DefBlacksmithy.CraftSystem.Recycle)
+                m_CraftSystems.Add(DefBlacksmithy.CraftSystem);
+
+            if (DefCarpentry.CraftSystem.Recycle)
+                m_CraftSystems.Add(DefCarpentry.CraftSystem);
+
+            if (DefCartography.CraftSystem.Recycle)
+                m_CraftSystems.Add(DefCartography.CraftSystem);
+
+            if (DefCooking.CraftSystem.Recycle)
+                m_CraftSystems.Add(DefCooking.CraftSystem);
+
+            if (DefGlassblowing.CraftSystem.Recycle)
+                m_CraftSystems.Add(DefGlassblowing.CraftSystem);
+
+            if (DefInscription.CraftSystem.Recycle)
+                m_CraftSystems.Add(DefInscription.CraftSystem);
+
+            if (DefMasonry.CraftSystem.Recycle)
+                m_CraftSystems.Add(DefMasonry.CraftSystem);
+
+            if (DefTailoring.CraftSystem.Recycle)
+                m_CraftSystems.Add(DefTailoring.CraftSystem);
+
+            if (DefTinkering.CraftSystem.Recycle)
+                m_CraftSystems.Add(DefTinkering.CraftSystem);
+
+            #endregion
+
+            return m_CraftSystems;
+        }
 
         public static bool IsRecycleResource(Type type)
         {
@@ -34,7 +77,7 @@ namespace Server.Engines.Craft
             return recycleable;
         }        
         
-		public static void Do( Mobile from, CraftSystem craftSystem, BaseTool tool )
+		public static void RecyclePrompt( Mobile from, CraftSystem craftSystem, BaseTool tool )
 		{
 			int num = craftSystem.CanCraft( from, tool, null );
 
@@ -110,17 +153,24 @@ namespace Server.Engines.Craft
 
                 if (craftContext == null)
                     return;
-
+                
                 if (craftContext.RecycleOption == CraftRecycleOption.RecycleEverything && targeted == from && from.Backpack != null)
                 {
                     result = Recycle(from, from.Backpack);
+
+                    switch (result)
+                    {
+                        case RecycleResult.Invalid: message = "That cannot be recycled."; break;
+                        case RecycleResult.InvalidEntireBackpack: message = "No recyclable items were found in your backpack."; break;
+                        case RecycleResult.NoSkill: message = "You do not know how to recycle this material."; break;
+                        case RecycleResult.Success: message = "You recycle an item."; break;
+                        case RecycleResult.SuccessMultiple: message = "You recycle several items."; break;
+                    }
+
                     from.SendGump(new CraftGump(from, m_CraftSystem, m_Tool, message));
 
-                    //TEST: ADD FEEDBACK
-
                     return;
-                }
-               
+                }               
 
                 Item item = targeted as Item;
 
@@ -131,11 +181,12 @@ namespace Server.Engines.Craft
                     result = Recycle(from, item);
 
                 switch (result)
-                {
-                    default:
+                {                    
                     case RecycleResult.Invalid: message = "That cannot be recycled."; break;
+                    case RecycleResult.InvalidEntireBackpack: message = "No recyclable items were found in your backpack."; break;
                     case RecycleResult.NoSkill: message = "You do not know how to recycle this material."; break;
-                    case RecycleResult.Success: message = "You recycle the item."; break;
+                    case RecycleResult.Success: message = "You recycle an item."; break;
+                    case RecycleResult.SuccessMultiple: message = "You recycle several items."; break;
                 }
 
                 from.SendGump(new CraftGump(from, m_CraftSystem, m_Tool, message));
@@ -146,223 +197,7 @@ namespace Server.Engines.Craft
                 if (from == null || item == null || m_CraftSystem == null || m_Tool == null)
                     return RecycleResult.Invalid;
 
-                CraftContext craftContext = m_CraftSystem.GetContext(from);
-
-                if (craftContext == null)
-                    return RecycleResult.Invalid;
-
-                bool recyleEntireBackpack = craftContext.RecycleOption == CraftRecycleOption.RecycleEverything;
-
-                //TEST: FINISH THIS!!!
-
-                Type itemType = item.GetType();
-
-                CraftItem craftItem = m_CraftSystem.CraftItems.SearchFor(itemType);
-
-                if (craftItem == null || craftItem.Resources.Count == 0)
-                    return RecycleResult.Invalid;
-
-                Dictionary<Type, int> m_ValidRecipeResources = new Dictionary<Type, int>();
-
-                CraftResCol craftResourceCollection = craftItem.Resources;
-
-                for (int a = 0; a < craftResourceCollection.Count; a++)
-                {
-                    CraftRes craftResource = craftResourceCollection.GetAt(a);
-
-                    if (!IsRecycleResource(craftResource.ItemType))
-                        continue;
-
-                    if (!m_ValidRecipeResources.ContainsKey(craftResource.ItemType))
-                        m_ValidRecipeResources.Add(craftResource.ItemType, craftResource.Amount);
-                }
-
-                if (m_ValidRecipeResources.Count == 0)
-                    return RecycleResult.Invalid;
-
                 if (from.Backpack == null)
-                    return RecycleResult.Invalid;
-
-                else if (from.Backpack.Deleted)
-                    return RecycleResult.Invalid;
-
-                List<Item> m_Items = new List<Item>();
-                List<Item> m_ItemsToRecycle = new List<Item>();
-
-                Item[] m_MatchingItems = from.Backpack.FindItemsByType(itemType);
-
-                for (int a = 0; a < m_MatchingItems.Length; a++)
-                {
-                    Item targetItem = m_MatchingItems[a];
-
-                    if (craftContext.RecycleOption == CraftRecycleOption.RecycleSingle && targetItem == item)
-                    {
-                        m_ItemsToRecycle.Add(targetItem);
-                        continue;
-                    }
-
-                    if (craftContext.RecycleOption == CraftRecycleOption.RecycleRegularByType && targetItem.Quality == Quality.Regular && !targetItem.IsMagical)
-                    {
-                        m_Items.Add(targetItem);
-                        continue;
-                    }
-
-                    if (craftContext.RecycleOption == CraftRecycleOption.RecycleExceptionalByType && targetItem.Quality == Quality.Exceptional)
-                    {
-                        m_Items.Add(targetItem);
-                        continue;
-                    }
-
-                    if (craftContext.RecycleOption == CraftRecycleOption.RecycleExceptionalByType && targetItem.IsMagical)
-                    {
-                        m_Items.Add(targetItem);
-                        continue;
-                    }
-
-                    if (craftContext.RecycleOption == CraftRecycleOption.RecycleAnyByType)
-                    {
-                        m_ItemsToRecycle.Add(targetItem);
-                        continue;
-                    }
-                }
-
-                foreach (Item recycleItem in m_Items)
-                {
-                    if (recycleItem.LootType != LootType.Regular) continue;
-                    if (recycleItem.PlayerClassCurrencyValue > 0) continue;
-                    if (recycleItem.QuestItem) continue;
-                    if (recycleItem.Nontransferable) continue;
-                    if (recycleItem.DonationItem) continue;
-                    if (recycleItem.DecorativeEquipment) continue;
-                    if (recycleItem.TierLevel > 0 && recycleItem.Aspect != AspectEnum.None) continue;
-
-                    m_ItemsToRecycle.Add(recycleItem);
-                }
-
-                if (m_ItemsToRecycle.Count == 0)
-                    return RecycleResult.Invalid;
-
-                Queue m_Queue = new Queue();
-
-                foreach (Item recycleItem in m_ItemsToRecycle)
-                {
-                    m_Queue.Enqueue(recycleItem);
-                }
-
-                int deletedCount = 0;
-
-                List<int> m_RecycleSounds = new List<int>();
-
-                while (m_Queue.Count > 0)
-                {
-                    Item recycleItem = (Item)m_Queue.Dequeue();
-
-                    bool deleteItem = false;
-
-                    foreach (KeyValuePair<Type, int> pair in m_ValidRecipeResources)
-                    {
-                        Type resourceType = pair.Key;
-                        int totalResourceAmount = pair.Value * recycleItem.Amount;
-
-                        if (totalResourceAmount < 2)
-                            continue;
-
-                        //Ingot
-                        if (resourceType == typeof(IronIngot))
-                        {
-                            if (!m_RecycleSounds.Contains(0x2A))
-                                m_RecycleSounds.Add(0x2A);
-
-                            if (!m_RecycleSounds.Contains(0x240))
-                                m_RecycleSounds.Add(0x240);
-
-                            if (recycleItem.Resource != CraftResource.Iron)
-                            {
-                                resourceType = CraftResources.GetCraftResourceType(recycleItem.Resource);
-
-                                if (resourceType == null)
-                                    resourceType = typeof(IronIngot);
-                            }
-                        }
-
-                        //Leather
-                        if (resourceType == typeof(Leather))
-                        {
-                            if (!m_RecycleSounds.Contains(0x3E3))
-                                m_RecycleSounds.Add(0x3E3);
-
-                            if (recycleItem.Resource != CraftResource.RegularLeather)
-                            {
-                                resourceType = CraftResources.GetCraftResourceType(recycleItem.Resource);
-
-                                if (resourceType == null)
-                                    resourceType = typeof(Leather);
-                            }
-                        }
-
-                        //Wood
-                        if (resourceType == typeof(Board))
-                        {
-                            if (!m_RecycleSounds.Contains(0x23D))
-                                m_RecycleSounds.Add(0x23D);
-
-                            if (recycleItem.Resource != CraftResource.RegularWood)
-                            {
-                                resourceType = CraftResources.GetCraftResourceType(recycleItem.Resource);
-
-                                if (resourceType == null)
-                                    resourceType = typeof(Board);
-                            }
-                        }
-
-                        Item newResource = (Item)Activator.CreateInstance(resourceType);
-
-                        if (newResource == null)
-                            continue;
-
-                        //Cloth
-                        if (resourceType == typeof(Cloth))
-                        {
-                            if (!m_RecycleSounds.Contains(0x248))
-                                m_RecycleSounds.Add(0x248);
-
-                            newResource.Hue = recycleItem.Hue;
-                        }
-
-                        deleteItem = true;
-                        deletedCount++;
-
-                        newResource.Amount = (int)(Math.Floor((double)totalResourceAmount / 2));
-                        from.AddToBackpack(newResource);
-                    }
-
-                    int arcaneEssenceValue = recycleItem.GetArcaneEssenceValue();
-
-                    if (arcaneEssenceValue > 0)
-                    {
-                        ArcaneEssence arcaneEssenceItem = new ArcaneEssence(arcaneEssenceValue);
-                        from.AddToBackpack(arcaneEssenceItem);
-                    }
-
-                    if (deleteItem)
-                        recycleItem.Delete();
-                }
-
-                if (deletedCount > 0)
-                {
-                    foreach (int sound in m_RecycleSounds)
-                    {
-                        from.PlaySound(sound);
-                    }
-
-                    return RecycleResult.Success;
-                }
-
-                else
-                    return RecycleResult.Invalid; 
-
-                /*
-                if (from == null || item == null || m_CraftSystem == null || m_Tool == null)
                     return RecycleResult.Invalid;
 
                 CraftContext craftContext = m_CraftSystem.GetContext(from);
@@ -370,212 +205,254 @@ namespace Server.Engines.Craft
                 if (craftContext == null)
                     return RecycleResult.Invalid;
 
-                Type itemType = item.GetType();
-                
-                CraftItem craftItem = m_CraftSystem.CraftItems.SearchFor(itemType); 
+                bool recycleEntireBackpack = false;
 
-                if (craftItem == null || craftItem.Resources.Count == 0)
-                    return RecycleResult.Invalid;
-                                
-                Dictionary<Type, int> m_ValidRecipeResources = new Dictionary<Type, int>();
+                if (craftContext.RecycleOption == CraftRecycleOption.RecycleEverything && item == from.Backpack)
+                    recycleEntireBackpack = true;
 
-                CraftResCol craftResourceCollection = craftItem.Resources;
+                List<CraftSystem> m_RecycleableCraftSystems = GetRecyclableCraftSystems();
 
-                for (int a = 0; a < craftResourceCollection.Count; a++)
+                List<Type> m_ItemTypes = new List<Type>();
+
+                if (recycleEntireBackpack)
                 {
-                    CraftRes craftResource = craftResourceCollection.GetAt(a);
-
-                    if (!IsRecycleResource(craftResource.ItemType))
-                        continue;
-                
-                    if (!m_ValidRecipeResources.ContainsKey(craftResource.ItemType))                    
-                        m_ValidRecipeResources.Add(craftResource.ItemType, craftResource.Amount);                    
-                }
-                
-                if (m_ValidRecipeResources.Count == 0)
-                    return RecycleResult.Invalid;
-                
-                if (from.Backpack == null)
-                    return RecycleResult.Invalid;
-
-                else if (from.Backpack.Deleted)
-                    return RecycleResult.Invalid;
-
-                List<Item> m_Items = new List<Item>();
-                List<Item> m_ItemsToRecycle = new List<Item>();                
-
-                Item[] m_MatchingItems = from.Backpack.FindItemsByType(itemType);
-                
-                for (int a = 0; a < m_MatchingItems.Length; a++)
-                {
-                    Item targetItem = m_MatchingItems[a];
-
-                    if (craftContext.RecycleOption == CraftRecycleOption.RecycleSingle && targetItem == item)
+                    List<Item> m_BackpackItems = from.Backpack.FindItemsByType<Item>();
+                    
+                    foreach (Item backpackItem in m_BackpackItems)
                     {
-                        m_ItemsToRecycle.Add(targetItem);
-                        continue;
-                    }
-
-                    if (craftContext.RecycleOption == CraftRecycleOption.RecycleRegularByType && targetItem.Quality == Quality.Regular && !targetItem.IsMagical)
-                    {
-                        m_Items.Add(targetItem);
-                        continue;
-                    }
-
-                    if (craftContext.RecycleOption == CraftRecycleOption.RecycleExceptionalByType && targetItem.Quality == Quality.Exceptional)
-                    {
-                        m_Items.Add(targetItem);
-                        continue;
-                    }
-
-                    if (craftContext.RecycleOption == CraftRecycleOption.RecycleExceptionalByType && targetItem.IsMagical)
-                    {
-                        m_Items.Add(targetItem);
-                        continue;
-                    } 
-
-                    if (craftContext.RecycleOption == CraftRecycleOption.RecycleAnyByType)
-                    {
-                        m_ItemsToRecycle.Add(targetItem);
-                        continue;
-                    }                                                       
-                }
-
-                foreach (Item recycleItem in m_Items)
-                {
-                    if (recycleItem.LootType != LootType.Regular) continue;
-                    if (recycleItem.PlayerClassCurrencyValue > 0) continue;
-                    if (recycleItem.QuestItem) continue;
-                    if (recycleItem.Nontransferable) continue;
-                    if (recycleItem.DonationItem) continue;
-                    if (recycleItem.DecorativeEquipment) continue;
-                    if (recycleItem.TierLevel > 0 && recycleItem.Aspect != AspectEnum.None) continue;
-
-                    m_ItemsToRecycle.Add(recycleItem);
-                }
-
-                if (m_ItemsToRecycle.Count == 0)                
-                    return RecycleResult.Invalid;                
-
-                Queue m_Queue = new Queue();
-
-                foreach (Item recycleItem in m_ItemsToRecycle)
-                {
-                    m_Queue.Enqueue(recycleItem);
-                }
-
-                int deletedCount = 0;
-
-                List<int> m_RecycleSounds = new List<int>();
-                
-                while (m_Queue.Count > 0)
-                {
-                    Item recycleItem = (Item)m_Queue.Dequeue();
-
-                    bool deleteItem = false;
-                                                           
-                    foreach (KeyValuePair<Type, int> pair in m_ValidRecipeResources)
-                    {
-                        Type resourceType = pair.Key;
-                        int totalResourceAmount = pair.Value * recycleItem.Amount;
-
-                        if (totalResourceAmount < 2)
+                        if (backpackItem is BaseTool)
                             continue;
 
-                        //Ingot
-                        if (resourceType == typeof(IronIngot))
-                        {
-                            if (!m_RecycleSounds.Contains(0x2A))
-                                m_RecycleSounds.Add(0x2A);
+                        Type itemType = backpackItem.GetType();
 
-                            if (!m_RecycleSounds.Contains(0x240))
-                                m_RecycleSounds.Add(0x240);
-
-                            if (recycleItem.Resource != CraftResource.Iron)
-                            {
-                                resourceType = CraftResources.GetCraftResourceType(recycleItem.Resource);
-
-                                if (resourceType == null)
-                                    resourceType = typeof(IronIngot);
-                            }
-                        }
-
-                        //Leather
-                        if (resourceType == typeof(Leather))
-                        {
-                            if (!m_RecycleSounds.Contains(0x3E3))
-                                m_RecycleSounds.Add(0x3E3);
-
-                            if (recycleItem.Resource != CraftResource.RegularLeather)
-                            {
-                                resourceType = CraftResources.GetCraftResourceType(recycleItem.Resource);
-
-                                if (resourceType == null)
-                                    resourceType = typeof(Leather);
-                            }
-                        }
-
-                        //Wood
-                        if (resourceType == typeof(Board))
-                        {
-                            if (!m_RecycleSounds.Contains(0x23D))
-                                m_RecycleSounds.Add(0x23D);
-
-                            if (recycleItem.Resource != CraftResource.RegularWood)
-                            {
-                                resourceType = CraftResources.GetCraftResourceType(recycleItem.Resource);
-
-                                if (resourceType == null)
-                                    resourceType = typeof(Board);
-                            }
-                        }
-
-                        Item newResource = (Item)Activator.CreateInstance(resourceType);
-
-                        if (newResource == null)
-                            continue;
-
-                        //Cloth
-                        if (resourceType == typeof(Cloth))
-                        {
-                            if (!m_RecycleSounds.Contains(0x248))
-                                m_RecycleSounds.Add(0x248);
-
-                            newResource.Hue = recycleItem.Hue;
-                        }
-
-                        deleteItem = true;
-                        deletedCount++;
-
-                        newResource.Amount = (int)(Math.Floor((double)totalResourceAmount / 2));
-                        from.AddToBackpack(newResource);
+                        if (!m_ItemTypes.Contains(itemType))
+                            m_ItemTypes.Add(itemType);
                     }
-
-                    int arcaneEssenceValue = recycleItem.GetArcaneEssenceValue();
-
-                    if (arcaneEssenceValue > 0)
-                    {
-                        ArcaneEssence arcaneEssenceItem = new ArcaneEssence(arcaneEssenceValue);
-                        from.AddToBackpack(arcaneEssenceItem);
-                    }
-
-                    if (deleteItem)
-                        recycleItem.Delete();
-                }
-                
-                if (deletedCount > 0)
-                {
-                    foreach (int sound in m_RecycleSounds)
-                    {
-                        from.PlaySound(sound);
-                    }
-
-                    return RecycleResult.Success;
                 }
 
                 else                
-                    return RecycleResult.Invalid; 
-                */
+                    m_ItemTypes.Add(item.GetType());
+
+                List<int> m_RecycleSounds = new List<int>();
+
+                int deletedCount = 0;      
+
+                foreach (Type itemType in m_ItemTypes)
+                {
+                    foreach (CraftSystem craftSystem in m_RecycleableCraftSystems)
+                    {
+                        CraftItem craftItem = craftSystem.CraftItems.SearchFor(itemType);
+
+                        if (craftItem == null || craftItem.Resources.Count == 0)
+                            continue;
+
+                        Dictionary<Type, int> m_ValidRecipeResources = new Dictionary<Type, int>();
+
+                        CraftResCol craftResourceCollection = craftItem.Resources;
+
+                        for (int a = 0; a < craftResourceCollection.Count; a++)
+                        {
+                            CraftRes craftResource = craftResourceCollection.GetAt(a);
+
+                            if (!IsRecycleResource(craftResource.ItemType))
+                                continue;
+
+                            if (!m_ValidRecipeResources.ContainsKey(craftResource.ItemType))
+                                m_ValidRecipeResources.Add(craftResource.ItemType, craftResource.Amount);
+                        }
+
+                        if (m_ValidRecipeResources.Count == 0)
+                            continue;
+
+                        List<Item> m_Items = new List<Item>();
+                        List<Item> m_ItemsToRecycle = new List<Item>();
+
+                        Item[] m_MatchingItems = from.Backpack.FindItemsByType(itemType);
+
+                        for (int a = 0; a < m_MatchingItems.Length; a++)
+                        {
+                            Item targetItem = m_MatchingItems[a];
+
+                            if (craftContext.RecycleOption == CraftRecycleOption.RecycleSingle && targetItem == item)
+                            {
+                                m_ItemsToRecycle.Add(targetItem);
+                                continue;
+                            }
+
+                            if (craftContext.RecycleOption == CraftRecycleOption.RecycleRegularByType && targetItem.Quality == Quality.Regular && !targetItem.IsMagical)
+                            {
+                                m_Items.Add(targetItem);
+                                continue;
+                            }
+
+                            if (craftContext.RecycleOption == CraftRecycleOption.RecycleExceptionalByType && targetItem.Quality == Quality.Exceptional)
+                            {
+                                m_Items.Add(targetItem);
+                                continue;
+                            }
+
+                            if (craftContext.RecycleOption == CraftRecycleOption.RecycleExceptionalByType && targetItem.IsMagical)
+                            {
+                                m_Items.Add(targetItem);
+                                continue;
+                            }
+
+                            if (craftContext.RecycleOption == CraftRecycleOption.RecycleAnyByType)
+                            {
+                                m_ItemsToRecycle.Add(targetItem);
+                                continue;
+                            }
+
+                            if (craftContext.RecycleOption == CraftRecycleOption.RecycleEverything)
+                            {
+                                m_ItemsToRecycle.Add(targetItem);
+                                continue;
+                            }
+                        }
+
+                        foreach (Item recycleItem in m_Items)
+                        {
+                            if (!recycleItem.Movable) continue;
+                            if (recycleItem.LootType != LootType.Regular) continue;
+                            if (recycleItem.PlayerClassCurrencyValue > 0) continue;
+                            if (recycleItem.QuestItem) continue;
+                            if (recycleItem.Nontransferable) continue;
+                            if (recycleItem.DonationItem) continue;
+                            if (recycleItem.DecorativeEquipment) continue;
+                            if (recycleItem.TierLevel > 0 && recycleItem.Aspect != AspectEnum.None) continue;
+
+                            m_ItemsToRecycle.Add(recycleItem);
+                        }
+
+                        if (m_ItemsToRecycle.Count == 0)
+                            continue;
+
+                        Queue m_Queue = new Queue();
+
+                        foreach (Item recycleItem in m_ItemsToRecycle)
+                        {
+                            m_Queue.Enqueue(recycleItem);
+                        }                 
+
+                        while (m_Queue.Count > 0)
+                        {
+                            Item recycleItem = (Item)m_Queue.Dequeue();
+
+                            bool deleteItem = false;
+
+                            foreach (KeyValuePair<Type, int> pair in m_ValidRecipeResources)
+                            {
+                                Type resourceType = pair.Key;
+                                int totalResourceAmount = pair.Value * recycleItem.Amount;
+
+                                if (totalResourceAmount < 2)
+                                    continue;
+
+                                //Ingot
+                                if (resourceType == typeof(IronIngot))
+                                {
+                                    if (!m_RecycleSounds.Contains(0x2A))
+                                        m_RecycleSounds.Add(0x2A);
+
+                                    if (!m_RecycleSounds.Contains(0x240))
+                                        m_RecycleSounds.Add(0x240);
+
+                                    if (recycleItem.Resource != CraftResource.Iron)
+                                    {
+                                        resourceType = CraftResources.GetCraftResourceType(recycleItem.Resource);
+
+                                        if (resourceType == null)
+                                            resourceType = typeof(IronIngot);
+                                    }
+                                }
+
+                                //Leather
+                                if (resourceType == typeof(Leather))
+                                {
+                                    if (!m_RecycleSounds.Contains(0x3E3))
+                                        m_RecycleSounds.Add(0x3E3);
+
+                                    if (recycleItem.Resource != CraftResource.RegularLeather)
+                                    {
+                                        resourceType = CraftResources.GetCraftResourceType(recycleItem.Resource);
+
+                                        if (resourceType == null)
+                                            resourceType = typeof(Leather);
+                                    }
+                                }
+
+                                //Wood
+                                if (resourceType == typeof(Board))
+                                {
+                                    if (!m_RecycleSounds.Contains(0x23D))
+                                        m_RecycleSounds.Add(0x23D);
+
+                                    if (recycleItem.Resource != CraftResource.RegularWood)
+                                    {
+                                        resourceType = CraftResources.GetCraftResourceType(recycleItem.Resource);
+
+                                        if (resourceType == null)
+                                            resourceType = typeof(Board);
+                                    }
+                                }
+
+                                Item newResource = (Item)Activator.CreateInstance(resourceType);
+
+                                if (newResource == null)
+                                    continue;
+
+                                //Cloth
+                                if (resourceType == typeof(Cloth))
+                                {
+                                    if (!m_RecycleSounds.Contains(0x248))
+                                        m_RecycleSounds.Add(0x248);
+
+                                    newResource.Hue = recycleItem.Hue;
+                                }
+
+                                deleteItem = true;
+                                deletedCount++;
+
+                                newResource.Amount = (int)(Math.Floor((double)totalResourceAmount / 2));
+                                from.AddToBackpack(newResource);
+                            }
+
+                            int arcaneEssenceValue = recycleItem.GetArcaneEssenceValue();
+
+                            if (arcaneEssenceValue > 0)
+                            {
+                                ArcaneEssence arcaneEssenceItem = new ArcaneEssence(arcaneEssenceValue);
+                                from.AddToBackpack(arcaneEssenceItem);
+                            }
+
+                            if (deleteItem)
+                                recycleItem.Delete();
+                        }
+                    }
+                }
+
+                if (deletedCount > 0)
+                {
+                    foreach (int sound in m_RecycleSounds)
+                    {
+                        from.PlaySound(sound);
+                    }
+
+                    if (deletedCount > 1)
+                        return RecycleResult.SuccessMultiple;
+
+                    else
+                        return RecycleResult.Success;
+                }
+
+                else
+                {
+                    if (recycleEntireBackpack)
+                        return RecycleResult.InvalidEntireBackpack;
+
+                    else
+                        return RecycleResult.Invalid;
+                }
 			}
 		}
 	}

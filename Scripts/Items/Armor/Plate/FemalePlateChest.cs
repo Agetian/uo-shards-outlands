@@ -6,6 +6,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x1c04, 0x1c05 )]
 	public class FemalePlateChest : BaseArmor
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int InitMinHits{ get{ return 51; } }
 		public override int InitMaxHits{ get{ return 65; } }
 

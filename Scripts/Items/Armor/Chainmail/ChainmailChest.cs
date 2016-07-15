@@ -6,6 +6,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x13bf, 0x13c4 )]
 	public class ChainmailChest : BaseArmor
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int InitMinHits{ get{ return 45; } }
 		public override int InitMaxHits{ get{ return 60; } }		
 

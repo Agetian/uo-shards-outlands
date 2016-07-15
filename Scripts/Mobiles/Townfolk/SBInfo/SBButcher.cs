@@ -20,10 +20,11 @@ namespace Server.Mobiles
 		{ 
 			public InternalBuyInfo() 
 			{
-                Add( new GenericBuyInfo("Skillet", typeof(Skillet), 10, 50, 0x97F, 0));
-				Add( new GenericBuyInfo( typeof( ButcherKnife ), 21, 20, 0x13F6, 0 ) );             
-				Add( new GenericBuyInfo( typeof( Cleaver ), 24, 20, 0xEC3, 0 ) ); 
-				Add( new GenericBuyInfo( typeof( SkinningKnife ), 26, 20, 0xEC4, 0 ) ); 
+                Add(new GenericBuyInfo("Skillet", typeof(Skillet), Skillet.GetSBPurchaseValue(), 50, 0x97F, 0));
+
+                Add(new GenericBuyInfo("Butcher's Knife", typeof(ButcherKnife), ButcherKnife.GetSBPurchaseValue(), 25, 0x13F6, 0));
+                Add(new GenericBuyInfo("Cleaver", typeof(Cleaver), Cleaver.GetSBPurchaseValue(), 25, 0xEC3, 0));
+                Add(new GenericBuyInfo("Skinning Knife", typeof(SkinningKnife), SkinningKnife.GetSBPurchaseValue(), 25, 0xEC4, 0)); 
 			} 
 		} 
 
@@ -31,10 +32,11 @@ namespace Server.Mobiles
 		{ 
 			public InternalSellInfo() 
 			{
-                Add( typeof( Skillet ), 2);
-				Add( typeof( ButcherKnife ), 13 ); 
-				Add( typeof( Cleaver ), 12 ); 
-				Add( typeof( SkinningKnife ), 10 ); 
+                Add(typeof(Skillet), Skillet.GetSBSellValue());
+
+                Add(typeof(ButcherKnife), ButcherKnife.GetSBSellValue());
+                Add(typeof(Cleaver), Cleaver.GetSBSellValue());
+                Add(typeof(SkinningKnife), SkinningKnife.GetSBSellValue());
 			} 
 		} 
 	} 

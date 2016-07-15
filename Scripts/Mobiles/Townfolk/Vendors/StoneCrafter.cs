@@ -21,9 +21,6 @@ namespace Server.Mobiles
 		public override void InitSBInfo()
 		{
 			m_SBInfos.Add( new SBStoneCrafter() );
-			m_SBInfos.Add( new SBStavesWeapon() );
-			m_SBInfos.Add( new SBCarpenter() );
-			m_SBInfos.Add( new SBWoodenShields() );
 		}
 
 		public StoneCrafter( Serial serial ) : base( serial )

@@ -20,11 +20,11 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new GenericBuyInfo( typeof( Bandage ), 5, 20, 0xE21, 0 ) );
-				Add( new GenericBuyInfo( typeof( LesserHealPotion ), 15, 20, 0xF0C, 0 ) );
-				Add( new GenericBuyInfo( typeof( RefreshPotion ), 15, 20, 0xF0B, 0 ) );
-				Add( new GenericBuyInfo( typeof( Garlic ), 3, 20, 0xF84, 0 ) );
-				Add( new GenericBuyInfo( typeof( Ginseng ), 3, 20, 0xF85, 0 ) );
+                Add(new GenericBuyInfo("Bandage", typeof(Bandage), Bandage.GetSBPurchaseValue(), 250, 0xE21, 0));
+
+                Add(new GenericBuyInfo("Lesser Heal Potion", typeof(LesserHealPotion), LesserHealPotion.GetSBPurchaseValue(), 50, 0xF0C, 0));
+                Add(new GenericBuyInfo("Lesser Cure Potion", typeof(LesserCurePotion), LesserCurePotion.GetSBPurchaseValue(), 50, 0xF07, 0));
+                Add(new GenericBuyInfo("Refresh Potion", typeof(RefreshPotion), RefreshPotion.GetSBPurchaseValue(), 50, 0xF0B, 0));
 			}
 		}
 
@@ -32,11 +32,11 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
-				Add( typeof( Bandage ), 2 );
-				Add( typeof( LesserHealPotion ), 7 );
-				Add( typeof( RefreshPotion ), 7 );
-				Add( typeof( Garlic ), 2 );
-				Add( typeof( Ginseng ), 2 );
+                Add(typeof(Bandage), Bandage.GetSBSellValue());
+
+                Add(typeof(LesserHealPotion), LesserHealPotion.GetSBSellValue());
+                Add(typeof(LesserCurePotion), LesserCurePotion.GetSBSellValue());
+                Add(typeof(RefreshPotion), RefreshPotion.GetSBSellValue());
 			}
 		}
 	}

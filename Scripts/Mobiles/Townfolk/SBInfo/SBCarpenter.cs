@@ -20,38 +20,27 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new GenericBuyInfo( typeof( Board ), 14, 20, 0x1BD7, 0) );
-                Add(new GenericBuyInfo(typeof(WoodenBox), 14, 20, 0xe7d, 0));
-                //Add( new GenericBuyInfo( typeof( SmallCrate ), 10, 20, 0xe7e, 0 ) );
-                //Add( new GenericBuyInfo( typeof( MediumCrate ), 12, 20, 0xe3e, 0 ) );
-                //Add( new GenericBuyInfo( typeof( LargeCrate ), 14, 20, 0xe3c, 0 ) );
-                //Add( new GenericBuyInfo( typeof( WoodenChest ), 30, 20, 0xe43, 0 ) );
-				
-                //Add( new GenericBuyInfo( typeof( LargeTable ), 20, 20, 0xB7D, 0 ) );
-                //Add( new GenericBuyInfo( typeof( Nightstand ), 15, 20, 0xB34, 0 ) );
-                //Add( new GenericBuyInfo( typeof( YewWoodTable ), 20, 20, 0xB7C, 0 ) );
+                Add(new GenericBuyInfo("Hatchet", typeof(Hatchet), Hatchet.GetSBPurchaseValue(), 50, 0xF43, 0));
+                Add(new GenericBuyInfo("Saw", typeof(Saw), Saw.GetSBPurchaseValue(), 50, 0x1034, 0));                
 
-                //Add( new GenericBuyInfo( typeof( Throne ), 58, 20, 0xB33, 0 ) );
-                //Add( new GenericBuyInfo( typeof( WoodenThrone ), 12, 20, 0xB2F, 0 ) );
-                Add(new GenericBuyInfo(typeof(Stool), 12, 20, 0xA2A, 0));
-                //Add( new GenericBuyInfo( typeof( FootStool ), 12, 20, 0xB5E, 0 ) );
+                Add(new GenericBuyInfo("Club", typeof(Club), Club.GetSBPurchaseValue(), 25, 0x13B4, 0));
+                Add(new GenericBuyInfo("Shepherd's Crook", typeof(ShepherdsCrook), ShepherdsCrook.GetSBPurchaseValue(), 25, 0xE81, 0));
+                Add(new GenericBuyInfo("Quarter Staff", typeof(QuarterStaff), QuarterStaff.GetSBPurchaseValue(), 25, 0xE89, 0));
+                Add(new GenericBuyInfo("Gnarled Staff", typeof(GnarledStaff), GnarledStaff.GetSBPurchaseValue(), 25, 0x13F8, 0));
+                Add(new GenericBuyInfo("Black Staff", typeof(BlackStaff), BlackStaff.GetSBPurchaseValue(), 25, 0xDF0, 0));
 
-                //Add( new GenericBuyInfo( typeof( FancyWoodenChairCushion ), 24, 20, 0xB4E, 0 ) );
-                //Add( new GenericBuyInfo( typeof( WoodenChairCushion ), 20, 20, 0xB52, 0 ) );
-                Add(new GenericBuyInfo(typeof(WoodenChair), 16, 20, 0xB56, 0));
-                //Add( new GenericBuyInfo( typeof( BambooChair ), 12, 20, 0xB5A, 0 ) );
-                //Add( new GenericBuyInfo( typeof( WoodenBench ), 12, 20, 0xB2C, 0 ) );
+                Add(new GenericBuyInfo("Wooden Shield", typeof(WoodenShield), WoodenShield.GetSBPurchaseValue(), 25, 7034, 0));
+                Add(new GenericBuyInfo("Wooden Kite Shield", typeof(WoodenKiteShield), WoodenKiteShield.GetSBPurchaseValue(), 25, 7033, 0));
 
-				Add( new GenericBuyInfo( typeof( Saw ), 18, 20, 0x1034, 0 ) );
-				Add( new GenericBuyInfo( typeof( Scorp ), 12, 20, 0x10E7, 0 ) );
-				Add( new GenericBuyInfo( typeof( SmoothingPlane ), 12, 20, 0x1032, 0 ) );
-				Add( new GenericBuyInfo( typeof( DrawKnife ), 12, 20, 0x10E4, 0 ) );
-				Add( new GenericBuyInfo( typeof( Froe ), 12, 20, 0x10E5, 0 ) );
-				Add( new GenericBuyInfo( typeof( Hammer ), 28, 20, 0x102A, 0 ) );
-				Add( new GenericBuyInfo( typeof( Inshave ), 12, 20, 0x10E6, 0 ) );
-				Add( new GenericBuyInfo( typeof( JointingPlane ), 13, 20, 0x1030, 0 ) );
-				Add( new GenericBuyInfo( typeof( MouldingPlane ), 13, 20, 0x102C, 0 ) );
-				Add( new GenericBuyInfo( typeof( DovetailSaw ), 14, 20, 0x1028, 0 ) );
+                Add(new GenericBuyInfo("Scorp", typeof(Scorp), Scorp.GetSBPurchaseValue(), 50, 0x10E7, 0));
+                Add(new GenericBuyInfo("Smoothing Plane", typeof(SmoothingPlane), SmoothingPlane.GetSBPurchaseValue(), 50, 0x1032, 0));
+                Add(new GenericBuyInfo("Drawing Knife", typeof(DrawKnife), DrawKnife.GetSBPurchaseValue(), 50, 0x10E4, 0));
+                Add(new GenericBuyInfo("Froe", typeof(Froe), Froe.GetSBPurchaseValue(), 50, 0x10E5, 0));
+                Add(new GenericBuyInfo("Hammer", typeof(Hammer), Hammer.GetSBPurchaseValue(), 50, 0x102A, 0));
+                Add(new GenericBuyInfo("Inshave", typeof(Inshave), Inshave.GetSBPurchaseValue(), 50, 0x10E6, 0));
+                Add(new GenericBuyInfo("Jointing Plane", typeof(JointingPlane), JointingPlane.GetSBPurchaseValue(), 50, 0x1030, 0));
+                Add(new GenericBuyInfo("Wooden Plane", typeof(WoodenPlane), WoodenPlane.GetSBPurchaseValue(), 50, 0x102C, 0));
+                Add(new GenericBuyInfo("Dovetail Saw", typeof(DovetailSaw), DovetailSaw.GetSBPurchaseValue(), 50, 0x1028, 0));
 			}
 		}
 
@@ -59,6 +48,29 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
+                Add(typeof(Hatchet), Hatchet.GetSBSellValue());
+                Add(typeof(Saw), Saw.GetSBSellValue());
+
+                Add(typeof(Scorp), Scorp.GetSBSellValue());
+                Add(typeof(SmoothingPlane), SmoothingPlane.GetSBSellValue());
+                Add(typeof(DrawKnife), DrawKnife.GetSBSellValue());
+                Add(typeof(Froe), Froe.GetSBSellValue());
+                Add(typeof(Hammer), Hammer.GetSBSellValue());
+                Add(typeof(Inshave), Inshave.GetSBSellValue());
+                Add(typeof(JointingPlane), JointingPlane.GetSBSellValue());
+                Add(typeof(WoodenPlane), WoodenPlane.GetSBSellValue());
+                Add(typeof(DovetailSaw), DovetailSaw.GetSBSellValue());
+
+                Add(typeof(Club), Club.GetSBSellValue());
+                Add(typeof(ShepherdsCrook), ShepherdsCrook.GetSBSellValue());
+                Add(typeof(QuarterStaff), QuarterStaff.GetSBSellValue());
+                Add(typeof(GnarledStaff), GnarledStaff.GetSBSellValue());
+                Add(typeof(BlackStaff), BlackStaff.GetSBSellValue());
+
+                Add(typeof(WoodenShield), WoodenShield.GetSBSellValue());
+                Add(typeof(WoodenKiteShield), WoodenKiteShield.GetSBSellValue());
+
+                /*
 				Add( typeof( WoodenBox ), 7 );
 				Add( typeof( SmallCrate ), 5 );
 				Add( typeof( MediumCrate ), 6 );
@@ -80,17 +92,7 @@ namespace Server.Mobiles
 				Add( typeof( WoodenChair ), 8 );
 				Add( typeof( BambooChair ), 6 );
 				Add( typeof( WoodenBench ), 6 );
-
-				Add( typeof( Saw ), 9 );
-				Add( typeof( Scorp ), 6 );
-				Add( typeof( SmoothingPlane ), 6 );
-				Add( typeof( DrawKnife ), 6 );
-				Add( typeof( Froe ), 6 );
-				Add( typeof( Hammer ), 4 );
-				Add( typeof( Inshave ), 6 );
-				Add( typeof( JointingPlane ), 6 );
-				Add( typeof( MouldingPlane ), 6 );
-				Add( typeof( DovetailSaw ), 7 );
+                */				
 			}
 		}
 	}

@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xF50, 0xF4F )]
 	public class Crossbow : BaseRanged
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int EffectID{ get{ return 0x1BFE; } }
 		public override Type AmmoType{ get{ return typeof( Bolt ); } }
 		public override Item Ammo{ get{ return new Bolt(); } }

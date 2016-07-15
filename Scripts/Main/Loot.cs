@@ -57,7 +57,6 @@ namespace Server
         private static void AddSequentialBossLoot(BaseCreature mob)
         {
             mob.AddLoot(LootPack.BossCloth);
-            mob.AddLoot(LootPack.BossSandals);
             mob.AddLoot(LootPack.BossMaskDye);
         }
 
@@ -255,7 +254,6 @@ namespace Server
                     int max = Math.Max(1, (int)(mob.Difficulty / 100));
                     mob.AddLoot(LootPack.SuperBoss, Utility.RandomMinMax(1, max));
                     mob.AddLoot(LootPack.BossCloth, Utility.RandomMinMax(1, max));
-                    mob.AddLoot(LootPack.BossSandals, Utility.RandomMinMax(1, max));
                     mob.AddLoot(LootPack.BossMaskDye, Utility.RandomMinMax(1, max));
                     mob.AddLoot(LootPack.VeryRareTitleDye);
                     mob.PackGem(6, 9);

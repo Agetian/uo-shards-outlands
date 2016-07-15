@@ -62,7 +62,7 @@ namespace Server.Mobiles
             }
 
             double basePrice = (double)price;
-            double priceScalar = item.GetSellValueScalar();
+            double priceScalar = item.GetSBSellValueScalar();
 
             price = (int)Math.Floor(basePrice * priceScalar);
 
@@ -74,7 +74,8 @@ namespace Server.Mobiles
                 
 		public int GetBuyPriceFor( Item item )
 		{
-            return (int)(GenericBuyInfo.PurchaseCompareToSellPriceScalar * GetSellPriceFor(item));
+            //TEST: FIX THIS
+            return GetSellPriceFor(item);
 		}        
 
 		public Type[] Types

@@ -33,6 +33,9 @@ namespace Server.Items
 	[TypeAlias( "Server.Items.BottleAle", "Server.Items.BottleLiquor", "Server.Items.BottleWine" )]
 	public class BeverageBottle : BaseBeverage
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int BaseLabelNumber{ get{ return 1042959; } } // a bottle of Ale
 		public override int MaxQuantity{ get{ return 5; } }
 		public override bool Fillable{ get{ return false; } }
@@ -59,6 +62,7 @@ namespace Server.Items
 		public BeverageBottle( BeverageType type )
 			: base( type )
 		{
+            Name = "beverage bottle";
 			Weight = 1.0;
 		}
 
@@ -114,6 +118,9 @@ namespace Server.Items
 
 	public class Jug : BaseBeverage
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int BaseLabelNumber{ get{ return 1042965; } } // a jug of Ale
 		public override int MaxQuantity{ get{ return 10; } }
 		public override bool Fillable{ get{ return false; } }
@@ -127,9 +134,9 @@ namespace Server.Items
 		}
 
 		[Constructable]
-		public Jug( BeverageType type )
-			: base( type )
+		public Jug( BeverageType type ): base( type )
 		{
+            Name = "jug";
 			Weight = 1.0;
 		}
 
@@ -297,6 +304,9 @@ namespace Server.Items
 		 "Server.Items.GlassMilk", "Server.Items.GlassWine", "Server.Items.GlassWater" )]
 	public class GlassMug : BaseBeverage
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int EmptyLabelNumber{ get{ return 1022456; } } // mug
 		public override int BaseLabelNumber{ get{ return 1042976; } } // a mug of Ale
 		public override int MaxQuantity{ get{ return 5; } }
@@ -322,6 +332,7 @@ namespace Server.Items
 		[Constructable]
 		public GlassMug()
 		{
+            Name = "glass mug";
 			Weight = 1.0;
 		}
 
@@ -329,6 +340,7 @@ namespace Server.Items
 		public GlassMug( BeverageType type )
 			: base( type )
 		{
+            Name = "glass mug";
 			Weight = 1.0;
 		}
 
@@ -400,6 +412,9 @@ namespace Server.Items
 		"Server.Items.GlassPitcher" )]
 	public class Pitcher : BaseBeverage
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int BaseLabelNumber{ get{ return 1048128; } } // a Pitcher of Ale
 		public override int MaxQuantity{ get{ return 5; } }
 
@@ -465,6 +480,7 @@ namespace Server.Items
 		[Constructable]
 		public Pitcher()
 		{
+            Name = "pitcher";
 			Weight = 2.0;
 		}
 
@@ -472,6 +488,7 @@ namespace Server.Items
 		public Pitcher( BeverageType type )
 			: base( type )
 		{
+            Name = "pitcher";
 			Weight = 2.0;
 		}
 

@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x0FBF, 0x0FC0 )]
 	public class ScribesPen : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override CraftSystem CraftSystem{ get{ return DefInscription.CraftSystem; } }
 
 		public override int LabelNumber{ get{ return 1044168; } } // scribe's pen
@@ -14,12 +17,14 @@ namespace Server.Items
 		[Constructable]
 		public ScribesPen() : base( 0x0FBF )
 		{
+            Name = "scribe's pen";
 			Weight = 1.0;
 		}
 
 		[Constructable]
 		public ScribesPen( int uses ) : base( uses, 0x0FBF )
 		{
+            Name = "scribe's pen";
 			Weight = 1.0;
 		}
 

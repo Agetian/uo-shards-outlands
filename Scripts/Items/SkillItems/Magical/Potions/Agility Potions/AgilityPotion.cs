@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class AgilityPotion : BaseAgilityPotion
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int DexOffset{ get{ return 10; } }
 		public override TimeSpan Duration{ get{ return TimeSpan.FromMinutes( 2.0 ); } }
 

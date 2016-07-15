@@ -20,57 +20,61 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new GenericBuyInfo( "deed to a stone-and-plaster house", typeof( StonePlasterHouseDeed ), 72500, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a field stone house", typeof( FieldStoneHouseDeed ), 72500, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a small brick house", typeof( SmallBrickHouseDeed), 72500, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a wooden house", typeof( WoodHouseDeed ), 72500, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a wood-and-plaster house", typeof( WoodPlasterHouseDeed ), 72500, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a thatched-roof cottage", typeof( ThatchedRoofCottageDeed ), 72500, 20, 0x14F0, 0 ) );
-				
-				Add( new GenericBuyInfo( "deed to a small stone workshop", typeof( StoneWorkshopDeed ), 150000, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a small marble workshop", typeof( MarbleWorkshopDeed ), 150000, 20, 0x14F0, 0 ) );
+                /*
+                Add(new GenericBuyInfo("deed to a stone-and-plaster house", typeof(StonePlasterHouseDeed), StonePlasterHouseDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a field stone house", typeof(FieldStoneHouseDeed), FieldStoneHouseDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a small brick house", typeof(SmallBrickHouseDeed), SmallBrickHouseDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a wooden house", typeof(WoodHouseDeed), WoodHouseDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a wood-and-plaster house", typeof(WoodPlasterHouseDeed), WoodPlasterHouseDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a thatched-roof cottage", typeof(ThatchedRoofCottageDeed), ThatchedRoofCottageDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
 
-				Add( new GenericBuyInfo( "deed to a small stone tower", typeof( SmallTowerDeed ), 175500, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a sandstone house with patio", typeof( SandstonePatioDeed ), 195900, 20, 0x14F0, 0 ) );
-				
-				Add( new GenericBuyInfo( "deed to a two story villa", typeof( VillaDeed ), 276500, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a two story log cabin", typeof( LogCabinDeed ), 295500, 20, 0x14F0, 0 ) );
+                Add(new GenericBuyInfo("deed to a small stone workshop", typeof(StoneWorkshopDeed), StoneWorkshopDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a small marble workshop", typeof(MarbleWorkshopDeed), MarbleWorkshopDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
 
-				Add( new GenericBuyInfo( "deed to a large house with patio", typeof( LargePatioDeed ), 425000, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a brick house", typeof( BrickHouseDeed ), 495000, 20, 0x14F0, 0 ) );
+                Add(new GenericBuyInfo("deed to a small stone tower", typeof(SmallTowerDeed), SmallTowerDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a sandstone house with patio", typeof(SandstonePatioDeed), SandstonePatioDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
 
-				Add( new GenericBuyInfo( "deed to a two-story wood-and-plaster house", typeof( TwoStoryWoodPlasterHouseDeed ), 650000, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a marble house with patio", typeof( LargeMarbleDeed ), 780000, 20, 0x14F0, 0 ) );
+                Add(new GenericBuyInfo("deed to a two story villa", typeof(VillaDeed), VillaDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a two story log cabin", typeof(LogCabinDeed), LogCabinDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
 
-				Add( new GenericBuyInfo( "deed to a tower", typeof( TowerDeed ), 1250000, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a small stone keep", typeof( KeepDeed ), 2550000, 20, 0x14F0, 0 ) );
-				Add( new GenericBuyInfo( "deed to a castle", typeof( CastleDeed ), 7420000, 20, 0x14F0, 0 ) );
-			}
+                Add(new GenericBuyInfo("deed to a large house with patio", typeof(LargePatioDeed), LargePatioDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a brick house", typeof(BrickHouseDeed), BrickHouseDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+
+                Add(new GenericBuyInfo("deed to a two-story wood-and-plaster house", typeof(TwoStoryWoodPlasterHouseDeed), TwoStoryWoodPlasterHouseDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a marble house with patio", typeof(LargeMarbleDeed), LargeMarbleDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+
+                Add(new GenericBuyInfo("deed to a tower", typeof(TowerDeed), TowerDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a small stone keep", typeof(KeepDeed), KeepDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+                Add(new GenericBuyInfo("deed to a castle", typeof(CastleDeed), CastleDeed.GetSBPurchaseValue(), 25, 0x14F0, 0));
+			    */
+            }
 		}
 
 		public class InternalSellInfo : GenericSellInfo
 		{
 			public InternalSellInfo()
 			{
-				Add( typeof( StonePlasterHouseDeed ), 72500 );
-				Add( typeof( FieldStoneHouseDeed ), 72500 );
-				Add( typeof( SmallBrickHouseDeed ), 72500 );
-				Add( typeof( WoodHouseDeed ), 72500 );
-				Add( typeof( WoodPlasterHouseDeed ), 72500 );
-				Add( typeof( ThatchedRoofCottageDeed ), 72500 );
-				Add( typeof( BrickHouseDeed ), 495000 );
-				Add( typeof( TwoStoryWoodPlasterHouseDeed ), 650000 );
-				Add( typeof( TowerDeed ), 1250000 );
-				Add( typeof( KeepDeed ), 2550000 );
-				Add( typeof( CastleDeed ), 7420000 );
-				Add( typeof( LargePatioDeed ), 425000 );
-				Add( typeof( LargeMarbleDeed ), 780000 );
-				Add( typeof( SmallTowerDeed ), 175500 );
-				Add( typeof( LogCabinDeed ), 295500 );
-				Add( typeof( SandstonePatioDeed ), 195900 );
-				Add( typeof( VillaDeed ), 276500 );
-				Add( typeof( StoneWorkshopDeed ), 150000 );
-				Add( typeof( MarbleWorkshopDeed ), 150000 );
+                /*
+                Add(typeof(StonePlasterHouseDeed), StonePlasterHouseDeed.GetSBSellValue());
+                Add(typeof(FieldStoneHouseDeed), FieldStoneHouseDeed.GetSBSellValue());
+                Add(typeof(SmallBrickHouseDeed), SmallBrickHouseDeed.GetSBSellValue());
+                Add(typeof(WoodHouseDeed), WoodHouseDeed.GetSBSellValue());
+                Add(typeof(WoodPlasterHouseDeed), WoodPlasterHouseDeed.GetSBSellValue());
+                Add(typeof(ThatchedRoofCottageDeed), ThatchedRoofCottageDeed.GetSBSellValue());
+                Add(typeof(BrickHouseDeed), BrickHouseDeed.GetSBSellValue());
+                Add(typeof(TwoStoryWoodPlasterHouseDeed), TwoStoryWoodPlasterHouseDeed.GetSBSellValue());
+                Add(typeof(TowerDeed), TowerDeed.GetSBSellValue());
+                Add(typeof(KeepDeed), KeepDeed.GetSBSellValue());
+                Add(typeof(CastleDeed), CastleDeed.GetSBSellValue());
+                Add(typeof(LargePatioDeed), LargePatioDeed.GetSBSellValue());
+                Add(typeof(LargeMarbleDeed), LargeMarbleDeed.GetSBSellValue());
+                Add(typeof(SmallTowerDeed), SmallTowerDeed.GetSBSellValue());
+                Add(typeof(LogCabinDeed), LogCabinDeed.GetSBSellValue());
+                Add(typeof(SandstonePatioDeed), SandstonePatioDeed.GetSBSellValue());
+                Add(typeof(VillaDeed), VillaDeed.GetSBSellValue());
+                Add(typeof(StoneWorkshopDeed), StoneWorkshopDeed.GetSBSellValue());
+                Add(typeof(MarbleWorkshopDeed), MarbleWorkshopDeed.GetSBSellValue());
+                */
 			}
 		}
 	}

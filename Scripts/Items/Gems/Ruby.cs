@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class Ruby : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override double DefaultWeight
 		{
 			get { return 0.1; }
@@ -13,11 +16,14 @@ namespace Server.Items
 		[Constructable]
 		public Ruby() : this( 1 )
 		{
+            Name = "ruby";
 		}
 
 		[Constructable]
 		public Ruby( int amount ) : base( 0xF13 )
 		{
+            Name = "ruby";
+
 			Stackable = true;
 			Amount = amount;
 		}

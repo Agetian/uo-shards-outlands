@@ -4,6 +4,9 @@ namespace Server.Items
 {
 	public class Bolt : Item, ICommodity
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		int ICommodity.DescriptionNumber { get { return LabelNumber; } }
 		bool ICommodity.IsDeedable { get { return true; } }
 

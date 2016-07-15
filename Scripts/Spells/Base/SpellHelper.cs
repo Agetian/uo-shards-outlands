@@ -11,10 +11,8 @@ using Server.Misc;
 using System.Collections.Generic;
 using Server.Spells.Seventh;
 using Server.Spells.Fifth;
-
 using Server.Commands;
 using Server.Network;
-using Server.ArenaSystem;
 using Server.Custom;
 
 namespace Server

@@ -6,6 +6,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x13eb, 0x13f2 )]
 	public class RingmailGloves : BaseArmor
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int InitMinHits{ get{ return 40; } }
 		public override int InitMaxHits{ get{ return 50; } }
 

@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class LesserCurePotion : BaseCurePotion
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		private static CureLevelInfo[] m_OldLevelInfo = new CureLevelInfo[]
 			{
 				new CureLevelInfo( Poison.Lesser,  0.75 ), // 75% chance to cure lesser poison

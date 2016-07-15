@@ -30,9 +30,9 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
-				Add( typeof( GlassblowingBook ), 5000 );
-				Add( typeof( SandMiningBook ), 5000 );
-				Add( typeof( Blowpipe ), 15 );
+				//Add( typeof( GlassblowingBook ), 5000 );
+				//Add( typeof( SandMiningBook ), 5000 );
+				//Add( typeof( Blowpipe ), 15 );
 			}
 		}
 	}

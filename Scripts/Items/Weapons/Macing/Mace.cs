@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xF5C, 0xF5D )]
 	public class Mace : BaseBashing
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 15; } }
         public override int BaseMaxDamage { get { return 26; } }
         public override int BaseSpeed { get { return 48; } }

@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class Torch : BaseEquipableLight
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int LitItemID{ get { return 0xA12; } }
 		public override int UnlitItemID{ get { return 0xF6B; } }
 
@@ -14,6 +17,8 @@ namespace Server.Items
 		[Constructable]
 		public Torch() : base( 0xF6B )
 		{
+            Name = "torch";
+
 			if ( Burnout )
 				Duration = TimeSpan.FromMinutes( 30 );
 			else

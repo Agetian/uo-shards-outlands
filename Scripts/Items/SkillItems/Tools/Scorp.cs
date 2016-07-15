@@ -6,17 +6,22 @@ namespace Server.Items
 {
 	public class Scorp : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override CraftSystem CraftSystem{ get{ return DefCarpentry.CraftSystem; } }
 
 		[Constructable]
 		public Scorp() : base( 0x10E7 )
 		{
+            Name = "scorp";
 			Weight = 1.0;
 		}
 
 		[Constructable]
 		public Scorp( int uses ) : base( uses, 0x10E7 )
 		{
+            Name = "scorp";
 			Weight = 1.0;
 		}
 

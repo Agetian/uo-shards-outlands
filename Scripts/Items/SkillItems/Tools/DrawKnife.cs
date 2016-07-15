@@ -6,17 +6,22 @@ namespace Server.Items
 {
 	public class DrawKnife : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override CraftSystem CraftSystem{ get{ return DefCarpentry.CraftSystem; } }
 
 		[Constructable]
 		public DrawKnife() : base( 0x10E4 )
 		{
+            Name = "drawing knife";
 			Weight = 1.0;
 		}
 
 		[Constructable]
 		public DrawKnife( int uses ) : base( uses, 0x10E4 )
 		{
+            Name = "drawing knife";
 			Weight = 1.0;
 		}
 

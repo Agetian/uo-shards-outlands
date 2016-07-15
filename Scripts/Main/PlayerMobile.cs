@@ -621,10 +621,10 @@ namespace Server.Mobiles
                     bandage.Amount = 200;
                     pm_Target.Backpack.DropItem(bandage);
 
-                    BagOfReagents bagOfReagents = new BagOfReagents();
+                    BagOfRegeants bagOfReagents = new BagOfRegeants();
                     pm_Target.Backpack.DropItem(bagOfReagents);
 
-                    bagOfReagents = new BagOfReagents();
+                    bagOfReagents = new BagOfRegeants();
                     pm_Target.Backpack.DropItem(bagOfReagents);
 
                     Spellbook spellbook = new Spellbook();

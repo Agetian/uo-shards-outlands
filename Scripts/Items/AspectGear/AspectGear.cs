@@ -114,11 +114,11 @@ namespace Server.Items
             {
                 case AspectEnum.None: return 0;
 
-                case AspectEnum.Affinity: return 2660; // 1401;
-                case AspectEnum.Air: return 2658;
-                case AspectEnum.Command: return 2653;
-                case AspectEnum.Earth: return 2709;
-                case AspectEnum.Eldritch: return 2615;
+                case AspectEnum.Affinity: return 2423;
+                case AspectEnum.Air: return 2653; 
+                case AspectEnum.Command: return 1401;
+                case AspectEnum.Earth: return 1440;
+                case AspectEnum.Eldritch: return 2612;
                 case AspectEnum.Fire: return 2635;                       
                 case AspectEnum.Poison: return 2127;
                 case AspectEnum.Shadow: return 2412;
@@ -135,11 +135,11 @@ namespace Server.Items
             {
                 case AspectEnum.None: return 2499;
 
-                case AspectEnum.Affinity: return 1377; //2606
-                case AspectEnum.Air: return 1153;
-                case AspectEnum.Command: return 2550;   
-                case AspectEnum.Earth: return 2709;
-                case AspectEnum.Eldritch: return 2605; //2618
+                case AspectEnum.Affinity: return 2423;
+                case AspectEnum.Air: return 2653;
+                case AspectEnum.Command: return 1401;   
+                case AspectEnum.Earth: return 1440;
+                case AspectEnum.Eldritch: return 2605;
                 case AspectEnum.Fire: return 1257;                             
                 case AspectEnum.Poison: return 2126;
                 case AspectEnum.Shadow: return 2403;
@@ -578,7 +578,9 @@ namespace Server.Items
                         player.SendMessage("Your Aspect armor reveals you.");
                     }
 
-                    player.PlaySound(0x56B);                    
+                    player.PlaySound(0x56B);
+                    player.SendMessage("Your aspect effect fades.");
+
                     //player.PublicOverheadMessage(MessageType.Emote, 0, false, "*Aspect Fades*");
                 }
             }

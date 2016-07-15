@@ -5,12 +5,17 @@ namespace Server.Items
 {
 	public class Candle : BaseEquipableLight
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int LitItemID{ get { return 0xA0F; } }
 		public override int UnlitItemID{ get { return 0xA28; } }
 
 		[Constructable]
 		public Candle() : base( 0xA28 )
 		{
+            Name = "candle";
+
 			if ( Burnout )
 				Duration = TimeSpan.FromMinutes( 20 );
 			else

@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xfbb, 0xfbc )]
 	public class Tongs : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override CraftSystem CraftSystem{ get{ return DefBlacksmithy.CraftSystem; } }
 
 		[Constructable]

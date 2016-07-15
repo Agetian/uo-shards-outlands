@@ -179,7 +179,7 @@ namespace Server.Engines.Craft
             AddCraft(1, typeof(Hammer), "Crafting Tools", "Hammer", 0, 25, typeof(IronIngot), 1044036, 2, 1044037);
             AddCraft(1, typeof(Inshave), "Crafting Tools", "Inshave", 0, 25, typeof(IronIngot), 1044036, 2, 1044037);
             AddCraft(1, typeof(JointingPlane), "Crafting Tools", "Jointing Plane", 0, 25, typeof(Board), 1044041, 2, 1044351);
-            AddCraft(1, typeof(MouldingPlane), "Crafting Tools", "Moulding Plane", 0, 25, typeof(Board), 1044041, 2, 1044351);
+            AddCraft(1, typeof(WoodenPlane), "Crafting Tools", "Moulding Plane", 0, 25, typeof(Board), 1044041, 2, 1044351);
             AddCraft(1, typeof(SmoothingPlane), "Crafting Tools", "Smoothing Plane", 0, 25, typeof(Board), 1044041, 2, 1044351);
 
             //Utensils            

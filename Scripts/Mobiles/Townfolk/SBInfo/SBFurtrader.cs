@@ -20,7 +20,7 @@ namespace Server.Mobiles
 		{ 
 			public InternalBuyInfo() 
 			{
-                Add(new GenericBuyInfo(typeof(SkinningKnife), 14, 20, 0xEC4, 0));
+                Add(new GenericBuyInfo("Skinning Knife", typeof(SkinningKnife), SkinningKnife.GetSBPurchaseValue(), 25, 0xEC4, 0));
 			} 
 		} 
 
@@ -28,7 +28,8 @@ namespace Server.Mobiles
 		{ 
 			public InternalSellInfo() 
 			{
-                Add(typeof(Hide), Hide.GoldValue); 
+                Add(typeof(SkinningKnife), SkinningKnife.GetSBSellValue()); 
+                Add(typeof(Hide), Hide.GetSBSellValue()); 
 			} 
 		} 
 	} 

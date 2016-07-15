@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xF4D, 0xF4E )]
 	public class Bardiche : BasePoleArm
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 22; } }
         public override int BaseMaxDamage { get { return 44; } }
         public override int BaseSpeed { get { return 25; } }

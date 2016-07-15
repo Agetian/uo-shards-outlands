@@ -19,9 +19,11 @@ namespace Server.Mobiles
 		public class InternalBuyInfo : List<GenericBuyInfo> 
 		{ 
 			public InternalBuyInfo() 
-			{
-                Add(new BeverageBuyInfo(typeof(Pitcher), BeverageType.Water, 11, 20, 0x1F9D, 0));
-                Add(new GenericBuyInfo(typeof(RollingPin), 10, 20, 0x1043, 0)); 
+			{                
+                Add(new GenericBuyInfo("Skillet", typeof(Skillet), Skillet.GetSBPurchaseValue(), 50, 0x1043, 0)); 
+                Add(new GenericBuyInfo("Rolling Pin", typeof(RollingPin), RollingPin.GetSBPurchaseValue(), 50, 0x1043, 0));
+
+                Add(new BeverageBuyInfo("Pitcher of Water", typeof(Pitcher), BeverageType.Water, Pitcher.GetSBPurchaseValue(), 25, 0x1F9D, 0));
 				
 			} 
 		} 
@@ -29,10 +31,11 @@ namespace Server.Mobiles
 		public class InternalSellInfo : GenericSellInfo 
 		{ 
 			public InternalSellInfo() 
-			{
-                Add(typeof(Pitcher), 5);
-                Add(typeof(RollingPin), 3);
-				
+			{               
+                Add(typeof(Skillet), Skillet.GetSBSellValue());				
+                Add(typeof(RollingPin), RollingPin.GetSBSellValue());
+
+                Add(typeof(Pitcher), Pitcher.GetSBSellValue());
 			} 
 		} 
 	} 

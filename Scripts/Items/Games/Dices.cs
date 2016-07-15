@@ -6,9 +6,13 @@ namespace Server.Items
 {
 	public class Dices : Item, ITelekinesisable
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		[Constructable]
 		public Dices() : base( 0xFA7 )
 		{
+            Name = "dice";
 			Weight = 1.0;
 		}
 

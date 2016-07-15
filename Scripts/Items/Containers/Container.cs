@@ -317,11 +317,16 @@ namespace Server.Items
 
 	public class Backpack : BaseContainer, IDyable
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		[Constructable]
 		public Backpack() : base( 0xE75 )
 		{
+            Name = "backpack";
+
 			Layer = Layer.Backpack;
-			Weight = 3.0;
+			Weight = 2.0;
 		}
 
 		public override int DefaultMaxWeight {
@@ -372,9 +377,13 @@ namespace Server.Items
 
 	public class Pouch : TrapableContainer
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		[Constructable]
 		public Pouch() : base( 0xE79 )
 		{
+            Name = "pouch";
 			Weight = 1.0;
 		}
 
@@ -487,10 +496,14 @@ namespace Server.Items
 
 	public class Bag : BaseContainer, IDyable
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		[Constructable]
 		public Bag() : base( 0xE76 )
 		{
-			Weight = 2.0;
+            Name = "bag";
+			Weight = 1.0;
 		}
 
 		public Bag( Serial serial ) : base( serial )

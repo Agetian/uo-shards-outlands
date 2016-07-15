@@ -11,9 +11,14 @@ namespace Server.Items
 {
 	public class FishingPole : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		[Constructable]
 		public FishingPole() : base( 0x0DC0 )
 		{
+            Name = "fishing pole";
+
 			Layer = Layer.TwoHanded;
 			Weight = 8.0;
 		}

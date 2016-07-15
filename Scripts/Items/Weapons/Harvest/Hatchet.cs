@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xF43, 0xF44 )]
 	public class Hatchet : BaseAxe
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 1; } }
         public override int BaseMaxDamage { get { return 2; } }
         public override int BaseSpeed { get { return 40; } }

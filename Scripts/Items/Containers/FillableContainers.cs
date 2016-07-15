@@ -868,7 +868,7 @@ namespace Server.Items
 				new FillableEntry( 1, typeof( ChiselsWest ) ),
 				new FillableEntry( 2, typeof( DovetailSaw ) ),
 				new FillableEntry( 2, typeof( Hammer ) ),
-				new FillableEntry( 2, typeof( MouldingPlane ) ),
+				new FillableEntry( 2, typeof( WoodenPlane ) ),
 				new FillableEntry( 2, typeof( JointingPlane ) ),
 				new FillableEntry( 2, typeof( SmoothingPlane ) ),
 				new FillableEntry( 2, typeof( Saw ) ),

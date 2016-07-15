@@ -136,15 +136,15 @@ namespace Server.Engines.Craft
             index = AddCraft(1, typeof(Kindling), "Bowcraft and Fletching", "Kindling", 0.0, 0.0, typeof(Board), 1044041, 1, 1044351);
             SetUseAllRes(index, true);
 
-            index = AddCraft(1, typeof(Shaft), "Bowcraft and Fletching", "Shaft", 0, 25, typeof(Board), 1044041, 1, 1044351);
+            index = AddCraft(10, typeof(Shaft), "Bowcraft and Fletching", "Shaft", 0, 25, typeof(Board), 1044041, 10, 1044351);
             SetUseAllRes(index, true);
 
-            index = AddCraft(1, typeof(Arrow), "Bowcraft and Fletching", "Arrow", 0, 25, typeof(Shaft), 1044560, 1, 1044561);
-            AddRes(index, typeof(Feather), 1044562, 1, 1044563);
+            index = AddCraft(25, typeof(Arrow), "Bowcraft and Fletching", "Arrow", 0, 25, typeof(Shaft), 1044560, 10, 1044561);
+            AddRes(index, typeof(Feather), 1044562, 10, 1044563);
             SetUseAllRes(index, true);
 
-            index = AddCraft(1, typeof(Bolt), "Bowcraft and Fletching", "Bolt", 0, 25, typeof(Shaft), 1044560, 1, 1044561);
-            AddRes(index, typeof(Feather), 1044562, 1, 1044563);
+            index = AddCraft(25, typeof(Bolt), "Bowcraft and Fletching", "Bolt", 0, 25, typeof(Shaft), 1044560, 10, 1044561);
+            AddRes(index, typeof(Feather), 1044562, 10, 1044563);
             SetUseAllRes(index, true);
 
             AddCraft(1, typeof(Bow), "Bowcraft and Fletching", "Bow", 35, 60, typeof(Board), 1044041, 10, 1044351);

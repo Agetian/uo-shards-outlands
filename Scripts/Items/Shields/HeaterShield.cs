@@ -5,16 +5,11 @@ namespace Server.Items
 {
     public class HeaterShield : BaseShield
     {
-        public override int BasePhysicalResistance { get { return 0; } }
-        public override int BaseFireResistance { get { return 1; } }
-        public override int BaseColdResistance { get { return 0; } }
-        public override int BasePoisonResistance { get { return 0; } }
-        public override int BaseEnergyResistance { get { return 0; } }
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
 
         public override int InitMinHits { get { return 100; } }
         public override int InitMaxHits { get { return 100; } }
-
-        public override int AosStrReq { get { return 90; } }
 
         public override int ArmorBase { get { return 22; } }
         public override int OldDexBonus { get { return -6; } }

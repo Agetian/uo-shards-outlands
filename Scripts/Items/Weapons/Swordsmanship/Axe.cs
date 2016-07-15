@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xF49, 0xF4a )]
 	public class Axe : BaseAxe
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 17; } }
         public override int BaseMaxDamage { get { return 34; } }
         public override int BaseSpeed { get { return 42; } }

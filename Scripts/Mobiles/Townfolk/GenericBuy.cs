@@ -8,8 +8,6 @@ namespace Server.Mobiles
 {
 	public class GenericBuyInfo : IBuyItemInfo
 	{
-        public static double PurchaseCompareToSellPriceScalar = 5.0;
-
 		private class DisplayCache : Container
 		{
 			private static DisplayCache m_Cache;
@@ -176,7 +174,6 @@ namespace Server.Mobiles
 		public int DefaultPrice{ get{ return m_PriceScalar; } }
 
 		private int m_PriceScalar;
-
 		public int PriceScalar
 		{
 			get{ return m_PriceScalar; }

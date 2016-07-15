@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using Server.Misc;
 using Server.Network;
-
 using Server.Commands;
 using Server.Items;
 using Server.Mobiles;
 using Server;
-using Server.ArenaSystem;
 
 namespace Server.Gumps
 {

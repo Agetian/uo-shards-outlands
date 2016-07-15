@@ -5,7 +5,8 @@ namespace Server
 {
     public class Hide : Item
     {
-        public static int GoldValue = 3;
+        public static int GetSBPurchaseValue() { return 6; }
+        public static int GetSBSellValue() { return 3; }
 
         [Constructable]
         public Hide(int amount): base(0x1079)

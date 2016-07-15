@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x13B9, 0x13Ba )]
 	public class VikingSword : BaseSword
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 14; } }
         public override int BaseMaxDamage { get { return 24; } }
         public override int BaseSpeed { get { return 50; } }

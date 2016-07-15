@@ -20,17 +20,17 @@ namespace Server.Mobiles
 		{ 
 			public InternalBuyInfo() 
 			{
-                Add(new GenericBuyInfo("Skillet", typeof(Skillet), 6, 20, 0x97F, 0));
-                Add(new GenericBuyInfo(typeof(RollingPin), 2, 20, 0x1043, 0));
+                Add(new GenericBuyInfo("Skillet", typeof(Skillet), Skillet.GetSBPurchaseValue(), 50, 0x97F, 0));
+                Add(new GenericBuyInfo("Rolling Pin", typeof(RollingPin), RollingPin.GetSBPurchaseValue(), 50, 0x1043, 0));
 			} 
 		} 
 
 		public class InternalSellInfo : GenericSellInfo 
 		{ 
 			public InternalSellInfo() 
-			{ 
-				Add( typeof( Skillet ), 1 );
-				Add( typeof( RollingPin ), 1 );
+			{
+                Add(typeof(Skillet), Skillet.GetSBSellValue());
+                Add(typeof(RollingPin), Skillet.GetSBSellValue());
 			} 
 		} 
 	} 

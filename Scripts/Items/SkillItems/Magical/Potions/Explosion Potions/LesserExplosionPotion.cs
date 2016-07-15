@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class LesserExplosionPotion : BaseExplosionPotion
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int MinDamage { get { return 5; } }
 		public override int MaxDamage { get { return 10; } }
 

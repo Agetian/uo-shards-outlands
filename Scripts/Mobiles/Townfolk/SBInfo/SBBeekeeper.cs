@@ -19,16 +19,16 @@ namespace Server.Mobiles
 		public class InternalBuyInfo : List<GenericBuyInfo>
 		{
 			public InternalBuyInfo()
-			{				
-				Add( new GenericBuyInfo( typeof( Beeswax ), 1, 20, 0x1422, 0 ) );
+			{
+                Add(new GenericBuyInfo("Beeswax", typeof(Beeswax), Beeswax.GetSBPurchaseValue(), 50, 0x1422, 0));
 			}
 		}
 
 		public class InternalSellInfo : GenericSellInfo
 		{
 			public InternalSellInfo()
-			{               
-				Add( typeof( Beeswax ), 1 );
+			{
+                Add(typeof(Beeswax), Beeswax.GetSBSellValue());
 			}
 		}
 	}

@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x13FF, 0x13FE )]
 	public class Katana : BaseSword
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 11; } }
         public override int BaseMaxDamage { get { return 17; } }
         public override int BaseSpeed { get { return 56; } }

@@ -4,7 +4,10 @@ using Server.Items;
 namespace Server.Items
 {
 	public class PlateGorget : BaseArmor
-	{		
+	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int InitMinHits{ get{ return 60; } }
 		public override int InitMaxHits{ get{ return 100; } }
 

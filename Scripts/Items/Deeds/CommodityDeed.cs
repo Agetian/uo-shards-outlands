@@ -12,6 +12,9 @@ namespace Server.Items
 
 	public class CommodityDeed : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		private Item m_Commodity;
 
 		[CommandProperty( AccessLevel.GameMaster )]
@@ -73,6 +76,8 @@ namespace Server.Items
 
 		public CommodityDeed( Item commodity ) : base( 0x14F0 )
 		{
+            Name = "commodity deed";
+
 			Weight = 1.0;
 			Hue = 0x47;
 

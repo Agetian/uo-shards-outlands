@@ -6,9 +6,13 @@ namespace Server.Items
 	[Flipable( 0xE1C, 0xFAD )]
 	public class Backgammon : BaseBoard
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		[Constructable]
 		public Backgammon() : base( 0xE1C )
 		{
+            Name = "backgammon";
 		}
 
 		public override void CreatePieces()

@@ -14,6 +14,9 @@ namespace Server.Items
 {
     public class Bandage : Item, IDyable
     {
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public static int Range = 1;
 
         public override double DefaultWeight

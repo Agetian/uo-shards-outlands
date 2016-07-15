@@ -20,15 +20,16 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new GenericBuyInfo( typeof( Amber ), 90, 20, 0xF25, 0 ) );
-				Add( new GenericBuyInfo( typeof( Amethyst ), 120, 20, 0xF16, 0 ) );
-				Add( new GenericBuyInfo( typeof( Citrine ), 60, 20, 0xF15, 0 ) );
-				Add( new GenericBuyInfo( typeof( Diamond ), 240, 20, 0xF26, 0 ) );
-				Add( new GenericBuyInfo( typeof( Emerald ), 120, 20, 0xF10, 0 ) );
-				Add( new GenericBuyInfo( typeof( Ruby ), 90, 20, 0xF13, 0 ) );
-				Add( new GenericBuyInfo( typeof( Sapphire ), 120, 20, 0xF19, 0 ) );
-				Add( new GenericBuyInfo( typeof( StarSapphire ), 150, 20, 0xF21, 0 ) );
-				Add( new GenericBuyInfo( typeof( Tourmaline ), 90, 20, 0xF2D, 0 ) );
+                Add(new GenericBuyInfo("Citrine", typeof(Citrine), Citrine.GetSBPurchaseValue(), 25, 0xF15, 0));
+                Add(new GenericBuyInfo("Tourmaline", typeof(Tourmaline), Tourmaline.GetSBPurchaseValue(), 25, 0xF2D, 0));
+                Add(new GenericBuyInfo("Amber", typeof(Amber), Amber.GetSBPurchaseValue(), 25, 0xF25, 0));
+                Add(new GenericBuyInfo("Amethyst", typeof(Amethyst), Amethyst.GetSBPurchaseValue(), 25, 0xF16, 0));
+                Add(new GenericBuyInfo("Ruby", typeof(Ruby), Ruby.GetSBPurchaseValue(), 25, 0xF13, 0));
+                Add(new GenericBuyInfo("Sapphire", typeof(Sapphire), Sapphire.GetSBPurchaseValue(), 25, 0xF19, 0));
+                Add(new GenericBuyInfo("Emerald", typeof(Emerald), Emerald.GetSBPurchaseValue(), 25, 0xF10, 0));
+                Add(new GenericBuyInfo("Star Sapphire", typeof(StarSapphire), StarSapphire.GetSBPurchaseValue(), 25, 0xF21, 0));
+                Add(new GenericBuyInfo("Diamond", typeof(Diamond), Diamond.GetSBPurchaseValue(), 25, 0xF26, 0));
+               
 			}
 		}
 
@@ -36,15 +37,15 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
-				Add( typeof( Amber ), 35 );
-				Add( typeof( Amethyst ), 45 );
-				Add( typeof( Citrine ), 25 );
-				Add( typeof( Diamond ), 100 );
-				Add( typeof( Emerald ), 55 );
-				Add( typeof( Ruby ), 39 );
-				Add( typeof( Sapphire ), 45 );
-				Add( typeof( StarSapphire ), 65 );
-				Add( typeof( Tourmaline ), 25 );
+                Add(typeof(Amber), Amber.GetSBSellValue());
+                Add(typeof(Amethyst), Amethyst.GetSBSellValue());
+                Add(typeof(Citrine), Citrine.GetSBSellValue());
+                Add(typeof(Diamond), Diamond.GetSBSellValue());
+                Add(typeof(Emerald), Emerald.GetSBSellValue());
+                Add(typeof(Ruby), Ruby.GetSBSellValue());
+                Add(typeof(Sapphire), Sapphire.GetSBSellValue());
+                Add(typeof(StarSapphire), StarSapphire.GetSBSellValue());
+                Add(typeof(Tourmaline), Tourmaline.GetSBSellValue());
 			}
 		}
 	}

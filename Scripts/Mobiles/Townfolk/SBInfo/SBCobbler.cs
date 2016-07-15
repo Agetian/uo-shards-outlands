@@ -19,22 +19,22 @@ namespace Server.Mobiles
 		public class InternalBuyInfo : List<GenericBuyInfo> 
 		{ 
 			public InternalBuyInfo() 
-			{ 
-				Add( new GenericBuyInfo( typeof( Shoes ), 23, 20, 0x170f, 0 ) ); 
-				Add( new GenericBuyInfo( typeof( Boots ), 38, 20, 0x170b, 0 ) ); 
-				Add( new GenericBuyInfo( typeof( ThighBoots ), 56, 20, 0x1711, 0 ) ); 
-				Add( new GenericBuyInfo( typeof( Sandals ), 18, 20, 0x170d, 0 ) ); 
+			{
+                Add(new GenericBuyInfo("Sandals", typeof(Sandals), Sandals.GetSBPurchaseValue(), 25, 0x170d, 0));
+                Add(new GenericBuyInfo("Shoes", typeof(Shoes), Shoes.GetSBPurchaseValue(), 25, 0x170f, 0));
+                Add(new GenericBuyInfo("Boots", typeof(Boots), Boots.GetSBPurchaseValue(), 25, 0x170b, 0));
+                Add(new GenericBuyInfo("Thigh Boots", typeof(ThighBoots), ThighBoots.GetSBPurchaseValue(), 25, 0x1711, 0));                
 			} 
 		} 
 
 		public class InternalSellInfo : GenericSellInfo 
 		{ 
 			public InternalSellInfo() 
-			{ 
-				Add( typeof( Shoes ), 11 ); 
-				Add( typeof( Boots ), 19 ); 
-				Add( typeof( ThighBoots ), 28 ); 
-				Add( typeof( Sandals ), 9 ); 
+			{
+                Add(typeof(Shoes), Shoes.GetSBSellValue());
+                Add(typeof(Boots), Boots.GetSBSellValue());
+                Add(typeof(ThighBoots), ThighBoots.GetSBSellValue());
+                Add(typeof(Sandals), Sandals.GetSBSellValue()); 
 			} 
 		} 
 	} 

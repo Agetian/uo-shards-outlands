@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class Amber : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override double DefaultWeight
 		{
 			get { return 0.1; }
@@ -13,11 +16,14 @@ namespace Server.Items
 		[Constructable]
 		public Amber() : this( 1 )
 		{
+            Name = "amber";
 		}
 
 		[Constructable]
 		public Amber( int amount ) : base( 0xF25 )
 		{
+            Name = "amber";
+
 			Stackable = true;
 			Amount = amount;
 		}

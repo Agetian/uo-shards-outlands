@@ -19,14 +19,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
@@ -37,12 +35,14 @@ namespace Server.Items
 		[Constructable]
 		public FancyShirt() : this( 0 )
 		{
+            Name = "fancy shirt";
 		}
 
 		[Constructable]
 		public FancyShirt( int hue ) : base( 0x1EFD, hue )
 		{
-			Weight = 2.0;
+            Name = "fancy shirt";
+			Weight = 1.0;
 		}
 
 		public FancyShirt( Serial serial ) : base( serial )
@@ -52,15 +52,13 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
-			int version = reader.ReadInt();
+            			int version = reader.ReadInt();
 		}
 	}
 
@@ -70,11 +68,13 @@ namespace Server.Items
 		[Constructable]
 		public Shirt() : this( 0 )
 		{
+            Name = "shirt";
 		}
 
 		[Constructable]
 		public Shirt( int hue ) : base( 0x1517, hue )
 		{
+            Name = "shirt";
 			Weight = 1.0;
 		}
 
@@ -85,18 +85,13 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
-
-			if ( Weight == 2.0 )
-				Weight = 1.0;
 		}
 	}
 
@@ -106,12 +101,15 @@ namespace Server.Items
 		[Constructable]
 		public ClothNinjaJacket() : this( 0 )
 		{
+            Name = "cloth ninja jacket";
 		}
 
 		[Constructable]
 		public ClothNinjaJacket( int hue ) : base( 0x2794, hue )
 		{
-			Weight = 5.0;
+            Name = "cloth ninja jacket";
+
+			Weight = 1.0;
 			Layer = Layer.InnerTorso;
 		}
 
@@ -122,31 +120,29 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}
 
 	public class ElvenShirt : BaseShirt
 	{
-		public override Race RequiredRace { get { return Race.Elf; } }
-
 		[Constructable]
 		public ElvenShirt() : this( 0 )
 		{
+            Name = "elven shirt";
 		}
 
 		[Constructable]
 		public ElvenShirt( int hue ) : base( 0x3175, hue )
 		{
-			Weight = 2.0;
+            Name = "elven shirt";
+			Weight = 1.0;
 		}
 
 		public ElvenShirt(Serial serial)
@@ -157,30 +153,30 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.WriteEncodedInt( 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadEncodedInt();
 		}
 	}
 
 	public class ElvenDarkShirt : BaseShirt
 	{
-		public override Race RequiredRace { get { return Race.Elf; } }
 		[Constructable]
 		public ElvenDarkShirt() : this( 0 )
 		{
+            Name = "elven dark shirt";
 		}
 
 		[Constructable]
 		public ElvenDarkShirt( int hue ) : base( 0x3176, hue )
 		{
-			Weight = 2.0;
+            Name = "elven dark shirt";
+
+			Weight = 1.0;
 		}
 
 		public ElvenDarkShirt( Serial serial ) : base( serial )
@@ -190,14 +186,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.WriteEncodedInt( 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadEncodedInt();
 		}
 	}

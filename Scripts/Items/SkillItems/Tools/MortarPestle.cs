@@ -6,17 +6,22 @@ namespace Server.Items
 {
 	public class MortarPestle : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override CraftSystem CraftSystem{ get{ return DefAlchemy.CraftSystem; } }
 
 		[Constructable]
 		public MortarPestle() : base( 0xE9B )
 		{
+            Name = "mortar and pestle";
 			Weight = 1.0;
 		}
 
 		[Constructable]
 		public MortarPestle( int uses ) : base( uses, 0xE9B )
 		{
+            Name = "mortar and pestle";
 			Weight = 1.0;
 		}
 

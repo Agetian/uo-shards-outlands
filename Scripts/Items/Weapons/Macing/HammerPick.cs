@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x143D, 0x143C )]
 	public class HammerPick : BaseBashing
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
         public override int BaseMinDamage { get { return 12; } }
         public override int BaseMaxDamage { get { return 18; } }
         public override int BaseSpeed { get { return 54; } }

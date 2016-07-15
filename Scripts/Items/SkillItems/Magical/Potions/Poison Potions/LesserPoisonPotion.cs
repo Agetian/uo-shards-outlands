@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class LesserPoisonPotion : BasePoisonPotion
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override Poison Poison{ get{ return Poison.Lesser; } }
 
 		public override double MinPoisoningSkill{ get{ return 0.0; } }

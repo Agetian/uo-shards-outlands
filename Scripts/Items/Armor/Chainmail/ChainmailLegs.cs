@@ -6,11 +6,8 @@ namespace Server.Items
 	[FlipableAttribute( 0x13be, 0x13c3 )]
 	public class ChainmailLegs : BaseArmor
 	{
-		public override int BasePhysicalResistance{ get{ return 4; } }
-		public override int BaseFireResistance{ get{ return 4; } }
-		public override int BaseColdResistance{ get{ return 4; } }
-		public override int BasePoisonResistance{ get{ return 1; } }
-		public override int BaseEnergyResistance{ get{ return 2; } }
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
 		
         public override int ArmorBase { get { return 30; } }
         public override int OldDexBonus { get { return -2; } }

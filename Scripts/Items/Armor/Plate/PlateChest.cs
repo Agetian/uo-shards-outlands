@@ -5,7 +5,10 @@ namespace Server.Items
 {
 	[FlipableAttribute( 0x1415, 0x1416 )]
 	public class PlateChest : BaseArmor
-	{        
+	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return 1; }
+
 		public override int InitMinHits{ get{ return 60; } }
 		public override int InitMaxHits{ get{ return 100; } }
 
