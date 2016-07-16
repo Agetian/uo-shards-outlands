@@ -260,6 +260,9 @@ namespace Server.Gumps
 
             for (int a = 0; a < itemCount + 1; a++)
             {
+                if (totalItems == 0)
+                    continue;
+
                 int itemIndex = itemStartIndex + a;
                 int itemButtonIndex = 20 + a;
 
@@ -447,7 +450,7 @@ namespace Server.Gumps
                 case 5:
                     if (m_CategoryPage > 0)
                     {
-                        m_CategoryPage++;
+                        m_CategoryPage--;
                         m_Player.SendSound(ChangePageSound);
                     }
 

@@ -16,7 +16,7 @@ namespace Server
         public static Type DonationCurrencyType = typeof(DragonCoin);        
 
         public static List<DonationCategory> DonationCategories = new List<DonationCategory>();
-        public static Dictionary<DonationCategory, List<DonationItem>> DonationShopList = new Dictionary<DonationCategory,List<DonationItem>>()
+        public static Dictionary<DonationCategory, List<DonationItem>> DonationShopList = new Dictionary<DonationCategory, List<DonationItem>>()
         {              
         };
 
@@ -65,7 +65,9 @@ namespace Server
             DonationShopList.Add(new DonationCategory("Convenience", 8793, 2550, 0, 0),
             new List<DonationItem>()
             {
-                new DonationItem(typeof(PotionKegCombiningDeed), "Potion Keg Combining Deed", new List<string>{"Combine the capacities of two potion kegs."}, 500, 5360, 2500, 0, 0),
+                new DonationItem(typeof(DiamondHatchet), "Diamond Hatchet", new List<string>{"Built to last and styled to impress!", "5000 Uses and Blessed."}, 500, 3908, 2500, -8, -3), 
+                new DonationItem(typeof(DiamondPickaxe), "Diamond Pickaxe", new List<string>{"Built to last and styled to impress!", "5000 Uses and Blessed."}, 500, 3717, 2500, -3, -5), 
+                new DonationItem(typeof(PotionKegCombiningDeed), "Potion Keg Combining Deed", new List<string>{"Combine the capacities of two potion", "kegs."}, 500, 5360, 2500, 0, 0),
                 new DonationItem(typeof(PotionBarrelConversionDeed), "Potion Barrel Conversion Deed", new List<string>{"Convert a potion keg with 500 capacity", "or more into a potion barrel."}, 500, 5360, 2515, 0, 0),                
                 new DonationItem(typeof(SkillMasteryScrollLibrary), "Power Scroll Library", new List<string>{"Store and organize Power Scrolls", "in this handy tome."}, 500, 8793, 2657, 0, 0),
                 new DonationItem(typeof(SpellScrollLibrary), "Spell Scroll Library", new List<string>{"Store and organize Spell Scrolls", "in this handy tome."}, 500, 8793, 2117, 0, 0),

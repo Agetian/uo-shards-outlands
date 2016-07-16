@@ -520,16 +520,20 @@ namespace Server.Custom
                     interactionType = InteractionType.Normal;
                 }
 
-                bool validMiningItem = false;
+                bool validLumberjackingItem = false;
+                bool validMiningItem = false;                
 
                 Item equippedItem = from.FindItemOnLayer(Layer.FirstValid);
 
-                if (equippedItem is Pickaxe || equippedItem is SturdyPickaxe || equippedItem is DiamondPickaxe)
-                    validMiningItem = true;
+                if (equippedItem is BaseAxe && !(equippedItem is Pickaxe))
+                    validLumberjackingItem = true;
+
+                if (equippedItem is Pickaxe)
+                    validMiningItem = true;               
 
                 BaseWeapon weapon = from.Weapon as BaseWeapon;
 
-                if (weapon != null || validMiningItem)
+                if (weapon != null || validMiningItem || validLumberjackingItem)
                 {
                     if (m_WeaponDamageScalar > 0)
                     {
@@ -537,7 +541,7 @@ namespace Server.Custom
                         interactionType = InteractionType.Weapon;
                     }
 
-                    if (m_LumberjackingDamageScalar > 0 && m_LumberjackingDamageScalar > highestScalar && weapon is BaseAxe)
+                    if (m_LumberjackingDamageScalar > 0 && m_LumberjackingDamageScalar > highestScalar && validLumberjackingItem)
                     {
                         highestScalar = m_LumberjackingDamageScalar;
                         interactionType = InteractionType.Lumberjacking;
@@ -786,7 +790,7 @@ namespace Server.Custom
 
                     Item equippedItem = from.FindItemOnLayer(Layer.FirstValid);
 
-                    if (equippedItem is Pickaxe || equippedItem is SturdyPickaxe || equippedItem is DiamondPickaxe)
+                    if (equippedItem is Pickaxe)
                         validMiningItem = true;
                     
                     if (validMiningItem)
@@ -824,7 +828,7 @@ namespace Server.Custom
                 case InteractionType.Lumberjacking:
                     weapon = from.Weapon as BaseWeapon;
 
-                    if (weapon != null && (weapon is BaseAxe))
+                    if (weapon != null && (weapon is BaseAxe && !(weapon is Pickaxe)))
                     {
                         damage = (int)(Math.Round(from.Skills.Lumberjacking.Value * LumberjackingDamageScalar * randomScalar));
 

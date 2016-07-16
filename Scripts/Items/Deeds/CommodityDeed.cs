@@ -12,7 +12,7 @@ namespace Server.Items
 
 	public class CommodityDeed : Item
 	{
-        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 50; }
         public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		private Item m_Commodity;

@@ -411,16 +411,6 @@ namespace Server.Items
                             rewardText = "You receive an exploding sheep.";
                         break;
 
-                        case "DiamondHarvestingTool":
-                            switch (Utility.RandomMinMax(1, 2))
-                            {
-                                case 1: item = new DiamondPickaxe(); break;
-                                case 2: item = new DiamondShovel(); break;
-                            }
-
-                            rewardText = "You receive a diamond-coated harvesting tool.";
-                        break;
-
                         //Common
                         case "PrestigeScroll":
                             item = new PrestigeScroll();

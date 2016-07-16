@@ -26,8 +26,6 @@ namespace Server.Items
 		public virtual HarvestSystem HarvestSystem{ get{ return Lumberjacking.System; } }
 
 		private int m_UsesRemaining;
-		private bool m_ShowUsesRemaining;
-
 		[CommandProperty( AccessLevel.GameMaster )]
 		public int UsesRemaining
 		{
@@ -35,6 +33,7 @@ namespace Server.Items
 			set { m_UsesRemaining = value; InvalidateProperties(); }
 		}
 
+        private bool m_ShowUsesRemaining;
 		[CommandProperty( AccessLevel.GameMaster )]
 		public bool ShowUsesRemaining
 		{
@@ -159,7 +158,6 @@ namespace Server.Items
 			writer.Write( (int) 2 ); // version
 
 			writer.Write( (bool) m_ShowUsesRemaining );
-
 			writer.Write( (int) m_UsesRemaining );
 		}
 

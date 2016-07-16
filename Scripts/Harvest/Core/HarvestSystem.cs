@@ -4,10 +4,7 @@ using System.Collections.Generic;
 using Server;
 using Server.Items;
 using Server.Targeting;
-
 using Server.Multis;
-
-using Server.Engines.BulkOrders;
 
 namespace Server.Engines.Harvest
 {
@@ -312,18 +309,7 @@ namespace Server.Engines.Harvest
         }
 
         public static bool GiveTo(Mobile m, Item item, bool placeAtFeet)
-        {
-            if (item is LargeBOD || item is SmallBOD)
-            {
-                if (item is LargeBOD)
-                    m.SendGump(new LargeBODAcceptGump(m, (LargeBOD)item));
-
-                else if (item is SmallBOD)
-                    m.SendGump(new SmallBODAcceptGump(m, (SmallBOD)item));
-
-                return false;
-            }
-            
+        {   
             if (item is BaseLog)
                 Custom.HarvestTracker.PlayerHarvest(m, Custom.HarvestType.Lumberjacking, item.Amount);
 

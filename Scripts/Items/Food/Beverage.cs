@@ -412,7 +412,7 @@ namespace Server.Items
 		"Server.Items.GlassPitcher" )]
 	public class Pitcher : BaseBeverage
 	{
-        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 10; }
         public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override int BaseLabelNumber{ get{ return 1048128; } } // a Pitcher of Ale

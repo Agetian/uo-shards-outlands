@@ -134,7 +134,7 @@ namespace Server.Items
                     //Quality
                     switch (Quality)
                     {
-                        case Quality.Low: ratingScalarBonus += -.20; break;
+                        case Quality.Low: ratingScalarBonus += -.10; break;
                         case Quality.Regular: ratingScalarBonus += 0; break;
                         case Quality.Exceptional: ratingScalarBonus += .20; break;
                     }
@@ -1622,8 +1622,12 @@ namespace Server.Items
 
             else
             {
-                if (Quality == Quality.Exceptional)
-                    displayName += "exceptional ";
+                switch (Quality)
+                {
+                    case Server.Quality.Low: displayName = "low quality "; break;
+                    case Server.Quality.Regular: displayName = ""; break;
+                    case Server.Quality.Exceptional: displayName += "exceptional "; break;
+                }
 
                 if (DurabilityLevel != ArmorDurabilityLevel.Regular)
                     displayName += DurabilityLevel.ToString().ToLower() + " ";

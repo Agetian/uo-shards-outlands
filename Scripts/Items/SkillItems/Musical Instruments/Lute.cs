@@ -6,7 +6,7 @@ namespace Server.Items
 {
 	public class Lute : BaseInstrument
 	{
-        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 50; }
         public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         public override int IconItemId { get { return 3763; } }

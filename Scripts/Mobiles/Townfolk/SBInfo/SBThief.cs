@@ -20,7 +20,8 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-                Add(new GenericBuyInfo("Lockpick", typeof(Lockpick), Lockpick.GetSBPurchaseValue(), 250, 0x14FC, 0));
+                Add(new GenericBuyInfo("Lockpick", typeof(Lockpick), Lockpick.GetSBPurchaseValue(), 100, 0x14FC, 0));
+                Add(new GenericBuyInfo("Dagger", typeof(Dagger), Dagger.GetSBPurchaseValue(), 25, 0xF52, 0));
 
                 Add(new GenericBuyInfo("Lantern", typeof(Lantern), Lantern.GetSBPurchaseValue(), 25, 0xA25, 0));
                 Add(new GenericBuyInfo("Torch", typeof(Torch), Torch.GetSBPurchaseValue(), 25, 0xF6B, 0));
@@ -40,6 +41,7 @@ namespace Server.Mobiles
 			public InternalSellInfo()
 			{
                 Add(typeof(Lockpick), Lockpick.GetSBSellValue());
+                Add(typeof(Dagger), Dagger.GetSBSellValue());
 
                 Add(typeof(Lantern), Lantern.GetSBSellValue());
                 Add(typeof(Torch), Torch.GetSBSellValue());

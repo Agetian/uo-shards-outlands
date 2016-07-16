@@ -6,7 +6,7 @@ using Server.Network;
 using Server.ContextMenus;
 using Server.Mobiles;
 using Server.Misc;
-using Server.Engines.BulkOrders;
+using Server.Engines;
 using Server.Regions;
 
 using Server.Engines.Craft;
@@ -89,68 +89,7 @@ namespace Server.Mobiles
 		public virtual DateTime NextTrickOrTreat { get { return m_NextTrickOrTreat; } set { m_NextTrickOrTreat = value; } }
 
 		public override bool ShowFameTitle { get { return false; } }
-
-		public virtual bool IsValidBulkOrder( Item item )
-		{
-			return false;
-		}
-
-		public virtual Item CreateBulkOrder( Mobile from, bool fromContextMenu )
-		{
-			return null;
-		}
-
-		public virtual bool SupportsBulkOrders( Mobile from )
-		{
-			return false;
-		}
-
-		public virtual TimeSpan GetNextBulkOrder( Mobile from )
-		{
-			return TimeSpan.Zero;
-		}
-
-		public virtual void OnSuccessfulBulkOrderReceive( Mobile from )
-		{
-		}
-
-		private class BulkOrderInfoEntry : ContextMenuEntry
-		{
-			private Mobile m_From;
-			private BaseVendor m_Vendor;
-
-			public BulkOrderInfoEntry( Mobile from, BaseVendor vendor ): base( 6152 )
-			{
-				m_From = from;
-				m_Vendor = vendor;
-			}
-
-			public override void OnClick()
-			{
-				if ( m_Vendor.SupportsBulkOrders( m_From ) )
-				{
-					TimeSpan ts = m_Vendor.GetNextBulkOrder( m_From );
-
-					int totalSeconds = (int)ts.TotalSeconds;
-					int totalHours = (totalSeconds + 3599) / 3600;
-					int totalMinutes = (totalSeconds + 59) / 60;
-
-					if ( ((Core.SE ) ? totalMinutes == 0 : totalHours == 0) )					
-						m_From.SendLocalizedMessage( 1049038 ); // You can get an order now.					
-
-					else
-					{
-						int oldSpeechHue = m_Vendor.SpeechHue;
-						m_Vendor.SpeechHue = 0x3B2;
-
-						m_Vendor.SayTo( m_From, 1049039, totalHours.ToString() ); // An offer may be available in about ~1_hours~ hours.
-
-						m_Vendor.SpeechHue = oldSpeechHue;
-					}
-				}
-			}
-		}
-
+        
 		public BaseVendor( string title ): base( AIType.AI_Vendor, FightMode.None, 2, 1, 0.5, 2 )
 		{
 			LoadSBInfo();
@@ -538,6 +477,7 @@ namespace Server.Mobiles
 			if ( !CheckVendorAccess( from ) )
 			{
 				Say( 501522 ); // I shall not treat with scum like thee!
+
 				return;
 			}
             
@@ -640,56 +580,6 @@ namespace Server.Mobiles
 
         public override bool OnDragDrop(Mobile from, Item dropped)
         {
-			if ( dropped is SmallBOD || dropped is LargeBOD )
-            {
-				PlayerMobile pm = from as PlayerMobile;
-
-                if ( !IsValidBulkOrder( dropped ) )
-				{
-					SayTo( from, 1045130 ); // That order is for some other shopkeeper.
-					return false;
-				}
-
-				else if ( (dropped is SmallBOD && !((SmallBOD)dropped).Complete) || (dropped is LargeBOD && !((LargeBOD)dropped).Complete) )
-				{
-					SayTo( from, 1045131 ); // You have not completed the order yet.
-					return false;
-				}
-
-				Item reward;
-				int gold, fame;
-
-				if ( dropped is SmallBOD )
-					((SmallBOD)dropped).GetRewards( out reward, out gold, out fame );
-
-				else
-					((LargeBOD)dropped).GetRewards( out reward, out gold, out fame );
-
-				from.SendSound( 0x3D );
-
-				SayTo( from, 1045132 ); // Thank you so much!  Here is a reward for your effort.
-
-				if ( reward != null )
-					from.AddToBackpack( reward );
-
-				if ( gold > 1000 )
-					from.AddToBackpack( new BankCheck( gold ) );
-
-				else if ( gold > 0 )
-					from.AddToBackpack( new Gold( gold ) );
-
-				FameKarmaTitles.AwardFame( from, fame, true );
-
-				OnSuccessfulBulkOrderReceive( from );
-
-				if ( Core.ML && pm != null )
-					pm.NextBODTurnInTime = DateTime.UtcNow + TimeSpan.FromSeconds( 10.0 );
-
-				dropped.Delete();
-
-				return true;
-			}
-
 			return base.OnDragDrop( from, dropped );
 		}
 
@@ -768,10 +658,12 @@ namespace Server.Mobiles
                     item.Acquisition = Item.AcquisitionType.VendorBought;
                     item.AcquisitionData = bii.Price;
 
+                    item.Quality = Quality.Low;
+
 					if (cont == null || !cont.TryDropItem(buyer, item, false))
 					{
 						if (bankbox.TryDropItem(buyer, item, false))
-							buyer.PrivateOverheadMessage(MessageType.Regular, 0x22, true, "Because of overweight your purchase was delivered to your bankbox.", buyer.NetState);
+                            buyer.PrivateOverheadMessage(MessageType.Regular, 0x22, true, "Because of overencumbrance your purchase was delivered to your bankbox.", buyer.NetState);
 						else
 							item.MoveToWorld(buyer.Location, buyer.Map);
 					}
@@ -789,7 +681,7 @@ namespace Server.Mobiles
 							if (cont == null || !cont.TryDropItem(buyer, item, false))
 							{
 								if (bankbox.TryDropItem(buyer, item, false))
-									buyer.PrivateOverheadMessage(MessageType.Regular, 0x22, true, "Because of overweight your purchase was delivered to your bankbox.", buyer.NetState);
+                                    buyer.PrivateOverheadMessage(MessageType.Regular, 0x22, true, "Because of overencumbrance your purchase was delivered to your bankbox.", buyer.NetState);
 								else
 									item.MoveToWorld(buyer.Location, buyer.Map);
 							}
@@ -1259,16 +1151,6 @@ namespace Server.Mobiles
 				    seller.AddToBackpack( new Gold( GiveGold ) );
 
 				seller.PlaySound( 0x0037 );
-
-				if ( SupportsBulkOrders( seller ) )
-				{
-					Item bulkOrder = CreateBulkOrder( seller, false );
-
-                    var pmSeller = seller as PlayerMobile;
-
-                    if (!pmSeller.HarvestLockedout)                    
-                        pmSeller.TempStashedHarvest = bulkOrder;                                        
-				}
 			}
 
 			return true;

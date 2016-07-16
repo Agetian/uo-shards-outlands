@@ -4677,9 +4677,7 @@ namespace Server.Mobiles
 
             m_VisList = new List<Mobile>();
             m_PermaFlags = new List<Mobile>();
-
-            m_BOBFilter = new Engines.BulkOrders.BOBFilter();
-
+            
             m_GameTime = TimeSpan.Zero;
 
             m_ShortTermElapse = TimeSpan.FromHours(MurderCountDecayHours);
@@ -5162,13 +5160,7 @@ namespace Server.Mobiles
         {
             SetHairMods(-1, -1);
         }
-
-        private Engines.BulkOrders.BOBFilter m_BOBFilter = new Engines.BulkOrders.BOBFilter();
-        public Engines.BulkOrders.BOBFilter BOBFilter
-        {
-            get { return m_BOBFilter; }
-        }
-
+        
         public override void Serialize(GenericWriter writer)
         {
             CheckKillDecay();
@@ -5268,7 +5260,6 @@ namespace Server.Mobiles
             writer.Write((Serial)m_LastTarget);
             writer.Write((DateTime)m_LastDeathByPlayer);
             writer.Write(m_LastOnline);
-            m_BOBFilter.Serialize(writer);
             writer.Write((int)m_NpcGuild);
             writer.Write((DateTime)m_NpcGuildJoinTime);
             writer.Write((TimeSpan)m_NpcGuildGameTime);
@@ -5365,7 +5356,6 @@ namespace Server.Mobiles
                 m_LastTarget = (Serial)reader.ReadInt();
                 m_LastDeathByPlayer = reader.ReadDateTime();
                 m_LastOnline = reader.ReadDateTime();
-                m_BOBFilter = new Engines.BulkOrders.BOBFilter(reader);
                 m_NpcGuild = (NpcGuild)reader.ReadInt();
                 m_NpcGuildJoinTime = reader.ReadDateTime();
                 m_NpcGuildGameTime = reader.ReadTimeSpan();

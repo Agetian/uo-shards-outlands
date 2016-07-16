@@ -116,7 +116,7 @@ namespace Server.Engines.Craft
                     break;
 
                     case CraftRecycleOption.RecycleEverything:
-                        from.SendMessage(1256, "Warning! You are about to recycle ALL items of ANY type that may be recycled within in your backpack. Target yourself to proceed.");
+                        from.SendMessage(1256, "Warning! You are about to recycle ALL craftable items of ANY type made with Ingots, Boards, Leather, or Cloth inside your backpack and containers within. Target yourself to proceed.");
                     break;
                 }
 			}
@@ -264,7 +264,7 @@ namespace Server.Engines.Craft
                         if (m_ValidRecipeResources.Count == 0)
                             continue;
 
-                        List<Item> m_Items = new List<Item>();
+                        List<Item> m_ItemMatches = new List<Item>();
                         List<Item> m_ItemsToRecycle = new List<Item>();
 
                         Item[] m_MatchingItems = from.Backpack.FindItemsByType(itemType);
@@ -275,42 +275,42 @@ namespace Server.Engines.Craft
 
                             if (craftContext.RecycleOption == CraftRecycleOption.RecycleSingle && targetItem == item)
                             {
-                                m_ItemsToRecycle.Add(targetItem);
+                                m_ItemMatches.Add(targetItem);
                                 continue;
                             }
 
                             if (craftContext.RecycleOption == CraftRecycleOption.RecycleRegularByType && targetItem.Quality == Quality.Regular && !targetItem.IsMagical)
                             {
-                                m_Items.Add(targetItem);
+                                m_ItemMatches.Add(targetItem);
                                 continue;
                             }
 
                             if (craftContext.RecycleOption == CraftRecycleOption.RecycleExceptionalByType && targetItem.Quality == Quality.Exceptional)
                             {
-                                m_Items.Add(targetItem);
+                                m_ItemMatches.Add(targetItem);
                                 continue;
                             }
 
                             if (craftContext.RecycleOption == CraftRecycleOption.RecycleExceptionalByType && targetItem.IsMagical)
                             {
-                                m_Items.Add(targetItem);
+                                m_ItemMatches.Add(targetItem);
                                 continue;
                             }
 
                             if (craftContext.RecycleOption == CraftRecycleOption.RecycleAnyByType)
                             {
-                                m_ItemsToRecycle.Add(targetItem);
+                                m_ItemMatches.Add(targetItem);
                                 continue;
                             }
 
                             if (craftContext.RecycleOption == CraftRecycleOption.RecycleEverything)
                             {
-                                m_ItemsToRecycle.Add(targetItem);
+                                m_ItemMatches.Add(targetItem);
                                 continue;
                             }
                         }
 
-                        foreach (Item recycleItem in m_Items)
+                        foreach (Item recycleItem in m_ItemMatches)
                         {
                             if (!recycleItem.Movable) continue;
                             if (recycleItem.LootType != LootType.Regular) continue;
@@ -320,6 +320,7 @@ namespace Server.Engines.Craft
                             if (recycleItem.DonationItem) continue;
                             if (recycleItem.DecorativeEquipment) continue;
                             if (recycleItem.TierLevel > 0 && recycleItem.Aspect != AspectEnum.None) continue;
+                            if (recycleItem is BaseContainer && recycleItem.TotalItems > 0) continue;
 
                             m_ItemsToRecycle.Add(recycleItem);
                         }
@@ -342,10 +343,15 @@ namespace Server.Engines.Craft
 
                             foreach (KeyValuePair<Type, int> pair in m_ValidRecipeResources)
                             {
-                                Type resourceType = pair.Key;
-                                int totalResourceAmount = pair.Value * recycleItem.Amount;
+                                double salvageScalar = .5;
 
-                                if (totalResourceAmount < 2)
+                                if (recycleItem.Quality == Quality.Low || recycleItem.Stackable)
+                                    salvageScalar = .25;
+
+                                Type resourceType = pair.Key;
+                                int totalResourceAmount = (int)(Math.Floor((double)pair.Value * (double)recycleItem.Amount * salvageScalar));
+                                
+                                if (totalResourceAmount < 1)
                                     continue;
 
                                 //Ingot
@@ -413,7 +419,7 @@ namespace Server.Engines.Craft
                                 deleteItem = true;
                                 deletedCount++;
 
-                                newResource.Amount = (int)(Math.Floor((double)totalResourceAmount / 2));
+                                newResource.Amount = totalResourceAmount;
                                 from.AddToBackpack(newResource);
                             }
 

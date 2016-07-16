@@ -228,7 +228,7 @@ namespace Server.Engines.Craft
             index = AddCraft(1, typeof(Runebook), "Utility", "Runebook", 75, 100, typeof(BlankScroll), "Blank Scroll", 10, 1044378);
             AddRes(index, typeof(ArcaneScroll), "Arcane Scroll", 4, "You do not have the neccessary arcane scrolls needed to craft that.");
             
-            AddCraft(1, typeof(Engines.BulkOrders.BulkOrderBook), "Bulk Order", "Bulk Order Book", 95, 120, typeof(BlankScroll), "Blank Scroll", 10, 1044378);
+            //AddCraft(1, typeof(Engines.BulkOrders.BulkOrderBook), "Bulk Order", "Bulk Order Book", 95, 120, typeof(BlankScroll), "Blank Scroll", 10, 1044378);
 
             index = AddCraft(1, typeof(AncientMystery.AncientMysteryScroll), "Utility", "Ancient Mystery Scroll", 80.0, 120.0, typeof(BlankScroll), "Blank Scroll", 25, 1044378);
             AddRes(index, typeof(GhoulHide), "Ghoul Hide", 2, "You do not have the neccesary crafting component needed to make this");

@@ -1460,9 +1460,9 @@ namespace Server.Items
             {
                 case WeaponDurabilityLevel.Durable: bonus += 20; break;
                 case WeaponDurabilityLevel.Substantial: bonus += 50; break;
-                case WeaponDurabilityLevel.Massive: bonus += 70; break;
+                case WeaponDurabilityLevel.Massive: bonus += 75; break;
                 case WeaponDurabilityLevel.Fortified: bonus += 100; break;
-                case WeaponDurabilityLevel.Indestructible: bonus += 120; break;
+                case WeaponDurabilityLevel.Indestructible: bonus += 125; break;
             }
 
             return bonus;
@@ -3105,9 +3105,13 @@ namespace Server.Items
 
             else
             {
-                if (Quality == Quality.Exceptional)
-                    displayName += "exceptional ";
-
+                switch (Quality)
+                {
+                    case Server.Quality.Low: displayName = "low quality "; break;
+                    case Server.Quality.Regular: displayName = ""; break;
+                    case Server.Quality.Exceptional: displayName += "exceptional "; break;
+                }
+                
                 if (DurabilityLevel != WeaponDurabilityLevel.Regular)
                     displayName += DurabilityLevel.ToString().ToLower() + " ";
 

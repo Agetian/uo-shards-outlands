@@ -6,7 +6,7 @@ namespace Server.Items
 {
 	public class RollingPin : BaseTool
 	{
-        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 10; }
         public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override CraftSystem CraftSystem{ get{ return DefCooking.CraftSystem; } }

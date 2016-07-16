@@ -163,22 +163,12 @@ namespace Server.Engines.Craft
             AddCraft(1, typeof(WoodenKiteShield), "Weapons and Shields", "Wooden Kite Shield", 30, 55, typeof(Board), 1044041, 12, 1044351);
 
             //Instruments
-            index = AddCraft(1, typeof(Harp), "Instruments", "Harp", 50, 75, typeof(Board), 1044041, 10, 1044351);
-            AddRes(index, typeof(Cloth), 1044286, 15, 1044287);
-                        
-            index = AddCraft(1, typeof(Drums), "Instruments", "Drums", 50, 75, typeof(Board), 1044041, 10, 1044351);
-            AddRes(index, typeof(Cloth), 1044286, 10, 1044287);
-
-            index = AddCraft(1, typeof(Lute), "Instruments", "Lute", 50, 75, typeof(Board), 1044041, 10, 1044351);
-            AddRes(index, typeof(Cloth), 1044286, 10, 1044287);
-
-            index = AddCraft(1, typeof(Tambourine), "Instruments", "Tambourine", 50, 75, typeof(Board), 1044041, 10, 1044351);
-            AddRes(index, typeof(Cloth), 1044286, 10, 1044287);
-
-            AddCraft(1, typeof(BambooFlute), "Instruments", "Bamboo Flute", 85, 110, typeof(Board), 1044041, 12, 1044351);
-
-            index = AddCraft(1, typeof(StandingHarp), "Instruments", "Standing Harp", 95, 120, typeof(Board), 1044041, 18, 1044351);
-            AddRes(index, typeof(Cloth), 1044286, 10, 1044287);
+            AddCraft(1, typeof(Harp), "Instruments", "Harp", 50, 75, typeof(Board), 1044041, 10, 1044351);                        
+            AddCraft(1, typeof(Drums), "Instruments", "Drums", 50, 75, typeof(Board), 1044041, 10, 1044351);
+            AddCraft(1, typeof(Lute), "Instruments", "Lute", 50, 75, typeof(Board), 1044041, 10, 1044351);      
+            AddCraft(1, typeof(Tambourine), "Instruments", "Tambourine", 50, 75, typeof(Board), 1044041, 10, 1044351);
+            AddCraft(1, typeof(BambooFlute), "Instruments", "Bamboo Flute", 85, 110, typeof(Board), 1044041, 10, 1044351);
+            AddCraft(1, typeof(StandingHarp), "Instruments", "Standing Harp", 95, 120, typeof(Board), 1044041, 20, 1044351);
 
             // Furniture
             AddCraft(1, typeof(FootStool), "Furniture", "Foot Stool", 10, 35, typeof(Board), 1044041, 10, 1044351);

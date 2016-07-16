@@ -258,7 +258,7 @@ namespace Server.Custom
                         interactionType = InteractionType.Lumberjacking;
                     }
 
-                    if (m_MiningDamageScalar > 0 && m_MiningDamageScalar > highestScalar && (weapon is Pickaxe || weapon is SturdyPickaxe || weapon is DiamondPickaxe))
+                    if (m_MiningDamageScalar > 0 && m_MiningDamageScalar > highestScalar && (weapon is BaseAxe))
                     {
                         highestScalar = m_MiningDamageScalar;
                         interactionType = InteractionType.Mining;

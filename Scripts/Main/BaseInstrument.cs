@@ -496,8 +496,12 @@ namespace Server.Items
 
             else
             {
-                if (Quality == Quality.Exceptional)
-                    displayName += "exceptional ";
+                switch (Quality)
+                {
+                    case Server.Quality.Low: displayName = "low quality "; break;
+                    case Server.Quality.Regular: displayName = ""; break;
+                    case Server.Quality.Exceptional: displayName += "exceptional "; break;
+                }
 
                 if (DurabilityLevel != InstrumentDurabilityLevel.Regular)
                     displayName += DurabilityLevel.ToString().ToLower() + " ";

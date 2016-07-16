@@ -18,12 +18,7 @@ namespace Server.Engines.Harvest
             m_System = system;
 
             DisallowMultis = true;
-
-            if (tool is Pickaxe || tool is Shovel || tool is SturdyPickaxe || tool is SturdyShovel ||
-                tool is ProspectorsTool || tool is DiamondPickaxe || tool is DiamondShovel)
-            {
-                CheckLOS = false;
-            }
+            CheckLOS = false;            
         }
 
         protected override void OnTarget(Mobile from, object targeted)

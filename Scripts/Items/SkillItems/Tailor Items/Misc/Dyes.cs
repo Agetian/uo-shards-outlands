@@ -83,23 +83,7 @@ namespace Server.Items
                     m_RunebookDyeTub.DyeColor = hue;
                 }
             }
-
-            private class InternalBulkOrderBulkPicker : HuePicker
-            {
-                private BulkOrderBookDyeTub m_BulkOrderBookDyeTub;
-
-                public InternalBulkOrderBulkPicker(BulkOrderBookDyeTub bulkOrderBookDyeTub)
-                    : base(bulkOrderBookDyeTub.ItemID)
-                {
-                    m_BulkOrderBookDyeTub = bulkOrderBookDyeTub;
-                }
-
-                public override void OnResponse(int hue)
-                {
-                    m_BulkOrderBookDyeTub.DyeColor = hue;
-                }
-            }
-
+            
             public virtual void SetTubHue(Mobile from, object state, int hue)
             {
                 if (state is RunebookDyeTub)
@@ -107,14 +91,7 @@ namespace Server.Items
                     RunebookDyeTub runebookDyeTub = state as RunebookDyeTub;
 
                     runebookDyeTub.DyeColor = hue;
-                }
-
-                if (state is BulkOrderBookDyeTub)
-                {
-                    BulkOrderBookDyeTub bulkOrderBookDyeTub = state as BulkOrderBookDyeTub;
-
-                    bulkOrderBookDyeTub.DyeColor = hue;
-                }
+                }                
 
                 if (state is DyeTub)
                 {
@@ -141,24 +118,7 @@ namespace Server.Items
 
                     else
                         from.SendMessage("That dye tub cannot be redyed.");
-                }
-
-                else if (targeted is BulkOrderBookDyeTub)
-                {
-                    BulkOrderBookDyeTub bulkOrderBookDyeTub = targeted as BulkOrderBookDyeTub;
-
-                    if (bulkOrderBookDyeTub.Redyable)
-                    {
-                        if (bulkOrderBookDyeTub.CustomHuePicker != null)
-                            from.SendGump(new CustomHuePickerGump(from, bulkOrderBookDyeTub.CustomHuePicker, new CustomHuePickerCallback(SetTubHue), bulkOrderBookDyeTub));
-
-                        else
-                            from.SendHuePicker(new InternalBulkOrderBulkPicker(bulkOrderBookDyeTub));
-                    }
-
-                    else
-                        from.SendMessage("That dye tub cannot be redyed.");
-                }
+                }                
 
                 else if (targeted is DyeTub)
                 {

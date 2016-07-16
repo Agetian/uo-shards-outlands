@@ -48,7 +48,7 @@ namespace Server.Items
                 //Quality
                 switch (Quality)
                 {
-                    case Server.Quality.Low: ratingScalarBonus += -.20; break;
+                    case Server.Quality.Low: ratingScalarBonus += -.10; break;
                     case Server.Quality.Regular: ratingScalarBonus += 0; break;
                     case Server.Quality.Exceptional: ratingScalarBonus += .20; break;
                 }

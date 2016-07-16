@@ -30,21 +30,18 @@ namespace Server.Mobiles
                 Add(new GenericBuyInfo("Dyes", typeof(Dyes), Dyes.GetSBPurchaseValue(), 25, 0xFA9, 0));
                 Add(new GenericBuyInfo("Dye Tub", typeof(DyeTub), DyeTub.GetSBPurchaseValue(), 25, 0xFAB, 0)); 
 
-                Add(new GenericBuyInfo("Lockpick", typeof(Lockpick), Lockpick.GetSBPurchaseValue(), 250, 0x14FC, 0));
+                Add(new GenericBuyInfo("Lockpick", typeof(Lockpick), Lockpick.GetSBPurchaseValue(), 100, 0x14FC, 0));
                 Add(new GenericBuyInfo("Skillet", typeof(Skillet), Skillet.GetSBPurchaseValue(), 50, 0x97F, 0));
+                Add(new GenericBuyInfo("Dagger", typeof(Dagger), Dagger.GetSBPurchaseValue(), 25, 0xF52, 0));
 
                 Add(new GenericBuyInfo("Lantern", typeof(Lantern), Lantern.GetSBPurchaseValue(), 25, 0xA25, 0));
                 Add(new GenericBuyInfo("Torch", typeof(Torch), Torch.GetSBPurchaseValue(), 25, 0xF6B, 0));
                 Add(new GenericBuyInfo("Candle", typeof(Candle), Candle.GetSBPurchaseValue(), 25, 0xA28, 0));
-                 Add(new GenericBuyInfo("Bedroll", typeof(Bedroll), Bedroll.GetSBPurchaseValue(), 25, 0xA57, 0));
+                Add(new GenericBuyInfo("Bedroll", typeof(Bedroll), Bedroll.GetSBPurchaseValue(), 25, 0xA57, 0));
                 Add(new GenericBuyInfo("Backpack", typeof(Backpack), Backpack.GetSBPurchaseValue(), 25, 0x9B2, 0));
                 Add(new GenericBuyInfo("Bag", typeof(Bag), Bag.GetSBPurchaseValue(), 25, 0xE76, 0));
                 Add(new GenericBuyInfo("Pouch", typeof(Pouch), Pouch.GetSBPurchaseValue(), 25, 0xE79, 0));
-                Add(new GenericBuyInfo("Wooden Box", typeof(WoodenBox), WoodenBox.GetSBPurchaseValue(), 25, 0xE7D, 0));
-
-                Add(new GenericBuyInfo("Book", typeof(RedBook), RedBook.GetSBPurchaseValue(), 25, 0xFF1, 0));
-                Add(new GenericBuyInfo("Book", typeof(TanBook), TanBook.GetSBPurchaseValue(), 25, 0xFF0, 0));
-                Add(new GenericBuyInfo("Book", typeof(BlueBook), BlueBook.GetSBPurchaseValue(), 25, 0xFF0, 0));
+                Add(new GenericBuyInfo("Wooden Box", typeof(WoodenBox), WoodenBox.GetSBPurchaseValue(), 25, 0xE7D, 0));                
 			}
 		}
 
@@ -63,6 +60,7 @@ namespace Server.Mobiles
 
                 Add(typeof(Lockpick), Lockpick.GetSBSellValue());
                 Add(typeof(Skillet), Skillet.GetSBSellValue());
+                Add(typeof(Dagger), Dagger.GetSBSellValue());
 
                 Add(typeof(Lantern), Lantern.GetSBSellValue());
                 Add(typeof(Torch), Torch.GetSBSellValue());
