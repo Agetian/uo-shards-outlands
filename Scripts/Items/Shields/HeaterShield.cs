@@ -11,8 +11,8 @@ namespace Server.Items
         public override int InitMinHits { get { return 100; } }
         public override int InitMaxHits { get { return 100; } }
 
-        public override int ArmorBase { get { return 22; } }
-        public override int OldDexBonus { get { return -6; } }
+        public override int ArmorBase { get { return 18; } }
+        public override int OldDexBonus { get { return -5; } }
 
         public override int IconItemId { get { return 7031; } }
         public override int IconHue { get { return Hue; } }
@@ -23,7 +23,7 @@ namespace Server.Items
         public HeaterShield(): base(7031)
         {
             Name = "heater shield";
-            Weight = 8.0;
+            Weight = 7.0;
         }
 
         public HeaterShield(Serial serial): base(serial)

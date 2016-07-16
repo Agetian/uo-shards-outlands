@@ -8,12 +8,10 @@ namespace Server.Items
         public static int GetSBPurchaseValue() { return 1; }
         public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
-        public override int InitMinHits { get { return 70; } }
-        public override int InitMaxHits { get { return 70; } }
-
-        public override int AosStrReq { get { return 20; } }
-
-        public override int ArmorBase { get { return 10; } }
+        public override int InitMinHits { get { return 50; } }
+        public override int InitMaxHits { get { return 50; } }
+        
+        public override int ArmorBase { get { return 8; } }
         public override int OldDexBonus { get { return 0; } }
 
         public override int IconItemId { get { return 7034; } }
@@ -27,7 +25,7 @@ namespace Server.Items
         public WoodenShield(): base(7034)
         {
             Name = "wooden shield";
-            Weight = 5.0;
+            Weight = 4.0;
         }
 
         public WoodenShield(Serial serial): base(serial)

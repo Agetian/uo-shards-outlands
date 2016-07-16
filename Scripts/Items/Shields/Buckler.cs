@@ -11,8 +11,8 @@ namespace Server.Items
         public override int InitMinHits { get { return 75; } }
         public override int InitMaxHits { get { return 75; } }
 
-        public override int ArmorBase { get { return 12; } }
-        public override int OldDexBonus { get { return -1; } }
+        public override int ArmorBase { get { return 6; } }
+        public override int OldDexBonus { get { return 0; } }
 
         public override int IconItemId { get { return 7027; } }
         public override int IconHue { get { return Hue; } }
@@ -23,7 +23,7 @@ namespace Server.Items
         public Buckler(): base(7027)
         {
             Name = "buckler";
-            Weight = 5.0;
+            Weight = 4.0;
         }
 
         public Buckler(Serial serial)

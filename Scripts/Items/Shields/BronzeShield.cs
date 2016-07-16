@@ -11,8 +11,8 @@ namespace Server.Items
         public override int InitMinHits { get { return 85; } }
         public override int InitMaxHits { get { return 85; } }
         
-        public override int ArmorBase { get { return 18; } }
-        public override int OldDexBonus { get { return -4; } }
+        public override int ArmorBase { get { return 14; } }
+        public override int OldDexBonus { get { return -3; } }
 
         public override int IconItemId { get { return 7026; } }
         public override int IconHue { get { return Hue; } }

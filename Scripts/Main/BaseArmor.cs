@@ -101,6 +101,7 @@ namespace Server.Items
 
                 if (m_ArmorBase == -1)
                     return ArmorBase;
+
                 else
                     return m_ArmorBase;
             }
@@ -111,47 +112,6 @@ namespace Server.Items
             }
         }
 
-        public double BaseArmorRatingScaled
-        {
-            get
-            {
-                return (BaseArmorRating * ArmorScalar);
-            }
-        }
-
-        public virtual double ArmorRating
-        {
-            get
-            {
-                int ar = BaseArmorRating;
-
-                if (Layer != Server.Layer.TwoHanded)
-                {
-                    if (m_ProtectionLevel != ArmorProtectionLevel.Regular)
-                        ar += 5 * (int)m_ProtectionLevel;
-
-                    bool coloredOre = false;
-
-                    switch (Resource)
-                    {
-                        case CraftResource.DullCopper: ar += 1; coloredOre = true; break;
-                        case CraftResource.ShadowIron: ar += 2; coloredOre = true; break;
-                        case CraftResource.Copper: ar += 3; coloredOre = true; break;
-                        case CraftResource.Bronze: ar += 4; coloredOre = true; break;
-                        case CraftResource.Gold: ar += 5; coloredOre = true; break;
-                        case CraftResource.Agapite: ar += 6; coloredOre = true; break;
-                        case CraftResource.Verite: ar += 7; coloredOre = true; break;
-                        case CraftResource.Valorite: ar += 8; coloredOre = true; break;
-                        case CraftResource.Lunite: ar += 9; coloredOre = true; break;
-                    }
-
-                    ar += -10 + (10 * (int)Quality);
-                }
-
-                return ScaleArmorByDurability(ar);
-            }
-        }
-
         public double ArmorRatingScaled
         {
             get
@@ -159,6 +119,54 @@ namespace Server.Items
                 return (ArmorRating * ArmorScalar);
             }
         }
+
+        public virtual double ArmorRating
+        {
+            get
+            {
+                double baseRating = BaseArmorRating;
+
+                double ratingScalarBonus = 0;
+                double durabilityPenalty = 0;
+
+                if (Layer != Server.Layer.TwoHanded)
+                {
+                    //Quality
+                    switch (Quality)
+                    {
+                        case Quality.Low: ratingScalarBonus += -.20; break;
+                        case Quality.Regular: ratingScalarBonus += 0; break;
+                        case Quality.Exceptional: ratingScalarBonus += .20; break;
+                    }
+
+                    //Magical
+                    ratingScalarBonus += (double)((int)m_ProtectionLevel) * .10;
+                    
+                    //Material
+                    switch (Resource)
+                    {
+                        case CraftResource.DullCopper: ratingScalarBonus += .02; break;
+                        case CraftResource.ShadowIron: ratingScalarBonus += .04; break;
+                        case CraftResource.Copper: ratingScalarBonus += .06; break;
+                        case CraftResource.Bronze: ratingScalarBonus += .08; break;
+                        case CraftResource.Gold: ratingScalarBonus += .10; break;
+                        case CraftResource.Agapite: ratingScalarBonus += .12; break;
+                        case CraftResource.Verite: ratingScalarBonus += .14; break;
+                        case CraftResource.Valorite: ratingScalarBonus += .16; break;
+
+                        case CraftResource.Lunite: ratingScalarBonus += .18; break;
+                    }                   
+                }
+
+                //Durability Scaling
+                durabilityPenalty = -.20 * (((double)m_MaxHitPoints - (double)m_HitPoints) / (double)m_MaxHitPoints);
+
+                double totalScalar = (1 + ratingScalarBonus + durabilityPenalty);
+                double finalArmorRating = baseRating * totalScalar;
+
+                return finalArmorRating;
+            }
+        }        
 
         [CommandProperty(AccessLevel.GameMaster)]
         public int StrBonus
@@ -489,8 +497,8 @@ namespace Server.Items
         public override int PoisonResistance { get { return BasePoisonResistance + GetProtOffset() + GetResourceAttrs().ArmorPoisonResist + m_PoisonBonus; } }
         public override int EnergyResistance { get { return BaseEnergyResistance + GetProtOffset() + GetResourceAttrs().ArmorEnergyResist + m_EnergyBonus; } }
 
-        public virtual int InitMinHits { get { return 0; } }
-        public virtual int InitMaxHits { get { return 0; } }
+        public virtual int InitMinHits { get { return 30; } }
+        public virtual int InitMaxHits { get { return 30; } }
 
         [CommandProperty(AccessLevel.GameMaster)]
         public ArmorBodyType BodyPosition
@@ -620,12 +628,6 @@ namespace Server.Items
                 from.SendLocalizedMessage(502437); // Items you wish to cut must be in your backpack.
                 return false;
             }
-            //Removed by IPY
-            /*if ( Ethics.Ethic.IsImbued( this ) )
-            {
-                from.SendLocalizedMessage( 502440 ); // Scissors can not be used on that to produce anything.
-                return false;
-            }*/
 
             CraftSystem system = DefTailoring.CraftSystem;
 
@@ -665,6 +667,7 @@ namespace Server.Items
             {
                 return m_ArmorScalars;
             }
+
             set
             {
                 m_ArmorScalars = value;
@@ -684,17 +687,6 @@ namespace Server.Items
                 {
                     BaseArmor armor = (BaseArmor)item;
 
-                    /*if( armor.RequiredRace != null && m.Race != armor.RequiredRace )
-                    {
-                        if( armor.RequiredRace == Race.Elf )
-                            m.SendLocalizedMessage( 1072203 ); // Only Elves may use this.
-                        else
-                            m.SendMessage( "Only {0} may use this.", armor.RequiredRace.PluralName );
-
-                        m.AddToBackpack( armor );
-                    }
-                    else
-                    Removed by IPY*/
                     if (!armor.AllowMaleWearer && !m.Female && m.AccessLevel < AccessLevel.GameMaster)
                     {
                         if (armor.AllowFemaleWearer)
@@ -704,6 +696,7 @@ namespace Server.Items
 
                         m.AddToBackpack(armor);
                     }
+
                     else if (!armor.AllowFemaleWearer && m.Female && m.AccessLevel < AccessLevel.GameMaster)
                     {
                         if (armor.AllowMaleWearer)
@@ -751,16 +744,6 @@ namespace Server.Items
 
                 from.Delta(MobileDelta.Armor); // Tell them armor rating has changed
             }
-        }
-
-        public virtual double ScaleArmorByDurability(double armor)
-        {
-            int scale = 100;
-
-            if (m_MaxHitPoints > 0 && m_HitPoints < m_MaxHitPoints)
-                scale = 50 + ((50 * m_HitPoints) / m_MaxHitPoints);
-
-            return (armor * scale) / 100;
         }
 
         protected void Invalidate()

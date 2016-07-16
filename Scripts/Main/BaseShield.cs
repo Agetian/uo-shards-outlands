@@ -40,35 +40,48 @@ namespace Server.Items
             {
                 Mobile mobile = Parent as Mobile;
 
-                double baseAR = base.ArmorRating;
+                double baseRating = BaseArmorRating;
 
-                if (ProtectionLevel != ArmorProtectionLevel.Regular)
-                    baseAR += (3 * (int)ProtectionLevel);
-
-                switch (Resource)
+                double ratingScalarBonus = 0;
+                double durabilityPenalty = 0;
+                
+                //Quality
+                switch (Quality)
                 {
-                    case CraftResource.DullCopper: baseAR += 1; break;
-                    case CraftResource.ShadowIron: baseAR += 2; break;
-                    case CraftResource.Copper: baseAR += 3; break;
-                    case CraftResource.Bronze: baseAR += 4; break;
-                    case CraftResource.Gold: baseAR += 5; break;
-                    case CraftResource.Agapite: baseAR += 6; break;
-                    case CraftResource.Verite: baseAR += 7; break;
-                    case CraftResource.Valorite: baseAR += 8; break;
-                    case CraftResource.Lunite: baseAR += 9; break;
+                    case Server.Quality.Low: ratingScalarBonus += -.20; break;
+                    case Server.Quality.Regular: ratingScalarBonus += 0; break;
+                    case Server.Quality.Exceptional: ratingScalarBonus += .20; break;
                 }
 
-                baseAR += -6 + (6 * (int)Quality);
+                //Magical
+                ratingScalarBonus += (double)((int)ProtectionLevel) * .10;
 
-                double finalAR = (baseAR * .5) + ((baseAR * .5) * (mobile.Skills[SkillName.Parry].Value / 100));
+                //Material
+                switch (Resource)
+                {
+                    case CraftResource.DullCopper: ratingScalarBonus += .02; break;
+                    case CraftResource.ShadowIron: ratingScalarBonus += .04; break;
+                    case CraftResource.Copper: ratingScalarBonus += .06; break;
+                    case CraftResource.Bronze: ratingScalarBonus += .08; break;
+                    case CraftResource.Gold: ratingScalarBonus += .10; break;
+                    case CraftResource.Agapite: ratingScalarBonus += .12; break;
+                    case CraftResource.Verite: ratingScalarBonus += .14; break;
+                    case CraftResource.Valorite: ratingScalarBonus += .16; break;
 
-                if (finalAR < 1)
-                    finalAR = 1;
+                    case CraftResource.Lunite: ratingScalarBonus += .18; break;
+                }                
 
-                if (mobile != null)
-                    return finalAR;
-                else
-                    return baseAR;
+                //Durability Scaling
+                durabilityPenalty = -.20 * (((double)MaxHitPoints - (double)HitPoints) / (double)MaxHitPoints);
+
+                double finalArmorRating = baseRating * (1 + ratingScalarBonus + durabilityPenalty);
+
+                if (mobile == null)
+                    return finalArmorRating;
+
+                double skillAdjustedFinalArmorRating = (finalArmorRating * .5) + ((finalArmorRating * .5) * (mobile.Skills[SkillName.Parry].Value / 100));
+
+                return skillAdjustedFinalArmorRating;
             }
         }
 

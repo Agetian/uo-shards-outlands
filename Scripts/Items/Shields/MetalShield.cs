@@ -11,8 +11,8 @@ namespace Server.Items
         public override int InitMinHits { get { return 90; } }
         public override int InitMaxHits { get { return 90; } }
 
-        public override int ArmorBase { get { return 16; } }
-        public override int OldDexBonus { get { return -3; } }
+        public override int ArmorBase { get { return 12; } }
+        public override int OldDexBonus { get { return -2; } }
 
         public override int IconItemId { get { return 7035; } }
         public override int IconHue { get { return Hue; } }
@@ -23,7 +23,7 @@ namespace Server.Items
         public MetalShield(): base(7035)
         {
             Name = "metal shield";
-            Weight = 6.0;
+            Weight = 5.0;
         }
 
         public MetalShield(Serial serial)
