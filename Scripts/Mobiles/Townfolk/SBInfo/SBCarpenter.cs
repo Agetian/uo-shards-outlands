@@ -32,6 +32,11 @@ namespace Server.Mobiles
                 Add(new GenericBuyInfo("Wooden Shield", typeof(WoodenShield), WoodenShield.GetSBPurchaseValue(), 25, 7034, 0));
                 Add(new GenericBuyInfo("Wooden Kite Shield", typeof(WoodenKiteShield), WoodenKiteShield.GetSBPurchaseValue(), 25, 7033, 0));
 
+                Add(new GenericBuyInfo("Lute", typeof(Lute), Lute.GetSBPurchaseValue(), 50, 0x0EB3, 0));
+                Add(new GenericBuyInfo("Drums", typeof(Drums), Drums.GetSBPurchaseValue(), 50, 0x0E9C, 0));
+                Add(new GenericBuyInfo("Harp", typeof(Harp), Harp.GetSBPurchaseValue(), 50, 0x0EB1, 0));
+                Add(new GenericBuyInfo("Tambourine", typeof(Tambourine), Tambourine.GetSBPurchaseValue(), 50, 0x0E9E, 0)); 
+
                 Add(new GenericBuyInfo("Scorp", typeof(Scorp), Scorp.GetSBPurchaseValue(), 50, 0x10E7, 0));
                 Add(new GenericBuyInfo("Smoothing Plane", typeof(SmoothingPlane), SmoothingPlane.GetSBPurchaseValue(), 50, 0x1032, 0));
                 Add(new GenericBuyInfo("Drawing Knife", typeof(DrawKnife), DrawKnife.GetSBPurchaseValue(), 50, 0x10E4, 0));
@@ -60,6 +65,11 @@ namespace Server.Mobiles
                 Add(typeof(JointingPlane), JointingPlane.GetSBSellValue());
                 Add(typeof(WoodenPlane), WoodenPlane.GetSBSellValue());
                 Add(typeof(DovetailSaw), DovetailSaw.GetSBSellValue());
+
+                Add(typeof(Lute), Lute.GetSBSellValue());
+                Add(typeof(Drums), Drums.GetSBSellValue());
+                Add(typeof(Harp), Harp.GetSBSellValue());
+                Add(typeof(Tambourine), Tambourine.GetSBSellValue()); 
 
                 Add(typeof(Club), Club.GetSBSellValue());
                 Add(typeof(ShepherdsCrook), ShepherdsCrook.GetSBSellValue());

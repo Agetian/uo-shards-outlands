@@ -34,7 +34,7 @@ namespace Server.Items
 	public class BeverageBottle : BaseBeverage
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override int BaseLabelNumber{ get{ return 1042959; } } // a bottle of Ale
 		public override int MaxQuantity{ get{ return 5; } }
@@ -119,7 +119,7 @@ namespace Server.Items
 	public class Jug : BaseBeverage
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override int BaseLabelNumber{ get{ return 1042965; } } // a jug of Ale
 		public override int MaxQuantity{ get{ return 10; } }
@@ -305,7 +305,7 @@ namespace Server.Items
 	public class GlassMug : BaseBeverage
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override int EmptyLabelNumber{ get{ return 1022456; } } // mug
 		public override int BaseLabelNumber{ get{ return 1042976; } } // a mug of Ale
@@ -413,7 +413,7 @@ namespace Server.Items
 	public class Pitcher : BaseBeverage
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override int BaseLabelNumber{ get{ return 1048128; } } // a Pitcher of Ale
 		public override int MaxQuantity{ get{ return 5; } }

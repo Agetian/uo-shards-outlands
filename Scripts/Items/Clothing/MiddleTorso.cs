@@ -32,6 +32,9 @@ namespace Server.Items
 	[Flipable( 0x1541, 0x1542 )]
 	public class BodySash : BaseMiddleTorso
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public BodySash() : this( 0 )
 		{
@@ -65,6 +68,9 @@ namespace Server.Items
 	[Flipable( 0x153d, 0x153e )]
 	public class FullApron : BaseMiddleTorso
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public FullApron() : this( 0 )
 		{
@@ -97,6 +103,9 @@ namespace Server.Items
 	[Flipable( 0x1f7b, 0x1f7c )]
 	public class Doublet : BaseMiddleTorso
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Doublet() : this( 0 )
 		{
@@ -130,6 +139,9 @@ namespace Server.Items
 	[Flipable( 0x1ffd, 0x1ffe )]
 	public class Surcoat : BaseMiddleTorso
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Surcoat() : this( 0 )
 		{
@@ -163,6 +175,9 @@ namespace Server.Items
 	[Flipable( 0x1fa1, 0x1fa2 )]
 	public class Tunic : BaseMiddleTorso
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Tunic() : this( 0 )
 		{
@@ -229,6 +244,9 @@ namespace Server.Items
 	[Flipable( 0x1f9f, 0x1fa0 )]
 	public class JesterSuit : BaseMiddleTorso
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public JesterSuit() : this( 0 )
 		{

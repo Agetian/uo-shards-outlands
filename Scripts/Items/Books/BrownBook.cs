@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class BrownBook : BaseBook
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public BrownBook() : base( 0xFEF )
 		{

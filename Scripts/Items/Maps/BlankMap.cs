@@ -5,9 +5,13 @@ namespace Server.Items
 {
 	public class BlankMap : MapItem
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public BlankMap()
 		{
+            Name = "blank map";
 		}
 
 		public override void OnDoubleClick( Mobile from )
@@ -22,14 +26,12 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 );
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
 		}
 	}

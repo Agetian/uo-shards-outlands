@@ -6,7 +6,7 @@ namespace Server.Items
 	public class Emerald : Item
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override double DefaultWeight
 		{

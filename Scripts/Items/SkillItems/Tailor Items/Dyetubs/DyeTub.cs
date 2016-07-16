@@ -15,6 +15,9 @@ namespace Server.Items
 
     public class DyeTub : Item, ISecurable
     {
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
         private bool m_Redyable;
         private int m_DyedHue;
         private SecureLevel m_SecureLevel;
@@ -156,6 +159,8 @@ namespace Server.Items
         [Constructable]
         public DyeTub() : base(0xFAB)
         {
+            Name = "dye tub";
+
             m_UsesRemaining = -1;
             Weight = 10.0;
             m_Redyable = true;

@@ -6,8 +6,8 @@ namespace Server.Items
 {
 	public class SulfurousAsh : BaseReagent, ICommodity
 	{
-        public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 3; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		int ICommodity.DescriptionNumber { get { return LabelNumber; } }
 		bool ICommodity.IsDeedable { get { return true; } }

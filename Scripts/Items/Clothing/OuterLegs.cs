@@ -65,6 +65,9 @@ namespace Server.Items
 	[Flipable( 0x1516, 0x1531 )]
 	public class Skirt : BaseOuterLegs
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Skirt() : this( 0 )
 		{
@@ -98,6 +101,9 @@ namespace Server.Items
 	[Flipable( 0x1537, 0x1538 )]
 	public class Kilt : BaseOuterLegs
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Kilt() : this( 0 )
 		{

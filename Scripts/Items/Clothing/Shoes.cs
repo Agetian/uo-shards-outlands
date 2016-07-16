@@ -102,7 +102,7 @@ namespace Server.Items
     public class Boots : BaseShoes
     {
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }
 
@@ -140,7 +140,7 @@ namespace Server.Items
     public class ThighBoots : BaseShoes
     {
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }
 
@@ -178,7 +178,7 @@ namespace Server.Items
     public class Shoes : BaseShoes
     {
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }
 
@@ -216,7 +216,7 @@ namespace Server.Items
     public class Sandals : BaseShoes
     {
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }
 

@@ -21,7 +21,13 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new AnimalBuyInfo( 1, typeof( PackHorse ), 552, 10, 0x2126, 0 ) );
+                Add(new AnimalBuyInfo(1, "Pack Horse", typeof(PackHorse), PackHorse.GetSBPurchaseValue(), 10, 0x123, 0));
+                Add(new AnimalBuyInfo(1, "Pack Horse", typeof(PackLlama), PackLlama.GetSBPurchaseValue(), 10, 0x124, 0));
+
+                Add(new AnimalBuyInfo(1, "Horse", typeof(Horse), Horse.GetSBPurchaseValue(), 10, 0xC8, 0));
+
+                Add(new GenericBuyInfo("Skillet", typeof(Skillet), Skillet.GetSBPurchaseValue(), 50, 0x1043, 0));
+                Add(new BeverageBuyInfo("Pitcher of Milk", typeof(Pitcher), BeverageType.Milk, Pitcher.GetSBPurchaseValue(), 25, 0x9AD, 0));
 			}
 		}
 
@@ -29,6 +35,8 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
+                Add(typeof(Skillet), Skillet.GetSBSellValue());
+                Add(typeof(Pitcher), Pitcher.GetSBSellValue());
 			}
 		}
 	}

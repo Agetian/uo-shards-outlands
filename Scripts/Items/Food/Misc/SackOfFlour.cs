@@ -4,9 +4,13 @@ namespace Server.Items
 {
     public class SackOfFlour : Item
     {
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
         [Constructable]
         public SackOfFlour(): this(1)
         {
+            Name = "sack of flour";
         }
 
         [Constructable]

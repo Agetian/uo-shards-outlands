@@ -20,6 +20,18 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
+                Add(new GenericBuyInfo("Recall Rune", typeof(RecallRune), RecallRune.GetSBPurchaseValue(), 50, 0x1f14, 0));
+                Add(new GenericBuyInfo("Spellbook", typeof(Spellbook), Spellbook.GetSBPurchaseValue(), 25, 0xEFA, 0));
+                Add(new GenericBuyInfo("Blank Scroll", typeof(BlankScroll), BlankScroll.GetSBPurchaseValue(), 500, 0x0E34, 0));
+                Add(new GenericBuyInfo("Scribe's Pen", typeof(ScribesPen), ScribesPen.GetSBPurchaseValue(), 50, 0xFBF, 0));
+
+                Add(new GenericBuyInfo("Book", typeof(RedBook), RedBook.GetSBPurchaseValue(), 50, 0xFF1, 0));
+                Add(new GenericBuyInfo("Book", typeof(BrownBook), BrownBook.GetSBPurchaseValue(), 50, 0xFEF, 0));
+                Add(new GenericBuyInfo("Book", typeof(TanBook), TanBook.GetSBPurchaseValue(), 50, 0xFF0, 0));
+                Add(new GenericBuyInfo("Book", typeof(BlueBook), BlueBook.GetSBPurchaseValue(), 50, 0xFF2, 0));
+                
+                //TEST: DETERMINE SCROLLS
+
 				//Add( new GenericBuyInfo( typeof( BladeSpiritsScroll ), 350, 5, 0x1F4D, 0 ) );
 				Add( new GenericBuyInfo( typeof( IncognitoScroll ), 450, 5, 0x1F4F, 0 ) );
 				Add( new GenericBuyInfo( typeof( MagicReflectScroll ), 500, 5, 0x1F50, 0 ) );
@@ -39,27 +51,19 @@ namespace Server.Mobiles
 				//Add( new GenericBuyInfo( typeof( EnergyFieldScroll ),1500, 3, 0x1F5E, 0 ) );
 				//Add( new GenericBuyInfo( typeof( FlamestrikeScroll ), 1750, 3, 0x1F5F, 0 ) );
 				//Add( new GenericBuyInfo( typeof( GateTravelScroll ), 1950, 3, 0x1F60, 0 ) );
-				Add( new GenericBuyInfo( typeof( ManaVampireScroll ), 1550, 3, 0x1F61, 0 ) );
+				//Add( new GenericBuyInfo( typeof( ManaVampireScroll ), 1550, 3, 0x1F61, 0 ) );
 				//Add( new GenericBuyInfo( typeof( MassDispelScroll ), 1500, 3, 0x1F62, 0 ) );
 				//Add( new GenericBuyInfo( typeof( MeteorSwarmScroll ), 1050, 3, 0x1F63, 0 ) );
 				//Add( new GenericBuyInfo( typeof( PolymorphScroll ), 1000, 3, 0x1F64, 0 ) );
 				//Add( new GenericBuyInfo( typeof( EarthquakeScroll ), 5500, 2, 0x1F65, 0 ) );
 				//Add( new GenericBuyInfo( typeof( EnergyVortexScroll ), 2500, 2, 0x1F66, 0 ) );
-				Add( new GenericBuyInfo( typeof( ResurrectionScroll ), 6575, 2, 0x1F67, 0 ) );
+				//Add( new GenericBuyInfo( typeof( ResurrectionScroll ), 6575, 2, 0x1F67, 0 ) );
 				//Add( new GenericBuyInfo( typeof( SummonAirElementalScroll ), 2000, 2, 0x1F68, 0 ) );
 				//Add( new GenericBuyInfo( typeof( SummonDaemonScroll ), 2500, 2, 0x1F69, 0 ) );
 				//Add( new GenericBuyInfo( typeof( SummonEarthElementalScroll ), 2000, 2, 0x1F6A, 0 ) );
 				//Add( new GenericBuyInfo( typeof( SummonFireElementalScroll ), 2000, 2, 0x1F6B, 0 ) );
 				//Add( new GenericBuyInfo( typeof( SummonWaterElementalScroll ), 2000, 2, 0x1F6C, 0 ) );
-				//Add( new GenericBuyInfo( typeof( DispelFieldScroll ), 500, 5, 0x1F4E, 0 ) );
-				Add( new GenericBuyInfo( typeof( ScribesPen ), 8,  Utility.Random( 8, 15 ), 0xFBF, 0 ) );
-				Add( new GenericBuyInfo( typeof( BrownBook ), 15, 10, 0xFEF, 0 ) );
-				Add( new GenericBuyInfo( typeof( TanBook ), 15, 10, 0xFF0, 0 ) );
-				Add( new GenericBuyInfo( typeof( BlueBook ), 15, 10, 0xFF2, 0 ) );
-				Add( new GenericBuyInfo( typeof( BlankScroll ), 6, 999, 0x0E34, 0 ) );
-				Add( new GenericBuyInfo( typeof( Spellbook ), 18, 10, 0xEFA, 0 ) );
-				Add( new GenericBuyInfo( typeof( RecallRune ), 25, 10, 0x1F14, 0 ) );
-				//Add( new GenericBuyInfo( "1041267", typeof( Runebook ), 3500, 10, 0xEFA, 0x461 ) );
+				//Add( new GenericBuyInfo( typeof( DispelFieldScroll ), 500, 5, 0x1F4E, 0 ) );				
 			}
 		}
 
@@ -67,13 +71,15 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
-				Add( typeof( ScribesPen ), 4 );
-				Add( typeof( BrownBook ), 7 );
-				Add( typeof( TanBook ), 7 );
-				Add( typeof( BlueBook ), 7 );
-				Add( typeof( BlankScroll ), 3 );
-				Add( typeof( Spellbook ), 9 );
-				Add( typeof( RecallRune ), 8 );
+                Add(typeof(RecallRune), RecallRune.GetSBSellValue());
+                Add(typeof(BlankScroll), BlankScroll.GetSBSellValue());
+                Add(typeof(Spellbook), Spellbook.GetSBSellValue());
+                Add(typeof(ScribesPen), ScribesPen.GetSBSellValue());
+
+                Add(typeof(BrownBook), BrownBook.GetSBSellValue());
+                Add(typeof(TanBook), TanBook.GetSBSellValue());
+                Add(typeof(BlueBook), BlueBook.GetSBSellValue());
+                Add(typeof(RedBook), RedBook.GetSBSellValue());
 			}
 		}
 	}

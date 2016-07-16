@@ -32,6 +32,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x152e, 0x152f )]
 	public class ShortPants : BasePants
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public ShortPants() : this( 0 )
 		{
@@ -65,6 +68,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x1539, 0x153a )]
 	public class LongPants : BasePants
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public LongPants() : this( 0 )
 		{

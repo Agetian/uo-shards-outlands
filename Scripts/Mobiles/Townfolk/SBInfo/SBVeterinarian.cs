@@ -21,11 +21,12 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new AnimalBuyInfo( 1, typeof( Cat ), 138, 10, 0x211B, 0 ) );
-				Add( new AnimalBuyInfo( 1, typeof( Dog ), 181, 10, 0x211C, 0 ) );
-				Add( new AnimalBuyInfo( 1, typeof( PackHorse ), 606, 10, 0x2126, 0 ) );
-				Add( new AnimalBuyInfo( 1, typeof( PackLlama ), 491, 10, 0x2127, 0 ) );
-				Add( new GenericBuyInfo( typeof( Bandage ), 5, 20, 0xE21, 0 ) );
+                Add(new GenericBuyInfo("Bandage", typeof(Bandage), Bandage.GetSBPurchaseValue(), 250, 0xE21, 0));
+
+                Add(new AnimalBuyInfo(1, "Rat", typeof(Rat), Rat.GetSBPurchaseValue(), 10, 0xEE, 0));
+                Add(new AnimalBuyInfo(1, "Rabbit", typeof(Rabbit), Rabbit.GetSBPurchaseValue(), 10, 0xCD, 0));
+                Add(new AnimalBuyInfo(1, "Cat", typeof(Cat), Cat.GetSBPurchaseValue(), 10, 0xC9, 0));
+                Add(new AnimalBuyInfo(1, "Dog", typeof(Dog), Dog.GetSBPurchaseValue(), 10, 0xD9, 0));
 			}
 		}
 
@@ -33,7 +34,7 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
-				Add( typeof( Bandage ), 2 );
+                Add(typeof(Bandage), Bandage.GetSBSellValue());
 			}
 		}
 	}

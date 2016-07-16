@@ -8,7 +8,7 @@ namespace Server.Items
 	public class Pitchfork : BaseSpear
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         public override int BaseMinDamage { get { return 16; } }
         public override int BaseMaxDamage { get { return 32; } }

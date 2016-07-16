@@ -10,7 +10,7 @@ namespace Server.Items
 	public class RecallRune : Item
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		private string m_Description;
 		private bool m_Marked;

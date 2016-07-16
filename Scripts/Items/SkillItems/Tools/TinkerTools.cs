@@ -7,17 +7,22 @@ namespace Server.Items
 	[Flipable( 0x1EB8, 0x1EB9 )]
 	public class TinkerTools : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		public override CraftSystem CraftSystem{ get{ return DefTinkering.CraftSystem; } }
 
 		[Constructable]
 		public TinkerTools() : base( 0x1EB8 )
 		{
+            Name = "tinker's tools";
 			Weight = 1.0;
 		}
 
 		[Constructable]
 		public TinkerTools( int uses ) : base( uses, 0x1EB8 )
 		{
+            Name = "tinker's tools";
 			Weight = 1.0;
 		}
 

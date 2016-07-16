@@ -146,6 +146,9 @@ namespace Server.Items
 
 	public class FloppyHat : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public FloppyHat() : this( 0 )
 		{
@@ -178,6 +181,9 @@ namespace Server.Items
 
 	public class WideBrimHat : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public WideBrimHat() : this( 0 )
 		{
@@ -210,6 +216,9 @@ namespace Server.Items
 
 	public class Cap : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Cap() : this( 0 )
 		{
@@ -242,6 +251,9 @@ namespace Server.Items
 
 	public class SkullCap : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public SkullCap() : this( 0 )
 		{
@@ -274,6 +286,9 @@ namespace Server.Items
 
 	public class Bandana : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Bandana() : this( 0 )
 		{
@@ -306,6 +321,9 @@ namespace Server.Items
 
 	public class TallStrawHat : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public TallStrawHat() : this( 0 )
 		{
@@ -370,6 +388,9 @@ namespace Server.Items
 
 	public class WizardsHat : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public WizardsHat() : this( 0 )
 		{
@@ -403,7 +424,7 @@ namespace Server.Items
 	public class MagicWizardsHat : BaseHat
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
         
 		public void AddStatMods( Mobile m )
 		{
@@ -477,6 +498,9 @@ namespace Server.Items
 
 	public class Bonnet : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Bonnet() : this( 0 )
 		{
@@ -509,6 +533,9 @@ namespace Server.Items
 
 	public class FeatheredHat : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public FeatheredHat() : this( 0 )
 		{
@@ -541,6 +568,9 @@ namespace Server.Items
 
 	public class TricorneHat : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public TricorneHat() : this( 0 )
 		{
@@ -573,6 +603,9 @@ namespace Server.Items
 
 	public class JesterHat : BaseHat
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public JesterHat() : this( 0 )
 		{

@@ -9,10 +9,15 @@ namespace Server.Items
 	[FlipableAttribute( 0xA57, 0xA58, 0xA59 )]
 	public class Bedroll : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Bedroll() : base( 0xA57 )
 		{
-			Weight = 5.0;
+            Name = "bedroll";
+
+			Weight = 3.0;
 		}
 
 		public Bedroll( Serial serial ) : base( serial )

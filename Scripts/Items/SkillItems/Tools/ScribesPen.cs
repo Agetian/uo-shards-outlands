@@ -8,11 +8,9 @@ namespace Server.Items
 	public class ScribesPen : BaseTool
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override CraftSystem CraftSystem{ get{ return DefInscription.CraftSystem; } }
-
-		public override int LabelNumber{ get{ return 1044168; } } // scribe's pen
 
 		[Constructable]
 		public ScribesPen() : base( 0x0FBF )

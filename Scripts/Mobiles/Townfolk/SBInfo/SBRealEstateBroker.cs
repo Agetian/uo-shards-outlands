@@ -19,18 +19,14 @@ namespace Server.Mobiles
 		public class InternalBuyInfo : List<GenericBuyInfo>
 		{
 			public InternalBuyInfo()
-			{
-				Add( new GenericBuyInfo( typeof( ScribesPen ), 8,  20, 0xFBF, 0 ) );
-				Add( new GenericBuyInfo( typeof( BlankScroll ), 6, 20, 0x0E34, 0 ) );
+			{				
 			}
 		}
 
 		public class InternalSellInfo : GenericSellInfo
 		{
 			public InternalSellInfo()
-			{
-				Add( typeof( ScribesPen ), 4 );
-				Add( typeof( BlankScroll ), 3 );
+			{				
 			}
 		}
 	}

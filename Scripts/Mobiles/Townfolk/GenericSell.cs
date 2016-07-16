@@ -62,7 +62,7 @@ namespace Server.Mobiles
             }
 
             double basePrice = (double)price;
-            double priceScalar = item.GetSBSellValueScalar();
+            double priceScalar = item.SBPlayerSellValueScalar();
 
             price = (int)Math.Floor(basePrice * priceScalar);
 

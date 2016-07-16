@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xF95, 0xF96, 0xF97, 0xF98, 0xF99, 0xF9A, 0xF9B, 0xF9C )]
 	public class BoltOfCloth : Item, IScissorable, IDyable, ICommodity
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		int ICommodity.DescriptionNumber { get { return LabelNumber; } }
 		bool ICommodity.IsDeedable { get { return true; } }
 

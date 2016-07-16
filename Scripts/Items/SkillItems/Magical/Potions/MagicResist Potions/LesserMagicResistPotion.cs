@@ -5,8 +5,8 @@ namespace Server.Items
 {
 	public class LesserMagicResistPotion : BaseMagicResistPotion
 	{
-        public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 10; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         public override double MagicResist { get { return 25.0; } }
 		public override TimeSpan Duration{ get{ return TimeSpan.FromMinutes( 2.0 ); } }

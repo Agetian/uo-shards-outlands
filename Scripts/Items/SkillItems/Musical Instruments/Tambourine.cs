@@ -7,7 +7,7 @@ namespace Server.Items
 	public class Tambourine : BaseInstrument
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         public override int IconItemId { get { return 3742; } }
         public override int IconHue { get { return Hue; } }

@@ -66,6 +66,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x1eff, 0x1f00 )]
 	public class FancyDress : BaseOuterTorso
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public FancyDress() : this( 0 )
 		{
@@ -143,6 +146,9 @@ namespace Server.Items
 	[Flipable]
 	public class Robe : BaseOuterTorso
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Robe() : this( 0 )
 		{
@@ -254,6 +260,9 @@ namespace Server.Items
 	[Flipable( 0x1f01, 0x1f02 )]
 	public class PlainDress : BaseOuterTorso
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public PlainDress() : this( 0 )
 		{

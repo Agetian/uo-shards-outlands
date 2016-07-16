@@ -5,8 +5,8 @@ namespace Server.Items
 {
 	public class LesserHealPotion : BaseHealPotion
 	{
-        public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 10; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override int MinHeal { get { return (Core.AOS ? 6 : 3); } }
 		public override int MaxHeal { get { return (Core.AOS ? 8 : 10); } }

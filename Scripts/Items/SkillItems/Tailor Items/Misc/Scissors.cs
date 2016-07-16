@@ -14,9 +14,13 @@ namespace Server.Items
 	[FlipableAttribute( 0xf9f, 0xf9e )]
 	public class Scissors : Item
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public Scissors() : base( 0xF9F )
 		{
+            Name = "scissors";
 			Weight = 1.0;
 		}
 

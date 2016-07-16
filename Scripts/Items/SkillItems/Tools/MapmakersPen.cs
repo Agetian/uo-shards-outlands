@@ -7,19 +7,22 @@ namespace Server.Items
 	[FlipableAttribute( 0x0FBF, 0x0FC0 )]
 	public class MapmakersPen : BaseTool
 	{
-		public override CraftSystem CraftSystem{ get{ return DefCartography.CraftSystem; } }
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
-		public override int LabelNumber{ get{ return 1044167; } } // mapmaker's pen
+		public override CraftSystem CraftSystem{ get{ return DefCartography.CraftSystem; } }
 
 		[Constructable]
 		public MapmakersPen() : base( 0x0FBF )
 		{
+            Name = "mapmaker's pen";
 			Weight = 1.0;
 		}
 
 		[Constructable]
 		public MapmakersPen( int uses ) : base( uses, 0x0FBF )
 		{
+            Name = "mapmaker's pen";
 			Weight = 1.0;
 		}
 

@@ -8,7 +8,7 @@ namespace Server.Items
 	public class SmoothingPlane : BaseTool
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override CraftSystem CraftSystem{ get{ return DefCarpentry.CraftSystem; } }
 

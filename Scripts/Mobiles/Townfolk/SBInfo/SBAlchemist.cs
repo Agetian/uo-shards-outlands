@@ -32,14 +32,14 @@ namespace Server.Mobiles
                 Add(new GenericBuyInfo("Spider Silk", typeof(SpidersSilk), SpidersSilk.GetSBPurchaseValue(), 500, 0xF8D, 0));
                 Add(new GenericBuyInfo("Sulfurous Ash", typeof(SulfurousAsh), SulfurousAsh.GetSBPurchaseValue(), 500, 0xF8C, 0));
 
-                Add(new GenericBuyInfo("Lesser Heal Potion", typeof(LesserHealPotion), LesserHealPotion.GetSBPurchaseValue(), 10, 0xF0C, 0));
-                Add(new GenericBuyInfo("Lesser Cure Potion", typeof(LesserCurePotion), LesserCurePotion.GetSBPurchaseValue(), 10, 0xF07, 0));               
-                Add(new GenericBuyInfo("Refresh Potion", typeof(RefreshPotion), RefreshPotion.GetSBPurchaseValue(), 10, 0xF0B, 0));
-                Add(new GenericBuyInfo("Agility Potion", typeof(AgilityPotion), AgilityPotion.GetSBPurchaseValue(), 10, 0xF08, 0));
-                Add(new GenericBuyInfo("Strength Potion", typeof(StrengthPotion), StrengthPotion.GetSBPurchaseValue(), 10, 0xF09, 0));
+                Add(new GenericBuyInfo("Lesser Heal Potion", typeof(LesserHealPotion), LesserHealPotion.GetSBPurchaseValue(), 50, 0xF0C, 0));
+                Add(new GenericBuyInfo("Lesser Cure Potion", typeof(LesserCurePotion), LesserCurePotion.GetSBPurchaseValue(), 50, 0xF07, 0));               
+                Add(new GenericBuyInfo("Refresh Potion", typeof(RefreshPotion), RefreshPotion.GetSBPurchaseValue(), 50, 0xF0B, 0));
+                Add(new GenericBuyInfo("Agility Potion", typeof(AgilityPotion), AgilityPotion.GetSBPurchaseValue(), 50, 0xF08, 0));
+                Add(new GenericBuyInfo("Strength Potion", typeof(StrengthPotion), StrengthPotion.GetSBPurchaseValue(), 50, 0xF09, 0));
                 Add(new GenericBuyInfo("Lesser Magic Resist Potion", typeof(LesserMagicResistPotion), LesserMagicResistPotion.GetSBPurchaseValue(), 10, 0xF06, 0));
-                Add(new GenericBuyInfo("Lesser Poison Potion", typeof(LesserPoisonPotion), LesserPoisonPotion.GetSBPurchaseValue(), 10, 0xF0A, 0));
-                Add(new GenericBuyInfo("Lesser Explosion Potion", typeof(LesserExplosionPotion), LesserExplosionPotion.GetSBPurchaseValue(), 10, 0xF0D, 0));                
+                Add(new GenericBuyInfo("Lesser Poison Potion", typeof(LesserPoisonPotion), LesserPoisonPotion.GetSBPurchaseValue(), 50, 0xF0A, 0));
+                Add(new GenericBuyInfo("Lesser Explosion Potion", typeof(LesserExplosionPotion), LesserExplosionPotion.GetSBPurchaseValue(), 50, 0xF0D, 0));                
 
                 Add(new GenericBuyInfo("Hair Dye", typeof(HairDye), HairDye.GetSBPurchaseValue(), 10, 0xEFF, 0));               
 			}

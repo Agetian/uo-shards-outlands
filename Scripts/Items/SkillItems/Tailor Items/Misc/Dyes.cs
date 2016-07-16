@@ -6,10 +6,14 @@ namespace Server.Items
 {
     public class Dyes : Item
     {
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
         [Constructable]
         public Dyes()
             : base(0xFA9)
         {
+            Name = "dyes";
             Weight = 3.0;
         }
 
@@ -136,8 +140,9 @@ namespace Server.Items
                     }
 
                     else
-                        from.SendMessage("That dye tube cannot be redyed.");
+                        from.SendMessage("That dye tub cannot be redyed.");
                 }
+
                 else if (targeted is BulkOrderBookDyeTub)
                 {
                     BulkOrderBookDyeTub bulkOrderBookDyeTub = targeted as BulkOrderBookDyeTub;
@@ -152,8 +157,9 @@ namespace Server.Items
                     }
 
                     else
-                        from.SendMessage("That dye tube cannot be redyed.");
+                        from.SendMessage("That dye tub cannot be redyed.");
                 }
+
                 else if (targeted is DyeTub)
                 {
                     DyeTub tub = (DyeTub)targeted;

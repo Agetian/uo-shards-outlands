@@ -7,6 +7,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xFB5, 0xFB4 )]
 	public class SledgeHammer : BaseTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		public override CraftSystem CraftSystem{ get{ return DefBlacksmithy.CraftSystem; } }
 
 		[Constructable]
@@ -14,12 +17,17 @@ namespace Server.Items
 		{
             Name = "sledgehammer";
 			Layer = Layer.OneHanded;
+
+            Weight = 3.0;
 		}
 
 		[Constructable]
 		public SledgeHammer( int uses ) : base( uses, 0xFB5 )
 		{
+            Name = "sledgehammer";
 			Layer = Layer.OneHanded;
+
+            Weight = 3.0;
 		}
 
 		public SledgeHammer( Serial serial ) : base( serial )

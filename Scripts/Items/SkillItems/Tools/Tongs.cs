@@ -8,20 +8,22 @@ namespace Server.Items
 	public class Tongs : BaseTool
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override CraftSystem CraftSystem{ get{ return DefBlacksmithy.CraftSystem; } }
 
 		[Constructable]
 		public Tongs() : base( 0xFBB )
 		{
-			Weight = 2.0;
+            Name = "tongs";
+			Weight = 1.0;
 		}
 
 		[Constructable]
 		public Tongs( int uses ) : base( uses, 0xFBB )
 		{
-			Weight = 2.0;
+            Name = "tongs";
+			Weight = 1.0;
 		}
 
 		public Tongs( Serial serial ) : base( serial )

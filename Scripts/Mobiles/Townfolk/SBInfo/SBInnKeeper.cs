@@ -22,6 +22,7 @@ namespace Server.Mobiles
 			{
                 Add(new GenericBuyInfo("Vendor Rental Contract", typeof(VendorRentalContract), VendorRentalContract.GetSBPurchaseValue(), 25, 0x14F0, 0));
 
+                Add(new GenericBuyInfo("Lantern", typeof(Lantern), Lantern.GetSBPurchaseValue(), 25, 0xA25, 0));
                 Add(new GenericBuyInfo("Torch", typeof(Torch), Torch.GetSBPurchaseValue(), 25, 0xF6B, 0));
                 Add(new GenericBuyInfo("Candle", typeof(Candle), Candle.GetSBPurchaseValue(), 25, 0xA28, 0));
                 Add(new GenericBuyInfo("Backpack", typeof(Backpack), Backpack.GetSBPurchaseValue(), 25, 0x9B2, 0));

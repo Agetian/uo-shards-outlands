@@ -7,7 +7,7 @@ namespace Server.Items
 	public class ChainmailArms : BaseArmor
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override int InitMinHits{ get{ return 40; } }
 		public override int InitMaxHits{ get{ return 50; } }

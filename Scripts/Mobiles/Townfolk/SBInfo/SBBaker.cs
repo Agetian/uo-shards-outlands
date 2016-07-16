@@ -23,8 +23,8 @@ namespace Server.Mobiles
                 Add(new GenericBuyInfo("Skillet", typeof(Skillet), Skillet.GetSBPurchaseValue(), 50, 0x1043, 0)); 
                 Add(new GenericBuyInfo("Rolling Pin", typeof(RollingPin), RollingPin.GetSBPurchaseValue(), 50, 0x1043, 0));
 
-                Add(new BeverageBuyInfo("Pitcher of Water", typeof(Pitcher), BeverageType.Water, Pitcher.GetSBPurchaseValue(), 25, 0x1F9D, 0));
-				
+                Add(new GenericBuyInfo("Sack of Flour", typeof(SackOfFlour), SackOfFlour.GetSBPurchaseValue(), 500, 0x1039, 0));
+                Add(new BeverageBuyInfo("Pitcher of Water", typeof(Pitcher), BeverageType.Water, Pitcher.GetSBPurchaseValue(), 25, 0x1F9D, 0));				
 			} 
 		} 
 
@@ -35,6 +35,7 @@ namespace Server.Mobiles
                 Add(typeof(Skillet), Skillet.GetSBSellValue());				
                 Add(typeof(RollingPin), RollingPin.GetSBSellValue());
 
+                Add(typeof(SackOfFlour), SackOfFlour.GetSBSellValue());
                 Add(typeof(Pitcher), Pitcher.GetSBSellValue());
 			} 
 		} 

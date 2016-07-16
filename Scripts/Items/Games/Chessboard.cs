@@ -6,7 +6,7 @@ namespace Server.Items
 	public class Chessboard : BaseBoard
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
         
 		[Constructable]
 		public Chessboard() : base( 0xFA6 )

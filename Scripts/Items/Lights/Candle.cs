@@ -6,7 +6,7 @@ namespace Server.Items
 	public class Candle : BaseEquipableLight
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override int LitItemID{ get { return 0xA0F; } }
 		public override int UnlitItemID{ get { return 0xA28; } }

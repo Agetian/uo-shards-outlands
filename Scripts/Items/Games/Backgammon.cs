@@ -7,7 +7,7 @@ namespace Server.Items
 	public class Backgammon : BaseBoard
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		[Constructable]
 		public Backgammon() : base( 0xE1C )

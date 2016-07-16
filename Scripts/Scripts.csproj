@@ -3838,7 +3838,6 @@
     <Compile Include="Mobiles\Townfolk\Vendors\Mapmaker.cs" />
     <Compile Include="Mobiles\Townfolk\Vendors\Miller.cs" />
     <Compile Include="Mobiles\Townfolk\Vendors\Miner.cs" />
-    <Compile Include="Mobiles\Townfolk\Vendors\Monk.cs" />
     <Compile Include="Mobiles\Townfolk\Vendors\Provisioner.cs" />
     <Compile Include="Mobiles\Townfolk\Vendors\Rancher.cs" />
     <Compile Include="Mobiles\Townfolk\Vendors\Ranger.cs" />
@@ -3851,8 +3850,6 @@
     <Compile Include="Mobiles\Townfolk\Vendors\TavernKeeper.cs" />
     <Compile Include="Mobiles\Townfolk\Vendors\Thief.cs" />
     <Compile Include="Mobiles\Townfolk\Vendors\Tinker.cs" />
-    <Compile Include="Mobiles\Townfolk\Vendors\Vagabond.cs" />
-    <Compile Include="Mobiles\Townfolk\Vendors\VarietyDealer.cs" />
     <Compile Include="Mobiles\Townfolk\Vendors\Veterinarian.cs" />
     <Compile Include="Mobiles\Townfolk\Vendors\Waiter.cs" />
     <Compile Include="Mobiles\Townfolk\Vendors\Weaponsmith.cs" />
@@ -3893,7 +3890,6 @@
     <Compile Include="Mobiles\Townfolk\SBInfo\SBMapmaker.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBMiller.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBMiner.cs" />
-    <Compile Include="Mobiles\Townfolk\SBInfo\SBMonk.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBPlayerBarkeeper.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBProvisioner.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBRancher.cs" />
@@ -3901,18 +3897,13 @@
     <Compile Include="Mobiles\Townfolk\SBInfo\SBRealEstateBroker.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBScribe.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBSECook.cs" />
-    <Compile Include="Mobiles\Townfolk\SBInfo\SBSEHats.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBShipwright.cs" />
-    <Compile Include="Mobiles\Townfolk\SBInfo\SBSmithTools.cs" />
-    <Compile Include="Mobiles\Townfolk\SBInfo\SBSpecialVendor.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBStoneCrafter.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBTailor.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBTanner.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBTavernKeeper.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBThief.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBTinker.cs" />
-    <Compile Include="Mobiles\Townfolk\SBInfo\SBVagabond.cs" />
-    <Compile Include="Mobiles\Townfolk\SBInfo\SBVarietyDealer.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBVeterinarian.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBWaiter.cs" />
     <Compile Include="Mobiles\Townfolk\SBInfo\SBWeaponsmith.cs" />

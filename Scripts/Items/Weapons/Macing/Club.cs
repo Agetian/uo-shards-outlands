@@ -8,7 +8,7 @@ namespace Server.Items
 	public class Club : BaseBashing
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         public override int BaseMinDamage { get { return 12; } }
         public override int BaseMaxDamage { get { return 18; } }

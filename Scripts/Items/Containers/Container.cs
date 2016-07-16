@@ -318,7 +318,7 @@ namespace Server.Items
 	public class Backpack : BaseContainer, IDyable
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		[Constructable]
 		public Backpack() : base( 0xE75 )
@@ -378,7 +378,7 @@ namespace Server.Items
 	public class Pouch : TrapableContainer
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		[Constructable]
 		public Pouch() : base( 0xE79 )
@@ -497,7 +497,7 @@ namespace Server.Items
 	public class Bag : BaseContainer, IDyable
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		[Constructable]
 		public Bag() : base( 0xE76 )
@@ -649,10 +649,15 @@ namespace Server.Items
 	[Flipable( 0x9AA, 0xE7D )]
 	public class WoodenBox : LockableContainer
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public WoodenBox() : base( 0x9AA )
 		{
-			Weight = 4.0;
+            Name = "wooden box";
+
+			Weight = 2.0;
 		}
 
 		public WoodenBox( Serial serial ) : base( serial )

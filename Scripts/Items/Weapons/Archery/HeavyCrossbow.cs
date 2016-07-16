@@ -8,7 +8,7 @@ namespace Server.Items
 	public class HeavyCrossbow : BaseRanged
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override int EffectID{ get{ return 0x1BFE; } }
 		public override Type AmmoType{ get{ return typeof( Bolt ); } }

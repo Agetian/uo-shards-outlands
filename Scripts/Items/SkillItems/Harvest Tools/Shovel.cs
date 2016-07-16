@@ -6,16 +6,21 @@ namespace Server.Items
 {
 	public class Shovel : BaseHarvestTool
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		public override HarvestSystem HarvestSystem{ get{ return Mining.System; } }
 
 		[Constructable]
 		public Shovel() : this( 30 )
 		{
+            Name = "shovel";
 		}
 
 		[Constructable]
 		public Shovel( int uses ) : base( uses, 0xF39 )
 		{
+            Name = "shovel";
 			Weight = 5.0;
 		}
 

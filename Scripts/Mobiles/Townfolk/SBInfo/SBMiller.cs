@@ -20,10 +20,9 @@ namespace Server.Mobiles
 		{ 
 			public InternalBuyInfo() 
 			{
-                Add(new GenericBuyInfo("Skillet", typeof(Skillet), 10, 20, 0x97F, 0));
-                Add(new GenericBuyInfo(typeof(RollingPin), 2, 20, 0x1043, 0));
-				Add(new GenericBuyInfo(typeof(SackOfFlour), 3, 20, 0x1039, 0 ) );
-				Add(new GenericBuyInfo(typeof(SheafOfHay), 2, 20, 0xF36, 0 ) );
+                Add(new GenericBuyInfo("Skillet", typeof(Skillet), Skillet.GetSBPurchaseValue(), 50, 0x97F, 0));
+                Add(new GenericBuyInfo("Rolling Pin", typeof(RollingPin), RollingPin.GetSBPurchaseValue(), 50, 0x1043, 0));
+                Add(new GenericBuyInfo("Sack of Flour", typeof(SackOfFlour), SackOfFlour.GetSBPurchaseValue(), 500, 0x1039, 0));
 			} 
 		} 
 
@@ -31,10 +30,9 @@ namespace Server.Mobiles
 		{ 
 			public InternalSellInfo() 
 			{
-                Add(typeof( Skillet), 2);
-                Add(typeof( RollingPin), 1);
-                Add(typeof( SackOfFlour ), 1);
-				Add(typeof( SheafOfHay ), 1 );
+                Add(typeof(Skillet), Skillet.GetSBSellValue());
+                Add(typeof(RollingPin), RollingPin.GetSBSellValue());
+                Add(typeof(SackOfFlour), SackOfFlour.GetSBSellValue());
 			} 
 		} 
 	} 

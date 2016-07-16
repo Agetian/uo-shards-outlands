@@ -32,6 +32,9 @@ namespace Server.Items
 	[FlipableAttribute( 0x153b, 0x153c )]
 	public class HalfApron : BaseWaist
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		[Constructable]
 		public HalfApron() : this( 0 )
 		{

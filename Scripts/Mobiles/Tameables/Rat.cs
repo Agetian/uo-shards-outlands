@@ -6,8 +6,8 @@ namespace Server.Mobiles
     [CorpseName("a rat corpse")]
     public class Rat : BaseCreature
     {
-        public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 100; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         [Constructable]
         public Rat(): base(AIType.AI_Animal, FightMode.Aggressor, 10, 1, 0.2, 0.4)

@@ -49,8 +49,8 @@ namespace Server.Mobiles
                 Add(new GenericBuyInfo("Sulfurous Ash", typeof(SulfurousAsh), SulfurousAsh.GetSBPurchaseValue(), 500, 0xF8C, 0));
 
                 Add(new GenericBuyInfo("Recall Rune", typeof(RecallRune), RecallRune.GetSBPurchaseValue(), 50, 0x1f14, 0));
-                Add(new GenericBuyInfo("Blank Scroll", typeof(BlankScroll), BlankScroll.GetSBPurchaseValue(), 500, 0x0E34, 0));
                 Add(new GenericBuyInfo("Spellbook", typeof(Spellbook), Spellbook.GetSBPurchaseValue(), 25, 0xEFA, 0));
+                Add(new GenericBuyInfo("Blank Scroll", typeof(BlankScroll), BlankScroll.GetSBPurchaseValue(), 500, 0x0E34, 0));               
                 Add(new GenericBuyInfo("Scribe's Pen", typeof(ScribesPen), ScribesPen.GetSBPurchaseValue(), 50, 0xFBF, 0));
                 Add(new GenericBuyInfo("Magical Wizard's Hat", typeof(MagicWizardsHat), MagicWizardsHat.GetSBPurchaseValue(), 25, 0x1718, 0));
 			}

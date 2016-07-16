@@ -20,28 +20,32 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
-				Add( new GenericBuyInfo( typeof( Bag ), 6, 20, 0xE76, 0 ) );
-				Add( new GenericBuyInfo( typeof( Pouch ), 6, 20, 0xE79, 0 ) );
-				Add( new GenericBuyInfo( typeof( SkinningKnife ), 26, 20, 0xEC4, 0 ) );
-				Add( new GenericBuyInfo( typeof( LeatherLegs ), 80, 20, 0x13CB, 0 ) );
-				Add( new GenericBuyInfo( typeof( LeatherShorts ), 86, 20, 0x1C00, 0 ) );
-				Add( new GenericBuyInfo( typeof( LeatherSkirt ), 87, 20, 0x1C08, 0 ) );
-				Add( new GenericBuyInfo( typeof( LeatherCap ), 10, 20, 0x1DB9, 0 ) );
-				Add( new GenericBuyInfo( typeof( LeatherGloves ), 60, 20, 0x13C6, 0 ) );
-				Add( new GenericBuyInfo( typeof( LeatherGorget ), 74, 20, 0x13C7, 0 ) );
-				Add( new GenericBuyInfo( typeof( LeatherChest ), 101, 20, 0x13CC, 0 ) );
-				Add( new GenericBuyInfo( typeof( LeatherBustier ), 97, 20, 0x1C0A, 0 ) );
-				Add( new GenericBuyInfo( typeof( LeatherArms ), 80, 20, 0x13CD, 0 ) );
-				Add( new GenericBuyInfo( typeof( StuddedLegs ), 103, 20, 0x13DA, 0 ) );
-				Add( new GenericBuyInfo( typeof( StuddedGloves ), 79, 20, 0x13D5, 0 ) );
-				Add( new GenericBuyInfo( typeof( StuddedGorget ), 73, 20, 0x13D6, 0 ) );
-				Add( new GenericBuyInfo( typeof( StuddedChest ), 128, 20, 0x13DB, 0 ) );
-				Add( new GenericBuyInfo( typeof( StuddedBustier ), 120, 20, 0x1C0C, 0 ) );
-				Add( new GenericBuyInfo( typeof( StuddedArms ), 87, 20, 0x13DC, 0 ) );
-				Add( new GenericBuyInfo( typeof( FemaleStuddedChest ), 142, 20, 0x1C02, 0 ) );
-				Add( new GenericBuyInfo( typeof( FemalePlateChest ), 245, 20, 0x1C04, 0 ) );
-				Add( new GenericBuyInfo( typeof( FemaleLeatherChest ), 116, 20, 0x1C06, 0 ) );
-				Add( new GenericBuyInfo( typeof( Backpack ), 15, 20, 0x9B2, 0 ) );
+                Add(new GenericBuyInfo("Skinning Knife", typeof(SkinningKnife), SkinningKnife.GetSBPurchaseValue(), 50, 0xEC4, 0));
+
+                Add(new GenericBuyInfo("Leather Cap", typeof(LeatherCap), LeatherCap.GetSBPurchaseValue(), 25, 7610, 0));
+                Add(new GenericBuyInfo("Leather Gorget", typeof(LeatherGorget), LeatherGorget.GetSBPurchaseValue(), 25, 5063, 0));
+                Add(new GenericBuyInfo("Leather Arms", typeof(LeatherArms), LeatherArms.GetSBPurchaseValue(), 25, 5061, 0));
+                Add(new GenericBuyInfo("Leather Gloves", typeof(LeatherGloves), LeatherGloves.GetSBPurchaseValue(), 25, 5070, 0));
+                Add(new GenericBuyInfo("Leather Chest", typeof(LeatherChest), LeatherChest.GetSBPurchaseValue(), 25, 5075, 0));
+                Add(new GenericBuyInfo("Female Leather Chest", typeof(FemaleLeatherChest), FemaleLeatherChest.GetSBPurchaseValue(), 25, 7175, 0));
+                Add(new GenericBuyInfo("Leather Bustier", typeof(LeatherBustier), LeatherBustier.GetSBPurchaseValue(), 25, 7179, 0));
+                Add(new GenericBuyInfo("Leather Legs", typeof(LeatherLegs), LeatherLegs.GetSBPurchaseValue(), 25, 5074, 0));
+                Add(new GenericBuyInfo("Leather Skirt", typeof(LeatherSkirt), LeatherSkirt.GetSBPurchaseValue(), 25, 7177, 0));
+                Add(new GenericBuyInfo("Leather Shorts", typeof(LeatherShorts), LeatherShorts.GetSBPurchaseValue(), 25, 7169, 0));
+
+                Add(new GenericBuyInfo("Studded Cap", typeof(StuddedCap), StuddedCap.GetSBPurchaseValue(), 25, 7610, 1507));
+                Add(new GenericBuyInfo("Studded Gorget", typeof(StuddedGorget), StuddedGorget.GetSBPurchaseValue(), 25, 5078, 0));
+                Add(new GenericBuyInfo("Studded Arms", typeof(StuddedArms), StuddedArms.GetSBPurchaseValue(), 25, 5076, 0));
+                Add(new GenericBuyInfo("Studded Gloves", typeof(StuddedGloves), StuddedGloves.GetSBPurchaseValue(), 25, 5085, 0));
+                Add(new GenericBuyInfo("Studded Chest", typeof(StuddedChest), StuddedChest.GetSBPurchaseValue(), 25, 5090, 0));
+                Add(new GenericBuyInfo("Female Studded Chest", typeof(FemaleStuddedChest), FemaleStuddedChest.GetSBPurchaseValue(), 25, 7170, 0));
+                Add(new GenericBuyInfo("Studded Bustier", typeof(StuddedBustier), StuddedBustier.GetSBPurchaseValue(), 25, 7181, 0));
+                Add(new GenericBuyInfo("Studded Legs", typeof(StuddedLegs), StuddedLegs.GetSBPurchaseValue(), 25, 5089, 0));
+
+                Add(new GenericBuyInfo("Shoes", typeof(Shoes), Shoes.GetSBPurchaseValue(), 25, 0x170F, 0));
+                Add(new GenericBuyInfo("Sandals", typeof(Sandals), Sandals.GetSBPurchaseValue(), 25, 0x170D, 0));
+                Add(new GenericBuyInfo("Boots", typeof(Boots), Boots.GetSBPurchaseValue(), 25, 0x170B, 0));
+                Add(new GenericBuyInfo("Thigh Boots", typeof(ThighBoots), ThighBoots.GetSBPurchaseValue(), 25, 0x1711, 0));
 			}
 		}
 
@@ -49,6 +53,34 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
+                Add(typeof(Hide), Hide.GetSBSellValue());
+
+                Add(typeof(SkinningKnife), SkinningKnife.GetSBSellValue());
+
+                Add(typeof(LeatherCap), LeatherCap.GetSBSellValue());
+                Add(typeof(LeatherGorget), LeatherGorget.GetSBSellValue());
+                Add(typeof(LeatherArms), LeatherArms.GetSBSellValue());
+                Add(typeof(LeatherGloves), LeatherGloves.GetSBSellValue());
+                Add(typeof(LeatherChest), LeatherChest.GetSBSellValue());
+                Add(typeof(FemaleLeatherChest), FemaleLeatherChest.GetSBSellValue());
+                Add(typeof(LeatherBustier), LeatherBustier.GetSBSellValue());
+                Add(typeof(LeatherLegs), LeatherLegs.GetSBSellValue());
+                Add(typeof(LeatherSkirt), LeatherSkirt.GetSBSellValue());
+                Add(typeof(LeatherShorts), LeatherShorts.GetSBSellValue());
+
+                Add(typeof(StuddedCap), StuddedCap.GetSBSellValue());
+                Add(typeof(StuddedGorget), StuddedGorget.GetSBSellValue());
+                Add(typeof(StuddedArms), StuddedArms.GetSBSellValue());
+                Add(typeof(StuddedGloves), StuddedGloves.GetSBSellValue());
+                Add(typeof(StuddedChest), StuddedChest.GetSBSellValue());
+                Add(typeof(FemaleStuddedChest), FemaleStuddedChest.GetSBSellValue());
+                Add(typeof(StuddedBustier), StuddedBustier.GetSBSellValue());
+                Add(typeof(StuddedLegs), StuddedLegs.GetSBSellValue());
+
+                Add(typeof(Shoes), Shoes.GetSBSellValue());
+                Add(typeof(Sandals), Sandals.GetSBSellValue());
+                Add(typeof(Boots), Boots.GetSBSellValue());
+                Add(typeof(ThighBoots), ThighBoots.GetSBSellValue());
 			}
 		}
 	}

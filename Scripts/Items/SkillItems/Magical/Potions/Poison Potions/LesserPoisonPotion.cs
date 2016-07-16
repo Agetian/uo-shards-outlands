@@ -5,8 +5,8 @@ namespace Server.Items
 {
 	public class LesserPoisonPotion : BasePoisonPotion
 	{
-        public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 10; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override Poison Poison{ get{ return Poison.Lesser; } }
 

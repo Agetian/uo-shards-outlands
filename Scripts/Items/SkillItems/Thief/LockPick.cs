@@ -21,15 +21,21 @@ namespace Server.Items
     [FlipableAttribute(0x14fc, 0x14fb)]
     public class Lockpick : Item
     {
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
         [Constructable]
         public Lockpick(): this(1)
         {
+            Name = "lockpick";
         }
 
         [Constructable]
         public Lockpick(int amount)
             : base(0x14FC)
         {
+            Name = "lockpick";
+
             Stackable = true;
             Amount = amount;
         }

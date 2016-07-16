@@ -5,6 +5,9 @@ namespace Server.Items
 {
 	public class Lantern : BaseEquipableLight
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		public override int LitItemID
 		{
 			get
@@ -30,6 +33,8 @@ namespace Server.Items
 		[Constructable]
 		public Lantern() : base( 0xA25 )
 		{
+            Name = "lantern";
+
 			if ( Burnout )
 				Duration = TimeSpan.FromMinutes( 20 );
 			else

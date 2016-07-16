@@ -27,15 +27,7 @@ namespace Server.Mobiles
 		public class InternalSellInfo : GenericSellInfo
 		{
 			public InternalSellInfo()
-			{				
-				Add( typeof( SmallBoatDeed ), 1000 );
-                Add( typeof( SmallDragonBoatDeed ), 1025);
-                Add( typeof( MediumBoatDeed ), 1250);
-                Add( typeof( MediumDragonBoatDeed ), 1300);
-                Add( typeof( LargeBoatDeed ), 1500);
-                Add( typeof( LargeDragonBoatDeed ), 1600);
-                Add( typeof( CarrackBoatDeed ), 2000);
-                Add( typeof( GalleonBoatDeed ), 3000);
+			{	
 			}
 		}
 	}

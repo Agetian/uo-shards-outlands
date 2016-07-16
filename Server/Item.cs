@@ -1061,12 +1061,19 @@ namespace Server
         {
         }
         
-        public virtual double SellPriceToPurchasePriceScalar()
+        public static int SBDetermineSellPrice(int purchasePrice)
         {
-            return .25;
+            double scalar = .25;
+
+            int sellPrice = (int)(Math.Floor((double)purchasePrice * scalar));
+
+            if (sellPrice < 1)
+                sellPrice = 1;
+
+            return sellPrice;
         }  
 
-        public virtual double GetSBSellValueScalar()
+        public virtual double SBPlayerSellValueScalar()
         {
             return 1.0;
         }

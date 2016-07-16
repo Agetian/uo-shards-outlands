@@ -357,7 +357,7 @@ namespace Server.Items
             return arcaneEssenceValue;
         }
 
-        public override double GetSBSellValueScalar()
+        public override double SBPlayerSellValueScalar()
         {
             double scalar = 1.0;
 
@@ -649,7 +649,15 @@ namespace Server.Items
             return false;
         }
 
-        private static double[] m_ArmorScalars = { 0.07, 0.07, 0.14, 0.15, 0.22, 0.35 };
+        private static double[] m_ArmorScalars = 
+        {
+            0.07, //Gorget
+            0.07, //Gloves
+            0.14, //Helmet
+            0.15, //Arms
+            0.22, //Legs
+            0.35  //Chest
+        };
 
         public static double[] ArmorScalars
         {

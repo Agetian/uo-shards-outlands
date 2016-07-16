@@ -7,7 +7,7 @@ namespace Server.Items
 	public class Drums : BaseInstrument
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         public override int IconItemId { get { return 3740; } }
         public override int IconHue { get { return Hue; } }

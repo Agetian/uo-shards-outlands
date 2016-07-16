@@ -20,7 +20,7 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{                
-                Add(new GenericBuyInfo("barkeep contract", typeof(BarkeepContract), 6250, 20, 0x14F0, 0));
+                Add(new GenericBuyInfo("Barkeep Contract", typeof(BarkeepContract), 6250, 20, 0x14F0, 0));
 
                 Add(new BeverageBuyInfo("Jug of Cider", typeof(Jug), BeverageType.Cider, Jug.GetSBPurchaseValue(), 25, 0x9C8, 0));
                 Add(new BeverageBuyInfo("Bottle of Ale", typeof(BeverageBottle), BeverageType.Ale, BeverageBottle.GetSBPurchaseValue(), 25, 0x99F, 0));

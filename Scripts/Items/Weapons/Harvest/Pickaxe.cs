@@ -8,6 +8,9 @@ namespace Server.Items
 	[FlipableAttribute( 0xE86, 0xE85 )]
 	public class Pickaxe : BaseAxe, IUsesRemaining
 	{
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
+
 		public override HarvestSystem HarvestSystem{ get{ return Mining.System; } }
 
         public override int BaseMinDamage { get { return 1; } }

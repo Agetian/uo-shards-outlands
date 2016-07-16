@@ -8,21 +8,25 @@ namespace Server.Items
 	public class SmithHammer : BaseTool
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
 		public override CraftSystem CraftSystem{ get{ return DefBlacksmithy.CraftSystem; } }
 
 		[Constructable]
 		public SmithHammer() : base( 0x13E3 )
 		{
-			Weight = 8.0;
+            Name = "smith's hammer";
+
+			Weight = 2.0;
 			Layer = Layer.OneHanded;
 		}
 
 		[Constructable]
 		public SmithHammer( int uses ) : base( uses, 0x13E3 )
 		{
-			Weight = 8.0;
+            Name = "smith's hammer";
+
+			Weight = 2.0;
 			Layer = Layer.OneHanded;
 		}
 

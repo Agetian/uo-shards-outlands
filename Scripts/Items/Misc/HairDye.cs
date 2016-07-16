@@ -7,8 +7,8 @@ namespace Server.Items
 {
     public class HairDye : Item
     {
-        public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 2500; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         [Constructable]
         public HairDye(): base(0xEFF)

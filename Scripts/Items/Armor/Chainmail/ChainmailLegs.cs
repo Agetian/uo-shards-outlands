@@ -7,7 +7,7 @@ namespace Server.Items
 	public class ChainmailLegs : BaseArmor
 	{
         public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 		
         public override int ArmorBase { get { return 30; } }
         public override int OldDexBonus { get { return -2; } }

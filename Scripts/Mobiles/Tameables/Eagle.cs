@@ -6,8 +6,8 @@ namespace Server.Mobiles
     [CorpseName("an eagle corpse")]
     public class Eagle : BaseCreature
     {
-        public static int GetSBPurchaseValue() { return 1; }
-        public static int GetSBSellValue() { return 1; }
+        public static int GetSBPurchaseValue() { return 300; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
         [Constructable]
         public Eagle(): base(AIType.AI_Animal, FightMode.Aggressor, 10, 1, 0.2, 0.4)

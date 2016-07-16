@@ -162,7 +162,7 @@ namespace Server.Items
             return arcaneEssenceValue;
         }
 
-        public override double GetSBSellValueScalar()
+        public override double SBPlayerSellValueScalar()
         {
             double scalar = 1.0;
 
