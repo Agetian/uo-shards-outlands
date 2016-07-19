@@ -26,12 +26,9 @@ namespace Server.Items
             PlayerMobile player = from as PlayerMobile;
 
             if (player != null)
-            {
-                //player.CloseGump(typeof(AchievementsGump));
-                //player.SendGump(new AchievementsGump(player, AchievementsGump.PageType.Main, 0, AchievementCategory.Battle, 0, 0));
-                
-                player.CloseGump(typeof(ProfessionBoardGump));
-                player.SendGump(new ProfessionBoardGump(player, ProfessionGroupType.ArtificersEnclave, ProfessionGroupPageDisplayType.Jobs));
+            {               
+                //player.CloseGump(typeof(ProfessionBoardGump));
+                //player.SendGump(new ProfessionBoardGump(player, ProfessionGroupType.ArtificersEnclave, ProfessionGroupPageDisplayType.Jobs));
             }
         }
 
