@@ -814,7 +814,7 @@
     <Compile Include="Multis\HouseDeed.cs" />
     <Compile Include="Multis\BlockedHousingTimedStatic.cs" />
     <Compile Include="ProfessionBoard\ProfessionBoardContract.cs" />
-    <Compile Include="ProfessionBoard\ProfessionGroups.cs" />
+    <Compile Include="ProfessionBoard\ProfessionBoard.cs" />
     <Compile Include="ProfessionBoard\ProfessionBoardGump.cs" />
     <Compile Include="Ships\BoatScuttleGump.cs" />
     <Compile Include="Ships\ConfirmDryDockGump.cs" />

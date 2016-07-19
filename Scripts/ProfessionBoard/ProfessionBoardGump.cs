@@ -92,8 +92,8 @@ namespace Server.Gumps
 
                     #endregion
 
-                    string professionGroupName = ProfessionGroups.GetProfessionGroupName(professionGroup);
-                    int professionGroupTextHue = ProfessionGroups.GetProfessionGroupTextHue(professionGroup);
+                    string professionGroupName = ProfessionBoard.GetProfessionGroupName(professionGroup);
+                    int professionGroupTextHue = ProfessionBoard.GetProfessionGroupTextHue(professionGroup);
 
                     string timeUntilJobsReset = "23h 17m";
                     string monthlyScoreText = "83 pts (25th)";

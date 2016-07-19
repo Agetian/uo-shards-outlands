@@ -9,6 +9,8 @@ namespace Server.Items
 {
     public class ProfessionBoardContract : Item
     {
+        ProfessionJob m_ProfessionJob = null;
+
         [Constructable]
         public ProfessionBoardContract(): base(5357)
         {
@@ -43,7 +45,10 @@ namespace Server.Items
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
-            writer.Write((int)0); //version         
+            writer.Write((int)0); //version  
+       
+            //Version 0
+
         }
 
         public override void Deserialize(GenericReader reader)
@@ -80,8 +85,8 @@ namespace Server.Items
 
             int WhiteTextHue = 2499;
 
-            string professionGroupName = ProfessionGroups.GetProfessionGroupName(m_ProfessionGroup);
-            int professionGroupTextHue = ProfessionGroups.GetProfessionGroupTextHue(m_ProfessionGroup);
+            string professionGroupName = ProfessionBoard.GetProfessionGroupName(m_ProfessionGroup);
+            int professionGroupTextHue = ProfessionBoard.GetProfessionGroupTextHue(m_ProfessionGroup);
 
             string titleText = "Job Contract from The " + professionGroupName;
             string timeRemaining = "23h 17m";
