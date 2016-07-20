@@ -56,9 +56,6 @@ namespace Server.Multis
             SailPoints = Boat.MaxSailPoints;
             GunPoints = Boat.MaxGunPoints;
 
-            PlayerClass = PlayerClass.Pirate;
-            PlayerClassRestricted = true;
-
             m_MultiID = id;
             m_Offset = offset;
         }
@@ -74,18 +71,9 @@ namespace Server.Multis
             if (ns != null)
             {
                 ns.Send(new UnicodeMessage(Serial, ItemID, MessageType.Label, 0, 3, "ENU", "", Name));
-
-                if (PlayerClassRestricted)
-                {
-                    if (PlayerClassOwner == null)
-                    {
-                        if (DoubloonCost > 0)
-                            ns.Send(new UnicodeMessage(Serial, ItemID, MessageType.Label, 0, 3, "ENU", "", "[Requires " + DoubloonCost.ToString() + " doubloons]"));
-                    }
-
-                    else
-                        ns.Send(new UnicodeMessage(Serial, ItemID, MessageType.Label, 0, 3, "ENU", "", "[Bound to " + PlayerClassOwner.RawName + "]"));
-                }
+                
+                if (DoubloonCost > 0)
+                    ns.Send(new UnicodeMessage(Serial, ItemID, MessageType.Label, 0, 3, "ENU", "", "[Requires " + DoubloonCost.ToString() + " doubloons]"));                  
             }
         }
 
@@ -96,61 +84,14 @@ namespace Server.Multis
             if (pm_From == null)
                 return;
 
-            if (PlayerClassRestricted)
+            if (!IsChildOf(from.Backpack))
             {
-                if (PlayerClassOwner == null)
-                {
-                    int doubloonsInBank = Banker.GetUniqueCurrencyBalance(from, typeof(Doubloon));
-
-                    if (doubloonsInBank >= DoubloonCost)
-                    {
-                        from.CloseAllGumps();
-                        from.SendGump(new BindBaseBoatDeedGump(this, pm_From));
-                    }
-
-                    else
-                        from.SendMessage("You must have at least " + DoubloonCost.ToString() + " doubloons in your bank to claim this ship as your own.");
-                }
-
-                else
-                {
-                    if (PlayerClassOwner == from)
-                    {
-                        if (!IsChildOf(from.Backpack))
-                            from.SendLocalizedMessage(1042001); // That must be in your pack for you to use it.			
-
-                        else if (from.AccessLevel < AccessLevel.GameMaster && (from.Map == Map.Ilshenar || from.Map == Map.Malas))
-                            from.SendLocalizedMessage(1010567, null, 0x25); // You may not place a boat from this location.			
-
-                        else
-                        {
-                            from.LocalOverheadMessage(MessageType.Regular, 0x3B2, 502482); // Where do you wish to place the ship?
-                            from.Target = new InternalTarget(this);
-                        }
-                    }
-
-                    else
-                    {
-                        PlayerClassOwner = from;
-                        from.SendMessage("You claim the ship deed as your own.");
-                    }                        
-                }
+                from.SendLocalizedMessage(1042001); // That must be in your pack for you to use it.	
+                return;
             }
 
-            else
-            {
-                if (!IsChildOf(from.Backpack))
-                    from.SendLocalizedMessage(1042001); // That must be in your pack for you to use it.			
-
-                else if (from.AccessLevel < AccessLevel.GameMaster && (from.Map == Map.Ilshenar || from.Map == Map.Malas))
-                    from.SendLocalizedMessage(1010567, null, 0x25); // You may not place a boat from this location.			
-
-                else
-                {
-                    from.LocalOverheadMessage(MessageType.Regular, 0x3B2, 502482); // Where do you wish to place the ship?
-                    from.Target = new InternalTarget(this);
-                }
-            }
+            from.LocalOverheadMessage(MessageType.Regular, 0x3B2, 502482); // Where do you wish to place the ship?
+            from.Target = new InternalTarget(this);
         }
 
         public void OnPlacement(Mobile from, Point3D p)
@@ -490,9 +431,8 @@ namespace Server.Multis
                         {
                             Doubloon doubloonPile = new Doubloon(m_BaseBoatDeed.DoubloonCost);
                             from.SendSound(doubloonPile.GetDropSound());
-                            doubloonPile.Delete();
-                            
-                            m_BaseBoatDeed.PlayerClassOwner = m_Player;
+                            doubloonPile.Delete();                            
+                           
                             m_Player.SendMessage("You claim the boat as your own.");
                         }
 

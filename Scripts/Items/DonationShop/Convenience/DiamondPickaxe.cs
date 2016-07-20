@@ -20,6 +20,8 @@ namespace Server.Items
             ShowUsesRemaining = true;
 
             LootType = LootType.Blessed;
+
+            
         }
 
         public DiamondPickaxe(Serial serial): base(serial)

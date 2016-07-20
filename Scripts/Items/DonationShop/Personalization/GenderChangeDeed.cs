@@ -19,7 +19,11 @@ namespace Server.Gumps
             : base(0x14F0)
         {
             Weight = 1.0;
+
+
             LootType = LootType.Blessed;
+
+            
         }
 
         public GenderChangeDeed(Serial serial)

@@ -10,17 +10,17 @@ namespace Server.Items
     public class PotionKegCombiningDeed : Item
     {
         [Constructable]
-        public PotionKegCombiningDeed()
-            : base(0x14F0)
+        public PotionKegCombiningDeed(): base(0x14F0)
         {
             Name = "a potion keg combining deed";
 
             Hue = 2500;
             Weight = .1;
+
+            
         }
 
-        public PotionKegCombiningDeed(Serial serial)
-            : base(serial)
+        public PotionKegCombiningDeed(Serial serial): base(serial)
         {
         }
 

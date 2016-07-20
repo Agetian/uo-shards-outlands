@@ -7,6 +7,7 @@ using Server.Items;
 using Server.Commands;
 using Server.Mobiles;
 using Server.Gumps;
+using Server.Accounting;
 
 namespace Server
 {
@@ -86,6 +87,45 @@ namespace Server
             return 2499;
         }
 
+        public static void OnLogin(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            CheckCreateProfessionPlayerSettings(player);
+        }
+
+        public static void CheckCreateProfessionPlayerSettings(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            if (player.m_ProfessionPlayerSettings == null)
+                player.m_ProfessionPlayerSettings = new ProfessionPlayerSettings(player);
+
+            else if (player.m_ProfessionPlayerSettings.Deleted)
+                player.m_ProfessionPlayerSettings = new ProfessionPlayerSettings(player);
+        }
+
+        public static ProfessionJobPlayerProgress GetProfessionJobPlayerProgress(PlayerMobile player, ProfessionJob professionJob)
+        {
+            ProfessionJobPlayerProgress jobPlayerProgress = null;
+
+            if (player == null) return jobPlayerProgress;
+            if (professionJob == null) return jobPlayerProgress;
+
+            CheckCreateProfessionPlayerSettings(player);
+
+            foreach (ProfessionJobPlayerProgress jobPlayerProgressEntry in player.m_ProfessionPlayerSettings.m_JobProgress)
+            {
+                if (jobPlayerProgressEntry == null) continue;
+                if (jobPlayerProgressEntry.m_ProfessionJob == professionJob)
+                    return jobPlayerProgressEntry;
+            }
+
+            return jobPlayerProgress;
+        }
+
         public static void Serialize(GenericWriter writer)
         {
             writer.WriteEncodedInt(0); //Version
@@ -138,6 +178,8 @@ namespace Server
         public CreatureModifier m_PrimaryCreatureModifier;
         public CreatureModifier m_SecondaryCreatureModifier;
 
+        public List<PlayerMobile> m_PlayersCompleted = new List<PlayerMobile>();
+
         [Constructable]
         public ProfessionJob(): base(0x0)
         {
@@ -147,6 +189,60 @@ namespace Server
 
         public ProfessionJob(Serial serial): base(serial)
         {
+        }
+
+        public bool AccountHasCompleted(PlayerMobile player)
+        {
+            if (player == null)
+                return false;
+
+            Account account = player.Account as Account;
+
+            if (account == null)
+                return false;
+
+            foreach (PlayerMobile targetPlayer in m_PlayersCompleted)
+            {
+                if (player == null)
+                    continue;
+
+                Account targetAccount = targetPlayer.Account as Account;
+
+                if (targetAccount == null) continue;
+
+                if (account == targetAccount)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public void PlayerAccept(PlayerMobile player)
+        {
+            if (player == null) 
+                return;
+
+            if (AccountHasCompleted(player))
+            {
+                //Another Player on Account Already Completed
+                return;
+            }
+
+            ProfessionJobPlayerProgress playerJobProgress = ProfessionBoard.GetProfessionJobPlayerProgress(player, this);
+
+            if (playerJobProgress == null)
+            {
+                playerJobProgress = new ProfessionJobPlayerProgress(player, this);
+                player.m_ProfessionPlayerSettings.m_JobProgress.Add(playerJobProgress);
+
+                //SendMessage
+                //Add Job Item
+            }
+
+            else
+            {
+                //Already Accepted
+            }
         }
 
         public override void OnDelete()
@@ -180,6 +276,50 @@ namespace Server
         }
     }
 
+    public class ProfessionPlayerSettings : Item
+    {
+        public PlayerMobile m_Player;
+        public List<ProfessionJobPlayerProgress> m_JobProgress = new List<ProfessionJobPlayerProgress>();
+
+        [Constructable]
+        public ProfessionPlayerSettings(PlayerMobile player): base(0x0)
+        {
+            Visible = false;
+            Movable = false;
+
+            m_Player = player;
+
+            if (player == null)
+                Delete();
+
+            else
+                m_Player.m_ProfessionPlayerSettings = this;
+        }
+
+        public ProfessionPlayerSettings(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //Version
+
+            //Version 0
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
     public class ProfessionJobPlayerProgress : Item
     {
         public PlayerMobile m_Player;
@@ -190,8 +330,11 @@ namespace Server
         public double m_ProgressValue3 = 0.0;
 
         [Constructable]
-        public ProfessionJobPlayerProgress(): base(0x0)
+        public ProfessionJobPlayerProgress(PlayerMobile player, ProfessionJob professionJob): base(0x0)
         {
+            m_Player = player;
+            m_ProfessionJob = professionJob;
+
             Visible = false;
             Movable = false;
         }

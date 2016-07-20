@@ -325,9 +325,8 @@ namespace Server.Items
 
                         if (!item.Deleted)
                             item.Bounce(from);
-                        
-                        //Change the potion keg color if it is original (has not been dyed by furniture tub or change color by potion yet).
-                        if (Hue == OriginalHue)
+
+                        if (Hue == 0)
                         {
                             //Change the color hue based on the type of the potion
                             switch (item.GetType().BaseType.Name)
@@ -345,7 +344,7 @@ namespace Server.Items
                             }
 
                             from.SendMessage("The potion keg has absorbed the potion and turned into its color.");
-                        }                        
+                        }                                                
 
                         return true;
                     }

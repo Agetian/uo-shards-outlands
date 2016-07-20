@@ -1252,10 +1252,9 @@ namespace Server.Engines.Craft
                             item.Amount = maxAmount;                        
                     }
 
-                    item.Acquisition = Item.AcquisitionType.Crafted;
-                    item.AcquisitionData = from.Serial.Value;
                     item.CraftedBy = from;
                     item.CrafterName = from.RawName;
+                    item.ItemGroup = ItemGroupType.Crafted;
 
                     if (m_Count > 1)
                     {

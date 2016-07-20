@@ -52,8 +52,11 @@ namespace Server.Items
         public TreasureMapLibrary(): base(8793)
         {
             Name = "a treasure map library";
+
             Hue = 2503;
             Weight = 5;
+
+            
 
             CreateEntries();
         }

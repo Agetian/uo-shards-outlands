@@ -866,7 +866,6 @@
     <Compile Include="BreakableObjects\Items\Mimic.cs" />
     <Compile Include="BreakableObjects\Items\LuniteOreFormation.cs" />
     <Compile Include="BreakableObjects\Items\BreakableStoneWall.cs" />
-    <Compile Include="Items\AstralLeash.cs" />
     <Compile Include="Items\BeverageKeg.cs" />
     <Compile Include="Items\KinPaints\CaveMoss.cs" />
     <Compile Include="Items\KinPaints\Bonemeal.cs" />

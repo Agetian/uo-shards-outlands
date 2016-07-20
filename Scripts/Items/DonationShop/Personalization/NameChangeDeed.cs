@@ -11,11 +11,11 @@ namespace Server.Items
     public class NameChangeDeed : Item
     {
         [Constructable]
-        public NameChangeDeed()
-            : base(0x14F0)
+        public NameChangeDeed(): base(0x14F0)
         {
             base.Weight = 1.0;
             base.Name = "a name change deed";
+            
         }
 
         public NameChangeDeed(Serial serial) : base(serial) { }

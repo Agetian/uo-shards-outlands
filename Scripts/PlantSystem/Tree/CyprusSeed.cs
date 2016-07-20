@@ -30,6 +30,7 @@ namespace Server.Items
         [Constructable]
         public CyprusTreeSeed(): base()
         {
+            ItemRarity = ItemRarityType.Rare;
         }
 
         public CyprusTreeSeed(Serial serial): base(serial)

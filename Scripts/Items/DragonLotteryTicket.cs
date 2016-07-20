@@ -19,7 +19,7 @@ namespace Server.Items
         {
             LootType = Server.LootType.Blessed;
             Name = "Dragon Lottery Ticket";
-            DonationItem = true;
+            
         }
 
         public override void OnSingleClick(Mobile from)

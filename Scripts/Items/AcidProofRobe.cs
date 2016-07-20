@@ -17,7 +17,7 @@ namespace Server.Items
 		{
             Name = "acid proof robe";
 			Hue = 2006;
-            DonationItem = true;
+            
 		}
 
 		public AcidProofRobe( Serial serial ) : base( serial )

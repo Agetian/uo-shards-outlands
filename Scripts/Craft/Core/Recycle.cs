@@ -313,11 +313,7 @@ namespace Server.Engines.Craft
                         foreach (Item recycleItem in m_ItemMatches)
                         {
                             if (!recycleItem.Movable) continue;
-                            if (recycleItem.LootType != LootType.Regular) continue;
-                            if (recycleItem.PlayerClassCurrencyValue > 0) continue;
-                            if (recycleItem.QuestItem) continue;
-                            if (recycleItem.Nontransferable) continue;
-                            if (recycleItem.DonationItem) continue;
+                            if (recycleItem.LootType != LootType.Regular) continue;                        
                             if (recycleItem.DecorativeEquipment) continue;
                             if (recycleItem.TierLevel > 0 && recycleItem.Aspect != AspectEnum.None) continue;
                             if (recycleItem is BaseContainer && recycleItem.TotalItems > 0) continue;
@@ -345,7 +341,7 @@ namespace Server.Engines.Craft
                             {
                                 double salvageScalar = .5;
 
-                                if (recycleItem.Quality == Quality.Low || recycleItem.Stackable)
+                                if (recycleItem.ItemGroup != ItemGroupType.Crafted)
                                     salvageScalar = .25;
 
                                 Type resourceType = pair.Key;

@@ -23,7 +23,7 @@ namespace Server.Items
             LootType = Server.LootType.Blessed;
             Hue = 1164;
             Weight = 0.01;
-            DonationItem = true;
+            
         }
 
         public DragonCoin(Serial serial)
@@ -42,7 +42,7 @@ namespace Server.Items
             base.Deserialize(reader);
             int version = reader.ReadEncodedInt();
 
-            DonationItem = true;
+            
         }
     }
 }

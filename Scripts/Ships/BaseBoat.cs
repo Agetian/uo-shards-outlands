@@ -5004,7 +5004,7 @@ namespace Server
             if (from == null || item == null)
                 return true;
 
-            if (item.GetType() == typeof(Doubloon) && from == item.PlayerClassOwner)
+            if (item.GetType() == typeof(Doubloon))
                 return true;
             
             if (item.GetType() == typeof(ShipTrashBarrel))
@@ -5152,11 +5152,7 @@ namespace Server
             if (boatDeed == null)
                 return;
 
-            PullGhostsToPlayer(from);
-
-            //Store Current Boat Properties in BoatDeed
-            if (boatDeed.PlayerClassRestricted == true)
-                boatDeed.PlayerClassOwner = Owner;
+            PullGhostsToPlayer(from);            
 
             boatDeed.m_CoOwners = m_CoOwners;
             boatDeed.m_Friends = m_Friends;
@@ -5417,15 +5413,6 @@ namespace Server
 
             for (int i = 0; i < currencyPiles.Length; ++i)
             {
-                if (boat.MobileControlType == MobileControlType.Player)
-                {
-                    if (boat.Owner != null && currencyPiles[i].PlayerClassOwner != null)
-                    {
-                        if (currencyPiles[i].PlayerClassOwner != boat.Owner)
-                            continue;
-                    }
-                }
-
                 balance += currencyPiles[i].Amount;
             }
 
@@ -5471,8 +5458,7 @@ namespace Server
             if (amountRemaining > 0)
             {
                 Item newCurrency = (Item)Activator.CreateInstance(typeof(Doubloon));
-
-                newCurrency.PlayerClassOwner = boat.Owner;
+               
                 newCurrency.Amount = amountRemaining;
 
                 if (boat.Hold.TryDropItem(from, newCurrency, true))
@@ -5525,9 +5511,8 @@ namespace Server
             foreach (Item item in m_Items)
             {
                 Doubloon doubloon = item as Doubloon;
-
-                if (doubloon.PlayerClassOwner == Owner)
-                    m_DoubloonPiles.Add(doubloon);
+               
+                m_DoubloonPiles.Add(doubloon);
             }
 
             foreach (Doubloon doubloon in m_DoubloonPiles)
@@ -5557,7 +5542,6 @@ namespace Server
                 for (int a = 0; a < doubloonStacks; a++)
                 {
                     Doubloon newDoubloons = new Doubloon();
-                    newDoubloons.PlayerClassOwner = Owner;
 
                     if (doubloonStacks <= 1)
                         newDoubloons.Amount = doubloonsRemaining;

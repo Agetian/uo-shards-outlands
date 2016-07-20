@@ -214,13 +214,6 @@ namespace Server.Spells.Fourth
                 if (m_Book != null)
                     --m_Book.CurCharges;
 
-                var astralLeash = Caster.Backpack.FindItemByType<AstralLeash>();
-                if (astralLeash != null && !astralLeash.Deleted && astralLeash.CanConsume() && Caster.Followers > 0)
-                {
-                    if (BaseCreature.TeleportPets(Caster, loc, map, false))
-                        astralLeash.Consume();
-                }
-
                 Point3D sourceLocation = Caster.Location;
                 Map sourceMap = Caster.Map;
 

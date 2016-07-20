@@ -25,27 +25,17 @@ namespace Server.Items
         [Constructable]
         public Doubloon(int amount): base(2539)
         {
-            Stackable = true;
-            Amount = amount;
-            Hue = 2125;
             Name = "doubloon";
 
-            PlayerClass = Server.PlayerClass.Pirate;
-            PlayerClassRestricted = true;
+            Stackable = true;
+            Amount = amount;
+            Hue = 2125;           
 
             Server.Custom.CurrencyTracking.RegisterDoubloons(amount);
         }
 
         public Doubloon(Serial serial): base(serial)
         {
-        }
-
-        public override bool StackWith(Mobile from, Item dropped, bool playSound)
-        {
-            if (dropped.PlayerClassOwner != PlayerClassOwner)
-                return false;
-
-            return base.StackWith(from, dropped, playSound);
         }
 
         public override void OnSingleClick(Mobile from)
@@ -57,8 +47,10 @@ namespace Server.Items
         {
             if (Amount <= 1)
                 return 0x2E4;
+
             else if (Amount <= 5)
                 return 0x2E5;
+
             else
                 return 0x2E6;
         }

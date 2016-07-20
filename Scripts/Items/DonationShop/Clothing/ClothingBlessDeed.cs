@@ -16,6 +16,8 @@ namespace Server.Items
             Hue = 2958;
 
 			Weight = 1.0;
+
+            
 		}
 
 		public ClothingBlessDeed( Serial serial ) : base( serial )
@@ -87,7 +89,7 @@ namespace Server.Items
 
                 if (item is BaseClothing || isMask || item.DecorativeEquipment)
                 {
-                    if (item.LootType == LootType.Blessed || item.BlessedFor == from || (Mobile.InsuranceEnabled && item.Insured))
+                    if (item.LootType == LootType.Blessed || item.BlessedFor == from )
                         from.SendLocalizedMessage(1045113); // That item is already blessed
 
                     else if (item.LootType != LootType.Regular)

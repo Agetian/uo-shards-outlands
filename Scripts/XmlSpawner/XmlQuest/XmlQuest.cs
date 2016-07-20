@@ -224,32 +224,10 @@ namespace Server.Items
 
 		private static void ReturnCollected(IXmlQuest quest, Item item)
 		{
-			if (item == null) return;
+			if (item == null)
+                return;
 
-			// if this was player made, then return the item to the creator
-			// dont allow players to return items to themselves.  This prevents possible exploits where quests are used as
-			// item transporters
-			if (quest != null && quest.PlayerMade && (quest.Creator != null) && !quest.Creator.Deleted && (quest.Creator != quest.Owner) && !item.QuestItem)
-			{
-				bool returned = false;
-				if ((quest.ReturnContainer != null) && !quest.ReturnContainer.Deleted)
-				{
-					returned = quest.ReturnContainer.TryDropItem(quest.Creator, item, false);
-
-					//ReturnContainer.DropItem(m_RewardItem);
-				}
-				if (!returned)
-				{
-					quest.Creator.AddToBackpack(item);
-				}
-
-                quest.Creator.SendMessage("You receive {0} from quest {1}", item.GetType().Name, quest.Name);
-			}
-			else
-			{
-				// just delete it
-				item.Delete();
-			}
+			item.Delete();			
 		}
 
 		private static void TakeGiven(Mobile to, IXmlQuest quest, Item item)

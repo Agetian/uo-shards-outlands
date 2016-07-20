@@ -192,9 +192,6 @@ namespace Server.Items
 		{
 			if ( m.AccessLevel < AccessLevel.GameMaster )
 			{
-                if (item.DonationItem || item.Nontransferable)
-                    return true;
-
 				if ( IsDecoContainer )
 				{
 					if ( message )

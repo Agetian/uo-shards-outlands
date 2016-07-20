@@ -15,6 +15,8 @@ namespace Server.Items
 		{
 			Weight = 1.0;
 			LootType = LootType.Blessed;
+
+            
 		}
 
         public override string DefaultName

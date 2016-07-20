@@ -29,6 +29,8 @@ namespace Server.Items
 			Weight = 2.0;
 
             LootType = LootType.Blessed;
+
+            
 		}
 
 		public DeerMask( Serial serial ) : base( serial )

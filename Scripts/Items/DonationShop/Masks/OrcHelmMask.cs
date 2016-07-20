@@ -28,6 +28,8 @@ namespace Server.Items
 			Weight = 2.0;
 
             LootType = LootType.Blessed;
+
+            
 		}
 
 		public OrcHelmMask( Serial serial ) : base( serial )

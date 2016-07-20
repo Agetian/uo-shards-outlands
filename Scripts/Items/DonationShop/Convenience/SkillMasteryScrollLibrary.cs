@@ -51,8 +51,11 @@ namespace Server.Items
         public SkillMasteryScrollLibrary(): base(8793)
         {
             Name = "a skill mastery scroll library";
+
             Hue = 2963;
             Weight = 5;
+
+            
 
             CreateSkillEntries();
         }

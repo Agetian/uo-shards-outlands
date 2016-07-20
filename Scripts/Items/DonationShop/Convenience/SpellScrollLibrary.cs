@@ -138,8 +138,11 @@ namespace Server.Items
         public SpellScrollLibrary(): base(8793)
         {
             Name = "a spell scroll library";
+
             Hue = 2117;
             Weight = 5;
+
+            
 
             CreateSpellEntries();
         }

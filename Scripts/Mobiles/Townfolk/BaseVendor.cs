@@ -523,25 +523,6 @@ namespace Server.Mobiles
 
 					foreach ( Item item in items )
 					{
-
-                        if (from is PlayerMobile)
-                        {
-                            PlayerMobile pMobile = (PlayerMobile)from;
-
-                            if (pMobile.ResetItemsNotCraftedByDateTime <= DateTime.UtcNow)                            
-                                pMobile.ItemsNotCraftedBySold = 0;
-                            
-                            if (item.Acquisition == Item.AcquisitionType.Crafted && item.AcquisitionData != from.Serial.Value && !item.Stackable)
-                            {
-                                if (numItemsNotCraftedBySeller + pMobile.ItemsNotCraftedBySold > 15)
-                                    continue;
-
-                                else                                
-                                    numItemsNotCraftedBySeller++;
-                                
-                            }
-                        }
-
 						if ( item is Container && ( (Container)item ).Items.Count != 0 )
 							continue;
 
@@ -655,9 +636,7 @@ namespace Server.Mobiles
 				else
 				{
 					item.Amount = 1;
-                    item.Acquisition = Item.AcquisitionType.VendorBought;
-                    item.AcquisitionData = bii.Price;
-
+                  
                     item.Quality = Quality.Low;
 
 					if (cont == null || !cont.TryDropItem(buyer, item, false))
@@ -672,9 +651,7 @@ namespace Server.Mobiles
 					{
 						if ( item != null )
 						{
-                            item = bii.GetEntity() as Item;
-                            item.Acquisition = Item.AcquisitionType.VendorBought;
-                            item.AcquisitionData = bii.Price;
+                            item = bii.GetEntity() as Item;                           
 
 							item.Amount = 1;
 
@@ -1020,9 +997,7 @@ namespace Server.Mobiles
 
             foreach ( SellItemResponse resp in list )
 			{
-				bool crafted_or_bought = (resp.Item.Acquisition == Item.AcquisitionType.Crafted || resp.Item.Acquisition == Item.AcquisitionType.VendorBought);
-				
-                if ( !crafted_or_bought || resp.Item.RootParent != seller || resp.Amount <= 0 || !resp.Item.IsStandardLoot() || !resp.Item.Movable || ( resp.Item is Container && ( (Container)resp.Item ).Items.Count != 0 ) )
+                if ( resp.Item.RootParent != seller || resp.Amount <= 0 || !resp.Item.IsStandardLoot() || !resp.Item.Movable || ( resp.Item is Container && ( (Container)resp.Item ).Items.Count != 0 ) )
 					continue;
 
 				foreach (IShopSellInfo ssi in info)
@@ -1105,25 +1080,8 @@ namespace Server.Mobiles
 								resp.Item.Delete();
 						}
 
-						if (ssi.IsSellable(resp.Item))
-						{
-							if (resp.Item.Acquisition == Item.AcquisitionType.VendorBought && !resp.Item.Stackable)
-								GiveGold += (int)(resp.Item.AcquisitionData * .40) * resp.Amount;
-
-							else
-								GiveGold += ssi.GetSellPriceFor(resp.Item) * resp.Amount;
-						}
-
-                        if (seller is PlayerMobile && !resp.Item.Stackable)
-                            if (resp.Item.Acquisition == Item.AcquisitionType.Crafted && resp.Item.AcquisitionData != seller.Serial.Value)
-                            {
-                                PlayerMobile pMobile = (PlayerMobile)seller;
-
-                                if (pMobile.ItemsNotCraftedBySold == 0)
-                                    pMobile.ResetItemsNotCraftedByDateTime = DateTime.UtcNow + TimeSpan.FromDays(1);
-                                
-                                pMobile.ItemsNotCraftedBySold++;
-                            }
+						if (ssi.IsSellable(resp.Item))						
+							GiveGold += ssi.GetSellPriceFor(resp.Item) * resp.Amount;
                         
 						break;
 					}

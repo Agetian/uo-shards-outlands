@@ -102,7 +102,7 @@ namespace Server.Multis
 		public RowBoatDeed() : base( m_BoatId, Point3D.Zero )
 		{
             Name = " a row boat deed";
-            PlayerClassRestricted = false;
+            
 		}
 
         public RowBoatDeed(Serial serial): base(serial)

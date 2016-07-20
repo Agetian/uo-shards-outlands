@@ -44,8 +44,7 @@ namespace Server.Multis
         [Constructable]
         public SmallFishermansBoatDeed(): base(m_BoatId, Point3D.Zero)
         {
-            Name = " a small fisherman's boat deed";
-            PlayerClassRestricted = false;
+            Name = " a small fisherman's boat deed";            
         }
 
         public SmallFishermansBoatDeed(Serial serial): base(serial)

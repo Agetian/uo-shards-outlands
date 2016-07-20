@@ -9,15 +9,12 @@ namespace Server.Items
         public override string DefaultName { get { return "a black feather"; } }
 
         [Constructable]
-        public BlackFeather()
-            : base(4129)
-        {
-            DonationItem = true;
+        public BlackFeather(): base(4129)
+        {            
             Hue = 2051;
         }
 
-        public BlackFeather(Serial serial)
-            : base(serial)
+        public BlackFeather(Serial serial): base(serial)
         {
         }
 

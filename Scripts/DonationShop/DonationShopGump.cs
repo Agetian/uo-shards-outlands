@@ -543,6 +543,8 @@ namespace Server.Gumps
                 m_Player.SendSound(PurchaseSound);
                 m_Player.SendMessage("You purchase the donation item.");
 
+                donationItem.ItemGroup = ItemGroupType.Donation;
+
                 m_Player.Backpack.DropItem(donationItem);
 
                 Banker.WithdrawUniqueCurrency(m_Player, DonationShop.DonationCurrencyType, item.ItemCost);

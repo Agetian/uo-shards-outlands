@@ -16,7 +16,10 @@ namespace Server.Items
 		public HairRestylingDeed() : base( 0x14F0 )
 		{
 			Weight = 1.0;
+
 			LootType = LootType.Blessed;
+
+            
 		}
 
 		public HairRestylingDeed( Serial serial ) : base( serial )

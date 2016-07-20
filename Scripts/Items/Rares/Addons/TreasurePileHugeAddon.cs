@@ -51,8 +51,6 @@ namespace Server.Items
 
 	public class TreasurePileHugeAddonDeed : BaseAddonDeed
 	{
-        public override int PlayerClassCurrencyValue { get { return 10000; } }
-
 		public override BaseAddon Addon { get { return new TreasurePileHugeAddon(); } }
 
 		[Constructable]

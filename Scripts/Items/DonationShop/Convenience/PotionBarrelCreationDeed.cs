@@ -16,6 +16,8 @@ namespace Server.Items
 
             Hue = 2515;
             Weight = .1;
+
+            
         }
 
         public PotionBarrelConversionDeed(Serial serial): base(serial)

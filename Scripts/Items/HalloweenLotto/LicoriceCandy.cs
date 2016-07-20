@@ -20,7 +20,7 @@ namespace Server.Items
             : base(0x469D) 
         {
             LootType = Server.LootType.Blessed;
-            DonationItem = true;
+            
             Hue = 2051;
 
         }

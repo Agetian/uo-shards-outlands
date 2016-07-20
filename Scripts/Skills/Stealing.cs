@@ -102,22 +102,9 @@ namespace Server.SkillHandlers
                 }
 
                 else if (root is Corpse)                
-                    from.SendLocalizedMessage(502710); // You can't steal that!                
+                    from.SendLocalizedMessage(502710); // You can't steal that! 
 
-                else if (item.Stealable && !item.AlreadyStolen)
-                {
-                    //TEST: Check This (Rares Stealing?) 
-                    if (from.CheckTargetSkill(SkillName.Stealing, item, item.MinimumStealing, item.MaximumStealing, 1.0))
-                    {
-                        item.AlreadyStolen = true;
-                        stolen = item;
-                    }
-
-                    else                    
-                        from.SendLocalizedMessage(502723); // You fail to steal the item.                    
-                }
-
-                else if (!item.Movable || item.LootType == LootType.Unlootable || item.LootType == LootType.Newbied || item.CheckBlessed(root) || item.DonationItem)                
+                else if (!item.Movable || item.LootType == LootType.Unlootable || item.LootType == LootType.Newbied || item.CheckBlessed(root))                
                     from.SendLocalizedMessage(502710); // You can't steal that!
                 
                 else

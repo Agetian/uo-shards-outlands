@@ -181,6 +181,8 @@ namespace Server
 
             bool claimed = true;
 
+            Item item = null;
+
             switch (achievement)
             {
                 #region Category: Seafaring
@@ -188,7 +190,11 @@ namespace Server
                 case Achievement.SinkOrSwim:
                     if (TryAcceptReward(player, entry, 1, 1))
                     {
-                        player.Backpack.AddItem(new CyprusTreeSeed());
+                        item = new CyprusTreeSeed();
+
+                        item.ItemGroup = ItemGroupType.Achievement;
+
+                        player.Backpack.AddItem(item);
                         player.SendMessage(rewardTextHue, "You receive a Cyprus Tree seed.");                        
                     }
                 break;

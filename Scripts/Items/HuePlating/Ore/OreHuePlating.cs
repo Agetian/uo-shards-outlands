@@ -88,13 +88,7 @@ namespace Server.Items
                             from.SendMessage("Aspect armor may not be hued with this item.");
                             return;
                         }
-
-                        if (item.PlayerClass != PlayerClass.None)
-                        {
-                            from.SendMessage("Playerclass items may not be hued with this item.");
-                            return;
-                        }
-
+                        
                         if (item.LootType == LootType.Newbied || item.LootType == LootType.Blessed)
                         {
                             from.SendMessage("Newbied or blessed items may not be hued with this item.");

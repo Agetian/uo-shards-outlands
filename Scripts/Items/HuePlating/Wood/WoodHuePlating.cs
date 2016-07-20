@@ -83,12 +83,6 @@ namespace Server.Items
 
                     if (item is BaseWeapon || item is BaseArmor || item is BaseShield)
                     {
-                        if (item.PlayerClass != PlayerClass.None)
-                        {
-                            from.SendMessage("Playerclass items may not be hued with this item.");
-                            return;
-                        }
-
                         if (item.LootType == LootType.Newbied || item.LootType == LootType.Blessed)
                         {
                             from.SendMessage("Newbied or blessed items may not be hued with this item.");

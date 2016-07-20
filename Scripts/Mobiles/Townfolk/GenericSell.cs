@@ -103,17 +103,11 @@ namespace Server.Mobiles
 
 		public bool IsSellable( Item item )
 		{
-			if ( item.Nontransferable )
-				return false;
-
 			return IsInList( item.GetType() );
 		}
 	 
 		public bool IsResellable( Item item )
 		{
-			if ( item.Nontransferable )
-				return false;
-
 			return IsInList( item.GetType() );
 		}
 

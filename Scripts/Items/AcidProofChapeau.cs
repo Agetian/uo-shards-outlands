@@ -11,7 +11,6 @@ namespace Server.Items
         {
             Name = "acid proof chapeau";
             Hue = 2006;
-            DonationItem = true;
         }
 
         public AcidProofChapeau(Serial serial)
