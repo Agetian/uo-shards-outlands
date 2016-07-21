@@ -7,11 +7,11 @@ using Server.Network;
 
 namespace Server.Gumps
 {
-    public class ProfessionBoardGump : Gump
+    public class SocietiesJobBoardGump : Gump
     {
         public PlayerMobile m_Player;
-        public ProfessionGroupType m_ProfessionGroup;
-        public ProfessionGroupPageDisplayType m_ProfessionGroupPageDisplayType = ProfessionGroupPageDisplayType.Jobs;
+        public SocietiesGroupType m_SocietiesGroup;
+        public SocietiesGroupPageDisplayType m_SocietiesGroupPageDisplay = SocietiesGroupPageDisplayType.Jobs;
 
         public static int OpenGumpSound = 0x055;
         public static int ChangePageSound = 0x057;
@@ -19,13 +19,13 @@ namespace Server.Gumps
         public static int PurchaseSound = 0x2E6;
         public static int CloseGumpSound = 0x058;        
 
-        public ProfessionBoardGump(PlayerMobile player, ProfessionGroupType professionGroup, ProfessionGroupPageDisplayType professionGroupPageDisplay): base(10, 10)
+        public SocietiesJobBoardGump(PlayerMobile player, SocietiesGroupType societiesGroup, SocietiesGroupPageDisplayType societiesGroupPageDisplay): base(10, 10)
         {
             if (player == null) return;
 
             m_Player = player;
-            m_ProfessionGroup = professionGroup;
-            m_ProfessionGroupPageDisplayType = professionGroupPageDisplay;
+            m_SocietiesGroup = societiesGroup;
+            m_SocietiesGroupPageDisplay = societiesGroupPageDisplay;
 
             int WhiteTextHue = 2499;
 
@@ -64,13 +64,13 @@ namespace Server.Gumps
             AddButton(14, 14, 2094, 2095, 1, GumpButtonType.Reply, 0);
             AddLabel(12, 2, 149, "Guide");
 
-            AddLabel(287, 0, WhiteTextHue, "Profession Board");
+            AddLabel(287, 0, WhiteTextHue, "Societies Job Board");
 
-            switch (m_ProfessionGroupPageDisplayType)
+            switch (m_SocietiesGroupPageDisplay)
             {
                 #region Jobs
 
-                    case ProfessionGroupPageDisplayType.Jobs:  
+                    case SocietiesGroupPageDisplayType.Jobs:  
                   
                     #region Header Images
 
@@ -92,21 +92,21 @@ namespace Server.Gumps
 
                     #endregion
 
-                    string professionGroupName = ProfessionBoard.GetProfessionGroupName(professionGroup);
-                    int professionGroupTextHue = ProfessionBoard.GetProfessionGroupTextHue(professionGroup);
+                    string societiesGroupName = Societies.GetSocietyGroupName(m_SocietiesGroup);
+                    int societiesGroupTextHue = Societies.GetSocietyGroupTextHue(m_SocietiesGroup);
 
                     string timeUntilJobsReset = "23h 17m";
                     string monthlyScoreText = "83 pts (25th)";
                     string lifetimeScoreText = "1,017 pts (3rd)";
-                    int professionPointsAvailable = 500;                    
+                    int societiesPointsAvailable = 500;                    
 
                     AddImage(203, 40, 1141);
-                    AddLabel(Utility.CenteredTextOffset(350, professionGroupName), 42, professionGroupTextHue, professionGroupName);
+                    AddLabel(Utility.CenteredTextOffset(350, societiesGroupName), 42, societiesGroupTextHue, societiesGroupName);
 
                     AddLabel(133, 67, 149, "Jobs Will Reset in");
                     AddLabel(Utility.CenteredTextOffset(190, timeUntilJobsReset), 87, WhiteTextHue, timeUntilJobsReset);
 
-                    AddLabel(129, 114, 63, professionPointsAvailable.ToString() + " Points Available");
+                    AddLabel(129, 114, 63, societiesPointsAvailable.ToString() + " Points Available");
 
                     AddLabel(437, 67, 2420, "Monthly Score (Rank)");
                     AddLabel(Utility.CenteredTextOffset(510, monthlyScoreText), 87, WhiteTextHue, monthlyScoreText);
@@ -120,11 +120,11 @@ namespace Server.Gumps
                     int startX = 272;
                     int startY = 57;
 
-                    #region Profession Images
+                    #region Societies Images
 
-                    switch (professionGroup)
+                    switch (m_SocietiesGroup)
                     {
-                        case ProfessionGroupType.FishermansCircle:
+                        case SocietiesGroupType.FishermansCircle:
                             AddItem(startX + 34, startY + 19, 3520);
                             AddItem(startX + 66, startY + 48, 3656);
                             AddItem(startX + 35, startY + 36, 2476);
@@ -132,7 +132,7 @@ namespace Server.Gumps
                             AddItem(startX + 45, startY + 35, 15113);
                         break;
 
-                        case ProfessionGroupType.SmithingOrder:
+                        case SocietiesGroupType.SmithingOrder:
                             AddItem(startX + 36, startY + 29, 5073);
                             AddItem(startX + 86, startY + 29, 5096);
                             AddItem(startX + 50, startY + 39, 7035);
@@ -140,7 +140,7 @@ namespace Server.Gumps
                             AddItem(startX + 47, startY + 33, 5181);
                         break;
 
-                        case ProfessionGroupType.TradesmanUnion:
+                        case SocietiesGroupType.TradesmanUnion:
                             AddItem(startX + 29, startY + 27, 4142);
                             AddItem(startX + 37, startY + 23, 4150);
                             AddItem(startX + 61, startY + 35, 2920);
@@ -152,7 +152,7 @@ namespace Server.Gumps
                             AddItem(startX + 45, startY + 14, 4172);
                         break;
 
-                        case ProfessionGroupType.ArtificersEnclave:
+                        case SocietiesGroupType.ArtificersEnclave:
                             AddItem(startX + 62, startY + 30, 2942, 2500);
                             AddItem(startX + 37, startY + 16, 2943, 2500);
                             AddItem(startX + 40, startY + 20, 4031);
@@ -164,12 +164,12 @@ namespace Server.Gumps
                             AddItem(startX + 65, startY + 43, 3622);
                         break;
 
-                        case ProfessionGroupType.SeafarersLeague:
+                        case SocietiesGroupType.SeafarersLeague:
                             AddItem(startX + 70, startY + 40, 5370);
                             AddItem(startX + 46, startY + 3, 709);
                         break;
 
-                        case ProfessionGroupType.AdventurersLodge:
+                        case SocietiesGroupType.AdventurersLodge:
                             AddItem(startX + 57, startY + 24, 4967);
                             AddItem(startX + 49, startY + 35, 4970);
                             AddItem(startX + 64, startY + 49, 2648);
@@ -179,23 +179,23 @@ namespace Server.Gumps
                             AddItem(startX + 50, startY + 25, 5365);
                         break;
 
-                        case ProfessionGroupType.ZoologicalFoundation:
+                        case SocietiesGroupType.ZoologicalFoundation:
                             AddItem(startX + 50, startY + 40, 2476);
                             AddItem(startX + 47, startY + 31, 3191);
                             AddItem(startX + 51, startY + 29, 3191);
                             AddItem(startX + 50, startY + 30, 3713);
                         break;
 
-                        case ProfessionGroupType.ThievesGuild:
+                        case SocietiesGroupType.ThievesGuild:
                             AddItem(startX + 58, startY + 39, 5373);
                             AddItem(startX + 48, startY + 33, 3589);
                         break;
 
-                        case ProfessionGroupType.FarmersCooperative:
+                        case SocietiesGroupType.FarmersCooperative:
                             AddItem(startX + 54, startY + 23, 18240);
                         break;
 
-                        case ProfessionGroupType.MonsterHuntersSociety:
+                        case SocietiesGroupType.MonsterHuntersSociety:
                             AddItem(startX + 32, startY + 26, 7433);
                             AddItem(startX + 34, startY + 38, 4655);
                             AddItem(startX + 54, startY + 23, 7438);
@@ -204,30 +204,49 @@ namespace Server.Gumps
                         break;
                     }
 
-                    #endregion
+                    #endregion                    
 
-                    //Jobs-----
+                    AddLabel(165, 175, 149, "Job Description");
+                    AddLabel(415, 175, 149, "Accepted");
+                    AddLabel(527, 175, 149, "Completion");
+                    
+                    startY = 200;
 
-                    AddLabel(165, 174, 149, "Job Description");
-                    AddLabel(415, 174, 149, "Accepted");
-                    AddLabel(527, 174, 149, "Completion");
+                    int entrySpacing = 60;
 
-                    //-----
+                    List<SocietyJob> m_SocietiesJobs = Societies.GetSocietyJobsByGroup(m_SocietiesGroup);
 
-                    AddItem(58, 212, 3847); //Image
-                    AddLabel(120, 204, WhiteTextHue, "Craft 300 Greater Cure Potions");
-                    AddLabel(130, 224, 2599, "(1 Profession Point Awarded)");
-                    AddButton(428, 206, 2151, 2154, 10, GumpButtonType.Reply, 0);
-                    AddLabel(Utility.CenteredTextOffset(560, "Any Alchemist In"), 204, WhiteTextHue, "Any Alchemist In");
-                    AddLabel(Utility.CenteredTextOffset(560, "Prevalia"), 224, WhiteTextHue, "Prevalia");
+                    for (int a = 0; a < m_SocietiesJobs.Count; a++)
+                    {
+                        SocietyJob societyJob = m_SocietiesJobs[a];
+
+                        if (societyJob == null) continue;
+                        if (societyJob.Deleted) continue;
+
+                        SocietyJobPlayerProgress jobPlayerProgress = Societies.GetSocietiesJobPlayerProgress(m_Player, societyJob);
+
+                        AddItem(58, startY, 3847); //Image
+                        AddLabel(120, startY, WhiteTextHue, "Craft " + societyJob.m_PrimaryNumber.ToString() + " Greater Cure Potions");
+                        AddLabel(130, startY + 20, 2599, "(" + societyJob.m_PointValue.ToString() + " Society Points Awarded)");
+
+                        if (jobPlayerProgress != null)
+                            AddButton(428, startY, 2154, 2151, 10 + a, GumpButtonType.Reply, 0);
+                        else
+                            AddButton(428, startY, 2151, 2154, 10 + a, GumpButtonType.Reply, 0);
+
+                        AddLabel(Utility.CenteredTextOffset(560, "Any Alchemist In"), startY, WhiteTextHue, "Any Alchemist In");
+                        AddLabel(Utility.CenteredTextOffset(560, "Prevalia"), startY + 20, WhiteTextHue, "Prevalia");
+
+                        startY += entrySpacing;
+                    }                    
 
                     //-----
 
                     AddButton(35, 416, 4014, 4016, 2, GumpButtonType.Reply, 0);
-                    AddLabel(69, 416, WhiteTextHue, "Previous Profession");
+                    AddLabel(69, 416, WhiteTextHue, "Previous Society");
 
                     AddButton(516, 416, 4005, 4007, 3, GumpButtonType.Reply, 0);
-                    AddLabel(552, 416, WhiteTextHue, "Next Profession");
+                    AddLabel(552, 416, WhiteTextHue, "Next Society");
 
                     AddButton(259, 415, 4008, 4010, 4, GumpButtonType.Reply, 0);
                     AddLabel(296, 416, 149, "View Server Rankings");
@@ -238,14 +257,14 @@ namespace Server.Gumps
 
                 #region Spend Points
 
-                case ProfessionGroupPageDisplayType.SpendPoints:
+                case SocietiesGroupPageDisplayType.SpendPoints:
                 break;
 
                 #endregion
 
                 #region Server Rankings
 
-                case ProfessionGroupPageDisplayType.ServerRankings:
+                case SocietiesGroupPageDisplayType.ServerRankings:
                 break;
 
                 #endregion
@@ -259,11 +278,11 @@ namespace Server.Gumps
 
             bool closeGump = true;
 
-            switch (m_ProfessionGroupPageDisplayType)
+            switch (m_SocietiesGroupPageDisplay)
             {
                 #region Jobs
 
-                case ProfessionGroupPageDisplayType.Jobs:
+                case SocietiesGroupPageDisplayType.Jobs:
                     switch (info.ButtonID)
                     {
                         //Guide
@@ -271,30 +290,30 @@ namespace Server.Gumps
                             closeGump = false;
                         break;
 
-                        //Previous Profession
+                        //Previous Society
                         case 2:
-                            int professionIndex = (int)m_ProfessionGroup;
-                            professionIndex--;
+                            int societiesIndex = (int)m_SocietiesGroup;
+                            societiesIndex--;
 
-                            if (professionIndex < 0)
-                                professionIndex = Enum.GetNames(typeof(ProfessionGroupType)).Length - 1;
+                            if (societiesIndex < 0)
+                                societiesIndex = Enum.GetNames(typeof(SocietiesGroupType)).Length - 1;
 
-                            m_ProfessionGroup = (ProfessionGroupType)professionIndex;
+                            m_SocietiesGroup = (SocietiesGroupType)societiesIndex;
 
                             m_Player.SendSound(ChangePageSound);
 
                             closeGump = false;
                         break;
 
-                        //Next Profession
+                        //Next Society
                         case 3:
-                            professionIndex = (int)m_ProfessionGroup;
-                            professionIndex++;
+                            societiesIndex = (int)m_SocietiesGroup;
+                            societiesIndex++;
 
-                            if (professionIndex > Enum.GetNames(typeof(ProfessionGroupType)).Length - 1)
-                                professionIndex = 0;
+                            if (societiesIndex > Enum.GetNames(typeof(SocietiesGroupType)).Length - 1)
+                                societiesIndex = 0;
 
-                            m_ProfessionGroup = (ProfessionGroupType)professionIndex;
+                            m_SocietiesGroup = (SocietiesGroupType)societiesIndex;
 
                             m_Player.SendSound(ChangePageSound);
 
@@ -314,15 +333,28 @@ namespace Server.Gumps
 
                     if (info.ButtonID >= 10)
                     {
-                        m_Player.Say("Pressed: " + info.ButtonID.ToString());
+                        List<SocietyJob> m_SocietiesJobs = Societies.GetSocietyJobsByGroup(m_SocietiesGroup);
+
+                        int jobIndex = info.ButtonID - 10;
+
+                        if (jobIndex < m_SocietiesJobs.Count)
+                        {
+                            SocietyJob societyJob = m_SocietiesJobs[jobIndex];
+
+                            if (societyJob != null)
+                            {
+                                if (!societyJob.Deleted)
+                                    societyJob.PlayerAccept(m_Player);
+                            }                            
+                        }                        
 
                         closeGump = false;
                     }
 
                     if (!closeGump)
                     {
-                        m_Player.CloseGump(typeof(ProfessionBoardGump));
-                        m_Player.SendGump(new ProfessionBoardGump(m_Player, m_ProfessionGroup, m_ProfessionGroupPageDisplayType));
+                        m_Player.CloseGump(typeof(SocietiesJobBoardGump));
+                        m_Player.SendGump(new SocietiesJobBoardGump(m_Player, m_SocietiesGroup, m_SocietiesGroupPageDisplay));
                     }
 
                     else
@@ -333,14 +365,14 @@ namespace Server.Gumps
 
                 #region Spend Points
 
-                case ProfessionGroupPageDisplayType.SpendPoints:
+                case SocietiesGroupPageDisplayType.SpendPoints:
                 break;
 
                 #endregion
 
                 #region Server Rankings
 
-                case ProfessionGroupPageDisplayType.ServerRankings:
+                case SocietiesGroupPageDisplayType.ServerRankings:
                 break;
 
                 #endregion

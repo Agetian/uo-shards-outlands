@@ -1042,7 +1042,7 @@ namespace Server.Mobiles
             ChatPersistance.OnLogin(pm_From);
             MHSPersistance.CheckAndCreateMHSAccountEntry(pm_From);
             EventCalendarPersistance.CheckAndCreateEventCalendarAccount(pm_From);
-            ProfessionBoard.OnLogin(pm_From);
+            Societies.OnLogin(pm_From);
 
             //Dungeon Armor
             AspectGear.CheckForAndUpdateAspectArmorProperties(pm_From);
@@ -1267,7 +1267,7 @@ namespace Server.Mobiles
         public Guild Guild = null;
         public GuildMemberEntry m_GuildMemberEntry = null;
         public GuildSettings m_GuildSettings = null;
-        public ProfessionPlayerSettings m_ProfessionPlayerSettings = null;
+        public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;
 
         public override bool KeepsItemsOnDeath { get { return (AccessLevel > AccessLevel.Player || Region is UOACZRegion); } }
 
@@ -1787,7 +1787,6 @@ namespace Server.Mobiles
         private PlayerFlag m_Flags;
 
         private bool m_IgnoreMobiles; // IgnoreMobiles should be moved to Server.Mobiles        
-        private int m_NonAutoreinsuredItems; // number of items that could not be automatically reinsured because gold in bank was not enough
         
         private bool m_Companion;
         [CommandProperty(AccessLevel.Counselor, AccessLevel.Administrator)]
@@ -3551,12 +3550,7 @@ namespace Server.Mobiles
             }
         }
 
-        private Mobile m_InsuranceAward;
-        private int m_InsuranceCost;
-        private int m_InsuranceBonus;
-
         private List<Item> m_EquipSnapshot;
-
         public List<Item> EquipSnapshot
         {
             get { return m_EquipSnapshot; }
@@ -3577,24 +3571,6 @@ namespace Server.Mobiles
                 state.CancelAllTrades();
 
             m_EquipSnapshot = new List<Item>(this.Items);
-
-            m_NonAutoreinsuredItems = 0;
-            m_InsuranceCost = 0;
-            m_InsuranceAward = base.FindMostRecentDamager(false);
-
-            if (m_InsuranceAward is BaseCreature)
-            {
-                Mobile master = ((BaseCreature)m_InsuranceAward).GetMaster();
-
-                if (master != null)
-                    m_InsuranceAward = master;
-            }
-
-            if (m_InsuranceAward != null && (!m_InsuranceAward.Player || m_InsuranceAward == this))
-                m_InsuranceAward = null;
-
-            if (m_InsuranceAward is PlayerMobile)
-                ((PlayerMobile)m_InsuranceAward).m_InsuranceBonus = 0;
 
             DropHolding();
 
@@ -3625,11 +3601,6 @@ namespace Server.Mobiles
 
         public override void OnDeath(Container c)
         {
-            if (m_NonAutoreinsuredItems > 0)
-            {
-                SendLocalizedMessage(1061115);
-            }
-
             base.OnDeath(c);
 
             SpecialAbilities.ClearSpecialEffects(this);
@@ -5453,6 +5424,20 @@ namespace Server.Mobiles
             ReleaseAllFollowers();
             
             Guilds.OnPlayerDeleted(this);
+            
+            //TEST: NEED TO DELETE ALL THESE ITEMS ON PLAYER DELETION
+
+            /*
+            public TitleCollection m_TitleCollection = null;
+            public AchievementAccountEntry m_AchievementAccountEntry = null;
+            public PlayerEnhancementAccountEntry m_PlayerEnhancementAccountEntry = null;
+            public InfluenceAccountEntry m_InfluenceAccountEntry = null;
+            public UOACZAccountEntry m_UOACZAccountEntry = null;
+            public Guild Guild = null;
+            public GuildMemberEntry m_GuildMemberEntry = null;
+            public GuildSettings m_GuildSettings = null;
+            public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;
+            */
 
             #region UOACZ
 

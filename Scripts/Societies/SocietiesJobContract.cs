@@ -7,26 +7,45 @@ using Server.Gumps;
 
 namespace Server.Items
 {
-    public class ProfessionBoardContract : Item
+    public class SocietiesJobContract : Item
     {
-        ProfessionJob m_ProfessionJob = null;
+        public SocietyJob m_Job = null;       
 
         [Constructable]
-        public ProfessionBoardContract(): base(5357)
+        public SocietiesJobContract(SocietyJob job): base(5357)
         {
-            Name = "professional contract"; 
+            Name = "society job contract";
+
+            m_Job = job;
         }
 
-        public ProfessionBoardContract(Serial serial): base(serial)
+        public SocietiesJobContract(Serial serial): base(serial)
         {
         }
 
         public override void OnSingleClick(Mobile from)
         {
-            base.OnSingleClick(from);
+            if (m_Job == null)
+            {
+                LabelTo(from, "an expired society job contract.");
+                return;
+            }
 
-            //string professionGroupName = ProfessionGroups.GetProfessionGroupName(m_ProfessionGroup);
-            //string titleText = "Job Contract from The " + professionGroupName;
+            if (m_Job.Deleted)
+            {
+                LabelTo(from, "an expired society job contract.");
+                return;
+            }
+
+            string professionGroupName = Societies.GetSocietyGroupName(m_Job.m_SocietiesGroupType);
+            
+            string titleText = "Job Contract From The " + professionGroupName;
+            string jobDescriptionText = "(" + m_Job.GetJobProgressText() + ")";
+            string timeRemaining = "[Expires in " + Utility.CreateTimeRemainingString(DateTime.UtcNow, Societies.NextJobsReset, true, true, true, true, false) + "]";
+
+            LabelTo(from, titleText);
+            LabelTo(from, jobDescriptionText);
+            LabelTo(from, timeRemaining);
         }
 
         public override void OnDoubleClick(Mobile from)
@@ -38,8 +57,8 @@ namespace Server.Items
             if (player == null)
                 return;
 
-            player.CloseGump(typeof(ProfessionBoardContractGump));
-            player.SendGump(new ProfessionBoardContractGump(player));
+            player.CloseGump(typeof(SocitiesJobContractGump));
+            player.SendGump(new SocitiesJobContractGump(player));
         }
 
         public override void Serialize(GenericWriter writer)
@@ -48,7 +67,7 @@ namespace Server.Items
             writer.Write((int)0); //version  
        
             //Version 0
-
+            writer.Write(m_Job);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -58,15 +77,16 @@ namespace Server.Items
 
             //Version 0
             if (version >= 0)
-            {         
+            {
+                m_Job = reader.ReadItem() as SocietyJob;
             }
         }
     }
 
-    public class ProfessionBoardContractGump : Gump
+    public class SocitiesJobContractGump : Gump
     {
         public PlayerMobile m_Player;
-        public ProfessionGroupType m_ProfessionGroup = ProfessionGroupType.ArtificersEnclave;
+        public SocietiesGroupType m_SocietiesGroup = SocietiesGroupType.ArtificersEnclave;
 
         public static int OpenGumpSound = 0x055;
         public static int ChangePageSound = 0x057;
@@ -74,7 +94,7 @@ namespace Server.Items
         public static int PurchaseSound = 0x2E6;
         public static int CloseGumpSound = 0x058;
 
-        public ProfessionBoardContractGump(PlayerMobile player): base(10, 10)
+        public SocitiesJobContractGump(PlayerMobile player): base(10, 10)
         {
             if (player == null)
                 return;
@@ -85,23 +105,23 @@ namespace Server.Items
 
             int WhiteTextHue = 2499;
 
-            string professionGroupName = ProfessionBoard.GetProfessionGroupName(m_ProfessionGroup);
-            int professionGroupTextHue = ProfessionBoard.GetProfessionGroupTextHue(m_ProfessionGroup);
+            string societiesGroupName = Societies.GetSocietyGroupName(m_SocietiesGroup);
+            int societiesGroupTextHue = Societies.GetSocietyGroupTextHue(m_SocietiesGroup);
 
-            string titleText = "Job Contract from The " + professionGroupName;
+            string titleText = "Job Contract from The " + societiesGroupName;
             string timeRemaining = "23h 17m";
             string destinationText = "Any Alchemist in Prevalia";
 
-            AddLabel(Utility.CenteredTextOffset(220, titleText), 37, professionGroupTextHue, titleText);
+            AddLabel(Utility.CenteredTextOffset(220, titleText), 37, societiesGroupTextHue, titleText);
 
             int startX = 115;
             int startY = 52;
 
-            #region Profession Images
+            #region Society Images
 
-            switch (m_ProfessionGroup)
+            switch (m_SocietiesGroup)
             {
-                case ProfessionGroupType.FishermansCircle:
+                case SocietiesGroupType.FishermansCircle:
                     AddItem(startX + 34, startY + 19, 3520);
                     AddItem(startX + 66, startY + 48, 3656);
                     AddItem(startX + 35, startY + 36, 2476);
@@ -109,7 +129,7 @@ namespace Server.Items
                     AddItem(startX + 45, startY + 35, 15113);
                 break;
 
-                case ProfessionGroupType.SmithingOrder:
+                case SocietiesGroupType.SmithingOrder:
                     AddItem(startX + 36, startY + 29, 5073);
                     AddItem(startX + 86, startY + 29, 5096);
                     AddItem(startX + 50, startY + 39, 7035);
@@ -117,7 +137,7 @@ namespace Server.Items
                     AddItem(startX + 47, startY + 33, 5181);
                 break;
 
-                case ProfessionGroupType.TradesmanUnion:
+                case SocietiesGroupType.TradesmanUnion:
                     AddItem(startX + 29, startY + 27, 4142);
                     AddItem(startX + 37, startY + 23, 4150);
                     AddItem(startX + 61, startY + 35, 2920);
@@ -129,7 +149,7 @@ namespace Server.Items
                     AddItem(startX + 45, startY + 14, 4172);
                 break;
 
-                case ProfessionGroupType.ArtificersEnclave:
+                case SocietiesGroupType.ArtificersEnclave:
                     AddItem(startX + 62, startY + 30, 2942, 2500);
                     AddItem(startX + 37, startY + 16, 2943, 2500);
                     AddItem(startX + 40, startY + 20, 4031);
@@ -141,12 +161,12 @@ namespace Server.Items
                     AddItem(startX + 65, startY + 43, 3622);
                 break;
 
-                case ProfessionGroupType.SeafarersLeague:
+                case SocietiesGroupType.SeafarersLeague:
                     AddItem(startX + 70, startY + 40, 5370);
                     AddItem(startX + 46, startY + 3, 709);
                 break;
 
-                case ProfessionGroupType.AdventurersLodge:
+                case SocietiesGroupType.AdventurersLodge:
                     AddItem(startX + 57, startY + 24, 4967);
                     AddItem(startX + 49, startY + 35, 4970);
                     AddItem(startX + 64, startY + 49, 2648);
@@ -156,23 +176,23 @@ namespace Server.Items
                     AddItem(startX + 50, startY + 25, 5365);
                 break;
 
-                case ProfessionGroupType.ZoologicalFoundation:
+                case SocietiesGroupType.ZoologicalFoundation:
                     AddItem(startX + 50, startY + 40, 2476);
                     AddItem(startX + 47, startY + 31, 3191);
                     AddItem(startX + 51, startY + 29, 3191);
                     AddItem(startX + 50, startY + 30, 3713);
                 break;
 
-                case ProfessionGroupType.ThievesGuild:
+                case SocietiesGroupType.ThievesGuild:
                     AddItem(startX + 58, startY + 39, 5373);
                     AddItem(startX + 48, startY + 33, 3589);
                 break;
 
-                case ProfessionGroupType.FarmersCooperative:
+                case SocietiesGroupType.FarmersCooperative:
                     AddItem(startX + 54, startY + 23, 18240);
                 break;
 
-                case ProfessionGroupType.MonsterHuntersSociety:
+                case SocietiesGroupType.MonsterHuntersSociety:
                     AddItem(startX + 32, startY + 26, 7433);
                     AddItem(startX + 34, startY + 38, 4655);
                     AddItem(startX + 54, startY + 23, 7438);

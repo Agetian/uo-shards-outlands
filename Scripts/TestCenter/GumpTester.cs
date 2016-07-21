@@ -26,9 +26,9 @@ namespace Server.Items
             PlayerMobile player = from as PlayerMobile;
 
             if (player != null)
-            {               
-                //player.CloseGump(typeof(ProfessionBoardGump));
-                //player.SendGump(new ProfessionBoardGump(player, ProfessionGroupType.ArtificersEnclave, ProfessionGroupPageDisplayType.Jobs));
+            {
+                player.CloseGump(typeof(SocietiesJobBoardGump));
+                player.SendGump(new SocietiesJobBoardGump(player, SocietiesGroupType.ArtificersEnclave, SocietiesGroupPageDisplayType.Jobs));
             }
         }
 

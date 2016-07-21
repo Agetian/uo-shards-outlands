@@ -813,9 +813,9 @@
     <Compile Include="Multis\Houses\HouseDeeds.cs" />
     <Compile Include="Multis\HouseDeed.cs" />
     <Compile Include="Multis\BlockedHousingTimedStatic.cs" />
-    <Compile Include="ProfessionBoard\ProfessionBoardContract.cs" />
-    <Compile Include="ProfessionBoard\ProfessionBoard.cs" />
-    <Compile Include="ProfessionBoard\ProfessionBoardGump.cs" />
+    <Compile Include="Societies\SocietiesJobContract.cs" />
+    <Compile Include="Societies\Societies.cs" />
+    <Compile Include="Societies\SocietiesJobBoardGump.cs" />
     <Compile Include="Ships\BoatScuttleGump.cs" />
     <Compile Include="Ships\ConfirmDryDockGump.cs" />
     <Compile Include="Ships\ShipCannon.cs" />
