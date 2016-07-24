@@ -258,7 +258,7 @@ namespace Server
                 if (itemName == null)
                     itemName = "";
 
-                itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName);
+                itemName = Utility.Capitalize(itemName);
                 itemAspectName = aspectName + " Tier " + newTier.ToString();
 
                 itemOffsetX = weapon.IconOffsetX;
@@ -307,7 +307,7 @@ namespace Server
                 if (itemName == null)
                     itemName = "";
 
-                itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName);
+                itemName = Utility.Capitalize(itemName);
                 itemAspectName = aspectName + " Tier " + (targetItem.TierLevel + 1).ToString();
 
                 itemOffsetX = armor.IconOffsetX;

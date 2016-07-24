@@ -40,8 +40,8 @@ namespace Server
 
         public static List<SocietyJob> m_SocietyJobs = new List<SocietyJob>();
 
-        public static TimeSpan JobDuration = TimeSpan.FromHours(72);
-        public static DateTime NextJobsReset = DateTime.UtcNow;
+        public static TimeSpan JobCycleDuration = TimeSpan.FromHours(72);
+        public static DateTime NextJobsAdded = DateTime.UtcNow;
 
         public static TimeSpan TickDuration = TimeSpan.FromMinutes(15);
 
@@ -49,6 +49,8 @@ namespace Server
 
         public static void Initialize()
         {
+            CommandSystem.Register("AddNewSocietyJobs", AccessLevel.Administrator, new CommandEventHandler(AddNewSocietyJobs));
+
             Timer.DelayCall(TimeSpan.FromTicks(1), delegate
             {
                 if (PersistanceItem == null)
@@ -71,6 +73,17 @@ namespace Server
             });
         }
 
+        #region Commands
+
+        [Usage("AddSocietyJobs")]
+        [Description("Adds New Society Jobs to Public Boards")]
+        public static void AddNewSocietyJobs(CommandEventArgs e)
+        {
+            AddSocietyJobs();
+        }
+
+        #endregion
+
         public class SocietiesTimer : Timer
         {
             public SocietiesTimer() : base(TimeSpan.Zero, TickDuration)
@@ -83,70 +96,94 @@ namespace Server
                 if (!Societies.Enabled)
                     return;
 
-                if (DateTime.UtcNow >= NextJobsReset)
-                    JobsReset();
+                CheckForExpiredSocietyJobs();
+
+                if (DateTime.UtcNow >= NextJobsAdded)
+                    AddSocietyJobs();
             }
         }
 
-        public static void JobsReset()
-        {
-            NextJobsReset = NextJobsReset + JobDuration;
-
-            DeleteAllJobs();
-            GenerateAllJobs();
-        }
-
-        public static void DeleteAllJobs()
-        {
+        public static void CheckForExpiredSocietyJobs()
+        {           
+            List<SocietyJob> m_ExpiredJobs = new List<SocietyJob>();
             Queue m_Queue = new Queue();
 
-            foreach (Item item in World.Items.Values)
+            foreach (SocietyJob societyJob in m_SocietyJobs)
             {
-                if (item is SocietyJob)
-                    m_Queue.Enqueue(item);               
+                if (societyJob.m_Expiration <= DateTime.UtcNow)
+                {                    
+                    m_ExpiredJobs.Add(societyJob);
+                    m_Queue.Enqueue(societyJob);
+                }
             }
-
-            while (m_Queue.Count > 0)
-            {
-                Item item = (Item)m_Queue.Dequeue();
-
-                item.Delete();
-            }
-
+            
             foreach (Mobile mobile in World.Mobiles.Values)
             {
-                if (!mobile.Player) 
+                if (!mobile.Player)
                     continue;
 
                 PlayerMobile player = mobile as PlayerMobile;
 
                 CheckCreateSocietiesPlayerSettings(player);
 
-                player.m_SocietiesPlayerSettings.m_JobProgress.Clear();
-            }
+                foreach (SocietyJob societyJob in m_ExpiredJobs)
+                {
+                    for (int a = 0; a < player.m_SocietiesPlayerSettings.m_JobProgress.Count; a++)
+                    {
+                        SocietyJobPlayerProgress jobPlayerProgress = player.m_SocietiesPlayerSettings.m_JobProgress[a];
 
-            m_SocietyJobs.Clear();
+                        if (jobPlayerProgress == null)
+                            continue;
+
+                        if (jobPlayerProgress.m_Job == societyJob)
+                        {
+                            if (jobPlayerProgress.m_JobContract != null)
+                                jobPlayerProgress.m_JobContract.JobStatus = SocietiesJobContract.JobStatusType.Expired;
+
+                            player.m_SocietiesPlayerSettings.m_JobProgress.RemoveAt(a);
+
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            while (m_Queue.Count > 0)
+            {
+                SocietyJob societyJob = (SocietyJob)m_Queue.Dequeue();
+                societyJob.Delete();
+            }
         }
 
-        public static void GenerateAllJobs()
+        public static void AddSocietyJobs()
         {
-            //TEST
-            SocietyJob newJob = new SocietyJob();
-            newJob.m_SocietiesGroupType = SocietiesGroupType.ArtificersEnclave;
-            newJob.m_PrimaryNumber = 150;
-            newJob.m_Expiration = Societies.NextJobsReset;
-            newJob.m_PointValue = 1;
+            NextJobsAdded = NextJobsAdded + JobCycleDuration;
 
-            m_SocietyJobs.Add(newJob);
+            ClearOldJobListings();
+            GenerateNewJobs();
 
-            //TEST
-            newJob = new SocietyJob();
-            newJob.m_SocietiesGroupType = SocietiesGroupType.ArtificersEnclave;
-            newJob.m_PrimaryNumber = 300;
-            newJob.m_Expiration = Societies.NextJobsReset;
-            newJob.m_PointValue = 2;
+            Utility.BroadcastMessage("New society job contracts are now available at society boards in each township.", 63);
+        }
 
-            m_SocietyJobs.Add(newJob);
+        public static void ClearOldJobListings()
+        {
+            foreach (SocietyJob societyJob in m_SocietyJobs)
+            {
+                if (societyJob == null)
+                    continue;
+
+                societyJob.m_Listed = false;
+            }
+        }
+
+        public static void GenerateNewJobs()
+        {
+            int societyGroupCount = Enum.GetNames(typeof(SocietiesGroupType)).Length;
+
+            for (int a = 0; a < societyGroupCount; a++)
+            {
+                SocietiesJobs.GenerateJobs((SocietiesGroupType)a);
+            }
         }
 
         public static string GetSocietyGroupName(SocietiesGroupType societyGroupType)
@@ -200,6 +237,26 @@ namespace Server
             return m_SocietiesJobs;
         }
 
+        public static int GetSocietyGroupMonthlyRank(PlayerMobile player, SocietiesGroupType societyGroupType)
+        {
+            int rank = 1;
+
+            //TEST
+            return Utility.RandomMinMax(1, 125);
+
+            return rank;
+        }
+
+        public static int GetSocietyGroupLifetimeRank(PlayerMobile player, SocietiesGroupType societyGroupType)
+        {
+            int rank = 1;
+
+            //TEST
+            return Utility.RandomMinMax(1, 125);
+
+            return rank;
+        }
+
         public static void OnLogin(PlayerMobile player)
         {
             if (player == null)
@@ -244,7 +301,7 @@ namespace Server
             writer.WriteEncodedInt(0); //Version
 
             //Version 0
-            writer.Write(NextJobsReset);
+            writer.Write(NextJobsAdded);
         }
 
         public static void Deserialize(GenericReader reader)
@@ -254,7 +311,7 @@ namespace Server
             //Version 0
             if (version >= 0)
             {
-                NextJobsReset = reader.ReadDateTime();
+                NextJobsAdded = reader.ReadDateTime();
             }
         }
     }
@@ -268,8 +325,7 @@ namespace Server
             KillCreature,
             SinkShip,
             StealItem,
-            TameCreature,
-            TameCreatureThenKillCreature
+            TameCreature           
         }
 
         public enum CreatureModifier
@@ -279,20 +335,30 @@ namespace Server
             Rare
         }
 
-        public DateTime m_Expiration = DateTime.UtcNow + Societies.JobDuration;
+        public bool m_Listed = true;
+        public DateTime m_Expiration = DateTime.UtcNow + Societies.JobCycleDuration;
 
         public int m_PointValue = 1;
 
         public SocietiesGroupType m_SocietiesGroupType = SocietiesGroupType.AdventurersLodge;
         public JobType m_JobType = JobType.CraftItem;
+        public string m_PrimaryTypeName;
         public Type m_PrimaryType;
-        public Type m_SecondaryType;
+        public string m_SecondaryTypeName;
+        public Type m_SecondaryType;        
         public double m_PrimaryNumber;
         public double m_SecondaryNumber;
         public Quality m_Quality;
         public CraftResource m_CraftResource;
         public CreatureModifier m_PrimaryCreatureModifier;
         public CreatureModifier m_SecondaryCreatureModifier;
+        public int m_IconItemId = 3847;
+        public int m_IconHue;
+        public int m_IconOffsetX;
+        public int m_IconOffsetY;
+        public Type m_DestinationMobile;
+        public string m_DestinationMobileName;
+        public Town m_DestinationTown;
 
         public List<PlayerMobile> m_PlayersCompleted = new List<PlayerMobile>();
 
@@ -311,17 +377,80 @@ namespace Server
         {
             string description = "";
 
+            switch (m_JobType)
+            {
+                case JobType.CraftItem: description = "Craft " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName; break;
+                case JobType.KillCreature: description = "Kill " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName; break;
+                case JobType.RetrieveFish: description = "Catch " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName; break;
+                case JobType.SinkShip: description = "Sink " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName; break;
+                case JobType.StealItem: description = "Steal " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName; break;
+                case JobType.TameCreature: description = "Tame " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName; break;
+            }
+
             return description;
         }
 
-        public string GetJobProgressText()
+        public string GetJobDescriptionProgressText(PlayerMobile player)
         {
             string description = "";
 
-            //TEST
-            description = "Craft " + m_PrimaryNumber.ToString() + " Cure Potions";
+            Societies.CheckCreateSocietiesPlayerSettings(player);
+
+            SocietyJobPlayerProgress jobPlayerProgress = Societies.GetSocietiesJobPlayerProgress(player, this);
+
+            double primaryNumber = 0;
+            double secondaryNumber = 0;
+
+            if (jobPlayerProgress != null)
+            {
+                primaryNumber = jobPlayerProgress.m_PrimaryProgress;
+                secondaryNumber = jobPlayerProgress.m_SecondaryProgress;
+            }
+
+            switch (m_JobType)
+            {
+                case JobType.CraftItem: description =  primaryNumber.ToString() + " / " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName + " Crafted"; break;
+                case JobType.KillCreature: description = primaryNumber.ToString() + " / " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName + " Killed"; break;
+                case JobType.RetrieveFish: description = primaryNumber.ToString() + " / " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName + " Caught"; break;
+                case JobType.SinkShip: description = primaryNumber.ToString() + " / " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName + " Sunk"; break;
+                case JobType.StealItem: description = primaryNumber.ToString() + " / " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName + " Stolen"; break;
+                case JobType.TameCreature: description = primaryNumber.ToString() + " / " + m_PrimaryNumber.ToString() + " " + m_PrimaryTypeName + " Tamed"; break;
+            }
 
             return description;
+        } 
+
+        public string GetJobDestinationText()
+        {
+            string description = "";
+
+            description = "Any " + m_DestinationMobileName + " in " + m_DestinationTown.TownName;
+
+            return description;
+        }
+
+        public string GetJobRewardText()
+        {
+            string description = "";
+
+            string societiesGroupName = Societies.GetSocietyGroupName(m_SocietiesGroupType);
+
+            if (m_PointValue == 1)
+                return "(" + m_PointValue.ToString() + " Society Point Earned)";
+
+            else
+                return "(" + m_PointValue.ToString() + " Society Points Earned)";
+
+            return description;
+        }
+
+        public bool HasNeccessaryItems(PlayerMobile player)
+        {
+            return false;
+        }
+
+        public void ConsumeNeccesaryItems(PlayerMobile player)
+        {
         }
 
         public bool AccountHasCompleted(PlayerMobile player)
@@ -379,6 +508,10 @@ namespace Server
                     player.SendMessage("You accept the job offer. A contract has been placed in your backpack.");
 
                     SocietiesJobContract jobContract = new SocietiesJobContract(this);
+                    playerJobProgress.m_JobContract = jobContract;
+                    jobContract.m_Player = player;
+
+                    player.SendSound(0x249);
 
                     player.Backpack.DropItem(jobContract);
                 }
@@ -413,9 +546,38 @@ namespace Server
 
                 else
                 {
+                    //Delete Any Old Instances of this Contract Created by Player
+                    Queue m_Queue = new Queue();
+
+                    foreach (Item item in World.Items.Values)
+                    {
+                        if (item is SocietiesJobContract)
+                        {
+                            SocietiesJobContract oldContract = item as SocietiesJobContract;
+                            
+                            if (oldContract == null) 
+                                continue;
+
+                            if (oldContract.m_Job == this && oldContract.m_Player == player)
+                                m_Queue.Enqueue(oldContract);
+                        }                            
+                    }
+
+                    while (m_Queue.Count > 0)
+                    {
+                        Item item = (Item)m_Queue.Dequeue();
+
+                        item.Delete();
+                    }
+
                     SocietiesJobContract jobContract = new SocietiesJobContract(this);
 
+                    jobContract.m_Player = player;
+                    playerJobProgress.m_JobContract = jobContract;
+
                     player.Backpack.DropItem(jobContract);
+
+                    player.SendSound(0x249);
 
                     player.SendMessage("You have previouly accepted this job offer, and receive a replacement contract for the job.");
                     return;
@@ -429,15 +591,19 @@ namespace Server
             writer.Write((int)0); //Version
 
             //Version 0
+            writer.Write(m_Listed);
             writer.Write(m_Expiration);
             writer.Write(m_PointValue);
             writer.Write((int)m_SocietiesGroupType);
             writer.Write((int)m_JobType);
+            writer.Write(m_PrimaryTypeName);
 
             if (m_PrimaryType == null)
                 writer.Write("null");
             else
                 writer.Write((string)m_PrimaryType.ToString());
+
+            writer.Write(m_SecondaryTypeName);
 
             if (m_SecondaryType == null)
                 writer.Write("null");
@@ -450,6 +616,19 @@ namespace Server
             writer.Write((int)m_CraftResource);
             writer.Write((int)m_PrimaryCreatureModifier);
             writer.Write((int)m_SecondaryCreatureModifier);
+
+            writer.Write(m_IconItemId);
+            writer.Write(m_IconHue);
+            writer.Write(m_IconOffsetX);
+            writer.Write(m_IconOffsetY);
+
+            if (m_DestinationMobile == null)
+                writer.Write("null");
+            else
+                writer.Write((string)m_DestinationMobile.ToString());
+
+            writer.Write(m_DestinationMobileName);
+            writer.Write(m_DestinationTown);
 
             writer.Write(m_PlayersCompleted.Count);
             for (int a = 0; a < m_PlayersCompleted.Count; a++)
@@ -466,16 +645,21 @@ namespace Server
             //Version 0
             if (version >= 0)
             {
+                m_Listed = reader.ReadBool();
                 m_Expiration = reader.ReadDateTime();
                 m_PointValue = reader.ReadInt();
                 m_SocietiesGroupType = (SocietiesGroupType)reader.ReadInt();
                 m_JobType = (JobType)reader.ReadInt();
+
+                m_PrimaryTypeName = reader.ReadString();
 
                 string primaryType = reader.ReadString();
                 if (primaryType == "null")
                     m_PrimaryType = null;
                 else
                     m_PrimaryType = Type.GetType(primaryType);
+
+                m_SecondaryTypeName = reader.ReadString();
 
                 string secondaryType = reader.ReadString();
                 if (secondaryType == "null")
@@ -489,6 +673,20 @@ namespace Server
                 m_CraftResource = (CraftResource)reader.ReadInt();
                 m_PrimaryCreatureModifier = (CreatureModifier)reader.ReadInt();
                 m_SecondaryCreatureModifier = (CreatureModifier)reader.ReadInt();
+
+                m_IconItemId = reader.ReadInt();
+                m_IconHue = reader.ReadInt();
+                m_IconOffsetX = reader.ReadInt();
+                m_IconOffsetY = reader.ReadInt();
+
+                string destionationMobile = reader.ReadString();
+                if (destionationMobile == "null")
+                    m_DestinationMobile = null;
+                else
+                    m_DestinationMobile = Type.GetType(destionationMobile);
+
+                m_DestinationMobileName = reader.ReadString();
+                m_DestinationTown = reader.ReadItem() as Town;
 
                 int playersCompletedCount = reader.ReadInt();
                 for (int a = 0; a < playersCompletedCount; a++)
@@ -507,6 +705,7 @@ namespace Server
     {
         public PlayerMobile m_Player;
         public List<SocietyJobPlayerProgress> m_JobProgress = new List<SocietyJobPlayerProgress>();
+        public List<SocietyGroupPlayerData> m_SocietyPlayerData = new List<SocietyGroupPlayerData>();
 
         [Constructable]
         public SocietiesPlayerSettings(PlayerMobile player): base(0x0)
@@ -520,11 +719,41 @@ namespace Server
                 Delete();
 
             else
+            {
                 m_Player.m_SocietiesPlayerSettings = this;
+                CreateSocietyData();
+            }
         }
 
         public SocietiesPlayerSettings(Serial serial): base(serial)
         {
+        }
+
+        public SocietyGroupPlayerData GetSocietyGroupPlayerData(SocietiesGroupType societyGroupType)
+        {
+            foreach (SocietyGroupPlayerData societyPlayerData in m_SocietyPlayerData)
+            {
+                if (societyPlayerData == null)
+                    continue;
+
+                if (societyPlayerData.m_SocietyGroupType == societyGroupType)
+                    return societyPlayerData;
+            }
+
+            return null;
+        }        
+
+        public void CreateSocietyData()
+        {
+            int societyTypesCount = Enum.GetNames(typeof(SocietiesGroupType)).Length;
+
+            for (int a = 0; a < societyTypesCount; a++)
+            {
+                SocietiesGroupType societyGroupType = (SocietiesGroupType)a;
+                SocietyGroupPlayerData societyPlayerData = new SocietyGroupPlayerData(societyGroupType);
+
+                m_SocietyPlayerData.Add(societyPlayerData);
+            }
         }
 
         public override void Serialize(GenericWriter writer)
@@ -539,8 +768,18 @@ namespace Server
             for (int a = 0; a < m_JobProgress.Count; a++)
             {
                 writer.Write(m_JobProgress[a].m_Job);
+                writer.Write(m_JobProgress[a].m_JobContract);
                 writer.Write(m_JobProgress[a].m_PrimaryProgress);
                 writer.Write(m_JobProgress[a].m_SecondaryProgress);
+            }
+
+            writer.Write(m_SocietyPlayerData.Count);
+            for (int a = 0; a < m_SocietyPlayerData.Count; a++)
+            {
+                writer.Write((int)m_SocietyPlayerData[a].m_SocietyGroupType);
+                writer.Write(m_SocietyPlayerData[a].m_PointsAvailable);
+                writer.Write(m_SocietyPlayerData[a].m_MontlyPoints);
+                writer.Write(m_SocietyPlayerData[a].m_LifetimePoints);
             }
         }
 
@@ -548,6 +787,8 @@ namespace Server
         {
             base.Deserialize(reader);
             int version = reader.ReadInt();
+
+            CreateSocietyData();
 
             //Version 0
             if (version >= 0)
@@ -558,26 +799,71 @@ namespace Server
                 for (int a = 0; a < jobProgressCount; a++)
                 {
                     SocietyJob job = reader.ReadItem() as SocietyJob;
+                    SocietiesJobContract jobContract = reader.ReadItem() as SocietiesJobContract;
                     double primaryProgress = reader.ReadDouble();
                     double secondaryProgress = reader.ReadDouble();
 
                     if (job == null) continue;
                     if (job.Deleted) continue;
-                    if (job.m_Expiration <= DateTime.UtcNow) continue;
 
                     SocietyJobPlayerProgress jobProgress = new SocietyJobPlayerProgress(job);
+                    jobProgress.m_JobContract = jobContract;
                     jobProgress.m_PrimaryProgress = primaryProgress;
                     jobProgress.m_SecondaryProgress = secondaryProgress;
 
                     m_JobProgress.Add(jobProgress);                    
+                }                
+
+                int recordedSocietyGroupDataCount = reader.ReadInt();
+                for (int a = 0; a < recordedSocietyGroupDataCount; a++)
+                {
+                    SocietiesGroupType societyGroupType = (SocietiesGroupType)reader.ReadInt();
+                    int pointsAvailable = reader.ReadInt();
+                    int monthlyPoints = reader.ReadInt();
+                    int lifetimePoints = reader.ReadInt();
+
+                    foreach(SocietyGroupPlayerData societyGroupPlayerData in m_SocietyPlayerData)
+                    {
+                        if (societyGroupPlayerData.m_SocietyGroupType == societyGroupType)
+                        {
+                            societyGroupPlayerData.m_PointsAvailable = pointsAvailable;
+                            societyGroupPlayerData.m_MontlyPoints = monthlyPoints;
+                            societyGroupPlayerData.m_LifetimePoints = lifetimePoints;
+
+                            break;
+                        }
+                    }
                 }
             }
+
+            //-----
+
+            if (m_Player != null)
+                m_Player.m_SocietiesPlayerSettings = this;
+
+            else
+                Delete();
+        }
+    }
+
+    public class SocietyGroupPlayerData
+    {
+        public SocietiesGroupType m_SocietyGroupType;
+
+        public int m_PointsAvailable = 0;
+        public int m_MontlyPoints = 0;
+        public int m_LifetimePoints = 0;
+
+        public SocietyGroupPlayerData(SocietiesGroupType societyGroupType)
+        {
+            m_SocietyGroupType = societyGroupType;
         }
     }
 
     public class SocietyJobPlayerProgress
     {
         public SocietyJob m_Job;
+        public SocietiesJobContract m_JobContract = null;
 
         public double m_PrimaryProgress = 0.0;
         public double m_SecondaryProgress = 0.0;

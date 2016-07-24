@@ -21,11 +21,14 @@ namespace Server.Gumps
 
         public SocietiesJobBoardGump(PlayerMobile player, SocietiesGroupType societiesGroup, SocietiesGroupPageDisplayType societiesGroupPageDisplay): base(10, 10)
         {
-            if (player == null) return;
+            if (player == null)
+                return;            
 
             m_Player = player;
             m_SocietiesGroup = societiesGroup;
             m_SocietiesGroupPageDisplay = societiesGroupPageDisplay;
+
+            Societies.CheckCreateSocietiesPlayerSettings(m_Player);
 
             int WhiteTextHue = 2499;
 
@@ -95,29 +98,43 @@ namespace Server.Gumps
                     string societiesGroupName = Societies.GetSocietyGroupName(m_SocietiesGroup);
                     int societiesGroupTextHue = Societies.GetSocietyGroupTextHue(m_SocietiesGroup);
 
-                    string timeUntilJobsReset = "23h 17m";
-                    string monthlyScoreText = "83 pts (25th)";
-                    string lifetimeScoreText = "1,017 pts (3rd)";
-                    int societiesPointsAvailable = 500;                    
+                    SocietyGroupPlayerData societyGroupPlayerData = m_Player.m_SocietiesPlayerSettings.GetSocietyGroupPlayerData(m_SocietiesGroup);
+
+                    if (societyGroupPlayerData == null)
+                        return;
+
+                    int availablePoints = societyGroupPlayerData.m_PointsAvailable;
+                    int monthlyPoints = societyGroupPlayerData.m_MontlyPoints;
+                    int lifetimePoints = societyGroupPlayerData.m_LifetimePoints;
+
+                    int monthlyRank = Societies.GetSocietyGroupMonthlyRank(m_Player, m_SocietiesGroup);
+                    int lifetimeRank = Societies.GetSocietyGroupLifetimeRank(m_Player, m_SocietiesGroup);
+
+                    string monthlyRankText = monthlyRank.ToString() + Utility.DetermineNumberSuffix(monthlyRank);
+                    string lifetimeRankText = lifetimeRank.ToString() + Utility.DetermineNumberSuffix(lifetimeRank);
+                    
+                    string timeUntilNewJobs = Utility.CreateTimeRemainingString(DateTime.UtcNow, Societies.NextJobsAdded, true, true, true, true, false);
+                    string monthlyScoreText = monthlyPoints.ToString() + " Points (" + monthlyRankText + ")";
+                    string lifetimeScoreText = lifetimePoints.ToString() + " Points (" + lifetimeRankText + ")";                                     
 
                     AddImage(203, 40, 1141);
                     AddLabel(Utility.CenteredTextOffset(350, societiesGroupName), 42, societiesGroupTextHue, societiesGroupName);
 
-                    AddLabel(133, 67, 149, "Jobs Will Reset in");
-                    AddLabel(Utility.CenteredTextOffset(190, timeUntilJobsReset), 87, WhiteTextHue, timeUntilJobsReset);
+                    AddLabel(125, 67, 149, "New Jobs Available In");
+                    AddLabel(Utility.CenteredTextOffset(190, timeUntilNewJobs), 87, WhiteTextHue, timeUntilNewJobs);
 
-                    AddLabel(129, 114, 63, societiesPointsAvailable.ToString() + " Points Available");
+                    AddLabel(129, 114, societiesGroupTextHue, availablePoints.ToString() + " Points in Society");
 
-                    AddLabel(437, 67, 2420, "Monthly Score (Rank)");
+                    AddLabel(415, 67, 2420, "Monthly Score (Server Rank)");
                     AddLabel(Utility.CenteredTextOffset(510, monthlyScoreText), 87, WhiteTextHue, monthlyScoreText);
 
-                    AddLabel(435, 109, 2603, "Lifetime Score (Rank)");
+                    AddLabel(415, 109, 2603, "Lifetime Score (Server Rank)");
                     AddLabel(Utility.CenteredTextOffset(510, lifetimeScoreText), 129, WhiteTextHue, lifetimeScoreText);
 
-                    AddButton(178, 141, 4029, 4031, 5, GumpButtonType.Reply, 0);
-                    AddLabel(215, 142, 2599, "Spend Points");
+                    AddButton(130, 141, 4029, 4031, 5, GumpButtonType.Reply, 0);
+                    AddLabel(165, 142, 63, "Spend Points");
 
-                    int startX = 272;
+                    int startX = 268;
                     int startY = 57;
 
                     #region Societies Images
@@ -207,8 +224,8 @@ namespace Server.Gumps
                     #endregion                    
 
                     AddLabel(165, 175, 149, "Job Description");
-                    AddLabel(415, 175, 149, "Accepted");
-                    AddLabel(527, 175, 149, "Completion");
+                    AddLabel(380, 175, 149, "Accepted");
+                    AddLabel(520, 175, 149, "Completion");
                     
                     startY = 200;
 
@@ -222,20 +239,22 @@ namespace Server.Gumps
 
                         if (societyJob == null) continue;
                         if (societyJob.Deleted) continue;
+                        if (!societyJob.m_Listed) continue;
 
                         SocietyJobPlayerProgress jobPlayerProgress = Societies.GetSocietiesJobPlayerProgress(m_Player, societyJob);
 
-                        AddItem(58, startY, 3847); //Image
-                        AddLabel(120, startY, WhiteTextHue, "Craft " + societyJob.m_PrimaryNumber.ToString() + " Greater Cure Potions");
-                        AddLabel(130, startY + 20, 2599, "(" + societyJob.m_PointValue.ToString() + " Society Points Awarded)");
-
+                        AddItem(5 + societyJob.m_IconOffsetX, -35 + startY + societyJob.m_IconOffsetY, societyJob.m_IconItemId, societyJob.m_IconHue); //Image
+                        AddLabel(120, startY, WhiteTextHue, societyJob.GetJobDescriptionText());
+                        AddLabel(130, startY + 20, societiesGroupTextHue, societyJob.GetJobRewardText());
+                        
                         if (jobPlayerProgress != null)
-                            AddButton(428, startY, 2154, 2151, 10 + a, GumpButtonType.Reply, 0);
+                            AddButton(390, startY, 2154, 2151, 10 + a, GumpButtonType.Reply, 0);
                         else
-                            AddButton(428, startY, 2151, 2154, 10 + a, GumpButtonType.Reply, 0);
+                            AddButton(390, startY, 2151, 2154, 10 + a, GumpButtonType.Reply, 0);
 
-                        AddLabel(Utility.CenteredTextOffset(560, "Any Alchemist In"), startY, WhiteTextHue, "Any Alchemist In");
-                        AddLabel(Utility.CenteredTextOffset(560, "Prevalia"), startY + 20, WhiteTextHue, "Prevalia");
+                        string destinationText = societyJob.GetJobDestinationText();
+
+                        AddLabel(Utility.CenteredTextOffset(555, destinationText), startY, 2550, destinationText);
 
                         startY += entrySpacing;
                     }                    

@@ -180,7 +180,7 @@ namespace Server.Items
             }
 
             if (itemName != "")
-                itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName);
+                itemName = Utility.Capitalize(itemName);
 
             string typeText = Item.GetItemGroupTypeName(m_Item.ItemGroup);
             string rarityText = Item.GetItemRarityName(m_Item.ItemRarity);

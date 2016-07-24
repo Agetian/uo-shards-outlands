@@ -113,6 +113,15 @@ namespace Server
             return townInstance;
         }
 
+        public static Town GetRandomTown()
+        {
+            if (Towns.TownList.Count > 0)            
+                return Towns.TownList[Utility.RandomMinMax(0, Towns.TownList.Count - 1)];            
+
+            else
+                return null;
+        }
+
         public static Town FromRegion(Region region)
         {
             foreach (Town town in TownList)

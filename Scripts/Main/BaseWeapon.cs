@@ -3079,7 +3079,7 @@ namespace Server.Items
                 if (Name == null)
                     itemName = "";
 
-                itemName = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(itemName);
+                itemName = Utility.Capitalize(itemName);
 
                 LabelTo(from, itemName + ": " + AspectGear.GetAspectName(Aspect) + " Aspect Tier " + TierLevel.ToString());
 

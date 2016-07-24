@@ -4,12 +4,42 @@ using Server.Targeting;
 using Server.Network;
 using Server.Mobiles;
 using Server.Gumps;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Server.Items
 {
     public class SocietiesJobContract : Item
     {
-        public SocietyJob m_Job = null;       
+        public enum JobStatusType
+        {
+            None,
+            Expired,
+            Ready,
+            Completed
+        }
+
+        public PlayerMobile m_Player;
+        public SocietyJob m_Job;
+
+        public JobStatusType m_JobStatus;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public JobStatusType JobStatus
+        {
+            get { return m_JobStatus; }
+            set 
+            { 
+                m_JobStatus = value;
+
+                switch (m_JobStatus)
+                {
+                    case JobStatusType.None: Hue = 0; break;
+                    case JobStatusType.Expired: Hue = 2401; break;
+                    case JobStatusType.Ready: Hue = 2003; break;
+                    case JobStatusType.Completed: Hue = 2401; break;
+                }
+            }
+        }        
 
         [Constructable]
         public SocietiesJobContract(SocietyJob job): base(5357)
@@ -25,6 +55,11 @@ namespace Server.Items
 
         public override void OnSingleClick(Mobile from)
         {
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
+                return;
+
             if (m_Job == null)
             {
                 LabelTo(from, "an expired society job contract.");
@@ -37,15 +72,49 @@ namespace Server.Items
                 return;
             }
 
-            string professionGroupName = Societies.GetSocietyGroupName(m_Job.m_SocietiesGroupType);
-            
-            string titleText = "Job Contract From The " + professionGroupName;
-            string jobDescriptionText = "(" + m_Job.GetJobProgressText() + ")";
-            string timeRemaining = "[Expires in " + Utility.CreateTimeRemainingString(DateTime.UtcNow, Societies.NextJobsReset, true, true, true, true, false) + "]";
+            if (m_Player == null)
+            {
+                LabelTo(from, "an expired society job contract.");
+                return;
+            }
 
-            LabelTo(from, titleText);
-            LabelTo(from, jobDescriptionText);
-            LabelTo(from, timeRemaining);
+            bool accountHasCompleted = m_Job.AccountHasCompleted(player);
+
+            if (accountHasCompleted && m_JobStatus != JobStatusType.Completed)
+                m_JobStatus = JobStatusType.Completed;
+
+            else if (m_Job.m_Expiration <= DateTime.UtcNow && m_JobStatus != JobStatusType.Expired)
+                m_JobStatus = JobStatusType.Expired;
+
+            string jobText = "Society Job Contract: " + m_Job.GetJobDescriptionProgressText(m_Player);
+            string ownerText = "(Accepted by " + m_Player.RawName + ")";
+            string expirationText = "[Expires in " + Utility.CreateTimeRemainingString(DateTime.UtcNow, m_Job.m_Expiration, true, true, true, true, false) + "]";
+           
+            switch (m_JobStatus)
+            {
+                case JobStatusType.None:
+                    LabelTo(from, jobText);
+                    LabelTo(from, ownerText);
+                    LabelTo(from, expirationText);
+                break;
+
+                case JobStatusType.Ready:
+                    LabelTo(from, jobText);
+                    LabelTo(from, ownerText);
+                    LabelTo(from, expirationText);
+                break;
+
+                case JobStatusType.Completed:
+                    ownerText = "(Completed by Account)";
+
+                    LabelTo(from, jobText);
+                    LabelTo(from, ownerText);
+                break;
+
+                case JobStatusType.Expired:
+                    LabelTo(from, "an expired society job contract.");
+                break;
+            }
         }
 
         public override void OnDoubleClick(Mobile from)
@@ -57,8 +126,10 @@ namespace Server.Items
             if (player == null)
                 return;
 
+            player.SendSound(0x055);
+
             player.CloseGump(typeof(SocitiesJobContractGump));
-            player.SendGump(new SocitiesJobContractGump(player));
+            player.SendGump(new SocitiesJobContractGump(player, this));
         }
 
         public override void Serialize(GenericWriter writer)
@@ -67,7 +138,9 @@ namespace Server.Items
             writer.Write((int)0); //version  
        
             //Version 0
+            writer.Write(m_Player);
             writer.Write(m_Job);
+            writer.Write((int)m_JobStatus);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -78,7 +151,9 @@ namespace Server.Items
             //Version 0
             if (version >= 0)
             {
+                m_Player = reader.ReadMobile() as PlayerMobile;
                 m_Job = reader.ReadItem() as SocietyJob;
+                m_JobStatus = (JobStatusType)reader.ReadInt();
             }
         }
     }
@@ -86,7 +161,7 @@ namespace Server.Items
     public class SocitiesJobContractGump : Gump
     {
         public PlayerMobile m_Player;
-        public SocietiesGroupType m_SocietiesGroup = SocietiesGroupType.ArtificersEnclave;
+        public SocietiesJobContract m_SocietiesJobContract; 
 
         public static int OpenGumpSound = 0x055;
         public static int ChangePageSound = 0x057;
@@ -94,32 +169,75 @@ namespace Server.Items
         public static int PurchaseSound = 0x2E6;
         public static int CloseGumpSound = 0x058;
 
-        public SocitiesJobContractGump(PlayerMobile player): base(10, 10)
+        public SocitiesJobContractGump(PlayerMobile player, SocietiesJobContract societiesJobContract): base(10, 10)
         {
-            if (player == null)
-                return;
-
             m_Player = player;
+            m_SocietiesJobContract = societiesJobContract;
+
+            if (m_Player == null) return;
+            if (m_SocietiesJobContract == null)
+            {
+                m_Player.SendMessage("That job contract is no longer accessible");
+                return;
+            }
+
+            if (m_SocietiesJobContract.Deleted)
+            {
+                m_Player.SendMessage("That job contract is no longer accessible");
+                return;
+            }
+
+            if (m_SocietiesJobContract.m_Job == null)
+            {
+                m_Player.SendMessage("That job is no longer available");
+                return;
+            }
+
+            if (m_SocietiesJobContract.m_Job.Deleted)
+            {
+                m_Player.SendMessage("That job is no longer available");
+                return;
+            }
+
+            SocietyJob societyJob = m_SocietiesJobContract.m_Job;
+            SocietyJobPlayerProgress jobPlayerProgress = Societies.GetSocietiesJobPlayerProgress(m_Player, societyJob);
+            
+            double progress = 0;
+
+            if (jobPlayerProgress != null)
+                progress = jobPlayerProgress.m_PrimaryProgress;
+
+            bool readyForTurnIn = false;
+
+            if (progress >= societyJob.m_PrimaryNumber)
+                readyForTurnIn = true;
 
             AddImage(0, 0, 1249);
 
             int WhiteTextHue = 2499;
 
-            string societiesGroupName = Societies.GetSocietyGroupName(m_SocietiesGroup);
-            int societiesGroupTextHue = Societies.GetSocietyGroupTextHue(m_SocietiesGroup);
+            string societiesGroupName = Societies.GetSocietyGroupName(societyJob.m_SocietiesGroupType);
+            int societiesGroupTextHue = Societies.GetSocietyGroupTextHue(societyJob.m_SocietiesGroupType);
 
-            string titleText = "Job Contract from The " + societiesGroupName;
-            string timeRemaining = "23h 17m";
-            string destinationText = "Any Alchemist in Prevalia";
+            string titleText = "Job Contract From " + societiesGroupName;
+            string ownerName = "-";
 
-            AddLabel(Utility.CenteredTextOffset(220, titleText), 37, societiesGroupTextHue, titleText);
+            if (m_SocietiesJobContract.m_Player != null)
+                ownerName = m_SocietiesJobContract.m_Player.RawName;
+
+            string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, societyJob.m_Expiration, true, true, true, true, false);
+            string jobDescriptionText = societyJob.GetJobDescriptionText();
+            string jobProgressText = "Progress: " + progress + " / " + societyJob.m_PrimaryNumber.ToString();
+            string destinationText = societyJob.GetJobDestinationText();
+            
+            AddLabel(Utility.CenteredTextOffset(220, titleText), 37, societiesGroupTextHue, titleText); //Title
 
             int startX = 115;
-            int startY = 52;
+            int startY = 50;
 
             #region Society Images
 
-            switch (m_SocietiesGroup)
+            switch (societyJob.m_SocietiesGroupType)
             {
                 case SocietiesGroupType.FishermansCircle:
                     AddItem(startX + 34, startY + 19, 3520);
@@ -205,21 +323,159 @@ namespace Server.Items
             
             AddLabel(8, 14, 149, "Guide");
             AddButton(11, 30, 2094, 2095, 1, GumpButtonType.Reply, 0);
+
+            AddLabel(58, 80, 2599, "Accepted By");
+            AddLabel(Utility.CenteredTextOffset(95, ownerName), 100, WhiteTextHue, ownerName);
                         
-            AddLabel(261, 81, 2603, "Job Expires In");
-            AddLabel(Utility.CenteredTextOffset(305, timeRemaining), 102, WhiteTextHue, timeRemaining);
+            AddLabel(250, 80, 2603, "Job Expires In");
+            AddLabel(Utility.CenteredTextOffset(295, timeRemaining), 100, WhiteTextHue, timeRemaining);
 
-            AddLabel(142, 142, 149, "Job Description");
+            AddLabel(142, 140, 149, "Job Description");
 
-            AddItem(53, 173, 3847); //Image
-            AddLabel(109, 163, WhiteTextHue, "Craft 300 Greater Cure Potions");
-            AddLabel(119, 183, 2599, "(1 Profession Point Awarded)");
+            AddItem(-2 + societyJob.m_IconOffsetX, 125 + societyJob.m_IconOffsetY, societyJob.m_IconItemId, societyJob.Hue); //Image
+
+            AddLabel(105, 160, WhiteTextHue, jobDescriptionText);
+
+            if (readyForTurnIn)
+                AddLabel(105, 180, 63, jobProgressText);
+            else
+                AddLabel(105, 180, 2114, jobProgressText);
+
+            AddLabel(105, 200, societiesGroupTextHue, societyJob.GetJobRewardText());
 
             AddLabel(69, 240, 149, "Turn In");
             AddButton(77, 258, 2151, 2154, 2, GumpButtonType.Reply, 0);
 
             AddLabel(170, 240, 149, "Completion Destination");
             AddLabel(Utility.CenteredTextOffset(245, destinationText), 260, 2550, destinationText);
+        }
+
+        public override void OnResponse(NetState sender, RelayInfo info)
+        {
+            if (m_Player == null)
+                return;
+
+            bool closeGump = true;
+
+            if (m_Player == null) return;
+            if (m_SocietiesJobContract == null)
+            {
+                m_Player.SendMessage("That job contract is no longer accessible");
+                return;
+            }
+
+            if (m_SocietiesJobContract.Deleted)
+            {
+                m_Player.SendMessage("That job contract is no longer accessible");
+                return;
+            }
+
+            if (m_SocietiesJobContract.m_Job == null)
+            {
+                m_Player.SendMessage("That job is no longer available");
+                return;
+            }
+
+            if (m_SocietiesJobContract.m_Job.Deleted)
+            {
+                m_Player.SendMessage("That job is no longer available");
+                return;
+            }
+
+            SocietyJob societyJob = m_SocietiesJobContract.m_Job;
+            SocietyJobPlayerProgress jobPlayerProgress = Societies.GetSocietiesJobPlayerProgress(m_Player, societyJob);
+            
+            switch (info.ButtonID)
+            {
+                //Guide
+                case 1:
+                    closeGump = false;
+                break;
+
+                //Turn In
+                case 2:
+                    if (m_SocietiesJobContract.m_Player != m_Player)                    
+                        m_Player.SendMessage("That job contract does not belong to you.");
+
+                    else if (societyJob.m_Expiration <= DateTime.UtcNow)
+                        m_Player.SendMessage("That job contract has expired.");
+
+                    else if (jobPlayerProgress != null)
+                    {
+                        if (jobPlayerProgress.m_PrimaryProgress < societyJob.m_PrimaryNumber || jobPlayerProgress.m_SecondaryProgress < societyJob.m_SecondaryNumber)
+                            m_Player.SendMessage("You have not completed all of the requirements of that contract yet.");
+
+                        else if (societyJob.m_DestinationTown != null)
+                        {
+                            if (m_Player.Region != societyJob.m_DestinationTown.region)
+                                m_Player.SendMessage("You must be within " + societyJob.m_DestinationTown.TownName + " to turn in that contract.");
+
+                            else
+                            {
+                                Mobile matchingMobile = null;
+
+                                IPooledEnumerable m_NearbyMobiles = m_Player.Map.GetMobilesInRange(m_Player.Location, 8);
+
+                                int closestMobile = 10000;
+
+                                foreach (Mobile mobile in m_NearbyMobiles)
+                                {
+                                    if (!mobile.Alive) continue;
+                                    if (mobile.Hidden) continue;
+
+                                    if (mobile.GetType() == societyJob.m_DestinationMobile)
+                                    {
+                                        int distance = Utility.GetDistance(m_Player.Location, mobile.Location);
+
+                                        if (distance < closestMobile)
+                                        {
+                                            matchingMobile = mobile;
+                                            closestMobile = distance;
+                                        }
+                                    }
+                                }
+
+                                m_NearbyMobiles.Free();
+
+                                if (matchingMobile != null)
+                                {
+                                    bool validCompletion = false;
+
+                                    if (societyJob.m_JobType == SocietyJob.JobType.CraftItem || societyJob.m_JobType == SocietyJob.JobType.RetrieveFish || societyJob.m_JobType == SocietyJob.JobType.StealItem)
+                                    {
+                                        if (!societyJob.HasNeccessaryItems(m_Player))
+                                        {
+                                            m_Player.SendMessage("You must have the items required for this contract in your backpack in order to complete it.");
+                                            validCompletion = false;
+                                        }
+
+                                        else
+                                            societyJob.ConsumeNeccesaryItems(m_Player);                                        
+                                    }
+
+                                    if (validCompletion)
+                                    {
+                                    }
+                                }
+
+                                else                                
+                                    m_Player.SendMessage("You must be near a " + societyJob.m_DestinationMobileName + " in order to turn in that contract.");                                
+                            }
+                        }
+                    }
+
+                    closeGump = false;
+                break;
+            }
+
+            if (!closeGump)
+            {
+                m_Player.CloseGump(typeof(SocitiesJobContractGump));
+                m_Player.SendGump(new SocitiesJobContractGump(m_Player, m_SocietiesJobContract));
+            }
+
+            else
+                m_Player.SendSound(CloseGumpSound);
         }
     }
 }

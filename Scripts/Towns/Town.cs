@@ -40,7 +40,7 @@ namespace Server.Items
         public Town(Serial serial): base(serial)
         {
         }
-
+        
         public virtual void CreateTown()
         {
             CreateVendors();

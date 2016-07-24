@@ -187,7 +187,7 @@ namespace Server.SkillHandlers
                 if (weaponNameText == null)
                     weaponNameText = "";
 
-                weaponNameText = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(weaponNameText);
+                weaponNameText = Utility.Capitalize(weaponNameText);
 
                 if (weaponNameText == null)
                     weaponNameText = "";
@@ -438,7 +438,7 @@ namespace Server.SkillHandlers
                 if (armorNameText == null)
                     armorNameText = "";
 
-                armorNameText = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(armorNameText);
+                armorNameText = Utility.Capitalize(armorNameText);
 
                 if (armorNameText == null)
                     armorNameText = "";
@@ -602,7 +602,7 @@ namespace Server.SkillHandlers
                 if (shieldNameText == null)
                     shieldNameText = "";
 
-                shieldNameText = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(shieldNameText);
+                shieldNameText = Utility.Capitalize(shieldNameText);
 
                 if (shieldNameText == null)
                     shieldNameText = "";
@@ -744,7 +744,7 @@ namespace Server.SkillHandlers
                 if (instrumentNameText == null)
                     instrumentNameText = "";
 
-                instrumentNameText = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(instrumentNameText);
+                instrumentNameText = Utility.Capitalize(instrumentNameText);
 
                 if (instrumentNameText == null)
                     instrumentNameText = "";

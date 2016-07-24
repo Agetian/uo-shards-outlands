@@ -897,6 +897,19 @@ namespace Server
             }
         }
 
+        public static void BroadcastMessage(string text, int hue)
+        {
+            foreach (NetState state in NetState.Instances)
+            {
+                Mobile mobile = state.Mobile;
+
+                if (mobile == null) continue;
+                if (!mobile.Player) continue;
+
+                mobile.SendMessage(hue, text);
+            } 
+        }
+
         public static string CreateTimeRemainingString(DateTime start, DateTime end, bool abbreviated, bool useDays, bool useHours, bool useMinutes, bool useSeconds)
         {
             int days;
@@ -1036,6 +1049,81 @@ namespace Server
                 return text;
 
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(text);
+        }
+
+        public static string DetermineNumberSuffix(int number)
+        {
+            string suffix = "th";
+
+            string lastDigit = "";
+            string lastTwoDigits = "";
+
+            if (number.ToString().Length == 1)
+            {
+                lastDigit = number.ToString();
+
+                if (lastDigit == "1")
+                    suffix = "st";
+
+                else if (lastDigit == "2")
+                    suffix = "nd";
+
+                else if (lastDigit == "3")
+                    suffix = "rd";
+
+                else
+                    suffix = "th";
+            }
+
+            else
+            {
+                lastDigit = number.ToString().Substring(number.ToString().Length - 1, 1);
+                lastTwoDigits = number.ToString().Substring(number.ToString().Length - 2, 2);
+
+                if (lastDigit == "1")
+                    suffix = "st";
+
+                else if (lastDigit == "2")
+                    suffix = "nd";
+
+                else if (lastDigit == "3")
+                    suffix = "rd";
+
+                else
+                    suffix = "th";
+
+                if (lastTwoDigits == "11")
+                    suffix = "th";
+
+                else if (lastTwoDigits == "12")
+                    suffix = "th";
+
+                else if (lastTwoDigits == "13")
+                    suffix = "th";
+
+                else if (lastTwoDigits == "14")
+                    suffix = "th";
+
+                else if (lastTwoDigits == "15")
+                    suffix = "th";
+
+                else if (lastTwoDigits == "16")
+                    suffix = "th";
+
+                else if (lastTwoDigits == "17")
+                    suffix = "th";
+
+                else if (lastTwoDigits == "18")
+                    suffix = "th";
+
+                else if (lastTwoDigits == "19")
+                    suffix = "th";
+
+                else if (lastTwoDigits == "20")
+                    suffix = "th";                
+            }
+
+            return suffix;
         }
 
         public static string CreateDecimalString(double value, int decimalPlaces)

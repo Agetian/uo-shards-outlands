@@ -232,14 +232,14 @@ namespace Server.SkillHandlers
             if (foodNameText == null)
                 foodNameText = "";
 
-            foodNameText = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(foodNameText);
+            foodNameText = Utility.Capitalize(foodNameText);
 
             string satisfactionText = Food.GetSatisfactionText(food.Satisfaction);
 
             if (satisfactionText == null)
                 satisfactionText = "";
 
-            satisfactionText = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(satisfactionText);
+            satisfactionText = Utility.Capitalize(satisfactionText);
             int satisfactionTextHue = Food.GetSatisfactionHue(food.Satisfaction);
 
             string decayExpiration = "Expires in " + Utility.CreateTimeRemainingString(DateTime.UtcNow, food.DecayExpiration, true, true, true, true, false);

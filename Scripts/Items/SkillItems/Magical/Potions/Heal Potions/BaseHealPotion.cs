@@ -11,7 +11,7 @@ namespace Server.Items
 		public abstract int MaxHeal { get; }
 		public abstract double Delay { get; }
 
-		public BaseHealPotion( PotionEffect effect ) : base( 0xF0C, effect )
+		public BaseHealPotion( PotionEffect effect ) : base( 3852, effect )
 		{
 		}
 
