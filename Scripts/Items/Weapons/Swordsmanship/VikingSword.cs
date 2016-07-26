@@ -22,8 +22,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5050; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -7; } }
-        public override int IconOffsetY { get { return -4; } }
+        public override int IconOffsetX { get { return 53; } }
+        public override int IconOffsetY { get { return 34; } }
 
 		[Constructable]
 		public VikingSword() : base( 0x13B9 )

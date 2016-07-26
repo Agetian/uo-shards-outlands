@@ -11,8 +11,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3762; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -5; } }
-        public override int IconOffsetY { get { return -8; } }
+        public override int IconOffsetX { get { return 44; } }
+        public override int IconOffsetY { get { return 35; } }
 
 		[Constructable]
         public Harp(): base(3762, 0x43, 0x44)

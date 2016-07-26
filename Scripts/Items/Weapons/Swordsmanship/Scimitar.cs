@@ -22,8 +22,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5045; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -9; } }
-        public override int IconOffsetY { get { return -5; } }
+        public override int IconOffsetX { get { return 51; } }
+        public override int IconOffsetY { get { return 38; } }
 
 		[Constructable]
 		public Scimitar() : base( 0x13B6 )

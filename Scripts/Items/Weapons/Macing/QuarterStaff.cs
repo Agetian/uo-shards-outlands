@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3722; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -13; } }
-        public override int IconOffsetY { get { return -13; } }
+        public override int IconOffsetX { get { return 49; } }
+        public override int IconOffsetY { get { return 24; } }
 
 		[Constructable]
 		public QuarterStaff() : base( 0xE89 )

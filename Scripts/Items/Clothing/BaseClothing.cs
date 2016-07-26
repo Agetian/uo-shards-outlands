@@ -20,7 +20,7 @@ namespace Server.Items
         int MaxArcaneCharges { get; set; }
     }
 
-    public abstract class BaseClothing : Item, IDyable, IScissorable, ICraftable, IWearableDurability
+    public abstract class BaseClothing : Item, IDyable, IScissorable, ICraftable
     {
         private bool m_IsInvisible = false;
 
@@ -36,9 +36,7 @@ namespace Server.Items
                 }
             }
         }
-        
-        private int m_MaxHitPoints;
-        private int m_HitPoints;       
+          
         private bool m_PlayerConstructed;
         protected CraftResource m_Resource;
         private int m_StrReq = -1;
@@ -69,45 +67,10 @@ namespace Server.Items
         public virtual int AosStrReq { get { return 10; } }
         public virtual int OldStrReq { get { return 0; } }
 
-        public virtual int InitMinHits { get { return 25; } }
-        public virtual int InitMaxHits { get { return 25; } }
-
         public virtual bool AllowMaleWearer { get { return true; } }
         public virtual bool AllowFemaleWearer { get { return true; } }
         public virtual bool CanBeBlessed { get { return true; } }
-
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int MaxHitPoints
-        {
-            get { return m_MaxHitPoints; }
-            set { m_MaxHitPoints = value; InvalidateProperties(); }
-        }
-
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int HitPoints
-        {
-            get
-            {
-                return m_HitPoints;
-            }
-
-            set
-            {
-                if (value != m_HitPoints && MaxHitPoints > 0)
-                {
-                    m_HitPoints = value;
-
-                    if (m_HitPoints < 0)
-                        Delete();
-
-                    else if (m_HitPoints > MaxHitPoints)
-                        m_HitPoints = MaxHitPoints;
-
-                    InvalidateProperties();
-                }
-            }
-        }
-        
+                
         [CommandProperty(AccessLevel.GameMaster)]
         public int StrRequirement
         {
@@ -368,9 +331,7 @@ namespace Server.Items
             Hue = hue;
 
             m_Resource = DefaultResource;
-
-            m_HitPoints = m_MaxHitPoints = Utility.RandomMinMax(InitMinHits, InitMaxHits);
-
+            
             m_AosAttributes = new AosAttributes(this);
             m_AosClothingAttributes = new AosArmorAttributes(this);
             m_AosSkillBonuses = new AosSkillBonuses(this);
@@ -401,26 +362,6 @@ namespace Server.Items
                 return true;
 
             return (m_AosAttributes.SpellChanneling != 0);
-        }
-
-        public void UnscaleDurability()
-        {
-            int scale = 100 + m_AosClothingAttributes.DurabilityBonus;
-
-            m_HitPoints = ((m_HitPoints * 100) + (scale - 1)) / scale;
-            m_MaxHitPoints = ((m_MaxHitPoints * 100) + (scale - 1)) / scale;
-
-            InvalidateProperties();
-        }
-
-        public void ScaleDurability()
-        {
-            int scale = 100 + m_AosClothingAttributes.DurabilityBonus;
-
-            m_HitPoints = ((m_HitPoints * scale) + 99) / 100;
-            m_MaxHitPoints = ((m_MaxHitPoints * scale) + 99) / 100;
-
-            InvalidateProperties();
         }
 
         public override bool CheckPropertyConfliction(Mobile m)
@@ -581,10 +522,7 @@ namespace Server.Items
                 list.Add(1060410, prop.ToString()); // durability ~1_val~%
 
             if ((prop = ComputeStatReq(StatType.Str)) > 0)
-                list.Add(1061170, prop.ToString()); // strength requirement ~1_val~
-
-            if (m_HitPoints >= 0 && m_MaxHitPoints > 0)
-                list.Add(1060639, "{0}\t{1}", m_HitPoints, m_MaxHitPoints); // durability ~1_val~ / ~2_val~
+                list.Add(1061170, prop.ToString()); // strength requirement ~1_val~           
         }
 
         public override void DisplayLabelName(Mobile from)
@@ -744,8 +682,6 @@ namespace Server.Items
             SetSaveFlag(ref flags, SaveFlag.ClothingAttributes, !m_AosClothingAttributes.IsEmpty);
             SetSaveFlag(ref flags, SaveFlag.SkillBonuses, !m_AosSkillBonuses.IsEmpty);
             SetSaveFlag(ref flags, SaveFlag.Resistances, !m_AosResistances.IsEmpty);
-            SetSaveFlag(ref flags, SaveFlag.MaxHitPoints, m_MaxHitPoints != 0);
-            SetSaveFlag(ref flags, SaveFlag.HitPoints, m_HitPoints != 0);
             SetSaveFlag(ref flags, SaveFlag.PlayerConstructed, m_PlayerConstructed != false);
             SetSaveFlag(ref flags, SaveFlag.StrReq, m_StrReq != -1);
             SetSaveFlag(ref flags, SaveFlag.IPYInvisible, IsInvisible);
@@ -766,12 +702,6 @@ namespace Server.Items
 
             if (GetSaveFlag(flags, SaveFlag.Resistances))
                 m_AosResistances.Serialize(writer);
-
-            if (GetSaveFlag(flags, SaveFlag.MaxHitPoints))
-                writer.WriteEncodedInt((int)m_MaxHitPoints);
-
-            if (GetSaveFlag(flags, SaveFlag.HitPoints))
-                writer.WriteEncodedInt((int)m_HitPoints);
 
             if (GetSaveFlag(flags, SaveFlag.StrReq))
                 writer.WriteEncodedInt((int)m_StrReq);
@@ -813,12 +743,6 @@ namespace Server.Items
                             m_AosResistances = new AosElementAttributes(this, reader);
                         else
                             m_AosResistances = new AosElementAttributes(this);
-
-                        if (GetSaveFlag(flags, SaveFlag.MaxHitPoints))
-                            m_MaxHitPoints = reader.ReadEncodedInt();
-
-                        if (GetSaveFlag(flags, SaveFlag.HitPoints))
-                            m_HitPoints = reader.ReadEncodedInt();
 
                         if (GetSaveFlag(flags, SaveFlag.StrReq))
                             m_StrReq = reader.ReadEncodedInt();
@@ -875,10 +799,7 @@ namespace Server.Items
 
             if (version < 4)
                 m_Resource = DefaultResource;
-
-            if (m_MaxHitPoints == 0 && m_HitPoints == 0)
-                m_HitPoints = m_MaxHitPoints = Utility.RandomMinMax(InitMinHits, InitMaxHits);
-
+            
             Mobile parent = Parent as Mobile;
 
             if (parent != null)

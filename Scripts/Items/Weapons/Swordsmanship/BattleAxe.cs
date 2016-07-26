@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3912; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return 0; } }
-        public override int IconOffsetY { get { return 0; } }
+        public override int IconOffsetX { get { return 62; } }
+        public override int IconOffsetY { get { return 39; } }
 
 		[Constructable]
 		public BattleAxe() : base( 0xF47 )

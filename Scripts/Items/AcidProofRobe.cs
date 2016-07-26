@@ -6,11 +6,7 @@ namespace Server.Items
 {
 	public class AcidProofRobe : Robe
 	{
-
 		public override int BaseFireResistance{ get{ return 4; } }
-
-		public override int InitMinHits{ get{ return 150; } }
-		public override int InitMaxHits{ get{ return 150; } }
 
 		[Constructable]
 		public AcidProofRobe()

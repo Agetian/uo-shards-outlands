@@ -22,8 +22,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5118; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -3; } }
-        public override int IconOffsetY { get { return -4; } }
+        public override int IconOffsetX { get { return 59; } }
+        public override int IconOffsetY { get { return 37; } }
 
 		[Constructable]
 		public Katana() : base( 0x13FF )

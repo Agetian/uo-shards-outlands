@@ -11,12 +11,7 @@ namespace Server.Items
 		public override int BaseFireResistance{ get{ return 5; } }
 		public override int BaseColdResistance{ get{ return 9; } }
 		public override int BasePoisonResistance{ get{ return 20; } }
-		public override int BaseEnergyResistance{ get{ return 20; } }
-
-		public override int InitMinHits{ get{ return 150; } }
-		public override int InitMaxHits{ get{ return 150; } }
-
-		
+		public override int BaseEnergyResistance{ get{ return 20; } }		
 
 		[Constructable]
 		public CrownOfTalKeesh()

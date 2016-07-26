@@ -267,7 +267,7 @@ namespace Server
 
                 AddLabel(Utility.CenteredTextOffset(195, itemName), 49, aspectTextHue, itemName);
                 AddLabel(Utility.CenteredTextOffset(195, itemAspectName), 74, aspectTextHue, itemAspectName);
-                AddItem(175 + itemOffsetX, 125 + itemOffsetY, itemIconItemdId, aspectHue); //Image                
+                AddItem(120 + itemOffsetX, 75 + itemOffsetY, itemIconItemdId, aspectHue); //Image                
 
                 int newDurability = AspectGear.BaselineDurability + (AspectGear.IncreasedDurabilityPerTier * newTier);
 
@@ -316,7 +316,7 @@ namespace Server
 
                 AddLabel(Utility.CenteredTextOffset(200, itemName), 49, aspectTextHue, itemName);
                 AddLabel(Utility.CenteredTextOffset(200, itemAspectName), 74, aspectTextHue, itemAspectName);
-                AddItem(170 + itemOffsetX, 110 + itemOffsetY, itemIconItemdId, aspectHue); //Image
+                AddItem(120 + itemOffsetX, 75 + itemOffsetY, itemIconItemdId, aspectHue); //Image
 
                 //TEST: FINISH!!!
 

@@ -4,7 +4,7 @@ using Server.Items;
 namespace Server.Items
 {
 	[FlipableAttribute( 0x13da, 0x13e1 )]
-	public class StuddedLegs : BaseArmor
+    public class StuddedLegs : BaseArmor
 	{
         public static int GetSBPurchaseValue() { return 1; }
         public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
@@ -17,8 +17,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5089; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -2; } }
-        public override int IconOffsetY { get { return 2; } }
+        public override int IconOffsetX { get { return 51; } }
+        public override int IconOffsetY { get { return 34; } }
 
         public override ArmorMaterialType MaterialType { get { return ArmorMaterialType.Studded; } }
         public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }

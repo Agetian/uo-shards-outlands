@@ -26,8 +26,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5120; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -7; } }
-        public override int IconOffsetY { get { return -4; } }
+        public override int IconOffsetX { get { return 55; } }
+        public override int IconOffsetY { get { return 39; } }
 
 		[Constructable]
 		public Kryss() : base( 0x1401 )

@@ -6,10 +6,7 @@ namespace Server.Items
 	public class TheMostKnowledgePerson : BaseOuterTorso
 	{
 		public override int LabelNumber{ get{ return 1094893; } } // The Most Knowledge Person [Replica]
-
-		public override int InitMinHits{ get{ return 150; } }
-		public override int InitMaxHits{ get{ return 150; } }
-        
+                
 		public override bool CanBeBlessed{ get{ return false; } }
 
 		[Constructable]

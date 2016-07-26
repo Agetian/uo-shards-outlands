@@ -24,8 +24,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3920; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -4; } }
-        public override int IconOffsetY { get { return -2; } }
+        public override int IconOffsetX { get { return 54; } }
+        public override int IconOffsetY { get { return 39; } }
 
 		[Constructable]
 		public Crossbow() : base( 0xF50 )

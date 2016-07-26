@@ -22,8 +22,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3936; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -20; } }
-        public override int IconOffsetY { get { return -5; } }
+        public override int IconOffsetX { get { return 38; } }
+        public override int IconOffsetY { get { return 34; } }
 
 		[Constructable]
 		public Longsword() : base( 0xF61 )

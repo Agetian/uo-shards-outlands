@@ -16,8 +16,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 7031; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return 0; } }
-        public override int IconOffsetY { get { return 5; } }
+        public override int IconOffsetX { get { return 50; } }
+        public override int IconOffsetY { get { return 32; } }
 
         [Constructable]
         public HeaterShield(): base(7031)

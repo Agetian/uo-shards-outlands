@@ -6,8 +6,8 @@ namespace Server.Items
 	{
         public override int IconItemId { get { return 10245; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return 6; } }
-        public override int IconOffsetY { get { return -1; } }
+        public override int IconOffsetX { get { return 54; } }
+        public override int IconOffsetY { get { return 37; } }
 
 		[Constructable]
 		public BambooFlute() : base( 10245, 0x504, 0x503 )

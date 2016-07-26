@@ -7,24 +7,16 @@ namespace Server.Items
 {
 	public class ChaosShield : BaseShield
 	{
-		public override int BasePhysicalResistance{ get{ return 1; } }
-		public override int BaseFireResistance{ get{ return 0; } }
-		public override int BaseColdResistance{ get{ return 0; } }
-		public override int BasePoisonResistance{ get{ return 0; } }
-		public override int BaseEnergyResistance{ get{ return 0; } }
-
 		public override int InitMinHits{ get{ return 125; } }
 		public override int InitMaxHits{ get{ return 125; } }
-
-		public override int AosStrReq{ get{ return 95; } }
 
 		public override int ArmorBase{ get{ return 24; } }
         public override int OldDexBonus { get { return -7; } }
 
         public override int IconItemId { get { return 7107; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -5; } }
-        public override int IconOffsetY { get { return 12; } }
+        public override int IconOffsetX { get { return 50; } }
+        public override int IconOffsetY { get { return 41; } }
 
 		[Constructable]
 		public ChaosShield() : base( 7107 )

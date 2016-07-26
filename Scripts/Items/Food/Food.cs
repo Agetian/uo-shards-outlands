@@ -29,12 +29,7 @@ namespace Server.Items
 
         public virtual string DisplayName { get { return "food"; } }
         public virtual SatisfactionLevelType Satisfaction { get { return SatisfactionLevelType.Paltry; } }   
-  
-        public virtual int IconItemId { get { return ItemID; } }
-        public virtual int IconItemHue { get { return Hue; } }
-        public virtual int IconOffsetX { get { return 0; } }
-        public virtual int IconOffsetY { get { return 0; } }
-          
+            
         public virtual int FillFactor { get { return 6; } }
         public virtual bool IsStackable { get { return true; } }   
         public virtual int MaxCharges { get { return 1; } }

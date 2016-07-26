@@ -2439,6 +2439,7 @@ namespace Server.Mobiles
                             moved = true;
                         }
                     }
+
                     else if (item is BaseClothing)
                     {
                         BaseClothing clothing = (BaseClothing)item;

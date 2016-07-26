@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5182; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -31; } }
-        public override int IconOffsetY { get { return -11; } }
+        public override int IconOffsetX { get { return 31; } }
+        public override int IconOffsetY { get { return 26; } }
 
 		[Constructable]
 		public Halberd() : base( 0x143E )

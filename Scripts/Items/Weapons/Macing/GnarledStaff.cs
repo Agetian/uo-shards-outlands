@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5113; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -13; } }
-        public override int IconOffsetY { get { return -13; } }
+        public override int IconOffsetX { get { return 47; } }
+        public override int IconOffsetY { get { return 21; } }
 
 		[Constructable]
 		public GnarledStaff() : base( 0x13F8 )

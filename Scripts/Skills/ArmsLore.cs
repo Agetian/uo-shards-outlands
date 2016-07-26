@@ -261,7 +261,7 @@ namespace Server.SkillHandlers
                         AddLabel(Utility.CenteredTextOffset(115, weaponTypeText), 45, 2603, weaponTypeText);
 
                         //Image
-                        AddItem(100 + weapon.IconOffsetX, 95 + weapon.IconOffsetY, weapon.IconItemId, weapon.IconHue);
+                        AddItem(34 + weapon.IconOffsetX, 68 + weapon.IconOffsetY, weapon.IconItemId, weapon.IconHue);
 
                         //Display Mode
                         AddLabel(235, 25, 149, "Base Values");
@@ -346,7 +346,7 @@ namespace Server.SkillHandlers
                         AddLabel(Utility.CenteredTextOffset(115, weaponTypeText), 45, 2603, weaponTypeText);
 		            
                         //Image
-                        AddItem(100 + weapon.IconOffsetX, 95 + weapon.IconOffsetY, weapon.IconItemId, weapon.IconHue);
+                        AddItem(34 + weapon.IconOffsetX, 68 + weapon.IconOffsetY, weapon.IconItemId, weapon.IconHue);
 
                         //Swing Speed
                         AddLabel(213, 45, textHue, "Swing Delay:");
@@ -497,7 +497,7 @@ namespace Server.SkillHandlers
                         AddLabel(Utility.CenteredTextOffset(115, armorTypeText), 45, 2603, armorTypeText);
 
                         //Image
-                        AddItem(85 + armor.IconOffsetX, 80 + armor.IconOffsetY, armor.IconItemId, armor.IconHue);
+                        AddItem(34 + armor.IconOffsetX, 68 + armor.IconOffsetY, armor.IconItemId, armor.IconHue);
 
                         //Properties
                         AddLabel(231, 45, textHue, "Armor:");
@@ -549,7 +549,7 @@ namespace Server.SkillHandlers
                         AddLabel(54, 45, 2603, armorTypeText);
 			            
                         //Image
-                        AddItem(85 + armor.IconOffsetX, 80 + armor.IconOffsetY, armor.IconItemId, armor.IconHue);
+                        AddItem(34 + armor.IconOffsetX, 68 + armor.IconOffsetY, armor.IconItemId, armor.IconHue);
 			           
                         //Suit Effects
                         int startY = 45;
@@ -640,7 +640,7 @@ namespace Server.SkillHandlers
                         AddLabel(Utility.CenteredTextOffset(115, shieldTypeText), 45, 2603, shieldTypeText);
 
                         //Image			           
-                        AddItem(85 + shield.IconOffsetX, 80 + shield.IconOffsetY, shield.IconItemId, shield.IconHue);
+                        AddItem(34 + shield.IconOffsetX, 68 + shield.IconOffsetY, shield.IconItemId, shield.IconHue);
                         			            
                         //Properties
                         AddLabel(228, 45, textHue, "Armor:");
@@ -692,7 +692,7 @@ namespace Server.SkillHandlers
                         AddLabel(Utility.CenteredTextOffset(115, shieldTypeText), 45, 2603, shieldTypeText);
 
                         //Image
-                        AddItem(85 + shield.IconOffsetX, 80 + shield.IconOffsetY, shield.IconItemId, shield.IconHue);
+                        AddItem(34 + shield.IconOffsetX, 68 + shield.IconOffsetY, shield.IconItemId, shield.IconHue);
                         		
 	                    //Values
                         string parryChanceText = Utility.CreateDecimalPercentageString(parryChance, 1);
@@ -801,7 +801,7 @@ namespace Server.SkillHandlers
                         AddButton(327, 29, 1210, 1209, 1, GumpButtonType.Reply, 0);
 			            
                         //Image
-                        AddItem(75 + instrument.IconOffsetX, 95 + instrument.IconOffsetY, instrument.IconItemId, instrument.IconHue);
+                        AddItem(34 + instrument.IconOffsetX, 68 + instrument.IconOffsetY, instrument.IconItemId, instrument.IconHue);
 
                         //Properties
                         AddLabel(212, 45, textHue, "Durability:");
@@ -843,7 +843,7 @@ namespace Server.SkillHandlers
                         AddLabel(Utility.CenteredTextOffset(115, instrumentTypeText), 45, 2603, instrumentTypeText);
 
                         //Image
-                        AddItem(75 + instrument.IconOffsetX, 95 + instrument.IconOffsetY, instrument.IconItemId, instrument.IconHue);
+                        AddItem(34 + instrument.IconOffsetX, 68 + instrument.IconOffsetY, instrument.IconItemId, instrument.IconHue);
 
                         //Skill Type
                         AddLabel(65, 149, 2562, "Displaying");

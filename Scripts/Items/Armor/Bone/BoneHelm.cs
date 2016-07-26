@@ -12,13 +12,18 @@ namespace Server.Items
         public override int ArmorBase { get { return 25; } }
         public override int OldDexBonus { get { return 0; } }
 
+        public override int IconItemId { get { return 5201; } }
+        public override int IconHue { get { return Hue; } }
+        public override int IconOffsetX { get { return 53; } }
+        public override int IconOffsetY { get { return 44; } }
+
         public override ArmorMaterialType MaterialType { get { return ArmorMaterialType.Bone; } }
         public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }
 
         public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorMeditationAllowance.Quarter; } }
 
 		[Constructable]
-		public BoneHelm() : base( 0x1451 )
+		public BoneHelm() : base( 5201 )
 		{
             Name = "bone helm";
 			Weight = 3.0;

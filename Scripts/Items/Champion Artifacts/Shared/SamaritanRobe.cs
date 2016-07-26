@@ -9,9 +9,6 @@ namespace Server.Items
 
 		public override int BasePhysicalResistance{ get{ return 5; } }
 
-		public override int InitMinHits{ get{ return 150; } }
-		public override int InitMaxHits{ get{ return 150; } }
-
 		[Constructable]
 		public SamaritanRobe()
 		{

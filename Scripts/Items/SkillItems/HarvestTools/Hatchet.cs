@@ -21,8 +21,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3908; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -8; } }
-        public override int IconOffsetY { get { return -3; } }
+        public override int IconOffsetX { get { return 50; } }
+        public override int IconOffsetY { get { return 37; } }
 
 		[Constructable]
 		public Hatchet() : base( 0xF43 )

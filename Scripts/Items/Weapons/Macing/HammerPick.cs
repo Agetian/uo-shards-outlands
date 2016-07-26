@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5180; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -4; } }
-        public override int IconOffsetY { get { return -3; } }
+        public override int IconOffsetX { get { return 53; } }
+        public override int IconOffsetY { get { return 33; } }
 
 		[Constructable]
 		public HammerPick() : base( 0x143D )

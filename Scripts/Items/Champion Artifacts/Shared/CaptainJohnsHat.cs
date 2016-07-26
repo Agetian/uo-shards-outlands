@@ -11,12 +11,7 @@ namespace Server.Items
 		public override int BaseFireResistance{ get{ return 6; } }
 		public override int BaseColdResistance{ get{ return 9; } }
 		public override int BasePoisonResistance{ get{ return 7; } }
-		public override int BaseEnergyResistance{ get{ return 23; } }
-
-		public override int InitMinHits{ get{ return 150; } }
-		public override int InitMaxHits{ get{ return 150; } }
-
-		
+		public override int BaseEnergyResistance{ get{ return 23; } }		
 
 		[Constructable]
 		public CaptainJohnsHat()

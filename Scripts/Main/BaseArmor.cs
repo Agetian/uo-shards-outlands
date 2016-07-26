@@ -56,11 +56,6 @@ namespace Server.Items
         public virtual int OldDexReq { get { return 0; } }
         public virtual int OldIntReq { get { return 0; } }
 
-        public virtual int IconItemId { get { return ItemID; } }
-        public virtual int IconHue { get { return Hue; } }
-        public virtual int IconOffsetX { get { return 0; } } //Base is 85
-        public virtual int IconOffsetY { get { return 0; } } //Base is 80
-
         public override CraftResource DefaultResource { get { return CraftResource.Iron; } }
 
         public virtual string BlessedInRegionName { get { return ""; } }
@@ -497,8 +492,8 @@ namespace Server.Items
         public override int PoisonResistance { get { return BasePoisonResistance + GetProtOffset() + GetResourceAttrs().ArmorPoisonResist + m_PoisonBonus; } }
         public override int EnergyResistance { get { return BaseEnergyResistance + GetProtOffset() + GetResourceAttrs().ArmorEnergyResist + m_EnergyBonus; } }
 
-        public virtual int InitMinHits { get { return 30; } }
-        public virtual int InitMaxHits { get { return 30; } }
+        public virtual int InitMinHits { get { return 25; } }
+        public virtual int InitMaxHits { get { return 35; } }
 
         [CommandProperty(AccessLevel.GameMaster)]
         public ArmorBodyType BodyPosition

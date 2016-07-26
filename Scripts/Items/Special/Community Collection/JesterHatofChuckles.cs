@@ -14,9 +14,6 @@ namespace Server.Items
 		public override int BasePoisonResistance { get { return 12; } }
 		public override int BaseEnergyResistance { get { return 12; } }
 
-		public override int InitMinHits{ get{ return 100; } }
-		public override int InitMaxHits{ get{ return 100; } }
-
 		[Constructable]
 		public JesterHatofChuckles() : this( Utility.RandomList( 0x13e, 0x03, 0x172, 0x3f ) )
 		{

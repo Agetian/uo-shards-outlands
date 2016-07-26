@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3939; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -24; } }
-        public override int IconOffsetY { get { return -12; } }
+        public override int IconOffsetX { get { return 35; } }
+        public override int IconOffsetY { get { return 23; } }
 
 		[Constructable]
 		public Spear() : base( 0xF62 )

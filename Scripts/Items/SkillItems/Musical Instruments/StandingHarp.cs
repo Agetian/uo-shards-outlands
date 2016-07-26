@@ -6,8 +6,8 @@ namespace Server.Items
 	{
         public override int IconItemId { get { return 3761; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -21; } }
-        public override int IconOffsetY { get { return -18; } }
+        public override int IconOffsetX { get { return 23; } }
+        public override int IconOffsetY { get { return 19; } }
 
 		[Constructable]
 		public StandingHarp() : base( 3761, 0x45, 0x46 )

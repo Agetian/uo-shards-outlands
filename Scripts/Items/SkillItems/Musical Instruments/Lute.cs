@@ -11,8 +11,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3763; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return 0; } }
-        public override int IconOffsetY { get { return 0; } }
+        public override int IconOffsetX { get { return 48; } }
+        public override int IconOffsetY { get { return 41; } }
 
 		[Constructable]
 		public Lute() : base( 0xEB3, 0x4C, 0x4D )

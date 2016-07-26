@@ -16,8 +16,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 7035; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -5; } }
-        public override int IconOffsetY { get { return 6; } }
+        public override int IconOffsetX { get { return 57; } }
+        public override int IconOffsetY { get { return 32; } }
 
         [Constructable]
         public MetalShield(): base(7035)

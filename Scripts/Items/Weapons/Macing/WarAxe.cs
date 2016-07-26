@@ -21,8 +21,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5039; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -3; } }
-        public override int IconOffsetY { get { return -3; } }
+        public override int IconOffsetX { get { return 53; } }
+        public override int IconOffsetY { get { return 35; } }
 
 		public override SkillName BaseSkill{ get{ return SkillName.Macing; } }
 		public override WeaponType BaseType{ get{ return WeaponType.Bashing; } }

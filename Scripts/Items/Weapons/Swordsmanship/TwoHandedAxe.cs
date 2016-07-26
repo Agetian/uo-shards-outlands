@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5186; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -5; } }
-        public override int IconOffsetY { get { return -5; } }
+        public override int IconOffsetX { get { return 54; } }
+        public override int IconOffsetY { get { return 38; } }
 
 		[Constructable]
 		public TwoHandedAxe() : base( 0x1443 )

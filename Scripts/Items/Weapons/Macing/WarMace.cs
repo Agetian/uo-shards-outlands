@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5126; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -5; } }
-        public override int IconOffsetY { get { return 0; } }
+        public override int IconOffsetX { get { return 53; } }
+        public override int IconOffsetY { get { return 39; } }
 
 		[Constructable]
 		public WarMace() : base( 0x1407 )

@@ -8,9 +8,9 @@ namespace Server.Items
         public override SatisfactionLevelType Satisfaction { get { return SatisfactionLevelType.Paltry; } }
 
         public override int IconItemId { get { return 3186; } }
-        public override int IconItemHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -9; } }
-        public override int IconOffsetY { get { return 2; } }
+        public override int IconHue { get { return Hue; } }
+        public override int IconOffsetX { get { return 44; } }
+        public override int IconOffsetY { get { return 41; } }
 
         public override int FillFactor { get { return 3; } }
         public override bool IsStackable { get { return true; } }

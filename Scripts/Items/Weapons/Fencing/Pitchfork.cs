@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3720; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -28; } }
-        public override int IconOffsetY { get { return -14; } }
+        public override int IconOffsetX { get { return 34; } }
+        public override int IconOffsetY { get { return -25; } }
 
 		[Constructable]
 		public Pitchfork() : base( 0xE87 )

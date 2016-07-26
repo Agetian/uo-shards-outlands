@@ -9,9 +9,6 @@ namespace Server.Items
 
 		public override int BasePhysicalResistance{ get{ return 10; } }
 
-		public override int InitMinHits{ get{ return 150; } }
-		public override int InitMaxHits{ get{ return 150; } }
-
 		[Constructable]
 		public TheRobeOfBritanniaAri() : base( 0x2684 )
 		{

@@ -256,11 +256,11 @@ namespace Server.SkillHandlers
             AddLabel(16, -3, 149, "Guide");
 
             //Item
-            AddItem(45 + food.IconOffsetX, 105 + food.IconOffsetX, food.IconItemId, food.IconItemHue);
+            AddItem(-7 + food.IconOffsetX, 58 + food.IconOffsetX, food.IconItemId, food.IconHue);
 
             //Description
-            AddLabel(114, 15, 2550, foodNameText);
-            AddLabel(112, 35, satisfactionTextHue, satisfactionText);
+            AddLabel(Utility.CenteredTextOffset(140, foodNameText), 15, 2550, foodNameText);
+            AddLabel(Utility.CenteredTextOffset(140, satisfactionText), 35, satisfactionTextHue, satisfactionText);
 
             if (food.Decays)
                 AddLabel(80, 55, 1101, decayExpiration);
@@ -278,13 +278,13 @@ namespace Server.SkillHandlers
             //Regen
             AddLabel(34, 190, 149, "Satisfaction Regen Boost Chances");
             AddLabel(20, 210, textHue, "Hits:");
-            AddLabel(55, 210, 2603, Utility.CreateDecimalPercentageString(hitsRegenChance, 1));
+            AddLabel(55, 210, 2603, Utility.CreateDecimalPercentageString(hitsRegenChance, 0));
 
             AddLabel(107, 210, textHue, "Stam:");
-            AddLabel(147, 210, 2603, Utility.CreateDecimalPercentageString(stamRegenChance, 1));
+            AddLabel(147, 210, 2603, Utility.CreateDecimalPercentageString(stamRegenChance, 0));
 
-            AddLabel(193, 210, textHue, "Mana:");
-            AddLabel(234, 210, 2603, Utility.CreateDecimalPercentageString(manaRegenChance, 1));
+            AddLabel(191, 210, textHue, "Mana:");
+            AddLabel(232, 210, 2603, Utility.CreateDecimalPercentageString(manaRegenChance, 0));
         }
 
         public override void OnResponse(NetState sender, RelayInfo info)

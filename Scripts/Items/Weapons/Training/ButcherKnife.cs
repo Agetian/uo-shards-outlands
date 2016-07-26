@@ -21,8 +21,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5111; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -10; } }
-        public override int IconOffsetY { get { return 2; } }
+        public override int IconOffsetX { get { return 50; } }
+        public override int IconOffsetY { get { return 45; } }
 
 		[Constructable]
 		public ButcherKnife() : base( 0x13F6 )

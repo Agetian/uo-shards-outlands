@@ -8,10 +8,10 @@ namespace Server.Items
         public override string DisplayName { get { return "chicken pot pie"; } }
         public override SatisfactionLevelType Satisfaction { get { return SatisfactionLevelType.Appetizing; } }
 
-        public override int IconItemId { get { return ItemID; } }
-        public override int IconItemHue { get { return Hue; } }
-        public override int IconOffsetX { get { return 5; } }
-        public override int IconOffsetY { get { return 5; } }
+        public override int IconItemId { get { return 4161; } }
+        public override int IconHue { get { return Hue; } }
+        public override int IconOffsetX { get { return 58; } }
+        public override int IconOffsetY { get { return 42; } }
 
         public override int FillFactor { get { return 15; } }
         public override bool IsStackable { get { return false; } }

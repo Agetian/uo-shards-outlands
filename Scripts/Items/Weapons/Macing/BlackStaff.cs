@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3568; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -14; } }
-        public override int IconOffsetY { get { return -13; } }
+        public override int IconOffsetX { get { return 47; } }
+        public override int IconOffsetY { get { return 21; } }
 
 		[Constructable]
 		public BlackStaff() : base( 0xDF0 )

@@ -7,12 +7,6 @@ namespace Server.Items
 {
 	public class OrderShield : BaseShield
 	{
-		public override int BasePhysicalResistance{ get{ return 1; } }
-		public override int BaseFireResistance{ get{ return 0; } }
-		public override int BaseColdResistance{ get{ return 0; } }
-		public override int BasePoisonResistance{ get{ return 0; } }
-		public override int BaseEnergyResistance{ get{ return 0; } }
-
 		public override int InitMinHits{ get{ return 125; } }
 		public override int InitMaxHits{ get{ return 125; } }
 
@@ -23,8 +17,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 7109; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return 6; } }
-        public override int IconOffsetY { get { return 6; } }
+        public override int IconOffsetX { get { return 58; } }
+        public override int IconOffsetY { get { return 31; } }
 
 		[Constructable]
 		public OrderShield() : base( 7109 )

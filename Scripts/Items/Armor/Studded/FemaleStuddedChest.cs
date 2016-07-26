@@ -17,8 +17,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 7170; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -2; } }
-        public override int IconOffsetY { get { return 2; } }
+        public override int IconOffsetX { get { return 48; } }
+        public override int IconOffsetY { get { return 32; } }
 
         public override ArmorMaterialType MaterialType { get { return ArmorMaterialType.Studded; } }
         public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }

@@ -19,10 +19,10 @@ namespace Server.Items
 
         public override bool TrainingWeapon { get { return true; } }
 
-        public override int IconItemId { get { return 5111; } }
+        public override int IconItemId { get { return 3778; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -10; } }
-        public override int IconOffsetY { get { return 2; } }
+        public override int IconOffsetX { get { return 51; } }
+        public override int IconOffsetY { get { return 43; } }
 
 		[Constructable]
 		public Cleaver() : base( 0xEC3 )

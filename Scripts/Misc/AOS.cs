@@ -1066,9 +1066,7 @@ namespace Server
 			else if( (bitmask == (int)AosArmorAttribute.DurabilityBonus) && (this is AosArmorAttributes) )
 			{
 				if( m_Owner is BaseArmor )
-					((BaseArmor)m_Owner).UnscaleDurability();
-				else if( m_Owner is BaseClothing )
-					((BaseClothing)m_Owner).UnscaleDurability();
+					((BaseArmor)m_Owner).UnscaleDurability();				
 			}
 
 			uint mask = (uint)bitmask;
@@ -1137,9 +1135,7 @@ namespace Server
 			else if( (bitmask == (int)AosArmorAttribute.DurabilityBonus) && (this is AosArmorAttributes) )
 			{
 				if( m_Owner is BaseArmor )
-					((BaseArmor)m_Owner).ScaleDurability();
-				else if( m_Owner is BaseClothing )
-					((BaseClothing)m_Owner).ScaleDurability();
+					((BaseArmor)m_Owner).ScaleDurability();				
 			}
 
 			if( m_Owner.Parent is Mobile )

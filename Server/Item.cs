@@ -435,6 +435,11 @@ namespace Server
 
         public virtual bool IsMagical { get { return false; } }
 
+        public virtual int IconItemId { get { return ItemID; } }
+        public virtual int IconHue { get { return Hue; } }
+        public virtual int IconOffsetX { get { return 50; } }
+        public virtual int IconOffsetY { get { return 35; } }
+
         private bool m_Identified;
         [CommandProperty(AccessLevel.GameMaster)]
         public bool Identified

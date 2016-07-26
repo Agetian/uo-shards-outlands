@@ -22,8 +22,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5124; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -2; } }
-        public override int IconOffsetY { get { return -7; } }
+        public override int IconOffsetX { get { return 56; } }
+        public override int IconOffsetY { get { return 34; } }
 
 		public override WeaponAnimation BaseAnimation { get{ return WeaponAnimation.Pierce1H; } }
 

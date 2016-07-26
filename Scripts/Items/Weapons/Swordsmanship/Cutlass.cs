@@ -22,8 +22,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 5184; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -5; } }
-        public override int IconOffsetY { get { return -0; } }
+        public override int IconOffsetX { get { return 55; } }
+        public override int IconOffsetY { get { return 37; } }
 
 		[Constructable]
 		public Cutlass() : base( 0x1441 )

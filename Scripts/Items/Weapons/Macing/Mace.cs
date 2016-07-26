@@ -19,8 +19,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3933; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -2; } }
-        public override int IconOffsetY { get { return -1; } }
+        public override int IconOffsetX { get { return 57; } }
+        public override int IconOffsetY { get { return 37; } }
 
 		[Constructable]
 		public Mace() : base( 0xF5C )

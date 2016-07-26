@@ -11,8 +11,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3742; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return 8; } }
-        public override int IconOffsetY { get { return -2; } }
+        public override int IconOffsetX { get { return 55; } }
+        public override int IconOffsetY { get { return 41; } }
 
 		[Constructable]
         public Tambourine(): base(0xE9E, 0x52, 0x53)

@@ -16,8 +16,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 7027; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return -1; } }
-        public override int IconOffsetY { get { return 6; } }
+        public override int IconOffsetX { get { return 52; } }
+        public override int IconOffsetY { get { return 41; } }
 
         [Constructable]
         public Buckler(): base(7027)

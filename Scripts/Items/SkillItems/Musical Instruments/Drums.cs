@@ -11,8 +11,8 @@ namespace Server.Items
 
         public override int IconItemId { get { return 3740; } }
         public override int IconHue { get { return Hue; } }
-        public override int IconOffsetX { get { return 6; } }
-        public override int IconOffsetY { get { return -4; } }
+        public override int IconOffsetX { get { return 53; } }
+        public override int IconOffsetY { get { return 36; } }
 
 		[Constructable]
 		public Drums() : base( 0xE9C, 0x38, 0x39 )

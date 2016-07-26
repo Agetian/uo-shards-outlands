@@ -10,9 +10,6 @@ namespace Server.Items
 		public override int BaseColdResistance{ get{ return 14; } }
 		public override int BasePoisonResistance{ get{ return 10; } }
 
-		public override int InitMinHits{ get{ return 255; } }
-		public override int InitMaxHits{ get{ return 255; } }
-
 		[Constructable]
 		public DreadPirateHat()
 		{
