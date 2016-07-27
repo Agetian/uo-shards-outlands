@@ -116,21 +116,21 @@ namespace Server.Items
         }
 
 		[Constructable]
-		public Runebook( int maxCharges ) : base( Core.AOS ? 0x22C5 : 0xEFA )
+		public Runebook( int maxCharges ) : base( 3834 )
 		{
-			Weight = (Core.SE ? 1.0 : 3.0);
+            Name = "runebook";
+
+            Weight = 1;
 			LootType = LootType.Blessed;
 			Hue = 0x461;
 
-			Layer = (Core.AOS ? Layer.Invalid : Layer.OneHanded);
+			Layer = (Layer.OneHanded);
 
 			m_Entries = new List<RunebookEntry>();
 
 			m_MaxCharges = maxCharges;
 
 			m_DefaultIndex = -1;
-            //Removed by IPY
-			//m_Level = SecureLevel.CoOwners;
 		}
 
 		[Constructable]

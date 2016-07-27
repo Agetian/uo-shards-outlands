@@ -6,14 +6,21 @@ namespace Server.Items
 {
 	public class EarthquakeScroll : SpellScroll
 	{
+        public override int IconItemId { get { return 8037; } }
+        public override int IconHue { get { return Hue; } }
+        public override int IconOffsetX { get { return 55; } }
+        public override int IconOffsetY { get { return 40; } }
+
 		[Constructable]
 		public EarthquakeScroll() : this( 1 )
 		{
+            Name = "earthquake scroll";
 		}
 
 		[Constructable]
-		public EarthquakeScroll( int amount ) : base( 56, 0x1F65, amount )
+		public EarthquakeScroll( int amount ) : base( 56, 8037, amount )
 		{
+            Name = "earthquake scroll";
 		}
 
 		public EarthquakeScroll( Serial serial ) : base( serial )

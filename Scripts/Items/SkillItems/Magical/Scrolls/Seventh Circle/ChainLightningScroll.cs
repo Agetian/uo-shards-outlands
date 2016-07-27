@@ -6,14 +6,21 @@ namespace Server.Items
 {
 	public class ChainLightningScroll : SpellScroll
 	{
+        public override int IconItemId { get { return 8029; } }
+        public override int IconHue { get { return Hue; } }
+        public override int IconOffsetX { get { return 50; } }
+        public override int IconOffsetY { get { return 40; } }
+
 		[Constructable]
 		public ChainLightningScroll() : this( 1 )
 		{
+            Name = "chain lightning scroll";
 		}
 
 		[Constructable]
-		public ChainLightningScroll( int amount ) : base( 48, 0x1F5D, amount )
+        public ChainLightningScroll(int amount): base(48, 8029, amount)
 		{
+            Name = "chain lightning scroll";
 		}
 
 		public ChainLightningScroll( Serial serial ) : base( serial )

@@ -6,14 +6,21 @@ namespace Server.Items
 {
 	public class SummonEarthElementalScroll : SpellScroll
 	{
+        public override int IconItemId { get { return 8042; } }
+        public override int IconHue { get { return Hue; } }
+        public override int IconOffsetX { get { return 45; } }
+        public override int IconOffsetY { get { return 40; } }
+
 		[Constructable]
 		public SummonEarthElementalScroll() : this( 1 )
 		{
+            Name = "summon earth elemental scroll";
 		}
 
 		[Constructable]
-		public SummonEarthElementalScroll( int amount ) : base( 61, 0x1F6A, amount )
+		public SummonEarthElementalScroll( int amount ) : base( 61, 8042, amount )
 		{
+            Name = "summon earth elemental scroll";
 		}
 
 		public SummonEarthElementalScroll( Serial serial ) : base( serial )

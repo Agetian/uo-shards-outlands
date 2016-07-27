@@ -229,7 +229,7 @@ namespace Server.Gumps
                     
                     startY = 200;
 
-                    int entrySpacing = 60;
+                    int entrySpacing = 50;
 
                     List<SocietyJob> m_SocietiesJobs = Societies.GetSocietyJobsByGroup(m_SocietiesGroup);
 
@@ -245,7 +245,7 @@ namespace Server.Gumps
 
                         AddItem(5 + societyJob.m_IconOffsetX, -35 + startY + societyJob.m_IconOffsetY, societyJob.m_IconItemId, societyJob.m_IconHue); //Image
                         AddLabel(120, startY, WhiteTextHue, societyJob.GetJobDescriptionText());
-                        AddLabel(130, startY + 20, societiesGroupTextHue, societyJob.GetJobRewardText());
+                        AddLabel(140, startY + 20, societiesGroupTextHue, societyJob.GetJobRewardText());
                         
                         if (jobPlayerProgress != null)
                             AddButton(390, startY, 2154, 2151, 10 + a, GumpButtonType.Reply, 0);

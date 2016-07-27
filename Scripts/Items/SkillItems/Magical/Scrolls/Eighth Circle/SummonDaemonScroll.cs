@@ -6,14 +6,21 @@ namespace Server.Items
 {
 	public class SummonDaemonScroll : SpellScroll
 	{
+        public override int IconItemId { get { return 8041; } }
+        public override int IconHue { get { return Hue; } }
+        public override int IconOffsetX { get { return 55; } }
+        public override int IconOffsetY { get { return 40; } }
+
 		[Constructable]
 		public SummonDaemonScroll() : this( 1 )
 		{
+            Name = "summon daemon scroll";
 		}
 
 		[Constructable]
-		public SummonDaemonScroll( int amount ) : base( 60, 0x1F69, amount )
+		public SummonDaemonScroll( int amount ) : base( 60, 8041, amount )
 		{
+            Name = "summon daemon scroll";
 		}
 
 		public SummonDaemonScroll( Serial serial ) : base( serial )

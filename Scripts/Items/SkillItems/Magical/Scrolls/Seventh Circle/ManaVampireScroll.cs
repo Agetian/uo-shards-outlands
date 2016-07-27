@@ -6,14 +6,21 @@ namespace Server.Items
 {
 	public class ManaVampireScroll : SpellScroll
 	{
+        public override int IconItemId { get { return 8033; } }
+        public override int IconHue { get { return Hue; } }
+        public override int IconOffsetX { get { return 55; } }
+        public override int IconOffsetY { get { return 40; } }
+
 		[Constructable]
 		public ManaVampireScroll() : this( 1 )
 		{
+            Name = "mana vampire scroll";
 		}
 
 		[Constructable]
-		public ManaVampireScroll( int amount ) : base( 52, 0x1F61, amount )
+        public ManaVampireScroll(int amount): base(52, 8033, amount)
 		{
+            Name = "mana vampire scroll";
 		}
 
 		public ManaVampireScroll( Serial serial ) : base( serial )

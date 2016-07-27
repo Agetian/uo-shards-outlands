@@ -86,7 +86,7 @@ namespace Server.Items
             else if (m_Job.m_Expiration <= DateTime.UtcNow && m_JobStatus != JobStatusType.Expired)
                 m_JobStatus = JobStatusType.Expired;
 
-            string jobText = "Society Job Contract: " + m_Job.GetJobDescriptionProgressText(m_Player);
+            string jobText = "Job Contract: " + m_Job.GetJobDescriptionProgressText(m_Player);
             string ownerText = "(Accepted by " + m_Player.RawName + ")";
             string expirationText = "[Expires in " + Utility.CreateTimeRemainingString(DateTime.UtcNow, m_Job.m_Expiration, true, true, true, true, false) + "]";
            
@@ -203,13 +203,17 @@ namespace Server.Items
             SocietyJobPlayerProgress jobPlayerProgress = Societies.GetSocietiesJobPlayerProgress(m_Player, societyJob);
             
             double progress = 0;
+            double turnedInAmount = 0;
 
             if (jobPlayerProgress != null)
-                progress = jobPlayerProgress.m_PrimaryProgress;
+            {
+                progress = jobPlayerProgress.m_ProgressAmount;
+                turnedInAmount = jobPlayerProgress.m_TurnedInAmount;
+            }
 
             bool readyForTurnIn = false;
 
-            if (progress >= societyJob.m_PrimaryNumber)
+            if (progress >= societyJob.m_TargetNumber)
                 readyForTurnIn = true;
 
             AddImage(0, 0, 1249);
@@ -227,7 +231,8 @@ namespace Server.Items
 
             string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, societyJob.m_Expiration, true, true, true, true, false);
             string jobDescriptionText = societyJob.GetJobDescriptionText();
-            string jobProgressText = "Progress: " + progress + " / " + societyJob.m_PrimaryNumber.ToString();
+            string jobProgressText = "Progress: " + progress + " / " + societyJob.m_TargetNumber.ToString();
+            string jobTurnInText = "Turned In: " + turnedInAmount + " / " + societyJob.m_TurnInRequirementAmount.ToString();
             string destinationText = societyJob.GetJobDestinationText();
             
             AddLabel(Utility.CenteredTextOffset(220, titleText), 37, societiesGroupTextHue, titleText); //Title
@@ -331,23 +336,34 @@ namespace Server.Items
             AddLabel(Utility.CenteredTextOffset(295, timeRemaining), 100, WhiteTextHue, timeRemaining);
 
             AddLabel(142, 140, 149, "Job Description");
-
+            
             AddItem(-2 + societyJob.m_IconOffsetX, 125 + societyJob.m_IconOffsetY, societyJob.m_IconItemId, societyJob.Hue); //Image
 
-            AddLabel(105, 160, WhiteTextHue, jobDescriptionText);
+            startY = 160;
+            int rowSpacing = 20;
+
+            AddLabel(105, startY, WhiteTextHue, jobDescriptionText);
+            startY += rowSpacing;
 
             if (readyForTurnIn)
-                AddLabel(105, 180, 63, jobProgressText);
+                AddLabel(105, startY, 63, jobProgressText);
             else
-                AddLabel(105, 180, 2114, jobProgressText);
+                AddLabel(105, startY, 2114, jobProgressText);
+            startY += rowSpacing;
 
-            AddLabel(105, 200, societiesGroupTextHue, societyJob.GetJobRewardText());
+            if (societyJob.m_TurnInRequirementAmount > 0)
+            {
+                AddLabel(105, startY, 2301, jobTurnInText);
+                startY += rowSpacing;
+            }
 
-            AddLabel(69, 240, 149, "Turn In");
-            AddButton(77, 258, 2151, 2154, 2, GumpButtonType.Reply, 0);
+            AddLabel(105, startY, societiesGroupTextHue, societyJob.GetJobRewardText());
 
-            AddLabel(170, 240, 149, "Completion Destination");
-            AddLabel(Utility.CenteredTextOffset(245, destinationText), 260, 2550, destinationText);
+            AddLabel(69, 245, 149, "Turn In");
+            AddButton(77, 265, 2151, 2154, 2, GumpButtonType.Reply, 0);
+
+            AddLabel(170, 245, 149, "Completion Destination");
+            AddLabel(Utility.CenteredTextOffset(245, destinationText), 265, 2550, destinationText);
         }
 
         public override void OnResponse(NetState sender, RelayInfo info)
@@ -402,7 +418,7 @@ namespace Server.Items
 
                     else if (jobPlayerProgress != null)
                     {
-                        if (jobPlayerProgress.m_PrimaryProgress < societyJob.m_PrimaryNumber || jobPlayerProgress.m_SecondaryProgress < societyJob.m_SecondaryNumber)
+                        if (jobPlayerProgress.m_ProgressAmount < societyJob.m_TargetNumber)
                             m_Player.SendMessage("You have not completed all of the requirements of that contract yet.");
 
                         else if (societyJob.m_DestinationTown != null)
@@ -439,23 +455,10 @@ namespace Server.Items
 
                                 if (matchingMobile != null)
                                 {
-                                    bool validCompletion = false;
+                                    bool validCompletion = societyJob.TurnIn(m_Player, matchingMobile);
 
-                                    if (societyJob.m_JobType == SocietyJob.JobType.CraftItem || societyJob.m_JobType == SocietyJob.JobType.RetrieveFish || societyJob.m_JobType == SocietyJob.JobType.StealItem)
-                                    {
-                                        if (!societyJob.HasNeccessaryItems(m_Player))
-                                        {
-                                            m_Player.SendMessage("You must have the items required for this contract in your backpack in order to complete it.");
-                                            validCompletion = false;
-                                        }
-
-                                        else
-                                            societyJob.ConsumeNeccesaryItems(m_Player);                                        
-                                    }
-
-                                    if (validCompletion)
-                                    {
-                                    }
+                                    if (validCompletion)                                    
+                                        societyJob.Complete(m_Player);                                    
                                 }
 
                                 else                                

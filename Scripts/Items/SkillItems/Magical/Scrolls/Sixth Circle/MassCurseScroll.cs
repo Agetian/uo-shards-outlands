@@ -6,14 +6,21 @@ namespace Server.Items
 {
 	public class MassCurseScroll : SpellScroll
 	{
+        public override int IconItemId { get { return 8026; } }
+        public override int IconHue { get { return Hue; } }
+        public override int IconOffsetX { get { return 45; } }
+        public override int IconOffsetY { get { return 40; } }
+
 		[Constructable]
 		public MassCurseScroll() : this( 1 )
 		{
+            Name = "mass curse scroll";
 		}
 
 		[Constructable]
-		public MassCurseScroll( int amount ) : base( 45, 0x1F5A, amount )
+        public MassCurseScroll(int amount): base(45, 8026, amount)
 		{
+            Name = "mass curse scroll";
 		}
 
 		public MassCurseScroll( Serial serial ) : base( serial )

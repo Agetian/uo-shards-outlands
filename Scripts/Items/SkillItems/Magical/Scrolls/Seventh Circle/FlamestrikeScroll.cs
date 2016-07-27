@@ -6,14 +6,21 @@ namespace Server.Items
 {
 	public class FlamestrikeScroll : SpellScroll
 	{
+        public override int IconItemId { get { return 8031; } }
+        public override int IconHue { get { return Hue; } }
+        public override int IconOffsetX { get { return 45; } }
+        public override int IconOffsetY { get { return 40; } }
+
 		[Constructable]
 		public FlamestrikeScroll() : this( 1 )
 		{
+            Name = "flamestrike scroll";
 		}
 
 		[Constructable]
-		public FlamestrikeScroll( int amount ) : base( 50, 0x1F5F, amount )
+        public FlamestrikeScroll(int amount): base(50, 8031, amount)
 		{
+            Name = "flamestrike scroll";
 		}
 
 		public FlamestrikeScroll( Serial serial ) : base( serial )
