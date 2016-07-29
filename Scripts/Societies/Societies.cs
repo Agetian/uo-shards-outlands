@@ -8,6 +8,7 @@ using Server.Commands;
 using Server.Mobiles;
 using Server.Gumps;
 using Server.Accounting;
+using System.Linq;
 
 namespace Server
 {
@@ -103,6 +104,79 @@ namespace Server
             }
         }
 
+        public static void RecordProgress(PlayerMobile player, SocietyJob.JobType jobType, Type type, Item item, BaseCreature creature, double amount)
+        {
+            if (player == null)
+                return;
+
+            CheckCreateSocietiesPlayerSettings(player);
+
+            foreach (SocietyJobPlayerProgress jobProgress in player.m_SocietiesPlayerSettings.m_JobProgress)
+            {
+                if (jobProgress == null) continue;
+                if (jobProgress.m_Job == null) continue;
+                if (jobProgress.m_Job.Deleted) continue;
+                if (jobProgress.m_ProgressAmount >= jobProgress.m_Job.m_TargetNumber) continue;
+                if (jobProgress.m_Job.m_JobType != jobType) continue;
+                if (jobProgress.m_Job.m_PrimaryType != type) continue;
+
+                if (jobProgress.m_Job.m_JobType == SocietyJob.JobType.CraftItem || jobProgress.m_Job.m_JobType == SocietyJob.JobType.RetrieveFish || jobProgress.m_Job.m_JobType == SocietyJob.JobType.StealItem)
+                {
+                    if (item == null)
+                        continue;
+
+                    if (jobProgress.m_Job.m_CraftResourceRequired != CraftResource.None && item.Resource != jobProgress.m_Job.m_CraftResourceRequired) continue;
+                    if (jobProgress.m_Job.m_PrimaryJobModifier == SocietyJob.JobModifierType.ExceptionalQuality && item.Quality != Quality.Exceptional) continue;
+                    if (jobProgress.m_Job.m_SecondaryJobModifier == SocietyJob.JobModifierType.ExceptionalQuality && item.Quality != Quality.Exceptional) continue;
+
+                    jobProgress.m_ProgressAmount += amount;
+
+                    if (jobProgress.m_ProgressAmount > jobProgress.m_Job.m_TargetNumber)
+                        jobProgress.m_ProgressAmount = jobProgress.m_Job.m_TargetNumber;
+
+                    if (jobProgress.m_ProgressAmount == jobProgress.m_Job.m_TargetNumber)
+                        player.SendMessage(2599, jobProgress.m_Job.GetJobDescriptionText() + ": " + jobProgress.m_ProgressAmount.ToString() + " / " + jobProgress.m_Job.m_TargetNumber.ToString());
+
+                    else
+                        player.SendMessage(63, "Job Completed: " + jobProgress.m_Job.GetJobDescriptionText() + ". Bring the job contract and any required items to the vendor and town listed within the contract.");            
+                }
+
+                else if (jobProgress.m_Job.m_JobType == SocietyJob.JobType.KillCreature || jobProgress.m_Job.m_JobType == SocietyJob.JobType.TameCreature)
+                {
+                    if (creature == null)
+                        continue;
+
+                    jobProgress.m_ProgressAmount += amount;
+
+                    if (jobProgress.m_ProgressAmount > jobProgress.m_Job.m_TargetNumber)
+                        jobProgress.m_ProgressAmount = jobProgress.m_Job.m_TargetNumber;
+
+                    if (jobProgress.m_ProgressAmount == jobProgress.m_Job.m_TargetNumber)
+                        player.SendMessage(2599, jobProgress.m_Job.GetJobDescriptionText() + ": " + jobProgress.m_ProgressAmount.ToString() + " / " + jobProgress.m_Job.m_TargetNumber.ToString());
+
+                    else if (jobProgress.m_Job.m_JobType == SocietyJob.JobType.TameCreature)
+                        player.SendMessage(63, "Job Completed: " + jobProgress.m_Job.GetJobDescriptionText() + ". Bring the job contract and any required creatures to the vendor and town listed within the contract.");
+
+                    else
+                        player.SendMessage(63, "Job Completed: " + jobProgress.m_Job.GetJobDescriptionText() + ". Bring the job contract to the vendor and town listed within the contract.");
+                }
+
+                else
+                {                       
+                    jobProgress.m_ProgressAmount += amount;
+
+                    if (jobProgress.m_ProgressAmount > jobProgress.m_Job.m_TargetNumber)
+                        jobProgress.m_ProgressAmount = jobProgress.m_Job.m_TargetNumber;
+
+                    if (jobProgress.m_ProgressAmount == jobProgress.m_Job.m_TargetNumber)
+                        player.SendMessage(2599, jobProgress.m_Job.GetJobDescriptionText() + ": " + jobProgress.m_ProgressAmount.ToString() + " / " + jobProgress.m_Job.m_TargetNumber.ToString());
+
+                    else
+                        player.SendMessage(63, "Job Completed: " + jobProgress.m_Job.GetJobDescriptionText() + ". Bring the job contract to the vendor and town listed within the contract.");
+                }                 
+            }            
+        }
+
         public static void CheckForExpiredSocietyJobs()
         {           
             List<SocietyJob> m_ExpiredJobs = new List<SocietyJob>();
@@ -160,7 +234,7 @@ namespace Server
                 SocietyJob societyJob = (SocietyJob)m_Queue.Dequeue();
                 societyJob.Delete();
             }
-        }
+        }        
 
         public static void AddSocietyJobs()
         {
@@ -244,24 +318,74 @@ namespace Server
             return m_SocietiesJobs;
         }
 
-        public static int GetSocietyGroupMonthlyRank(PlayerMobile player, SocietiesGroupType societyGroupType)
+        public static List<KeyValuePair<PlayerMobile, int>> GetSocietyGroupMonthlyRanks(SocietiesGroupType societyGroupType)
         {
-            int rank = 1;
+            Dictionary<PlayerMobile, int> dictPlayers = new Dictionary<PlayerMobile, int>();
+            
+            foreach (Mobile mobile in World.Mobiles.Values)
+            {
+                if (mobile == null) continue;
+                if (mobile.Deleted) continue;
+                if (!mobile.Player) continue;
 
-            //TEST
-            return Utility.RandomMinMax(1, 125);
+                PlayerMobile pm_Target = mobile as PlayerMobile;
 
-            return rank;
+                Societies.CheckCreateSocietiesPlayerSettings(pm_Target);
+                SocietyGroupPlayerData societyGroupPlayerData = pm_Target.m_SocietiesPlayerSettings.GetSocietyGroupPlayerData(societyGroupType);
+
+                if (societyGroupPlayerData == null) 
+                    continue;
+
+                if (societyGroupPlayerData.m_MontlyPoints > 0)
+                    dictPlayers.Add(pm_Target, societyGroupPlayerData.m_MontlyPoints);
+            }
+
+            List<KeyValuePair<PlayerMobile, int>> m_Results = new List<KeyValuePair<PlayerMobile, int>>();
+
+            foreach (KeyValuePair<PlayerMobile, int> pair in dictPlayers.OrderByDescending(key => key.Value))
+            {
+                PlayerMobile pm_Target = pair.Key;
+                int points = pair.Value;
+
+                m_Results.Add(pair);
+            }
+
+            return m_Results;
         }
 
-        public static int GetSocietyGroupLifetimeRank(PlayerMobile player, SocietiesGroupType societyGroupType)
+        public static List<KeyValuePair<PlayerMobile, int>> GetSocietyGroupLifetimeRanks(SocietiesGroupType societyGroupType)
         {
-            int rank = 1;
+            Dictionary<PlayerMobile, int> dictPlayers = new Dictionary<PlayerMobile, int>();
 
-            //TEST
-            return Utility.RandomMinMax(1, 125);
+            foreach (Mobile mobile in World.Mobiles.Values)
+            {
+                if (mobile == null) continue;
+                if (mobile.Deleted) continue;
+                if (!mobile.Player) continue;
 
-            return rank;
+                PlayerMobile pm_Target = mobile as PlayerMobile;
+
+                Societies.CheckCreateSocietiesPlayerSettings(pm_Target);
+                SocietyGroupPlayerData societyGroupPlayerData = pm_Target.m_SocietiesPlayerSettings.GetSocietyGroupPlayerData(societyGroupType);
+
+                if (societyGroupPlayerData == null)
+                    continue;
+
+                if (societyGroupPlayerData.m_MontlyPoints > 0)
+                    dictPlayers.Add(pm_Target, societyGroupPlayerData.m_LifetimePoints);
+            }
+
+            List<KeyValuePair<PlayerMobile, int>> m_Results = new List<KeyValuePair<PlayerMobile, int>>();
+
+            foreach (KeyValuePair<PlayerMobile, int> pair in dictPlayers.OrderByDescending(key => key.Value))
+            {
+                PlayerMobile pm_Target = pair.Key;
+                int points = pair.Value;
+
+                m_Results.Add(pair);
+            }
+
+            return m_Results;
         }
 
         public static void OnLogin(PlayerMobile player)
@@ -283,7 +407,7 @@ namespace Server
             else if (player.m_SocietiesPlayerSettings.Deleted)
                 player.m_SocietiesPlayerSettings = new SocietiesPlayerSettings(player);
         }
-
+        
         public static SocietyJobPlayerProgress GetSocietiesJobPlayerProgress(PlayerMobile player, SocietyJob job)
         {
             SocietyJobPlayerProgress jobPlayerProgress = null;

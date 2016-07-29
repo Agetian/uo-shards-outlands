@@ -107,9 +107,30 @@ namespace Server.Gumps
                     int monthlyPoints = societyGroupPlayerData.m_MontlyPoints;
                     int lifetimePoints = societyGroupPlayerData.m_LifetimePoints;
 
-                    int monthlyRank = Societies.GetSocietyGroupMonthlyRank(m_Player, m_SocietiesGroup);
-                    int lifetimeRank = Societies.GetSocietyGroupLifetimeRank(m_Player, m_SocietiesGroup);
+                    List<KeyValuePair<PlayerMobile, int>> monthlyRanks = Societies.GetSocietyGroupMonthlyRanks(m_SocietiesGroup);
+                    List<KeyValuePair<PlayerMobile, int>> lifetimeRanks = Societies.GetSocietyGroupMonthlyRanks(m_SocietiesGroup);
 
+                    int monthlyRank = monthlyRanks.Count;
+                    int lifetimeRank = lifetimeRanks.Count;
+
+                    for (int a = 0; a < monthlyRanks.Count; a++)
+                    {
+                        if (monthlyRanks[a].Key == m_Player)
+                        {
+                            monthlyRank = a + 1;
+                            break;
+                        }                        
+                    }
+
+                    for (int a = 0; a < lifetimeRanks.Count; a++)
+                    {
+                        if (lifetimeRanks[a].Key == m_Player)
+                        {
+                            lifetimeRank = a + 1;
+                            break;
+                        }
+                    }
+                    
                     string monthlyRankText = monthlyRank.ToString() + Utility.DetermineNumberSuffix(monthlyRank);
                     string lifetimeRankText = lifetimeRank.ToString() + Utility.DetermineNumberSuffix(lifetimeRank);
                     
