@@ -38,7 +38,7 @@ namespace Server.Items
                 player.SendSound(0x055);
 
                 player.CloseGump(typeof(SocietiesJobBoardGump));
-                player.SendGump(new SocietiesJobBoardGump(player, SocietiesGroupType.ArtificersEnclave, SocietiesGroupPageDisplayType.Jobs));
+                player.SendGump(new SocietiesJobBoardGump(player, SocietiesGroupType.ArtificersEnclave, SocietiesGroupPageDisplayType.Jobs, 0));
             }
         }
 

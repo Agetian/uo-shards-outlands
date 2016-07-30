@@ -27,8 +27,13 @@ namespace Server.Items
 
             if (player != null)
             {
-                player.CloseGump(typeof(SocietiesJobBoardGump));
-                player.SendGump(new SocietiesJobBoardGump(player, SocietiesGroupType.ArtificersEnclave, SocietiesGroupPageDisplayType.Jobs));
+                CaptchaPersistance.CheckAndCreateCaptchaAccountEntry(player);
+
+                if (player.m_CaptchaAccountData.Attempt(player, CaptchaSourceType.Mining))
+                {
+                    //TEST
+                    //Continue Harvest            
+                }
             }
         }
 

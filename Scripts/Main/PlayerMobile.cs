@@ -1035,7 +1035,8 @@ namespace Server.Mobiles
             Guilds.OnLogin(pm_From);
             Faction.OnLogin(pm_From);
             TitlePersistance.OnLogin(pm_From);
-            AchievementsPersistance.OnLogin(pm_From);       
+            AchievementsPersistance.OnLogin(pm_From);
+            CaptchaPersistance.OnLogin(pm_From);
             PlayerCustomization.OnLogin(pm_From);
             InfluencePersistance.OnLogin(pm_From);
             UOACZSystem.OnLogin(pm_From);
@@ -1261,13 +1262,14 @@ namespace Server.Mobiles
 
         public TitleCollection m_TitleCollection = null;
         public AchievementAccountEntry m_AchievementAccountEntry = null;
+        public CaptchaAccountData m_CaptchaAccountData = null;
         public PlayerEnhancementAccountEntry m_PlayerEnhancementAccountEntry = null;
         public InfluenceAccountEntry m_InfluenceAccountEntry = null;
         public UOACZAccountEntry m_UOACZAccountEntry = null;
         public Guild Guild = null;
         public GuildMemberEntry m_GuildMemberEntry = null;
         public GuildSettings m_GuildSettings = null;
-        public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;
+        public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;        
 
         public override bool KeepsItemsOnDeath { get { return (AccessLevel > AccessLevel.Player || Region is UOACZRegion); } }
 
@@ -4679,6 +4681,7 @@ namespace Server.Mobiles
             writer.Write(m_ShowAdminFilterText);
             writer.Write(m_TitleCollection);
             writer.Write(m_AchievementAccountEntry);
+            writer.Write(m_CaptchaAccountData);
             writer.Write(m_PlayerEnhancementAccountEntry);
             writer.Write(m_InfluenceAccountEntry);
             writer.Write((int)m_ShowFollowerDamageTaken);
@@ -4774,6 +4777,7 @@ namespace Server.Mobiles
                 m_ShowAdminFilterText = reader.ReadBool();
                 m_TitleCollection = (TitleCollection)reader.ReadItem() as TitleCollection;
                 m_AchievementAccountEntry = (AchievementAccountEntry)reader.ReadItem() as AchievementAccountEntry;
+                m_CaptchaAccountData = (CaptchaAccountData)reader.ReadItem() as CaptchaAccountData;
                 m_PlayerEnhancementAccountEntry = (PlayerEnhancementAccountEntry)reader.ReadItem() as PlayerEnhancementAccountEntry;
                 m_InfluenceAccountEntry = reader.ReadItem() as InfluenceAccountEntry;
                 m_ShowFollowerDamageTaken = (DamageDisplayMode)reader.ReadInt();
