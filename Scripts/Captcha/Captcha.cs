@@ -151,7 +151,10 @@ namespace Server.Items
 
         public CaptchaSourceType m_CaptchaSourceType = CaptchaSourceType.Mining;
 
-        public DateTime m_LastPrompt = DateTime.UtcNow;
+        public DateTime m_NextCaptchaTime = DateTime.UtcNow;
+        public static int MinimumCaptchaDelay = 5; //Minutes
+        public static int MaximumCaptchaDelay = 10; //Minutes
+
         public bool m_CaptchaRequired = false;
         public int m_CaptchaAttempt = 0;
         public bool m_ConfirmPrompt = false;
@@ -200,7 +203,7 @@ namespace Server.Items
 
             if (m_PreviousPenalty != null && DateTime.UtcNow >= m_PenaltyProbationExpiration)            
                 m_PreviousPenalty = PenaltyLevelType.None;
-
+            
             if (m_CurrentPenalty != PenaltyLevelType.None)
             {
                 string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_CurrentPenaltyExpiration, false, true, true, true, false);
@@ -226,18 +229,13 @@ namespace Server.Items
 
             else
             {
-                //Check If Captcha Needed
-
-                //TEST
-                bool launchCaptcha = true;
-
-                if (launchCaptcha)
+                if (DateTime.UtcNow >= m_NextCaptchaTime)
                 {
                     GenerateIDs();
 
                     player.SendSound(0x055);
 
-                    m_LastPrompt = DateTime.UtcNow;
+                    m_NextCaptchaTime = DateTime.UtcNow + TimeSpan.FromMinutes((double)Utility.RandomMinMax(MinimumCaptchaDelay, MaximumCaptchaDelay));
                     m_CaptchaRequired = true;
                     m_CaptchaAttempt = 0;
                     m_ConfirmPrompt = false;
@@ -503,7 +501,7 @@ namespace Server.Items
             //Version 0
             writer.Write(m_AccountName);
             writer.Write((int)m_CaptchaSourceType);
-            writer.Write(m_LastPrompt);
+            writer.Write(m_NextCaptchaTime);
             writer.Write(m_CaptchaRequired);
             writer.Write(m_CaptchaAttempt);
             writer.Write(m_ConfirmPrompt);
@@ -549,7 +547,7 @@ namespace Server.Items
             {
                 m_AccountName = reader.ReadString();
                 m_CaptchaSourceType = (CaptchaSourceType)reader.ReadInt();
-                m_LastPrompt = reader.ReadDateTime();
+                m_NextCaptchaTime = reader.ReadDateTime();
                 m_CaptchaRequired = reader.ReadBool();
                 m_CaptchaAttempt = reader.ReadInt();
                 m_ConfirmPrompt = reader.ReadBool();

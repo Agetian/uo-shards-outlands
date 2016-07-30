@@ -4,14 +4,10 @@ using Server.Items;
 using Server.Mobiles;
 using Server.Targeting;
 
-
-
 namespace Server.Engines.Harvest
 {
     public class Mining : HarvestSystem
     {
-        public static bool UseMiningCaptcha = true;
-
         private static Mining m_System;
 
         public static Mining System
@@ -216,6 +212,16 @@ namespace Server.Engines.Harvest
                 return false;
             }
 
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
+                return false;
+
+            CaptchaPersistance.CheckAndCreateCaptchaAccountEntry(player);
+
+            if (!player.m_CaptchaAccountData.Attempt(player, CaptchaSourceType.Mining))
+                return false;
+
             return true;
         }
 
@@ -251,39 +257,22 @@ namespace Server.Engines.Harvest
                 return false;
             }
 
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
+                return false;
+
+            CaptchaPersistance.CheckAndCreateCaptchaAccountEntry(player);
+
+            if (!player.m_CaptchaAccountData.Attempt(player, CaptchaSourceType.Mining))
+                return false;
+
             return true;
         }
 
         public override Item Construct(Type type, Mobile from, Item tool, HarvestDefinition def, HarvestBank bank, HarvestResource resource)
-        {
-            if (UseMiningCaptcha)
-            {
-                Item item = base.Construct(type, from, tool, def, bank, resource);
-
-                if (item == null)
-                    return null;
-              
-                if (item is BaseGranite)
-                    item.Amount = 1;
-                else
-                    item.Amount = bank.Current;
-
-                PlayerMobile pm = from as PlayerMobile;
-
-                if (pm != null && !pm.HarvestLockedout)
-                {
-                    pm.TempStashedHarvestDef = def;
-                    pm.TempStashedHarvest = item;
-
-                    bank.Consume(bank.Current, from);
-                    HarvestSystem.WearTool(from, tool, def);
-                }
-
-                return null;
-            }
-
-            else           
-                return base.Construct(type, from, tool, def, bank, resource);            
+        {         
+            return base.Construct(type, from, tool, def, bank, resource);            
         }
 
         public override HarvestVein MutateVein(Mobile from, Item tool, HarvestDefinition def, HarvestBank bank, object toHarvest, HarvestVein vein)

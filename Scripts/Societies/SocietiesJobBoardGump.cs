@@ -442,11 +442,14 @@ namespace Server.Gumps
 
                 #endregion
 
-                AddLabel(139, 82, 2420, "My Monthly Points Rank)");
-                AddLabel(166, 102, WhiteTextHue, "7000 (25th)");
+                string monthlyPointsRankText = monthlyPoints.ToString() + " (" + monthlyRankText + ")";
+                string lifetimePointsRankText = lifetimePoints.ToString() + " (" + lifetimeRankText + ")";
+
+                AddLabel(139, 82, 2420, "My Monthly Points (Rank)");
+                AddLabel(Utility.CenteredTextOffset(220, monthlyPointsRankText), 102, WhiteTextHue, monthlyPointsRankText);
 
                 AddLabel(406, 82, 2603, "My Lifetime Points (Rank)");
-                AddLabel(433, 102, WhiteTextHue, "100,000 (25th)");
+                AddLabel(Utility.CenteredTextOffset(495, lifetimePointsRankText), 102, WhiteTextHue, lifetimePointsRankText);
 
                 AddLabel(67, 174, 2420, "Server Monthly Points Leader");
                 AddLabel(391, 175, 2603, "Server Lifetime Points Leader");
@@ -601,6 +604,8 @@ namespace Server.Gumps
                         case 4:
                             m_SocietiesGroupPageDisplay = SocietiesGroupPageDisplayType.ServerRankings;
 
+                            m_Player.SendSound(OpenGumpSound);                            
+
                             closeGump = false;
                         break;
 
@@ -679,6 +684,8 @@ namespace Server.Gumps
                         case 4:
                             m_SocietiesGroupPageDisplay = SocietiesGroupPageDisplayType.Jobs;
 
+                            m_Player.SendSound(OpenGumpSound);    
+
                             closeGump = false;
                         break;
                     }
@@ -749,6 +756,8 @@ namespace Server.Gumps
                         //View Job Contracts
                         case 4:
                             m_SocietiesGroupPageDisplay = SocietiesGroupPageDisplayType.Jobs;
+
+                            m_Player.SendSound(OpenGumpSound);
 
                             closeGump = false;
                         break;

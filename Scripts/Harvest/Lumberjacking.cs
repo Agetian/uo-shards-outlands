@@ -2,12 +2,12 @@ using System;
 using Server;
 using Server.Items;
 using Server.Network;
+using Server.Mobiles;
 
 namespace Server.Engines.Harvest
 {
     public class Lumberjacking : HarvestSystem
     {
-        public static bool UseLumberjackingCaptcha = true;
         private static Lumberjacking m_System;
 
         public static Lumberjacking System
@@ -108,6 +108,16 @@ namespace Server.Engines.Harvest
                 return false;
             }
 
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
+                return false;
+
+            CaptchaPersistance.CheckAndCreateCaptchaAccountEntry(player);
+
+            if (!player.m_CaptchaAccountData.Attempt(player, CaptchaSourceType.Lumberjacking))
+                return false;
+
             return true;
         }
 
@@ -121,6 +131,16 @@ namespace Server.Engines.Harvest
                 from.SendLocalizedMessage(500487); // The axe must be equipped for any serious wood chopping.
                 return false;
             }
+
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
+                return false;
+
+            CaptchaPersistance.CheckAndCreateCaptchaAccountEntry(player);
+
+            if (!player.m_CaptchaAccountData.Attempt(player, CaptchaSourceType.Lumberjacking))
+                return false;
 
             return true;
         }
@@ -141,31 +161,8 @@ namespace Server.Engines.Harvest
         }
 
         public override Item Construct(Type type, Mobile from, Item tool, HarvestDefinition def, HarvestBank bank, HarvestResource resource)
-        {
-            if (UseLumberjackingCaptcha)
-            {               
-                Item item = base.Construct(type, from, tool, def, bank, resource);
-
-                if (item == null)
-                    return null;
-
-                Server.Mobiles.PlayerMobile pm = from as Server.Mobiles.PlayerMobile;
-
-                if (pm != null && !pm.HarvestLockedout)
-                {
-                    pm.TempStashedHarvestDef = def;
-                    pm.TempStashedHarvest = item;
-
-                    item.Amount = bank.Current;
-                    bank.Consume(bank.Current, from);
-                    HarvestSystem.WearTool(from, tool, def);
-                }
-
-                return null;
-            }
-
-            else            
-                return base.Construct(type, from, tool, def, bank, resource);            
+        {        
+            return base.Construct(type, from, tool, def, bank, resource);            
         }
 
         public object SearchForNearbyNode(Point3D location, Map map, int range)

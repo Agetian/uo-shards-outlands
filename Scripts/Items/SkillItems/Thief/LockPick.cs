@@ -31,8 +31,7 @@ namespace Server.Items
         }
 
         [Constructable]
-        public Lockpick(int amount)
-            : base(0x14FC)
+        public Lockpick(int amount): base(0x14FC)
         {
             Name = "lockpick";
 
@@ -40,21 +39,18 @@ namespace Server.Items
             Amount = amount;
         }
 
-        public Lockpick(Serial serial)
-            : base(serial)
+        public Lockpick(Serial serial): base(serial)
         {
         }
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
-
             writer.Write((int)1); // version
         }
 
         public override void Deserialize(GenericReader reader)
         {
             base.Deserialize(reader);
-
             int version = reader.ReadInt();
 
             if (version == 0 && Weight == 0.1)
@@ -63,7 +59,7 @@ namespace Server.Items
 
         public override void OnDoubleClick(Mobile from)
         {
-            if (!from.BeginAction(typeof(Lockpick)))
+            if (!from.CanBeginAction(typeof(Lockpick)))
             {
                 from.SendMessage("You must wait a few moments before attempting to pick another lock.");
                 return;
@@ -77,8 +73,7 @@ namespace Server.Items
         {
             private Lockpick m_Item;
 
-            public InternalTarget(Lockpick item)
-                : base(1, false, TargetFlags.None)
+            public InternalTarget(Lockpick item): base(1, false, TargetFlags.None)
             {
                 m_Item = item;
             }
@@ -122,6 +117,19 @@ namespace Server.Items
 
                 if (targeted is ILockpickable)
                 {
+                    if (targeted is BaseTreasureChest)
+                    {
+                        PlayerMobile player = from as PlayerMobile;
+
+                        if (player != null)
+                        {
+                            CaptchaPersistance.CheckAndCreateCaptchaAccountEntry(player);
+
+                            if (!player.m_CaptchaAccountData.Attempt(player, CaptchaSourceType.DungeonChest))
+                                return;
+                        }
+                    }
+
                     Item item = (Item)targeted;
                     from.Direction = from.GetDirectionTo(item);
 

@@ -154,7 +154,7 @@ namespace Server.Items
 
                         if (correct)
                         {
-                            captchaData.m_LastPrompt = DateTime.UtcNow;
+                            captchaData.m_NextCaptchaTime = DateTime.UtcNow + TimeSpan.FromMinutes((double)Utility.RandomMinMax(CaptchaAccountData.MinimumCaptchaDelay, CaptchaAccountData.MaximumCaptchaDelay));
                             captchaData.m_CaptchaRequired = false;
                             captchaData.m_CaptchaAttempt = 0;
                             captchaData.m_ConfirmPrompt = false;
@@ -162,8 +162,6 @@ namespace Server.Items
                             m_Player.SendSound(0x5B6);
 
                             m_Player.SendMessage("Captcha successful.");
-
-                            //TEST: CONTINUE WITH HARVEST
 
                             return;
                         }
@@ -258,7 +256,7 @@ namespace Server.Items
                                     m_Player.SendMessage(2115, responseMessage);
                                 }
 
-                                captchaData.m_LastPrompt = DateTime.UtcNow;
+                                captchaData.m_NextCaptchaTime = DateTime.UtcNow + TimeSpan.FromMinutes((double)Utility.RandomMinMax(CaptchaAccountData.MinimumCaptchaDelay, CaptchaAccountData.MaximumCaptchaDelay));
                                 captchaData.m_CaptchaRequired = false;
                                 captchaData.m_CaptchaAttempt = 0;
                                 captchaData.m_ConfirmPrompt = false;
@@ -272,11 +270,11 @@ namespace Server.Items
                             {
                                 switch(captchaData.m_CaptchaAttempt)
                                 {
-                                    case 1: m_Player.SendMessage("Captcha response incorrect. You have two more attempts."); break;
-                                    case 2: m_Player.SendMessage("Captcha response incorrect. You have one more attempt."); break;
+                                    case 1: m_Player.SendMessage(55, "Captcha response incorrect. You have two more attempts."); break;
+                                    case 2: m_Player.SendMessage(1256, "Captcha response incorrect. You have one more attempt."); break;
                                 }
 
-                                captchaData.m_LastPrompt = DateTime.UtcNow;
+                                captchaData.m_NextCaptchaTime = DateTime.UtcNow + TimeSpan.FromMinutes((double)Utility.RandomMinMax(CaptchaAccountData.MinimumCaptchaDelay, CaptchaAccountData.MaximumCaptchaDelay));
                                 captchaData.GenerateIDs();
                                 captchaData.m_ConfirmPrompt = false;
                             }

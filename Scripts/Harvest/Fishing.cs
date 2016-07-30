@@ -737,6 +737,16 @@ namespace Server.Engines.Harvest
                 return false;
             }
 
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
+                return false;
+
+            CaptchaPersistance.CheckAndCreateCaptchaAccountEntry(player);
+
+            if (!player.m_CaptchaAccountData.Attempt(player, CaptchaSourceType.Fishing))
+                return false;
+
             return true;
         }
 
@@ -750,6 +760,16 @@ namespace Server.Engines.Harvest
                 from.SendLocalizedMessage(500971); // You can't fish while riding!
                 return false;
             }
+
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
+                return false;
+
+            CaptchaPersistance.CheckAndCreateCaptchaAccountEntry(player);
+
+            if (!player.m_CaptchaAccountData.Attempt(player, CaptchaSourceType.Fishing))
+                return false;
 
             return true;
         }

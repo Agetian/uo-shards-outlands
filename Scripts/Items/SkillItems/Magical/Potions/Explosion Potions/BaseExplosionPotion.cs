@@ -76,7 +76,7 @@ namespace Server.Items
                 return;
             }
 
-            if (!from.BeginAction(typeof(BaseExplosionPotion)))
+            if (!from.CanBeginAction(typeof(BaseExplosionPotion)))
             {
                 from.PrivateOverheadMessage(MessageType.Regular, 0x22, false, "You must wait a few seconds before using another explosion potion.", from.NetState);
                 return;

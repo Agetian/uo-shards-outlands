@@ -16,8 +16,7 @@ namespace Server.Items
 		private short m_MaxSpawnTime = 60;
 		private short m_MinSpawnTime = 30;
 		private short s_AbsoluteMinSpawntime = 30;
-		private TreasureResetTimer m_ResetTimer;
-        private bool m_UsedCaptcha = false;
+		private TreasureResetTimer m_ResetTimer;        
 
 		[CommandProperty( AccessLevel.GameMaster )]
 		public TreasureLevel Level
@@ -33,20 +32,6 @@ namespace Server.Items
                 Reset();
 			}
 		}
-
-
-        [CommandProperty(AccessLevel.GameMaster)]
-        public bool UsedCaptcha
-        {
-            get
-            {
-                return m_UsedCaptcha;
-            }
-            set
-            {
-                m_UsedCaptcha = value;
-            }
-        }
 
 		[CommandProperty( AccessLevel.GameMaster )]
 		public short MaxSpawnTime
@@ -153,11 +138,9 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
+            writer.Write((int)1);
 
-			writer.Write( (int) 1 );
-            // version 1
-            writer.Write( m_UsedCaptcha );
-            // version 0
+            // version 1			
 			writer.Write( (byte) m_TreasureLevel );
 			writer.Write( m_MinSpawnTime );
 			writer.Write( m_MaxSpawnTime );
@@ -169,32 +152,18 @@ namespace Server.Items
 
 			int version = reader.ReadInt();
 
-            if (version > 0)
+            //Version 1
+            if (version >= 1)
             {
-                m_UsedCaptcha = reader.ReadBool();
-            }
-
-			m_TreasureLevel = (TreasureLevel)reader.ReadByte();
-			m_MinSpawnTime = Math.Max(reader.ReadShort(), (short)s_AbsoluteMinSpawntime);
-			m_MaxSpawnTime = reader.ReadShort();
+                m_TreasureLevel = (TreasureLevel)reader.ReadByte();
+                m_MinSpawnTime = Math.Max(reader.ReadShort(), (short)s_AbsoluteMinSpawntime);
+                m_MaxSpawnTime = reader.ReadShort();
+            }			
 
 			if( !Locked )
 				StartResetTimer();
 		}
-
-        private void CaptchaDump(PlayerMobile from) 
-        {
-          if (!from.HarvestLockedout)
-          {
-              from.TempStashedHarvest = this;
-              for(int i = 0; i < Items.Count; i++)
-              {
-                  Item item = Items[i];
-                  item.Movable = false;
-              }
-          }
-        }
-
+        
         public override void OnDoubleClick(Mobile from)
         {
             if (from.AccessLevel > AccessLevel.Player)
@@ -202,15 +171,8 @@ namespace Server.Items
                 base.OnDoubleClick(from);
                 return;
             }
-
-            if (!Locked && TrapPower == 0 && Items.Count > 0 && from is PlayerMobile && from.Alive && !UsedCaptcha)
-            {
-                CaptchaDump(from as PlayerMobile);
-            }
-            else
-            {
-                base.OnDoubleClick(from);
-            }
+            
+            base.OnDoubleClick(from);            
         }
 
         public override void OnTelekinesis(Mobile from)
@@ -222,34 +184,19 @@ namespace Server.Items
             {
                 if (Utility.RandomBool())
                 {
-                    if (!ExecuteTrap(from))
-                    {
-                      if (Items.Count > 0 && from is PlayerMobile && from.Alive && !UsedCaptcha)
-                      {
-                          CaptchaDump(from as PlayerMobile);
-                      }
-                      else
-                      {
-                          base.DisplayTo(from);
-                      }
-                    }
+                    if (!ExecuteTrap(from))                    
+                        base.DisplayTo(from);
                 }
+
                 else
                     from.SendMessage("Your magic fails to open the trap.");
             }
+
             else if (Level >= TreasureLevel.Level5) // no chance to pop trap
                 from.SendMessage("Your magic fails to open a trap of this strength.");
-            else if (!ExecuteTrap(from)) //!this.TrapOnOpen ||
-            {
-                if (Items.Count > 0 && from is PlayerMobile && from.Alive && !UsedCaptcha)
-                {
-                    CaptchaDump(from as PlayerMobile);
-                }
-                else
-                {
-                    base.DisplayTo(from);
-                }
-            }
+
+            else if (!ExecuteTrap(from))            
+                base.DisplayTo(from);
         }
 
 		protected virtual void SetLockLevel()
@@ -502,7 +449,6 @@ namespace Server.Items
 			Locked = true;
 			ClearContents();
 			GenerateTreasure();
-            UsedCaptcha = false;
 		}
 
 		public enum TreasureLevel

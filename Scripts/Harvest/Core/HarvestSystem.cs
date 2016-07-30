@@ -234,6 +234,8 @@ namespace Server.Engines.Harvest
                     }
                 }
 
+                //TEST: CHECK THIS
+                /*
                 if (type == null)
                 {	
                     if ((def.Skill != SkillName.Mining && def.Skill != SkillName.Lumberjacking) || !Mining.UseMiningCaptcha)
@@ -243,6 +245,7 @@ namespace Server.Engines.Harvest
                         FailHarvest(from, def);
                     }
                 }
+                */
             }
 
             else
@@ -323,8 +326,7 @@ namespace Server.Engines.Harvest
 
             if (item is BaseTreasureChest)
             {
-                var chest = item as BaseTreasureChest;
-                chest.UsedCaptcha = true;
+                var chest = item as BaseTreasureChest;               
 
                 for (int i = chest.Items.Count - 1; i >= 0; i--)
                 {
@@ -333,6 +335,7 @@ namespace Server.Engines.Harvest
                 }
 
                 chest.OnDoubleClick(m);
+
                 return true;
             }
 

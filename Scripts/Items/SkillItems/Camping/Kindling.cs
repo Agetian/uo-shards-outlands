@@ -44,7 +44,7 @@ namespace Server.Items
 			if ( !this.VerifyMove( from ) )
 				return;
 
-            if (!from.BeginAction(typeof(Kindling)))
+            if (!from.CanBeginAction(typeof(Kindling)))
             {
                 from.SendMessage("You must wait a few moments before attempting to create another campfire.");
                 return;

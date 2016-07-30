@@ -1682,8 +1682,6 @@
     <Compile Include="ContextMenus\EjectPlayer.cs" />
     <Compile Include="ContextMenus\OpenBankEntry.cs" />
     <Compile Include="ContextMenus\TeachEntry.cs" />
-    <Compile Include="AntiRailing\AntiRailGump.cs" />
-    <Compile Include="AntiRailing\HarvestGump.cs" />
     <Compile Include="OldCasino\CardDeck.cs" />
     <Compile Include="OldCasino\CEOBlackJack.cs" />
     <Compile Include="OldCasino\KenoBoard.cs" />
