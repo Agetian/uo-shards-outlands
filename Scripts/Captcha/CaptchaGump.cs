@@ -5,6 +5,7 @@ using Server.Gumps;
 using Server.Mobiles;
 using Server.Network;
 using Server.Custom;
+using Server.Engines.Harvest;
 
 namespace Server.Items
 {
@@ -162,6 +163,38 @@ namespace Server.Items
                             m_Player.SendSound(0x5B6);
 
                             m_Player.SendMessage("Captcha successful.");
+
+                            switch (captchaData.m_CaptchaSourceType)
+                            {
+                                case CaptchaSourceType.Fishing: 
+                                    FishingPole fishingPole = m_Player.FindItemOnLayer(Layer.TwoHanded) as FishingPole;
+
+                                    if (fishingPole != null)
+                                        Fishing.System.StartHarvesting(m_Player, fishingPole, null, true);
+                                break;
+
+                                case CaptchaSourceType.Lumberjacking:
+                                    Hatchet hatchet = m_Player.FindItemOnLayer(Layer.TwoHanded) as Hatchet;
+
+                                    if (hatchet != null)
+                                        Lumberjacking.System.StartHarvesting(m_Player, hatchet, null, true);
+                                break;
+
+                                case CaptchaSourceType.Mining:
+                                    Pickaxe pickaxe = m_Player.FindItemOnLayer(Layer.OneHanded) as Pickaxe;
+
+                                    if (pickaxe != null)
+                                        Mining.System.StartHarvesting(m_Player, pickaxe, null, true);
+                                break;
+
+                                case CaptchaSourceType.DungeonChest:                                    
+                                    Lockpick lockpick = (Lockpick)m_Player.Backpack.FindItemByType(typeof(Lockpick));
+
+                                    //TEST
+                                    if (lockpick != null)                                    
+                                        lockpick.OnDoubleClick(m_Player);                                    
+                                break;
+                            }
 
                             return;
                         }

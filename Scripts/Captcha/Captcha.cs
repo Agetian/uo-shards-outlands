@@ -152,6 +152,7 @@ namespace Server.Items
         public CaptchaSourceType m_CaptchaSourceType = CaptchaSourceType.Mining;
 
         public DateTime m_NextCaptchaTime = DateTime.UtcNow;
+        
         public static int MinimumCaptchaDelay = 5; //Minutes
         public static int MaximumCaptchaDelay = 10; //Minutes
 
