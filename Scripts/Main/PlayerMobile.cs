@@ -1037,9 +1037,7 @@ namespace Server.Mobiles
             TitlePersistance.OnLogin(pm_From);
             AchievementsPersistance.OnLogin(pm_From);
             CaptchaPersistance.OnLogin(pm_From);
-            PlayerCustomization.OnLogin(pm_From);
-            InfluencePersistance.OnLogin(pm_From);
-            UOACZSystem.OnLogin(pm_From);
+            PlayerCustomization.OnLogin(pm_From);          
             ChatPersistance.OnLogin(pm_From);
             MHSPersistance.CheckAndCreateMHSAccountEntry(pm_From);
             EventCalendarPersistance.CheckAndCreateEventCalendarAccount(pm_From);
@@ -1263,15 +1261,13 @@ namespace Server.Mobiles
         public TitleCollection m_TitleCollection = null;
         public AchievementAccountEntry m_AchievementAccountEntry = null;
         public CaptchaAccountData m_CaptchaAccountData = null;
-        public PlayerEnhancementAccountEntry m_PlayerEnhancementAccountEntry = null;
-        public InfluenceAccountEntry m_InfluenceAccountEntry = null;
-        public UOACZAccountEntry m_UOACZAccountEntry = null;
+        public PlayerEnhancementAccountEntry m_PlayerEnhancementAccountEntry = null;       
         public Guild Guild = null;
         public GuildMemberEntry m_GuildMemberEntry = null;
         public GuildSettings m_GuildSettings = null;
         public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;        
 
-        public override bool KeepsItemsOnDeath { get { return (AccessLevel > AccessLevel.Player || Region is UOACZRegion); } }
+        public override bool KeepsItemsOnDeath { get { return (AccessLevel > AccessLevel.Player); } }
 
         public DateTime NextEmoteAllowed = DateTime.UtcNow;
         public static TimeSpan EmoteCooldownLong = TimeSpan.FromSeconds(120);
@@ -1466,48 +1462,7 @@ namespace Server.Mobiles
         public Boolean CloseBankRunebookGump;
 
         public TimeSpan m_ShortTermElapse;
-        public TimeSpan m_LongTermElapse;
-
-        #region UOACZ
-
-        public bool IsInUOACZ
-        {
-            get
-            {
-                if (!(Region is UOACZRegion))
-                    return false;
-
-                UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-                return m_UOACZAccountEntry.ActiveProfile != UOACZAccountEntry.ActiveProfileType.None;
-            }
-        }
-
-        public bool IsUOACZHuman
-        {
-            get
-            {
-                UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-
-                if (!(Region is UOACZRegion))
-                    return false;
-
-                return m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Human;
-            }
-        }
-
-        public bool IsUOACZUndead
-        {
-            get
-            {
-                if (!(Region is UOACZRegion))
-                    return false;
-
-                UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-                return m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Undead;
-            }
-        }
-
-        #endregion
+        public TimeSpan m_LongTermElapse;       
 
         public void EnterContestedRegion(bool ressingHere)
         {
@@ -1576,10 +1531,7 @@ namespace Server.Mobiles
             for (int i = 0; i < mobile.StatMods.Count; ++i)
             {
                 StatMod check = mobile.StatMods[i];
-
-                if (mobile.Region is UOACZRegion)
-                    return;
-
+                
                 if (check.Type == StatType.Str || check.Type == StatType.Dex || check.Type == StatType.Int)
                 {
                     if (check.Duration >= MaximumPvPDuration)
@@ -1880,14 +1832,6 @@ namespace Server.Mobiles
 
         public override bool AllowItemUse(Item item)
         {
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-
-            if (m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Undead)
-            {
-                if (!UOACZSystem.IsUndeadUsableItem(this, item))
-                    return false;
-            }
-
             #region Dueling
             if (m_DuelContext != null && !m_DuelContext.AllowItemUse(this, item))
                 return false;
@@ -1898,61 +1842,21 @@ namespace Server.Mobiles
 
         public override bool OnDragLift(Item item)
         {
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-
-            if (m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Undead)
-            {
-                if (item.RootParentEntity is Corpse || item.RootParentEntity is BaseContainer)
-                    return false;
-            }
-
             return base.OnDragLift(item);
         }
 
         public override bool OnDroppedItemInto(Item item, Container container, Point3D loc)
         {
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-
-            if (m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Undead)
-            {
-                if (UOACZSystem.IsUndeadUsableItem(this, item) && container.RootParentEntity == this)
-                    return true;
-
-                return false;
-            }
-
             return base.OnDroppedItemInto(item, container, loc);
         }
 
         public override bool OnDroppedItemOnto(Item item, Item target)
         {
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-
-            if (m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Human)
-            {
-                if (item is UOACZSurvivalTome || item is UOACZCorruptionTome)
-                    return false;
-            }
-
-            if (m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Undead)
-                return false;
-
             return base.OnDroppedItemOnto(item, target);
         }
 
         public override bool OnDroppedItemToMobile(Item item, Mobile target)
         {
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-
-            if (m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Human)
-            {
-                if (item is UOACZSurvivalTome || item is UOACZCorruptionTome)
-                    return false;
-            }
-
-            if (m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Undead)
-                return false;
-
             return base.OnDroppedItemToMobile(item, target);
         }
 
@@ -1960,20 +1864,6 @@ namespace Server.Mobiles
         {
             if (!base.OnDroppedItemToWorld(item, location))
                 return false;
-
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-
-            if (m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Human)
-            {
-                if (item is UOACZSurvivalTome || item is UOACZCorruptionTome)
-                    return false;
-            }
-
-            if (m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Undead)
-            {
-                if (UOACZSystem.IsUndeadUsableItem(this, item))
-                    return false;
-            }
             
             BounceInfo bi = item.GetBounce();
 
@@ -2773,10 +2663,7 @@ namespace Server.Mobiles
         public override void UpdateRegion()
         {
             Region newRegion = Region.Find(Location, Map);
-
-            if (UOACZPersistance.Active && Region is UOACZRegion && !(newRegion is UOACZRegion) && Map != Map.Internal)
-                UOACZSystem.PlayerExitUOACZRegion(this);
-
+            
             base.UpdateRegion();
         }
 
@@ -2791,9 +2678,7 @@ namespace Server.Mobiles
             base.GetContextMenuEntries(from, list);
 
             if (from == this)
-            {
-                list.Add(new CallbackEntry(10008, new ContextCallback(ShowIPYGump)));       
-                
+            {   
                 BaseHouse house = BaseHouse.FindHouseAt(this);
 
                 if (house != null)
@@ -2807,12 +2692,7 @@ namespace Server.Mobiles
         private void CancelProtection()
         {
         }
-
-        public void ShowIPYGump()
-        {
-            this.SendGump(new IPYGump(this));
-        }
-
+        
         private void ToggleTrades()
         {
             RefuseTrades = !RefuseTrades;
@@ -2883,12 +2763,6 @@ namespace Server.Mobiles
         public override bool CheckEquip(Item item)
         {
             if (!base.CheckEquip(item))
-                return false;
-
-            //UOACZ
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-
-            if (m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Undead)
                 return false;
 
             #region Dueling
@@ -3113,42 +2987,7 @@ namespace Server.Mobiles
                 return true;
 
             if (shoved.Blessed)
-                return true;
-
-            else if (UOACZSystem.IsUOACZValidMobile(this))
-            {
-                if (!shoved.Alive || !Alive || shoved.IsDeadBondedPet || IsDeadBondedPet)
-                    return true;
-
-                else if (shoved.Hidden && shoved.AccessLevel > AccessLevel.Player)
-                    return true;
-
-                if (!Pushing)
-                {
-                    Pushing = true;
-
-                    int number;
-
-                    if (this.AccessLevel > AccessLevel.Player)
-                        number = shoved.Hidden ? 1019041 : 1019040;
-
-                    else
-                    {
-                        if (Stam >= 10)
-                        {
-                            number = shoved.Hidden ? 1019043 : 1019042;
-                            Stam -= 10;
-                        }
-
-                        else
-                            return false;
-                    }
-
-                    SendLocalizedMessage(number);
-                }
-
-                return true;
-            }
+                return true;            
 
             return base.CheckShove(shoved);
         }
@@ -3184,12 +3023,6 @@ namespace Server.Mobiles
 
         public override void OnBeneficialAction(Mobile target, bool isCriminal)
         {
-            if (Region is UOACZRegion)
-            {
-                base.OnBeneficialAction(target, isCriminal);
-                return;
-            }
-
             base.OnBeneficialAction(target, isCriminal);
         }
 
@@ -3353,7 +3186,7 @@ namespace Server.Mobiles
 
             base.Resurrect();
 
-            if (Alive && !wasAlive && !(Region is UOACZRegion))
+            if (Alive && !wasAlive)
             {
                 Item deathRobe = new DeathRobe();
 
@@ -3584,46 +3417,7 @@ namespace Server.Mobiles
             bool justiceDisabledZone = DuelContext != null ||
                                         SpellHelper.InBuccs(Map, Location) || SpellHelper.InYewOrcFort(Map, Location) || SpellHelper.InYewCrypts(Map, Location) ||
                                         GreyZoneTotem.InGreyZoneTotemArea(Location, Map) || Hotspot.InHotspotArea(Location, Map, true);
-
-            #region UOACZ
-
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-
-            if (IsUOACZHuman)
-            {
-                foreach (Mobile mobile in killers)
-                {
-                    PlayerMobile playerKiller = mobile as PlayerMobile;
-
-                    if (playerKiller == null)
-                        continue;
-
-                    if (playerKiller.IsUOACZHuman)
-                    {
-                        UOACZPersistance.CheckAndCreateUOACZAccountEntry(playerKiller);
-                        playerKiller.m_UOACZAccountEntry.HumanPlayersKilledAsHuman++;
-
-                        m_UOACZAccountEntry.HumanProfile.CauseOfDeath = UOACZAccountEntry.HumanProfileEntry.CauseOfDeathType.PlayerHuman;
-
-                        UOACZSystem.ChangeStat(playerKiller, UOACZSystem.UOACZStatType.Honor, UOACZSystem.CommitMurderHonorLoss, true);
-
-                        foreach (NetState state in NetState.Instances)
-                        {
-                            Mobile m_Mobile = state.Mobile;
-                            PlayerMobile player = m_Mobile as PlayerMobile;
-
-                            if (player == null)
-                                continue;
-
-                            if (UOACZRegion.ContainsMobile(player))
-                                player.SendMessage(UOACZSystem.redTextHue, playerKiller.Name + " [Human] has killed " + Name + " [Human].");
-                        }
-                    }
-                }
-            }
-
-            #endregion
-
+            
             //Player, Paladin, and Murderer Handling
             bool killedByPlayer = false;
             bool killedByPaladin = false;
@@ -3754,58 +3548,6 @@ namespace Server.Mobiles
                 {
                     playerClaimCount++;
 
-                    if (IsUOACZHuman)
-                    {
-                        if (playerDamager.IsUOACZUndead)
-                        {
-                            UOACZPersistance.CheckAndCreateUOACZAccountEntry(playerDamager);
-                            playerDamager.m_UOACZAccountEntry.HumanPlayersKilledAsUndead++;
-
-                            if (m_UOACZAccountEntry.FatigueExpiration > DateTime.UtcNow)
-                                UOACZSystem.ChangeStat(playerDamager, UOACZSystem.UOACZStatType.UndeadScore, UOACZSystem.UndeadPlayerKillFatiguedHumanPlayerScore, true);
-                            else
-                                UOACZSystem.ChangeStat(playerDamager, UOACZSystem.UOACZStatType.UndeadScore, UOACZSystem.UndeadPlayerKillHumanPlayerScore, true);
-
-                            foreach (NetState state in NetState.Instances)
-                            {
-                                Mobile mobile = state.Mobile;
-                                PlayerMobile player = mobile as PlayerMobile;
-
-                                if (player == null)
-                                    continue;
-
-                                if (UOACZRegion.ContainsMobile(player))
-                                    player.SendMessage(UOACZSystem.redTextHue, playerDamager.Name + " [Undead] has killed " + Name + " [Human].");
-                            }                            
-                        }
-                    }
-
-                    if (IsUOACZUndead)
-                    {
-                        if (playerDamager.IsUOACZHuman)
-                        {
-                            if (m_UOACZAccountEntry.FatigueExpiration > DateTime.UtcNow)
-                                UOACZSystem.ChangeStat(playerDamager, UOACZSystem.UOACZStatType.HumanScore, UOACZSystem.HumanPlayerKillFatiguedUndeadPlayerScore, true);
-                            else
-                                UOACZSystem.ChangeStat(playerDamager, UOACZSystem.UOACZStatType.HumanScore, UOACZSystem.HumanPlayerKillUndeadPlayerScore, true);
-
-                            UOACZPersistance.CheckAndCreateUOACZAccountEntry(playerDamager);
-                            playerDamager.m_UOACZAccountEntry.UndeadPlayersKilledAsHuman++;
-
-                            foreach (NetState state in NetState.Instances)
-                            {
-                                Mobile mobile = state.Mobile;
-                                PlayerMobile player = mobile as PlayerMobile;
-
-                                if (player == null)
-                                    continue;
-
-                                if (UOACZRegion.ContainsMobile(player))
-                                    player.SendMessage(UOACZSystem.redTextHue, playerDamager.Name + " [Human] has killed " + Name + " [Undead].");
-                            }
-                        }
-                    }
-
                     if (damageAmount > highestPlayerDamage)
                     {
                         highestPlayerDamager = playerDamager;
@@ -3866,7 +3608,7 @@ namespace Server.Mobiles
             if (violentDeath && Utility.RandomDouble() >= .75)
                 violentDeath = false;
 
-            if ((carnage || violentDeath) && !(Region is UOACZRegion))
+            if ((carnage || violentDeath))
                 CustomizationAbilities.PlayerDeathExplosion(Location, Map, carnage, violentDeath);
 
             if (m_DuelContext != null)
@@ -4145,12 +3887,6 @@ namespace Server.Mobiles
                     {
                         if (Utility.GetDistance(Location, item.Location) > 1)
                             continue;
-
-                        if (item is UOACZStatic || item is UOACZBreakableStatic)
-                        {
-                            foundBlockingItem = true;
-                            break;
-                        }
                     }
 
                     itemsOnTile.Free();
@@ -4430,9 +4166,6 @@ namespace Server.Mobiles
             if (Young && (DuelContext == null || !DuelContext.Started || DuelContext.Finished))
                 return true;
 
-            if (IsUOACZUndead)
-                return true;
-
             return base.CheckPoisonImmunity(from, poison);
         }
 
@@ -4555,7 +4288,6 @@ namespace Server.Mobiles
             writer.Write(m_MHSPlayerEntry);
             writer.Write((int)m_ShowHealing);
             writer.Write(m_WorldChatAccountEntry);
-            writer.Write(m_UOACZAccountEntry);
             writer.Write(m_HideRestrictionExpiration);
             writer.Write((int)m_HenchmenSpeechDisplayMode);
             writer.Write((int)m_StealthStepsDisplayMode);
@@ -4564,7 +4296,6 @@ namespace Server.Mobiles
             writer.Write(m_AchievementAccountEntry);
             writer.Write(m_CaptchaAccountData);
             writer.Write(m_PlayerEnhancementAccountEntry);
-            writer.Write(m_InfluenceAccountEntry);
             writer.Write((int)m_ShowFollowerDamageTaken);
             writer.Write(m_LastPlayerKilledBy);
             writer.Write(m_LastInstrument);
@@ -4651,7 +4382,6 @@ namespace Server.Mobiles
                 m_MHSPlayerEntry = (MHSPlayerEntry)reader.ReadItem() as MHSPlayerEntry;
                 m_ShowHealing = (DamageDisplayMode)reader.ReadInt();
                 m_WorldChatAccountEntry = (WorldChatAccountEntry)reader.ReadItem() as WorldChatAccountEntry;
-                m_UOACZAccountEntry = (UOACZAccountEntry)reader.ReadItem() as UOACZAccountEntry;
                 m_HideRestrictionExpiration = reader.ReadDateTime();
                 m_HenchmenSpeechDisplayMode = (HenchmenSpeechDisplayMode)reader.ReadInt();
                 m_StealthStepsDisplayMode = (StealthStepsDisplayMode)reader.ReadInt();
@@ -4660,7 +4390,6 @@ namespace Server.Mobiles
                 m_AchievementAccountEntry = (AchievementAccountEntry)reader.ReadItem() as AchievementAccountEntry;
                 m_CaptchaAccountData = (CaptchaAccountData)reader.ReadItem() as CaptchaAccountData;
                 m_PlayerEnhancementAccountEntry = (PlayerEnhancementAccountEntry)reader.ReadItem() as PlayerEnhancementAccountEntry;
-                m_InfluenceAccountEntry = reader.ReadItem() as InfluenceAccountEntry;
                 m_ShowFollowerDamageTaken = (DamageDisplayMode)reader.ReadInt();
                 m_LastPlayerKilledBy = (PlayerMobile)reader.ReadMobile();
                 m_LastInstrument = (BaseInstrument)reader.ReadItem();
@@ -4758,10 +4487,7 @@ namespace Server.Mobiles
                 Hidden = true;
                 Poison = null;
             }
-
-            if (Region.Find(LogoutLocation, LogoutMap) is UOACZRegion)
-                Hidden = false;
-
+            
             if (LastPlayerCombatTime > DateTime.MinValue)
             {
                 if (RecentlyInPlayerCombat)
@@ -5017,11 +4743,11 @@ namespace Server.Mobiles
 
             if (Hidden && DesignContext.Find(this) == null)	//Hidden & NOT customizing a house
             {
-                if (!Mounted && (Skills.Stealth.Value >= 20.0 || UOACZSystem.IsUOACZValidMobile(this)))
+                if (!Mounted && (Skills.Stealth.Value >= 20.0))
                 {
                     bool running = (d & Direction.Running) != 0;
 
-                    if (running && !UOACZSystem.IsUOACZValidMobile(this))
+                    if (running)
                     {
                         AllowedStealthSteps = -1;
                         RevealingAction();
@@ -5032,7 +4758,7 @@ namespace Server.Mobiles
                     AllowedStealthSteps--;
                     stealthMove = true;
 
-                    if (m_AutoStealth && !UOACZSystem.IsUOACZValidMobile(this))
+                    if (m_AutoStealth)
                     {
                         if (AllowedStealthSteps < 0 || CanBeginAction(typeof(Stealth)))
                         {
@@ -5084,35 +4810,7 @@ namespace Server.Mobiles
                 else
                     RevealingAction();
             }
-
-            if (UOACZSystem.IsUOACZValidMobile(this))
-            {
-                if (IsUOACZUndead)
-                {
-                    double igniteValue = GetSpecialAbilityEntryValue(SpecialAbilityEffect.Ignite);
-
-                    if (Utility.RandomDouble() <= igniteValue)
-                    {
-                        PlaySound(0x208);
-                        new UOACZFirefield(this).MoveToWorld(Location, Map);
-                    }
-
-                    double bileValue = GetSpecialAbilityEntryValue(SpecialAbilityEffect.Bile);
-
-                    if (Utility.RandomDouble() <= bileValue)
-                    {
-                        PlaySound(0x230);
-                        new UOACZBile(this).MoveToWorld(Location, Map);
-                    }
-
-                    if (!stealthMove && DateTime.UtcNow >= m_UOACZAccountEntry.UndeadProfile.m_NextMoveSoundAllowed)
-                    {
-                        m_UOACZAccountEntry.UndeadProfile.m_NextMoveSoundAllowed = DateTime.UtcNow + m_UOACZAccountEntry.UndeadProfile.MoveSoundDelay;
-                        Effects.PlaySound(Location, Map, GetIdleSound());
-                    }
-                }
-            }
-
+            
             return true;
         }
 
@@ -5310,48 +5008,12 @@ namespace Server.Mobiles
             ReleaseAllFollowers();
             
             Guilds.OnPlayerDeleted(this);
-            
-            //TEST: NEED TO DELETE ALL THESE ITEMS ON PLAYER DELETION
 
-            /*
-            public TitleCollection m_TitleCollection = null;
-            public AchievementAccountEntry m_AchievementAccountEntry = null;
-            public PlayerEnhancementAccountEntry m_PlayerEnhancementAccountEntry = null;
-            public InfluenceAccountEntry m_InfluenceAccountEntry = null;
-            public UOACZAccountEntry m_UOACZAccountEntry = null;
-            public Guild Guild = null;
-            public GuildMemberEntry m_GuildMemberEntry = null;
-            public GuildSettings m_GuildSettings = null;
-            public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;
-            */
+            if (m_TitleCollection != null)
+                m_TitleCollection.Delete();
 
-            #region UOACZ
-
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(this);
-
-            if (m_UOACZAccountEntry.MostRecentPlayer == this)
-            {
-                switch (m_UOACZAccountEntry.ActiveProfile)
-                {
-                    case UOACZAccountEntry.ActiveProfileType.Human:
-                        UOACZSystem.DepositUOACZItems(this, true);
-                        break;
-
-                    case UOACZAccountEntry.ActiveProfileType.Undead:
-                        UOACZSystem.DepositUOACZItems(this, false);
-                        break;
-                }
-            }
-
-            UOACZCharacterSnapshot snapshot = UOACZPersistance.FindCharacterSnapshot(this);
-
-            if (snapshot != null)
-            {
-                if (!snapshot.Deleted)
-                    snapshot.Delete();
-            }
-
-            #endregion
+            if (m_SocietiesPlayerSettings != null)
+                m_SocietiesPlayerSettings.Delete();
         }
 
         #endregion
@@ -5538,9 +5200,6 @@ namespace Server.Mobiles
         {
             get
             {
-                if (Region is UOACZRegion)
-                    return false;
-
                 return GetFlag(PlayerFlag.Young);
             }
 
@@ -5590,10 +5249,7 @@ namespace Server.Mobiles
         {
             if (!this.Young)
                 return false;
-
-            if (Region is UOACZRegion)
-                return false;
-
+            
             if (Region is BaseRegion && !((BaseRegion)Region).YoungProtected)
                 return false;
 
@@ -5737,32 +5393,6 @@ namespace Server.Mobiles
 
         public override bool CanHear(Mobile from)
         {
-            #region UOACZ
-
-            if (IsUOACZHuman)
-            {
-                PlayerMobile pm_From = from as PlayerMobile;
-
-                if (pm_From != null)
-                {
-                    if (pm_From.IsUOACZUndead)
-                        return false;
-                }
-            }
-
-            if (IsUOACZUndead)
-            {
-                PlayerMobile pm_From = from as PlayerMobile;
-
-                if (pm_From != null)
-                {
-                    if (pm_From.IsUOACZHuman)
-                        return false;
-                }
-            }
-
-            #endregion
-
             return true;
         }
 

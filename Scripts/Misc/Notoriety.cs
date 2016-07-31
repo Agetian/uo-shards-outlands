@@ -69,14 +69,7 @@ namespace Server.Misc
             BaseCreature bc_Target = target as BaseCreature;
 
             Map map = from.Map;
-
-            #region UOACZ
-
-            if (from.Region is UOACZRegion && target.Region is UOACZRegion)
-                return true;
-
-            #endregion
-
+            
             #region ConPVP / Arenas / Battlegrounds
             PlayerMobile pmFrom = from as PlayerMobile;
             PlayerMobile pmTarg = target as PlayerMobile;
@@ -226,54 +219,6 @@ namespace Server.Misc
             if (target.AccessLevel > AccessLevel.Player)
                 return Notoriety.CanBeAttacked;
 
-            #region UOACZ
-
-            if (UOACZRegion.ContainsItem(target))
-            {
-                PlayerMobile pm_Owner = target.Owner as PlayerMobile;
-                BaseCreature bc_Owner = target.Owner as BaseCreature;                
-
-                if (pm_Owner != null)
-                {
-                    UOACZPersistance.CheckAndCreateUOACZAccountEntry(pm_Owner);
-
-                    if (pm_Owner.IsUOACZUndead)
-                        return Notoriety.Murderer;
-
-                    if (pm_Owner.m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Human)
-                    {
-                        if (pm_Owner.m_UOACZAccountEntry.HumanProfile.HonorPoints <= UOACZSystem.HonorAggressionThreshold)
-                            return Notoriety.Enemy;
-
-                        if (pm_Owner.Criminal)
-                            return Notoriety.CanBeAttacked;
-
-                        return Notoriety.Innocent;
-                    }  
-                }
-
-                if (bc_Owner != null)
-                {
-                    if (bc_Owner is UOACZBaseUndead)
-                    {
-                        if (bc_Owner.ControlMaster == source)
-                            return Notoriety.Ally;
-
-                        return Notoriety.CanBeAttacked;
-                    }
-
-                    if (bc_Owner is UOACZBaseWildlife)
-                        return Notoriety.CanBeAttacked;
-
-                    if (bc_Owner is UOACZBaseHuman)
-                        return Notoriety.Innocent;
-                }
-
-                return Notoriety.CanBeAttacked;
-            }
-
-            #endregion
-
             Body body = (Body)target.Amount;
 
             BaseCreature cretOwner = target.Owner as BaseCreature;
@@ -399,103 +344,7 @@ namespace Server.Misc
             Mobile m_TargetController = null;
             BaseCreature bc_TargetController = null;
             PlayerMobile pm_TargetController = null;
-
-            #region UOACZ
-
-            if (UOACZRegion.ContainsMobile(target))
-            {
-                if (pm_Target != null)
-                {
-                    UOACZPersistance.CheckAndCreateUOACZAccountEntry(pm_Target);
-
-                    if (pm_Target.IsUOACZUndead)
-                    {
-                        if (pm_Source != null)
-                        {
-                            if (pm_Source.IsUOACZHuman)
-                                return Notoriety.Enemy;
-
-                            if (pm_Source.IsUOACZUndead)
-                            {
-                                if (pm_Target.Criminal)
-                                    return Notoriety.CanBeAttacked;
-
-                                return Notoriety.Innocent;
-                            }
-                        }
-
-                        return Notoriety.CanBeAttacked;
-                    }
-
-                    if (pm_Target.IsUOACZHuman)
-                    {
-                        if (pm_Source != null)
-                        {
-                            if (pm_Source.IsUOACZUndead)
-                                return Notoriety.Enemy;
-                        }
-
-                        if (pm_Target.m_UOACZAccountEntry.HumanProfile.HonorPoints <= UOACZSystem.HonorAggressionThreshold)
-                            return Notoriety.Enemy;
-
-                        if (pm_Target.Criminal)
-                            return Notoriety.CanBeAttacked;
-
-                        if (pm_Source != null)                        
-                            return Notoriety.Innocent;                        
-
-                        return Notoriety.CanBeAttacked;
-                    }                    
-                }
-
-                if (bc_Target != null)
-                {
-                    if (bc_Target is UOACZBaseUndead)
-                    {
-                        UOACZBaseUndead bc_Undead = bc_Target as UOACZBaseUndead;
-
-                        if (bc_Undead.ControlMaster == source)
-                            return Notoriety.Ally;
-
-                        if (pm_Source != null && (bc_Undead == UOACZPersistance.UndeadChampion || bc_Undead == UOACZPersistance.UndeadBoss))
-                        {
-                            if (pm_Source.IsUOACZHuman)
-                                return Notoriety.Murderer;
-                        }
-
-                        return Notoriety.CanBeAttacked;
-                    }
-
-                    if (bc_Target is UOACZBaseWildlife)
-                        return Notoriety.CanBeAttacked;
-
-                    if (bc_Target is UOACZBaseHuman)
-                    {
-                        UOACZBaseHuman bc_Human = bc_Target as UOACZBaseHuman;
-
-                        if (source is UOACZBaseWildlife || source is UOACZBaseUndead)
-                            return Notoriety.CanBeAttacked;
-
-                        if (pm_Source != null)
-                        {
-                            if (pm_Source.IsUOACZUndead)
-                            {
-                                if (bc_Human == UOACZPersistance.HumanChampion || bc_Human == UOACZPersistance.HumanBoss)
-                                    return Notoriety.Murderer;
-
-                                return Notoriety.CanBeAttacked;
-                            }
-                        }
-                        
-                        return Notoriety.Innocent;
-                    }
-                }
-
-                return Notoriety.Innocent;
-            }
-
-            #endregion
-
+            
             if (bc_Source != null)
             {
                 m_SourceController = bc_Source.ControlMaster as Mobile;

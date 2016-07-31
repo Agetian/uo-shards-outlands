@@ -589,20 +589,7 @@ namespace Server.Items
                 PlayerMobile player = attacker as PlayerMobile;
 
                 bool customAttackSound = false;
-
-                if (player != null)
-                {
-                    UOACZPersistance.CheckAndCreateUOACZAccountEntry(player);
-
-                    if (player.m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Undead && attacker.AttackSound != -1)
-                    {
-                        attacker.PlaySound(attacker.AttackSound);
-                        defender.PlaySound(attacker.AttackSound);
-
-                        customAttackSound = true;
-                    }
-                }
-
+                
                 if (!customAttackSound)
                     Timer.DelayCall(TimeSpan.FromSeconds(.75), delegate { GetWrestlingSounds(attacker, defender, false); });
             }
@@ -694,10 +681,7 @@ namespace Server.Items
                 if (bc_Defender.Controlled && bc_Defender.ControlMaster is PlayerMobile)
                     TamedDefender = true;
             }
-
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(pm_Attacker);
-            UOACZPersistance.CheckAndCreateUOACZAccountEntry(pm_Defender);
-
+            
             AspectGear.AspectArmorProfile attackerAspectArmor = new AspectGear.AspectArmorProfile(attacker, null);
             AspectGear.AspectArmorProfile defenderAspectArmor = new AspectGear.AspectArmorProfile(defender, null);
 
@@ -744,13 +728,7 @@ namespace Server.Items
                     {
                         bool customAttackSound = false;
                         bool customDefendSound = false;
-
-                        if (pm_Attacker != null)
-                        {
-                            if (pm_Attacker.m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Undead && pm_Attacker.AttackSound != -1)
-                                customAttackSound = true;
-                        }
-
+                        
                         if (customAttackSound)
                         {
                             attacker.PlaySound(attacker.AttackSound);
@@ -810,10 +788,7 @@ namespace Server.Items
                             stealthBonus = 0;                       
 
                         else                        
-                            stealthBonus *= bc_Defender.BackstabDamageRecievedScalar;                        
-
-                        if (pm_Attacker.IsUOACZHuman || pm_Attacker.IsUOACZUndead)
-                            stealthBonus *= .5;
+                            stealthBonus *= bc_Defender.BackstabDamageRecievedScalar;      
                     }
 
                     //Tamed Creature Attacking
@@ -821,11 +796,9 @@ namespace Server.Items
                     {
                         if (pm_Defender != null)
                             stealthBonus = 0;
-                        else
-                            stealthBonus = 4.0;
 
-                        if (attacker.Region is UOACZRegion)
-                            stealthBonus = 1.0;
+                        else
+                            stealthBonus = 4.0;                        
                     }
 
                     //Normal Creature Attacking
@@ -878,15 +851,6 @@ namespace Server.Items
                     doWeaponSpecialAttack = true;
                     allowDungeonAttack = false;
                 }
-            }
-
-            if (pm_Attacker != null)
-            {
-                if (pm_Attacker.IsUOACZUndead)
-                    doWeaponSpecialAttack = false;
-
-                if (pm_Attacker.IsUOACZHuman && defender is PlayerMobile)
-                    doWeaponSpecialAttack = false;
             }
 
             //Decorative / Training Weapons
@@ -1037,7 +1001,7 @@ namespace Server.Items
             //Sneak Attack Bonus: Tamed Creature Capable of Stealth Attacking a "Distracted" Combatant
             if (TamedAttacker && bc_Defender != null)
             {
-                if (bc_Attacker.DictWanderAction[WanderAction.Stealth] > 0 && stealthBonus == 0 && !(bc_Attacker.Region is UOACZRegion))
+                if (bc_Attacker.DictWanderAction[WanderAction.Stealth] > 0 && stealthBonus == 0)
                 {
                     if (defender.Combatant != bc_Attacker && Utility.RandomDouble() <= SneakAttackChance)
                     {
@@ -1075,24 +1039,7 @@ namespace Server.Items
 
             if (m_SlayerGroup == SlayerGroupType.Undead)
             {
-                double slayerBonus = 0;
-
-                if (defender is UOACZBaseWildlife)
-                {
-                    UOACZBaseWildlife wildlife = defender as UOACZBaseWildlife;
-
-                    if (wildlife.Corrupted)
-                        slayerBonus = .5;
-                }
-
-                if (defender is UOACZBaseUndead)
-                    slayerBonus = .5;
-
-                if (pm_Defender != null)
-                {
-                    if (pm_Defender.IsUOACZUndead)                    
-                        slayerBonus = .25;                    
-                }
+                double slayerBonus = 0;                
 
                 if (slayerBonus > 0)
                 {
@@ -1147,38 +1094,14 @@ namespace Server.Items
             //Player Attacking
             if (pm_Attacker != null)
             {
-                if (pm_Defender != null)
-                {
-                    if (pm_Attacker.IsUOACZHuman)
-                        finalBaseDamage *= PlayerVsPlayerDamageScalar * UOACZSystem.HumanPlayerVsPlayerDamageScalar * UOACZSystem.GetFatigueScalar(pm_Attacker);
+                if (pm_Defender != null)                
+                    finalBaseDamage *= PlayerVsPlayerDamageScalar;                
 
-                    else if (pm_Attacker.IsUOACZUndead)
-                        finalBaseDamage *= PlayerVsPlayerDamageScalar * UOACZSystem.UndeadPlayerVsPlayerDamageScalar * UOACZSystem.GetFatigueScalar(pm_Attacker);
-
-                    else
-                        finalBaseDamage *= PlayerVsPlayerDamageScalar;
-                }
-
-                else if (TamedDefender)
-                {
-                    if (pm_Attacker.IsUOACZHuman || pm_Attacker.IsUOACZUndead)
-                        finalBaseDamage *= PlayerVsTamedCreatureDamageScalar * UOACZSystem.GetFatigueScalar(pm_Attacker);
-
-                    else
-                        finalBaseDamage *= PlayerVsTamedCreatureDamageScalar;
-                }
+                else if (TamedDefender)                
+                    finalBaseDamage *= PlayerVsTamedCreatureDamageScalar;                
 
                 else
-                {
-                    if (pm_Attacker.IsUOACZHuman)
-                        finalBaseDamage *= PlayerVsCreatureDamageScalar * UOACZSystem.HumanPlayerVsCreatureDamageScalar;
-
-                    else if (pm_Attacker.IsUOACZUndead)
-                        finalBaseDamage *= PlayerVsCreatureDamageScalar * UOACZSystem.UndeadPlayerVsCreatureDamageScalar;
-
-                    else
-                        finalBaseDamage *= PlayerVsCreatureDamageScalar;
-                }
+                    finalBaseDamage *= PlayerVsCreatureDamageScalar;                
             }
 
             //Tamed Creature Attacking
@@ -1186,32 +1109,14 @@ namespace Server.Items
             {
                 PlayerMobile pm_Controller = bc_Attacker.ControlMaster as PlayerMobile;
 
-                if (pm_Defender != null)
-                {
-                    if (pm_Controller.IsUOACZHuman || pm_Controller.IsUOACZUndead)
-                        finalBaseDamage *= TamedCreatureVsPlayerDamageScalar * bc_Attacker.PvPMeleeDamageScalar * UOACZSystem.GetFatigueScalar(pm_Controller);
+                if (pm_Defender != null)                
+                    finalBaseDamage *= TamedCreatureVsPlayerDamageScalar * bc_Attacker.PvPMeleeDamageScalar;                
 
-                    else
-                        finalBaseDamage *= TamedCreatureVsPlayerDamageScalar * bc_Attacker.PvPMeleeDamageScalar;
-                }
+                else if (TamedDefender)                
+                    finalBaseDamage *= TamedCreatureVsTamedCreatureDamageScalar;                
 
-                else if (TamedDefender)
-                {
-                    if (pm_Controller.IsUOACZHuman || pm_Controller.IsUOACZUndead)
-                        finalBaseDamage *= TamedCreatureVsTamedCreatureDamageScalar * UOACZSystem.GetFatigueScalar(pm_Controller);
-
-                    else
-                        finalBaseDamage *= TamedCreatureVsTamedCreatureDamageScalar;
-                }
-
-                else
-                {
-                    if (UOACZSystem.IsUOACZValidMobile(bc_Attacker))
-                        finalBaseDamage *= TamedCreatureVsCreatureDamageScalar * UOACZSystem.TamedCreatureVsCreatureDamageScalar;
-
-                    else
-                        finalBaseDamage *= TamedCreatureVsCreatureDamageScalar;
-                }
+                else                
+                    finalBaseDamage *= TamedCreatureVsCreatureDamageScalar;                
             }
 
             //Normal Creature Attacking
@@ -1219,12 +1124,6 @@ namespace Server.Items
             {
                 if (pm_Defender != null)
                     finalBaseDamage *= CreatureVsPlayerDamageScalar;
-
-                else if (TamedDefender)
-                {
-                    if (UOACZSystem.IsUOACZValidMobile(bc_Defender))
-                        finalBaseDamage *= CreatureVsTamedCreatureDamageScalar * UOACZSystem.CreatureVsTamedCreatureDamageScalar;
-                }
 
                 else                
                     finalBaseDamage *= CreatureVsCreatureDamageScalar;                
@@ -1268,7 +1167,7 @@ namespace Server.Items
             #region Reactive Armor
 
             //Enhanced Spellbook: Wizard --- Player Can Get Above 20, But Only Should Be Against Monsters
-            if (attacker is PlayerMobile && defender.MeleeDamageAbsorb > 20 && !(defender.Region is UOACZRegion))
+            if (attacker is PlayerMobile && defender.MeleeDamageAbsorb > 20)
                 defender.MeleeDamageAbsorb = 20;
 
             int reactiveArmorAbsorption = defender.MeleeDamageAbsorb;
@@ -1733,17 +1632,7 @@ namespace Server.Items
                     }
                 }
             }
-
-            //UOACZ Defensive Wrestling PvP Cap
-            if (UOACZSystem.IsUOACZValidMobile(attacker) && UOACZSystem.IsUOACZValidMobile(defender))
-            {
-                if ((pm_Attacker != null || TamedAttacker) && pm_Defender != null)
-                {
-                    if (defValue > 100)
-                        defValue = 100;
-                }
-            }
-            
+                        
             double ourValue;
             double theirValue;
 
@@ -1844,36 +1733,7 @@ namespace Server.Items
         public virtual int GetHitDefendSound(Mobile attacker, Mobile defender)
         {
             PlayerMobile defenderPlayer = defender as PlayerMobile;
-
-            if (defenderPlayer != null)
-            {
-                UOACZPersistance.CheckAndCreateUOACZAccountEntry(defenderPlayer);
-
-                if (defenderPlayer.m_UOACZAccountEntry.ActiveProfile == UOACZAccountEntry.ActiveProfileType.Human)
-                {
-                    int sound;
-
-                    if (defenderPlayer.Female)
-                        sound = Utility.RandomList(0x14B, 0x14C, 0x14D, 0x14E, 0x14F, 0x57E, 0x57B);
-                    else
-                        sound = Utility.RandomList(0x154, 0x155, 0x156, 0x159, 0x589, 0x5F6, 0x436, 0x437, 0x43B, 0x43C);
-
-                    return sound;
-                }
-            }
-
-            if (defender is UOACZBaseHuman)
-            {
-                int sound;
-
-                if (defender.Female)
-                    sound = Utility.RandomList(0x14B, 0x14C, 0x14D, 0x14E, 0x14F, 0x57E, 0x57B);
-                else
-                    sound = Utility.RandomList(0x154, 0x155, 0x156, 0x159, 0x589, 0x5F6, 0x436, 0x437, 0x43B, 0x43C);
-
-                return sound;
-            }
-
+            
             return defender.GetHurtSound();
         }
 
@@ -2040,28 +1900,7 @@ namespace Server.Items
                     return;
                 }
             }
-
-            PlayerMobile playerAttacker = attacker as PlayerMobile;
-
-            if (UOACZSystem.IsUOACZValidMobile(playerAttacker))
-            {
-                if (playerAttacker.IsUOACZHuman && this is Fists)
-                {
-                    min = 4;
-                    max = 8;
-
-                    return;
-                }
-
-                if (playerAttacker.IsUOACZUndead)
-                {
-                    min = playerAttacker.m_UOACZAccountEntry.UndeadProfile.DamageMin;
-                    max = playerAttacker.m_UOACZAccountEntry.UndeadProfile.DamageMax;
-
-                    return;
-                }
-            }
-
+            
             min = MinDamage;
             max = MaxDamage;
         }
@@ -2246,19 +2085,7 @@ namespace Server.Items
             int frames;
 
             PlayerMobile player = from as PlayerMobile;
-
-            if (player != null)
-            {
-                if (player.IsUOACZUndead)
-                {
-                    if (player.m_UOACZAccountEntry.UndeadProfile.AttackAnimation != -1)
-                    {
-                        player.Animate(player.m_UOACZAccountEntry.UndeadProfile.HurtAnimation, player.m_UOACZAccountEntry.UndeadProfile.HurtAnimationFrames, 1, true, false, 0);
-                        return;
-                    }
-                }
-            }
-
+            
             if (from is BaseCreature)
             {
                 BaseCreature bc_From = from as BaseCreature;
@@ -2334,19 +2161,7 @@ namespace Server.Items
             int action;
 
             PlayerMobile player = from as PlayerMobile;
-
-            if (player != null)
-            {
-                if (player.IsUOACZUndead)
-                {
-                    if (player.m_UOACZAccountEntry.UndeadProfile.AttackAnimation != -1)
-                    {
-                        player.Animate(player.m_UOACZAccountEntry.UndeadProfile.AttackAnimation, player.m_UOACZAccountEntry.UndeadProfile.AttackAnimationFrames, 1, true, false, 0);
-                        return;
-                    }
-                }
-            }
-
+            
             if (from is BaseCreature)
             {
                 BaseCreature bc_From = from as BaseCreature;

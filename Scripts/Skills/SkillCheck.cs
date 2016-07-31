@@ -506,10 +506,7 @@ namespace Server
         }
 
         private static bool AllowStatGain(Mobile from, Stat stat)
-        {
-            if (from.Region is UOACZRegion)
-                return false;
-            
+        {            
             switch (stat)
             {
                 case Stat.Str:
@@ -538,10 +535,7 @@ namespace Server
                 if (from.NextSkillGainAllowed[skill] > DateTime.UtcNow)
                     return false;
             }
-
-            if (from.Region is UOACZRegion)
-                return false;
-
+            
             if (from.Region is NewbieDungeonRegion)
             {
                 if (skill.Base >= NewbieDungeonRegion.SkillGainCap)

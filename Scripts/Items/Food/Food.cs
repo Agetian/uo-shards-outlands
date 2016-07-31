@@ -373,8 +373,7 @@ namespace Server.Items
         }
 
         public static void CheckFoodHitsRegen(PlayerMobile player)
-        {
-            if (player.Region is UOACZRegion) return;
+        {   
             if (!AllowInPlayerVsPlayerCombat && player.RecentlyInPlayerCombat) return;
             if (player.SatisfactionExpiration <= DateTime.UtcNow) return;
 
@@ -385,8 +384,7 @@ namespace Server.Items
         }
 
         public static void CheckFoodStamRegen(PlayerMobile player)
-        {
-            if (player.Region is UOACZRegion) return;
+        {            
             if (!AllowInPlayerVsPlayerCombat && player.RecentlyInPlayerCombat) return;
             if (player.SatisfactionExpiration <= DateTime.UtcNow) return;
 
@@ -397,8 +395,7 @@ namespace Server.Items
         }
 
         public static void CheckFoodManaRegen(PlayerMobile player)
-        {
-            if (player.Region is UOACZRegion) return;
+        {            
             if (!AllowInPlayerVsPlayerCombat && player.RecentlyInPlayerCombat) return;
             if (player.SatisfactionExpiration <= DateTime.UtcNow) return;
 

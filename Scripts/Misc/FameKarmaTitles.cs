@@ -67,9 +67,6 @@ namespace Server.Misc
 
         public static void AwardKarma(Mobile m, int offset, bool message)
         {
-            if (m.Region is UOACZRegion)
-                return;
-
             if (offset > 0)
             {
                 if (m is PlayerMobile && ((PlayerMobile)m).KarmaLocked)

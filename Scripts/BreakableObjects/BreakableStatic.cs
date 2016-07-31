@@ -701,16 +701,7 @@ namespace Server.Custom
                             minDamage = 10;
                             maxDamage = 20;
                         }
-
-                        if (UOACZSystem.IsUOACZValidMobile(player))
-                        {     
-                            if (player.IsUOACZUndead)
-                            {
-                                minDamage = player.m_UOACZAccountEntry.UndeadProfile.DamageMin;
-                                maxDamage = player.m_UOACZAccountEntry.UndeadProfile.DamageMax;
-                            }
-                        }
-
+                        
                         if (minDamage < m_MinInteractDamage)
                             minDamage = m_MinInteractDamage;
 
@@ -732,11 +723,6 @@ namespace Server.Custom
 
                         if (bc_Creature != null)
                         {
-                            UOACZBaseUndead undeadCreature = bc_Creature as UOACZBaseUndead;
-
-                            if (undeadCreature != null)                            
-                                undeadCreature.m_LastActivity = DateTime.UtcNow;                            
-
                             if (weapon != null)
                                 weapon.PlaySwingAnimation(bc_Creature);
                         }
@@ -944,7 +930,7 @@ namespace Server.Custom
 
                 Effects.SendLocationParticles(EffectItem.Create(new Point3D(Location.X, Location.Y, Location.Z), Map, EffectItem.DefaultDuration), 0x377A, 10, 10, 9502);
 
-                PublicOverheadMessage(MessageType.Regular, UOACZSystem.greyTextHue, false, "-" + damage.ToString());
+                PublicOverheadMessage(MessageType.Regular, 2401, false, "-" + damage.ToString());
 
                 if (from != null)
                     from.SendMessage("You inflict " + damage.ToString() + " damage upon your target. [Remaining durability: " + HitPoints.ToString() + "/" + m_MaxHitPoints.ToString() + "]");

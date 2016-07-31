@@ -150,15 +150,7 @@ namespace Server.Mobiles
         Evil,
         Aggressor,
         Any,
-        None,
-        UOACZHuman,
-        UOACZIgnoreHumanSentry,
-        UOACZHumanPlayer,
-        UOACZEvilHumanPlayer,
-        UOACZUndead,
-        UOACZUndeadPlayer,
-        UOACZWildlife,
-        UOACZEvilWildlife,
+        None,        
     }
 
     public enum CombatTargetingWeight
@@ -1505,15 +1497,7 @@ namespace Server.Mobiles
                     {
                         #region WaypointHandling
 
-                        bool allowJumpTo = true;
-
-                        UOACZWayPoint uoaczWaypoint = bc_Creature.CurrentWaypoint as UOACZWayPoint;
-
-                        if (uoaczWaypoint != null)
-                        {
-                            if (!uoaczWaypoint.AllowJumpTo)
-                                allowJumpTo = false;
-                        }
+                        bool allowJumpTo = true;                        
 
                         WayPoint waypoint = bc_Creature.CurrentWaypoint;
                         WayPoint previousWaypoint;
@@ -1559,43 +1543,7 @@ namespace Server.Mobiles
                                 GetWaypointAction();
 
                             bool considerNextWaypointType = true;
-
-                            if (uoaczWaypoint != null)
-                            {
-                                if (uoaczWaypoint.WaypointType == UOACZWayPoint.UOACZWaypointType.UndeadTown)
-                                {
-                                    if (bc_Creature is UOACZBaseUndead)
-                                    {
-                                        UOACZBaseUndead undeadCreature = bc_Creature as UOACZBaseUndead;
-                                        undeadCreature.InWilderness = false;
-                                    }
-                                }
-
-                                if (uoaczWaypoint.m_GotoSplitGroup > -1)
-                                {
-                                    List<UOACZWayPoint> m_UOACZWaypoints = new List<UOACZWayPoint>();
-
-                                    foreach (UOACZWayPoint targetWaypoint in UOACZWayPoint.m_UOACZWaypoints)
-                                    {
-                                        if (!UOACZRegion.ContainsItem(targetWaypoint)) continue;
-
-                                        if (targetWaypoint.WaypointType == uoaczWaypoint.WaypointType && targetWaypoint.SplitGroup == uoaczWaypoint.GotoSplitGroup)
-                                        {
-                                            if (!targetWaypoint.Deleted)
-                                                m_UOACZWaypoints.Add(targetWaypoint);
-                                        }
-                                    }
-
-                                    if (m_UOACZWaypoints.Count > 0)
-                                    {
-                                        bc_Creature.CurrentWaypoint = m_UOACZWaypoints[Utility.RandomMinMax(0, m_UOACZWaypoints.Count - 1)];
-                                        SetWaypointTimeout(bc_Creature);
-
-                                        considerNextWaypointType = false;
-                                    }
-                                }
-                            }
-
+                            
                             if (considerNextWaypointType)
                             {
                                 switch (waypoint.Behavior)
@@ -2057,13 +2005,7 @@ namespace Server.Mobiles
         {
             if (from == null || bc_Creature == null)
                 return false;
-
-            if (bc_Creature.Region is UOACZRegion)
-            {
-                from.SendMessage("That command is not usable while in UOACZ.");
-                return false;
-            }
-
+            
             if (!from.Alive)
             {
                 from.SendMessage("You must be alive to issue that command.");
@@ -2255,13 +2197,7 @@ namespace Server.Mobiles
         {
             if (from == null || bc_Creature == null)
                 return false;
-
-            if (bc_Creature.Region is UOACZRegion)
-            {
-                from.SendMessage("Swarm followers may only guard.");
-                return false;
-            }
-
+            
             if (!from.Alive)
             {
                 from.SendMessage("You must be alive to issue that command.");
@@ -2369,13 +2305,7 @@ namespace Server.Mobiles
         {
             if (from == null || bc_Creature == null)
                 return false;
-
-            if (bc_Creature.Region is UOACZRegion)
-            {
-                from.SendMessage("That command is not usable while in UOACZ.");
-                return false;
-            }
-
+            
             if (!from.Alive)
             {
                 from.SendMessage("You must be alive to issue that command.");
@@ -2438,13 +2368,7 @@ namespace Server.Mobiles
         {
             if (from == null || bc_Creature == null)
                 return false;
-
-            if (bc_Creature.Region is UOACZRegion)
-            {
-                from.SendMessage("Swarm followers may only guard.");
-                return false;
-            }
-
+            
             if (!from.Alive)
             {
                 from.SendMessage("You must be alive to issue that command.");
@@ -4642,108 +4566,6 @@ namespace Server.Mobiles
                 }
             }
 
-            #region UOACZ
-
-            //Ignore Sentry
-            if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZIgnoreHumanSentry] > 0)
-            {
-                if (target is UOACZBaseHuman)
-                {
-                    UOACZBaseHuman bc_Human = target as UOACZBaseHuman;
-
-                    if (bc_Human.Sentry)
-                        return 0;
-                }
-            }
-
-            //UOACZ Human
-            if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZHuman] > 0)
-            {
-                if (target is UOACZBaseHuman)
-                {
-                    if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZHuman] > BestTargetValue)
-                        BestTargetValue = bc_Creature.DictCombatTargeting[CombatTargeting.UOACZHuman];
-                }
-            }
-
-            //UOACZ Human Player
-            if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZHumanPlayer] > 0)
-            {
-                if (pm_Target != null)
-                {
-                    if (pm_Target.IsUOACZHuman)
-                    {
-                        if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZHumanPlayer] > BestTargetValue)
-                            BestTargetValue = bc_Creature.DictCombatTargeting[CombatTargeting.UOACZHumanPlayer];
-                    }
-                }
-            }
-
-            //UOACZ Evil Human Player
-            if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZEvilHumanPlayer] > 0)
-            {
-                if (pm_Target != null)
-                {
-                    if (pm_Target.IsUOACZHuman)
-                    {
-                        if (pm_Target.m_UOACZAccountEntry.HumanProfile.HonorPoints <= UOACZSystem.HonorAggressionThreshold)
-                        {
-                            if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZEvilHumanPlayer] > BestTargetValue)
-                                BestTargetValue = bc_Creature.DictCombatTargeting[CombatTargeting.UOACZEvilHumanPlayer];
-                        }
-                    }
-                }
-            }
-
-            //UOACZ Undead
-            if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZUndead] > 0)
-            {
-                if (target is UOACZBaseUndead)
-                {
-                    if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZUndead] > BestTargetValue)
-                        BestTargetValue = bc_Creature.DictCombatTargeting[CombatTargeting.UOACZUndead];
-                }
-            }
-
-            //UOACZ Undead Player
-            if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZUndeadPlayer] > 0)
-            {
-                if (pm_Target != null)
-                {
-                    if (pm_Target.IsUOACZUndead)
-                    {
-                        if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZUndeadPlayer] > BestTargetValue)
-                            BestTargetValue = bc_Creature.DictCombatTargeting[CombatTargeting.UOACZUndeadPlayer];
-                    }
-                }
-            }
-
-            //UOACZ Wildlife
-            if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZWildlife] > 0)
-            {
-                if (target is UOACZBaseWildlife)
-                {
-                    UOACZBaseWildlife wildlife = target as UOACZBaseWildlife;
-
-                    if (!wildlife.Corrupted && bc_Creature.DictCombatTargeting[CombatTargeting.UOACZWildlife] > BestTargetValue)
-                        BestTargetValue = bc_Creature.DictCombatTargeting[CombatTargeting.UOACZWildlife];
-                }
-            }
-
-            //UOACZ Evil Wildlife
-            if (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZEvilWildlife] > 0)
-            {
-                if (target is UOACZBaseWildlife)
-                {
-                    UOACZBaseWildlife wildlife = target as UOACZBaseWildlife;
-
-                    if (wildlife.Corrupted && (bc_Creature.DictCombatTargeting[CombatTargeting.UOACZEvilWildlife] > BestTargetValue))
-                        BestTargetValue = bc_Creature.DictCombatTargeting[CombatTargeting.UOACZEvilWildlife];
-                }
-            }
-
-            #endregion
-
             //Check Weights            
             if (currentBestTarget != null)
             {
@@ -5878,17 +5700,7 @@ namespace Server.Mobiles
         {
             if (from.Alive && bc_Creature.Controlled && from.InRange(bc_Creature, 14))
             {
-                if (bc_Creature.Region is UOACZRegion)
-                {
-                    list.Add(new InternalEntry(from, 6107, 14, bc_Creature, this, OrderType.Guard));  // Command: Guard                    
-                    list.Add(new InternalEntry(from, 6108, 14, bc_Creature, this, OrderType.Follow)); // Command: Follow
-                    list.Add(new InternalEntry(from, 6114, 14, bc_Creature, this, OrderType.Stay));   // Command: Stay
-                    list.Add(new InternalEntry(from, 6112, 14, bc_Creature, this, OrderType.Stop));   // Command: Stop
-
-                    list.Add(new InternalEntry(from, 6118, 14, bc_Creature, this, OrderType.Release)); // Release 
-                }
-
-                else if (from == bc_Creature.ControlMaster)
+                if (from == bc_Creature.ControlMaster)
                 {
                     list.Add(new InternalEntry(from, 6111, 14, bc_Creature, this, OrderType.Attack)); // Command: Kill
                     list.Add(new InternalEntry(from, 6107, 14, bc_Creature, this, OrderType.Guard));  // Command: Guard                    

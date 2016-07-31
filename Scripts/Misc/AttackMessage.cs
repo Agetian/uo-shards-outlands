@@ -26,31 +26,14 @@ namespace Server.Misc
             PlayerMobile pm_Target = e.Aggressed as PlayerMobile;
 
             BaseCreature bc_Target = e.Aggressed as BaseCreature;
-
-            //UOACZ
-            if (pm_From != null && bc_Target != null)
-            {
-                if (pm_From.IsUOACZHuman && bc_Target is UOACZBaseHuman)
-                {
-                    if (!CheckAggressions(pm_From, bc_Target) && pm_From.AccessLevel == AccessLevel.Player)
-                        UOACZSystem.ChangeStat(pm_From, UOACZSystem.UOACZStatType.Honor, UOACZSystem.HumanAttackCivilianHonorLoss, true); 
-                }  
-            }
-
+            
             if (pm_From == null || pm_Target == null)
                 return;
 
             if (!CheckAggressions(pm_From, pm_Target) && pm_From.AccessLevel == AccessLevel.Player)
 			{
                 pm_From.LocalOverheadMessage(MessageType.Regular, Hue, true, String.Format(AggressorFormat, pm_Target.Name));
-                pm_Target.LocalOverheadMessage(MessageType.Regular, Hue, true, String.Format(AggressedFormat, pm_From.Name));
-
-                //UOACZ
-                if (pm_From.IsUOACZHuman && pm_Target.IsUOACZHuman)
-                {
-                    if (Notoriety.Compute(pm_From, pm_Target) == Notoriety.Innocent)                    
-                        UOACZSystem.ChangeStat(pm_From, UOACZSystem.UOACZStatType.Honor, UOACZSystem.HumanAttackPlayerHonorLoss, true);                    
-                }               
+                pm_Target.LocalOverheadMessage(MessageType.Regular, Hue, true, String.Format(AggressedFormat, pm_From.Name));              
 			}           
 		}
 

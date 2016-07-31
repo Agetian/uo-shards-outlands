@@ -169,29 +169,9 @@ namespace Server
                 IPooledEnumerable mobileInRange = m_ForebiddenLoreStatue.Map.GetMobilesInRange(location, m_ForebiddenLoreStatue.Range);
 
                 foreach (Mobile mobile in mobileInRange)
-                {
-                    if (UOACZRegion.ContainsItem(m_ForebiddenLoreStatue))
-                    {  
-                        if (!UOACZSystem.IsUOACZValidMobile(mobile)) continue;
-                        if (!map.InLOS(location, mobile.Location)) continue;
-                        if (mobile.Hidden) continue;
-                        if (mobile is UOACZBaseUndead) continue;
-                        if (mobile is PlayerMobile)
-                        {
-                            PlayerMobile player = mobile as PlayerMobile;
-
-                            if (player.IsUOACZUndead)
-                                continue;
-                        }
-
-                        m_ValidMobiles.Add(mobile);
-                    }
-
-                    else
-                    {
-                        if (!SpecialAbilities.MonsterCanDamage(null, mobile))
-                            continue; 
-                    }
+                {                    
+                    if (!SpecialAbilities.MonsterCanDamage(null, mobile))
+                        continue;                     
                 }
 
                 mobileInRange.Free();

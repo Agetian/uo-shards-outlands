@@ -63,40 +63,20 @@ namespace Server.Items
 				from.SendLocalizedMessage( 501695 ); // There is not a spot nearby to place your campfire.
                 return;
 			}
+                        
+            from.BeginAction(typeof(Kindling));
 
-            if (from.Region is UOACZRegion)
+            Timer.DelayCall(TimeSpan.FromSeconds(SkillCooldown.CampingCooldown), delegate
             {
-                if (!from.CheckSkill(SkillName.Camping, 0.0, 25, 1.0))
-                {
-                    if (Utility.RandomDouble() <= .5)
-                    {
-                        from.SendMessage("You fail to ignite the campfire and consume the kindling in the process");
-                        Consume();
-                    }
+                if (from != null)
+                    from.EndAction(typeof(Kindling));
+            });
 
-                    else
-                        from.SendLocalizedMessage(501696); // You fail to ignite the campfire.
-
-                    return;
-                }               
-            }
-
-            else
+            if (!from.CheckSkill(SkillName.Camping, 0.0, 120.0, 1.0))
             {
-                from.BeginAction(typeof(Kindling));
-
-                Timer.DelayCall(TimeSpan.FromSeconds(SkillCooldown.CampingCooldown), delegate
-                {
-                    if (from != null)
-                        from.EndAction(typeof(Kindling));
-                });
-
-                if (!from.CheckSkill(SkillName.Camping, 0.0, 120.0, 1.0))
-                {
-                    from.SendLocalizedMessage(501696); // You fail to ignite the campfire.
-                    return;
-                } 
-            }
+                from.SendLocalizedMessage(501696); // You fail to ignite the campfire.
+                return;
+            }             
 
             Effects.PlaySound(Location, Map, 0x4B9);
 

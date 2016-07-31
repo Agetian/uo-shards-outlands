@@ -15,16 +15,6 @@ namespace Server.SkillHandlers
 
 		public static TimeSpan OnUse( Mobile m )
 		{
-            if (m.Region is UOACZRegion)
-            {
-                m.Target = new InternalTarget();
-                m.SendMessage("What will you search for traps?");
-
-                m.Target = new InternalTarget();
-
-                return TimeSpan.FromSeconds(SkillCooldown.RemoveTrapCooldown);
-            }
-
 			if ( m.Skills[SkillName.Lockpicking].Value < 50 )			
 				m.SendLocalizedMessage( 502366 ); // You do not know enough about locks.  Become better at picking locks.
 						
@@ -57,21 +47,6 @@ namespace Server.SkillHandlers
 
 			protected override void OnTarget( Mobile from, object targeted )
 			{
-                if (from.Region is UOACZRegion)
-                {
-                    if (targeted is UOACZScavengeContainer || targeted is UOACZScavengeDebris)
-                    {
-                        UOACZBaseScavengeObject scavengeObject = targeted as UOACZBaseScavengeObject;
-
-                        scavengeObject.RemoveTrap(from);                       
-                    }
-
-                    else                    
-                        from.SendMessage("That cannot be trapped.");
-
-                    return;
-                }
-
 				if ( targeted is Mobile )				
 					from.SendLocalizedMessage( 502816 ); // You feel that such an action would be inappropriate
 				

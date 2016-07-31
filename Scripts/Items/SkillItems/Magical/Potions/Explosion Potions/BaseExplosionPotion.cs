@@ -100,10 +100,7 @@ namespace Server.Items
 
             if (m_Timer == null)
             {
-                if (from.Region is UOACZRegion)
-                    Timer.DelayCall(TimeSpan.FromSeconds(60.0), new TimerStateCallback(ReleaseExploLock), from);
-                else
-                    Timer.DelayCall(TimeSpan.FromSeconds(10.0), new TimerStateCallback(ReleaseExploLock), from);
+                Timer.DelayCall(TimeSpan.FromSeconds(10.0), new TimerStateCallback(ReleaseExploLock), from);
 
                 from.SendLocalizedMessage(500236); // You should throw it now!
                 m_Timer = Timer.DelayCall(TimeSpan.FromSeconds(0.75), TimeSpan.FromSeconds(1.0), 4, new TimerStateCallback(Detonate_OnTick), new object[] { from, 3 });

@@ -128,14 +128,6 @@ namespace Server.Items
                     boat.Hold.DropItem(item);               
             }
 
-            if (Utility.RandomDouble() < prestigeScrollChance)
-            {
-                if (Utility.RandomDouble() <= .5)
-                    boat.Hold.DropItem(new PrestigeScroll(IndexedRegionName.BuccaneeersDen));
-                else
-                    boat.Hold.DropItem(new PrestigeScroll());
-            }
-
             if (Utility.RandomDouble() < craftingComponentChance)
                 boat.Hold.DropItem(CraftingComponent.GetRandomCraftingComponent(1));
         }

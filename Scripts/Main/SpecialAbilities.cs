@@ -61,13 +61,8 @@ namespace Server.Mobiles
                 if (entry.m_SpecialAbilityEffect == SpecialAbilityEffect.Hinder)
                 {
                     //TEST: Fix This (Other Possible Sources of Frozen)
-                    if (DateTime.UtcNow >= entry.m_Expiration)
-                    {
-                        mobile.Frozen = false;
-
-                        if (!(mobile.Region is UOACZRegion))
-                            mobile.SendMessage("You are no longer hindered.");
-                    }
+                    if (DateTime.UtcNow >= entry.m_Expiration)                    
+                        mobile.Frozen = false;       
                 }
 
                 if (entry.m_SpecialAbilityEffect == SpecialAbilityEffect.Petrify)

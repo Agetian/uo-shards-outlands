@@ -226,9 +226,6 @@ namespace Server.Mobiles
         {
             get
             {
-                if (Region is UOACZRegion)
-                    return 0;
-
                 if (IsChamp())
                     return .75;
 
@@ -1211,15 +1208,6 @@ namespace Server.Mobiles
             DictCombatTargeting.Add(CombatTargeting.Aggressor, 3);
             DictCombatTargeting.Add(CombatTargeting.Any, 0);
             DictCombatTargeting.Add(CombatTargeting.None, 0);
-
-            DictCombatTargeting.Add(CombatTargeting.UOACZHuman, 0);
-            DictCombatTargeting.Add(CombatTargeting.UOACZIgnoreHumanSentry, 0);
-            DictCombatTargeting.Add(CombatTargeting.UOACZHumanPlayer, 0);
-            DictCombatTargeting.Add(CombatTargeting.UOACZEvilHumanPlayer, 0);
-            DictCombatTargeting.Add(CombatTargeting.UOACZUndead, 0);
-            DictCombatTargeting.Add(CombatTargeting.UOACZUndeadPlayer, 0);
-            DictCombatTargeting.Add(CombatTargeting.UOACZWildlife, 0);
-            DictCombatTargeting.Add(CombatTargeting.UOACZEvilWildlife, 0);
 
             //Combat Targeting Weights: 
             DictCombatTargetingWeight.Clear();
@@ -2851,7 +2839,7 @@ namespace Server.Mobiles
 
         public void StartStamFreeMoveAuraTimer()
         {
-            if ((IsBoss() || IsChamp() || IsLoHBoss() || IsEventBoss()) && !(Region is UOACZRegion))
+            if ((IsBoss() || IsChamp() || IsLoHBoss() || IsEventBoss()))
             {
                 m_StamFreeMoveAuraTimer = new StamFreeMoveAuraTimer(this);
                 m_StamFreeMoveAuraTimer.Start();
@@ -3036,10 +3024,6 @@ namespace Server.Mobiles
 
         public virtual bool CheckControlChance(Mobile m)
         {
-            //UOACZ
-            if (Region is UOACZRegion)
-                return true;
-
             //If Both AnimalTaming and AnimalLore Exceed Minimum Taming Requirement, Control Success 
             double TargetTamingLore = MinTameSkill;
 
@@ -3623,7 +3607,7 @@ namespace Server.Mobiles
 
         public Dictionary<BaseCreature, DateTime> DictAutoDispelInstances = new Dictionary<BaseCreature, DateTime>();
 
-        public virtual bool AutoDispel { get { return (!Summoned && !(Region is UOACZRegion) && (InitialDifficulty >= MediumDifficultyThreshold || IsChamp() || IsBoss() || IsLoHBoss() || IsEventBoss())); } }
+        public virtual bool AutoDispel { get { return (!Summoned && (InitialDifficulty >= MediumDifficultyThreshold || IsChamp() || IsBoss() || IsLoHBoss() || IsEventBoss())); } }
 
         public void SetDispelResistance(Mobile caster, bool enhancedSpellcast, double bonusResist)
         {
@@ -3843,25 +3827,7 @@ namespace Server.Mobiles
                 {
                     int adjustedRange = weapon.MaxRange + extraRange;
 
-                    bool foundBlockingItem = false;
-
-                    IPooledEnumerable itemsOnTile = Map.GetItemsInRange(mobileTarget.Location, 1);
-
-                    foreach (Item item in itemsOnTile)
-                    {
-                        if (Utility.GetDistance(Location, item.Location) > 1)
-                            continue;
-
-                        if (item is UOACZStatic || item is Custom.UOACZBreakableStatic)
-                        {
-                            foundBlockingItem = true;
-                            break;
-                        }
-                    }
-
-                    itemsOnTile.Free();
-
-                    if (InRange(mobileTarget, adjustedRange) && foundBlockingItem)
+                    if (InRange(mobileTarget, adjustedRange))
                         return true;
                 }
             }
@@ -3932,12 +3898,7 @@ namespace Server.Mobiles
 
                 defender.ApplyPoison(this, p);
             }
-
-            UOACZBaseUndead undeadCreature = this as UOACZBaseUndead;
-
-            if (undeadCreature != null)
-                undeadCreature.m_LastActivity = DateTime.UtcNow;
-
+            
             if (bc_Defender != null)
             {
                 CheckAutoDispel(bc_Defender);
@@ -6328,7 +6289,7 @@ namespace Server.Mobiles
             if (m_AI != null && Commandable)
                 m_AI.GetContextMenuEntries(from, list);
 
-            if (m_Tameable && !m_bControlled && from.Alive && !(from.Region is UOACZRegion))
+            if (m_Tameable && !m_bControlled && from.Alive)
                 list.Add(new TameEntry(from, this));
 
             AddCustomContextEntries(from, list);
@@ -7012,16 +6973,7 @@ namespace Server.Mobiles
                     PackItem(new Custom.ResearchMaterials());
             }
         }
-
-        public void PackPrestigeScroll(int chanceAttempts, double chance)
-        {
-            for (int a = 0; a < chanceAttempts; a++)
-            {
-                if (Utility.RandomDouble() <= chance)
-                    PackItem(new PrestigeScroll());
-            }
-        }
-
+        
         public void PackPetDye(int chanceAttempts, double chance)
         {
             for (int a = 0; a < chanceAttempts; a++)
@@ -7046,16 +6998,7 @@ namespace Server.Mobiles
                     PackItem(new Custom.SpellHueDeed());
             }
         }
-
-        public void PackUOACZUnlockableDeed(int chanceAttempts, double chance)
-        {
-            for (int a = 0; a < chanceAttempts; a++)
-            {
-                if (Utility.RandomDouble() <= chance)
-                    PackItem(new Custom.UOACZUnlockableDeed());
-            }
-        }
-
+        
         public void PackPotion()
         {
             PackItem(Loot.RandomPotion());
@@ -7147,9 +7090,7 @@ namespace Server.Mobiles
                                 PackItem(new Hide(hideAmount));
                             break;
                         }
-
-                        Custom.GoldCoinTracker.TrackGoldCoinLoot(gold, LastPlayerKiller);
-
+                        
                         Loot.AddTieredLoot(this);
                     }
                 }
@@ -7638,19 +7579,8 @@ namespace Server.Mobiles
                     else if (IsBonded)
                         number = 1049608; // (bonded)                
 
-                    else
-                    {
-                        if (Region is UOACZRegion)
-                        {
-                            PrivateOverheadMessage(MessageType.Regular, 0x3B2, false, "(swarm)", from.NetState);
-                            base.OnSingleClick(from);
-
-                            return;
-                        }
-
-                        else
-                            number = 502006; // (tame)
-                    }
+                    else                    
+                        number = 502006; // (tame)                    
 
                     PrivateOverheadMessage(MessageType.Regular, 0x3B2, number, from.NetState);
                 }
@@ -7712,7 +7642,7 @@ namespace Server.Mobiles
 
         public override bool OnBeforeDeath()
         {
-            if (IsBoss() && !(Region is NewbieDungeonRegion) && !DiedByShipSinking && !IsLoHBoss() && !(Region is UOACZRegion))
+            if (IsBoss() && !(Region is NewbieDungeonRegion) && !DiedByShipSinking && !IsLoHBoss())
             {
                 double dungeonArmorChance = 1;
                 double dungeonArmorUpgradeHammerChance = 1;
@@ -7738,14 +7668,13 @@ namespace Server.Mobiles
                     HandoutPowerScrolls(Utility.RandomMinMax(1, 3), true);
 
                 PackCraftingComponent(10, 0.5);
-                PackPrestigeScroll(5, 0.5);
                 PackResearchMaterials(2, 0.5);
                 PackSpellHueDeed(1, .15);
 
                 PackItem(new TreasureMap(RandomMinMaxScaled(3, 6)));
             }
 
-            else if (IsChamp() && !(Region is NewbieDungeonRegion) && !DiedByShipSinking && !(Region is UOACZRegion))
+            else if (IsChamp() && !(Region is NewbieDungeonRegion) && !DiedByShipSinking)
             {
                 double dungeonArmorChance = 1;
                 double dungeonArmorUpgradeHammerChance = .25;
@@ -7764,18 +7693,13 @@ namespace Server.Mobiles
                     HandoutPowerScrolls(Utility.RandomMinMax(1, 2), false);
 
                 PackCraftingComponent(10, 0.1);
-                PackPrestigeScroll(5, 0.1);
                 PackResearchMaterials(2, 0.1);
                 PackSpellHueDeed(1, .03);
 
                 PackItem(new TreasureMap(RandomMinMaxScaled(2, 6)));
             }
-
-            if (m_Paragon && !NoKillAwards && !DiedByShipSinking && !(Region is UOACZRegion))
-            {
-            }
-
-            if (!Summoned && !NoKillAwards && !IsBonded && TreasureMapLevel >= 0 && !DiedByShipSinking && !(Region is UOACZRegion))
+            
+            if (!Summoned && !NoKillAwards && !IsBonded && TreasureMapLevel >= 0 && !DiedByShipSinking)
             {
                 if (m_Paragon && Paragon.ChestChance > Utility.RandomDouble())
                     PackItem(new ParagonChest(this.Name, TreasureMapLevel));
@@ -7784,7 +7708,7 @@ namespace Server.Mobiles
                     PackItem(new TreasureMap(TreasureMapLevel, Map));
             }
 
-            if (!Summoned && !NoKillAwards && !DiedByShipSinking && !(Region is UOACZRegion))
+            if (!Summoned && !NoKillAwards && !DiedByShipSinking)
                 GenerateLoot(false);
 
             if (IsAnimatedDead)
@@ -8607,7 +8531,7 @@ namespace Server.Mobiles
         {
             bool ret = base.CanBeRenamedBy(from);
 
-            if (Controlled && from == ControlMaster && !(from.Region is UOACZRegion) && !from.Region.IsPartOf(typeof(Jail)))
+            if (Controlled && from == ControlMaster && !from.Region.IsPartOf(typeof(Jail)))
                 ret = true;
 
             return ret;

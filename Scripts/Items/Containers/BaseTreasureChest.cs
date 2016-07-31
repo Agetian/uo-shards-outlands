@@ -349,11 +349,7 @@ namespace Server.Items
             //Crafting Component Scroll
             if (Utility.RandomDouble() <= craftingComponentChance)
                 DropItem(CraftingComponent.GetRandomCraftingComponent(1));
-
-            //Prestige Scroll
-            if (Utility.RandomDouble() <= prestigeScrollChance)
-                DropItem(new PrestigeScroll());
-
+            
             //Research Materials
             if (Utility.RandomDouble() <= researchMaterialsChance)
                 DropItem(new ResearchMaterials());            

@@ -1320,15 +1320,7 @@ namespace Server.Mobiles
                 }
             }
 		}
-
-        private InfluenceMarker m_InfluenceMarker;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public InfluenceMarker InfluenceMarker
-        {            
-            get { return m_InfluenceMarker; }
-            set { m_InfluenceMarker = value; }
-        }
-
+        
         private Custom.Hotspot m_Hotspot;
         [CommandProperty(AccessLevel.GameMaster)]
         public Custom.Hotspot Hotspot
@@ -11801,7 +11793,6 @@ public static void _TraceEnd(int index)
             writer.Write(m_Hotspot);
 
             //Version 32
-            writer.Write(m_InfluenceMarker);
 
 			// version 31
 			writer.Write(m_DisableGlobalAutoReset);
@@ -12106,8 +12097,7 @@ public static void _TraceEnd(int index)
                     }
 
                 case 32:
-                    {
-                        m_InfluenceMarker = (InfluenceMarker)reader.ReadItem();
+                    {                        
                         goto case 31;
                     }
 

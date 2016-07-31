@@ -265,13 +265,7 @@ namespace Server.Items
                     if (Utility.RandomDouble() <= craftingComponentChance)
                         cont.DropItem(CraftingComponent.GetRandomCraftingComponent(1));
                 }
-
-                for (int a = 0; a < prestigeScrollLoops; a++)
-                {
-                    if (Utility.RandomDouble() <= prestigeScrollChance)
-                        cont.DropItem(new PrestigeScroll());
-                }
-
+                
                 for (int a = 0; a < spellHueDeedLoops; a++)
                 {
                     if (Utility.RandomDouble() <= spellHueDeedChance)

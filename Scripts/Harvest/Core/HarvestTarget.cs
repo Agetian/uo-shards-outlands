@@ -56,12 +56,6 @@ namespace Server.Engines.Harvest
 
         private void DestroyFurniture(Mobile from, Item item)
         {
-            if (from.Region is UOACZRegion && !item.Movable)
-            {
-                from.SendMessage("That does not seem to work here.");
-                return;
-            }
-
             if (!from.InRange(item.GetWorldLocation(), 3))
             {
                 from.SendLocalizedMessage(500446); // That is too far away.

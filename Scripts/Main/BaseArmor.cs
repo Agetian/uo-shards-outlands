@@ -1283,13 +1283,7 @@ namespace Server.Items
 
             PlayerMobile pm_Defender = defender as PlayerMobile;
             BaseCreature bc_Defender = defender as BaseCreature;
-
-            if (pm_Defender != null)
-            {
-                if (pm_Defender.IsUOACZUndead)
-                    adjustedArmorRating = (double)pm_Defender.m_UOACZAccountEntry.UndeadProfile.VirtualArmor;
-            }
-
+            
             if (bc_Defender != null)
                 adjustedArmorRating = defender.VirtualArmor + defender.VirtualArmorMod; 
            

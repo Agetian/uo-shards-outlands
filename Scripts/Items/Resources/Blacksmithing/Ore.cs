@@ -195,10 +195,7 @@ namespace Server.Items
 						case CraftResource.Valorite: difficulty = 99.0; break;
                         case CraftResource.Lunite: difficulty = 100.0; break;
 					}
-
-                    if (from.Region is UOACZRegion)
-                        difficulty = 25;
-
+                    
 					double minSkill = difficulty - 25.0;
 					double maxSkill = difficulty + 25.0;
 					

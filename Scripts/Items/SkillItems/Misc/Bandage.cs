@@ -486,12 +486,6 @@ namespace Server.Items
 
                     if (playerHealer != null)
                     {
-                        if (UOACZSystem.IsUOACZValidMobile(playerHealer))
-                        {
-                            if (playerHealer.IsUOACZHuman)
-                                toHeal += 20;
-                        }
-
                         double superiorHealing = playerHealer.GetSpecialAbilityEntryValue(SpecialAbilityEffect.SuperiorHealing);
 
                         if (superiorHealing > 0)
@@ -616,10 +610,7 @@ namespace Server.Items
 
                 if (context != null)
                     context.StopHeal();
-
-                if (patient.Region is UOACZRegion)
-                    seconds = 10;
-
+                
                 double rapidTreatmentValue = healer.GetSpecialAbilityEntryValue(SpecialAbilityEffect.RapidTreatment);
 
                 if (rapidTreatmentValue > 0)

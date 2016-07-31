@@ -41,32 +41,14 @@ namespace Server.Misc
         
 		private static TimeSpan Mobile_HitsRegenRate( Mobile from )
 		{            
-            PlayerMobile player = from as PlayerMobile;
-
-            if (player != null && from.Region is UOACZRegion)
-            {
-                double regenRate = UOACZSystem.HitsRegen;
-                double regenValue = player.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Hardy);
-
-                if (regenValue > 0)
-                    regenRate *= regenValue;                
-
-                return TimeSpan.FromSeconds(regenRate);
-            }              
+            PlayerMobile player = from as PlayerMobile;                       
 
             return Mobile.DefaultHitsRate;
 		}
 
 		private static TimeSpan Mobile_StamRegenRate( Mobile from )
 		{            
-            PlayerMobile player = from as PlayerMobile;
-
-            if (player != null && from.Region is UOACZRegion)
-            {
-                double regenRate = UOACZSystem.StamRegen;
-
-                return TimeSpan.FromSeconds(regenRate);
-            }            
+            PlayerMobile player = from as PlayerMobile;          
 
             return Mobile.DefaultStamRate;
 		}
@@ -96,17 +78,7 @@ namespace Server.Misc
 				rate = 1.0;
 
 			else
-				rate = 0.75;
-
-            if (!(from.Region is UOACZRegion))
-			    rate *= armorPenalty;
-            
-            if (player != null && from.Region is UOACZRegion)
-            {
-                rate *= UOACZSystem.ManaRegenScalar;
-
-                return TimeSpan.FromSeconds(rate);
-            }            
+				rate = 0.75;                 
 
 			if ( from.Meditating )
 				rate *= 0.55;

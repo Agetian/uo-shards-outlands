@@ -292,9 +292,6 @@ namespace Server.Custom
                 else if (eventResult <= .90)
                     FindDoubloons(from);
 
-                else if (eventResult <= .95)
-                    FindPrestigeScroll(from);                
-
                 else if (eventResult <= .97)
                     FindCreature(from, 1);
 
@@ -498,24 +495,7 @@ namespace Server.Custom
                     item.MoveToWorld(from.Location, from.Map);
                 }
             }
-        }  
-
-        public void FindPrestigeScroll(Mobile from)
-        {
-            Item item = new PrestigeScroll();            
-
-            if (item != null)
-            {
-                if (from.AddToBackpack(item))
-                    from.SendMessage("You retrieve a Prestige Scroll from the shipwreck and place it in your backpack.");
-
-                else
-                {
-                    from.SendMessage("You retrieve a Prestige Scroll from the shipwreck, and place it at your feet.");
-                    item.MoveToWorld(from.Location, from.Map);
-                }
-            }
-        }        
+        }                 
 
         public void FindCreature(Mobile from, int creatureLevel)
         {

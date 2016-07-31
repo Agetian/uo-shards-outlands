@@ -90,9 +90,6 @@ namespace Server.Items
         {
             double arrowChance = 0.4;
             
-            if (UOACZSystem.IsUOACZValidMobile(attacker))
-                arrowChance = .66;   
-
             if (attacker.Player && !defender.Player && (defender.Body.IsAnimal || defender.Body.IsMonster) && arrowChance >= Utility.RandomDouble())            
                 defender.AddToBackpack(Ammo);            
 
@@ -105,9 +102,6 @@ namespace Server.Items
         public override void OnMiss(Mobile attacker, Mobile defender)
         {
             double arrowChance = 0.4;
-
-            if (UOACZSystem.IsUOACZValidMobile(attacker))
-                arrowChance = .66;            
 
             if (attacker.Player && arrowChance >= Utility.RandomDouble() && !DuelContext.IsFreeConsume(attacker))
                 Ammo.MoveToWorld(new Point3D(defender.X + Utility.RandomMinMax(-1, 1), defender.Y + Utility.RandomMinMax(-1, 1), defender.Z), defender.Map);

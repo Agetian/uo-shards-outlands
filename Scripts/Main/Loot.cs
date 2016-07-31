@@ -145,10 +145,8 @@ namespace Server
                     uniqueLootChance = .001;
 
                     mob.PackCraftingComponent(1, uniqueLootChance * craftingChanceComponentScalar);
-                    mob.PackPrestigeScroll(1, uniqueLootChance * prestigeChanceScalar);
                     mob.PackResearchMaterials(1, uniqueLootChance * researchMaterialsChanceScalar);
-                    mob.PackSpellHueDeed(1, uniqueLootChance * spellHueDeedChanceScalar);
-                    mob.PackUOACZUnlockableDeed(1, uniqueLootChance * UOACZUnlockableChanceScalar);      
+                    mob.PackSpellHueDeed(1, uniqueLootChance * spellHueDeedChanceScalar);    
                 break;
 
                 case Loot.LootTier.Two:
@@ -157,10 +155,8 @@ namespace Server
                     uniqueLootChance = .0025;
                             
                     mob.PackCraftingComponent(1, uniqueLootChance * craftingChanceComponentScalar);
-                    mob.PackPrestigeScroll(1, uniqueLootChance * prestigeChanceScalar);
                     mob.PackResearchMaterials(1, uniqueLootChance * researchMaterialsChanceScalar);
                     mob.PackSpellHueDeed(1, uniqueLootChance * spellHueDeedChanceScalar);
-                    mob.PackUOACZUnlockableDeed(1, uniqueLootChance * UOACZUnlockableChanceScalar);
                 break;
 
                 case Loot.LootTier.Three:
@@ -170,10 +166,8 @@ namespace Server
                     uniqueLootChance = .005;
 
                     mob.PackCraftingComponent(1, uniqueLootChance * craftingChanceComponentScalar);
-                    mob.PackPrestigeScroll(1, uniqueLootChance * prestigeChanceScalar);
                     mob.PackResearchMaterials(1, uniqueLootChance * researchMaterialsChanceScalar);
                     mob.PackSpellHueDeed(1, uniqueLootChance * spellHueDeedChanceScalar);
-                    mob.PackUOACZUnlockableDeed(1, uniqueLootChance * UOACZUnlockableChanceScalar);
                 break;
 
                 case Loot.LootTier.Four:
@@ -185,10 +179,8 @@ namespace Server
                     uniqueLootChance = .0075;
                                 
                     mob.PackCraftingComponent(1, uniqueLootChance * craftingChanceComponentScalar);
-                    mob.PackPrestigeScroll(1, uniqueLootChance * prestigeChanceScalar);
                     mob.PackResearchMaterials(1, uniqueLootChance * researchMaterialsChanceScalar);
                     mob.PackSpellHueDeed(1, uniqueLootChance * spellHueDeedChanceScalar);
-                    mob.PackUOACZUnlockableDeed(1, uniqueLootChance * UOACZUnlockableChanceScalar);
 
                     mob.PackPetDye(1, 1.0 / 8000.0);
                 break;
@@ -203,10 +195,8 @@ namespace Server
                     uniqueLootChance = .01;
                                
                     mob.PackCraftingComponent(1, uniqueLootChance * craftingChanceComponentScalar);
-                    mob.PackPrestigeScroll(1, uniqueLootChance * prestigeChanceScalar);
                     mob.PackResearchMaterials(1, uniqueLootChance * researchMaterialsChanceScalar);
                     mob.PackSpellHueDeed(1, uniqueLootChance * spellHueDeedChanceScalar);
-                    mob.PackUOACZUnlockableDeed(1, uniqueLootChance * UOACZUnlockableChanceScalar);
 
                     mob.PackPetDye(1, 1.0 / 4000.0);
                 break;
@@ -221,10 +211,8 @@ namespace Server
                     uniqueLootChance = .015;
                  
                     mob.PackCraftingComponent(1, uniqueLootChance * craftingChanceComponentScalar);
-                    mob.PackPrestigeScroll(1, uniqueLootChance * prestigeChanceScalar);
                     mob.PackResearchMaterials(1, uniqueLootChance * researchMaterialsChanceScalar);
                     mob.PackSpellHueDeed(1, uniqueLootChance * spellHueDeedChanceScalar);
-                    mob.PackUOACZUnlockableDeed(1, uniqueLootChance * UOACZUnlockableChanceScalar);
 
                     mob.PackPetDye(1, 1.0 / 2000.0);
                 break;
@@ -242,10 +230,8 @@ namespace Server
                     uniqueLootChance = .02;
                 
                     mob.PackCraftingComponent(1, uniqueLootChance * craftingChanceComponentScalar);
-                    mob.PackPrestigeScroll(1, uniqueLootChance * prestigeChanceScalar);
                     mob.PackResearchMaterials(1, uniqueLootChance * researchMaterialsChanceScalar);
                     mob.PackSpellHueDeed(1, uniqueLootChance * spellHueDeedChanceScalar);
-                    mob.PackUOACZUnlockableDeed(1, uniqueLootChance * UOACZUnlockableChanceScalar);
 
                     mob.PackPetDye(1, 1.0 / 1000.0);
                 break;
@@ -265,10 +251,8 @@ namespace Server
                     uniqueLootChance = .04;
                 
                     mob.PackCraftingComponent(1, uniqueLootChance * craftingChanceComponentScalar);
-                    mob.PackPrestigeScroll(1, uniqueLootChance * prestigeChanceScalar);
                     mob.PackResearchMaterials(1, uniqueLootChance * researchMaterialsChanceScalar);
                     mob.PackSpellHueDeed(1, uniqueLootChance * spellHueDeedChanceScalar);
-                    mob.PackUOACZUnlockableDeed(1, uniqueLootChance * UOACZUnlockableChanceScalar);
 
                     mob.PackPetDye(1, 1.0 / 1000.0);
                 break;

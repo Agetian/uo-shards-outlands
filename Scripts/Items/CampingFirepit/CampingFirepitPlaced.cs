@@ -306,21 +306,7 @@ namespace Server.Custom
 
                     if (!mobile.Alive) continue;
                     if (!mobile.InRange(m_Firepit.Location, m_Firepit.EffectRadius)) continue;
-
-                    if (mobile.Region is UOACZRegion)
-                    {
-                        if (mobile is BaseCreature)
-                            continue;
-
-                        if (mobile is PlayerMobile)
-                        {
-                            PlayerMobile player = mobile as PlayerMobile;
-
-                            if (player.IsUOACZUndead)
-                                continue;
-                        }
-                    }
-                    
+                                        
                     m_Queue.Enqueue(mobile);
                 }
 

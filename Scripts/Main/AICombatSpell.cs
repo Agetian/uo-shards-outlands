@@ -150,12 +150,6 @@ namespace Server.Mobiles
                         if (creature.AcquireNewTargetEveryCombatAction)
                             creature.m_NextAcquireTargetAllowed = DateTime.UtcNow;
 
-                        if (creature is UOACZBaseUndead)
-                        {
-                            UOACZBaseUndead uoaczBaseUndead = creature as UOACZBaseUndead;
-                            uoaczBaseUndead.m_LastActivity = DateTime.UtcNow;
-                        }
-
                         spell.Cast();                                               
 
                         return true;
@@ -315,10 +309,7 @@ namespace Server.Mobiles
 
             if (DateTime.UtcNow < creature.NextSpellTime)
                 return false;
-
-            if (creature.Region is UOACZRegion)
-                return false;
-
+            
             if (creature.DictCombatSpell[CombatSpell.SpellPoison] > 0)
             {
                 if (creature.InLOS(target) && SpellInDefaultRange(creature, target) && creature.Mana >= 9)
