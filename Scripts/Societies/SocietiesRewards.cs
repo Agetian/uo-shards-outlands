@@ -23,7 +23,7 @@ namespace Server
             SocietyRewardList.Add(SocietiesGroupType.AdventurersLodge,
             new List<SocietyRewardItem>()
             {
-                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "(Maximum of 720 Skill Cap"}, 100, 22336, 2966, 0, 0),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
             });
 
             #endregion
@@ -33,7 +33,11 @@ namespace Server
             SocietyRewardList.Add(SocietiesGroupType.ArtificersEnclave,
             new List<SocietyRewardItem>()
             {
-                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "(Maximum of 720 Skill Cap"}, 100, 22336, 2966, 0, 0),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
             }); 
 
             #endregion
@@ -43,7 +47,7 @@ namespace Server
             SocietyRewardList.Add(SocietiesGroupType.FarmersCooperative,
             new List<SocietyRewardItem>()
             {
-                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "(Maximum of 720 Skill Cap"}, 100, 22336, 2966, 0, 0),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
             });
 
             #endregion
@@ -53,7 +57,7 @@ namespace Server
             SocietyRewardList.Add(SocietiesGroupType.FishermansCircle,
             new List<SocietyRewardItem>()
             {
-                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "(Maximum of 720 Skill Cap"}, 100, 22336, 2966, 0, 0),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
             });
 
             #endregion
@@ -63,7 +67,7 @@ namespace Server
             SocietyRewardList.Add(SocietiesGroupType.MonsterHuntersSociety,
             new List<SocietyRewardItem>()
             {
-                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "(Maximum of 720 Skill Cap"}, 100, 22336, 2966, 0, 0),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
             });
 
             #endregion
@@ -73,7 +77,7 @@ namespace Server
             SocietyRewardList.Add(SocietiesGroupType.SeafarersLeague,
             new List<SocietyRewardItem>()
             {
-                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "(Maximum of 720 Skill Cap"}, 100, 22336, 2966, 0, 0),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
             });
 
             #endregion
@@ -83,7 +87,7 @@ namespace Server
             SocietyRewardList.Add(SocietiesGroupType.SmithingOrder,
             new List<SocietyRewardItem>()
             {
-                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "(Maximum of 720 Skill Cap"}, 100, 22336, 2966, 0, 0),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
             });
 
             #endregion
@@ -93,7 +97,7 @@ namespace Server
             SocietyRewardList.Add(SocietiesGroupType.ThievesGuild,
             new List<SocietyRewardItem>()
             {
-                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "(Maximum of 720 Skill Cap"}, 100, 22336, 2966, 0, 0),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
             });
 
             #endregion
@@ -103,7 +107,7 @@ namespace Server
             SocietyRewardList.Add(SocietiesGroupType.TradesmanUnion,
             new List<SocietyRewardItem>()
             {
-                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "(Maximum of 720 Skill Cap"}, 100, 22336, 2966, 0, 0),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
             });
 
             #endregion
@@ -113,7 +117,7 @@ namespace Server
             SocietyRewardList.Add(SocietiesGroupType.ZoologicalFoundation,
             new List<SocietyRewardItem>()
             {
-                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "(Maximum of 720 Skill Cap"}, 100, 22336, 2966, 0, 0),
+                new SocietyRewardItem(typeof(SkillMasteryOrb), "Skill Mastery Orb", new List<string>{"Increase Your Total Skill Cap by 1.", "Maximum of 720 Skill Cap."}, 100, 22336, 2966, 52, 43),
             });
 
             #endregion

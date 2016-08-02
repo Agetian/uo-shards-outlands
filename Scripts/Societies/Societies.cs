@@ -526,6 +526,7 @@ namespace Server
                 writer.Write(m_SocietyPlayerData[a].m_PointsAvailable);
                 writer.Write(m_SocietyPlayerData[a].m_MontlyPoints);
                 writer.Write(m_SocietyPlayerData[a].m_LifetimePoints);
+                writer.Write(m_SocietyPlayerData[a].m_PointsSpent);
             }
         }
 
@@ -564,9 +565,11 @@ namespace Server
                 for (int a = 0; a < recordedSocietyGroupDataCount; a++)
                 {
                     SocietiesGroupType societyGroupType = (SocietiesGroupType)reader.ReadInt();
+
                     int pointsAvailable = reader.ReadInt();
                     int monthlyPoints = reader.ReadInt();
                     int lifetimePoints = reader.ReadInt();
+                    int pointsSpent = reader.ReadInt();
 
                     foreach(SocietyGroupPlayerData societyGroupPlayerData in m_SocietyPlayerData)
                     {
@@ -575,6 +578,7 @@ namespace Server
                             societyGroupPlayerData.m_PointsAvailable = pointsAvailable;
                             societyGroupPlayerData.m_MontlyPoints = monthlyPoints;
                             societyGroupPlayerData.m_LifetimePoints = lifetimePoints;
+                            societyGroupPlayerData.m_PointsSpent = pointsSpent;
 
                             break;
                         }
@@ -599,6 +603,7 @@ namespace Server
         public int m_PointsAvailable = 0;
         public int m_MontlyPoints = 0;
         public int m_LifetimePoints = 0;
+        public int m_PointsSpent = 0;
 
         public SocietyGroupPlayerData(SocietiesGroupType societyGroupType)
         {

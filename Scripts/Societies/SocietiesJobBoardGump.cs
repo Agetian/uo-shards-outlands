@@ -14,7 +14,7 @@ namespace Server.Gumps
         public SocietiesGroupPageDisplayType m_SocietiesGroupPageDisplay = SocietiesGroupPageDisplayType.Jobs;
         public int m_RewardPage = 0;
 
-        public static int RewardItemsPerPage = 5;
+        public static int RewardItemsPerPage = 4;
 
         public static int OpenGumpSound = 0x055;
         public static int ChangePageSound = 0x057;
@@ -45,7 +45,8 @@ namespace Server.Gumps
             int availablePoints = societyGroupPlayerData.m_PointsAvailable;
             int monthlyPoints = societyGroupPlayerData.m_MontlyPoints;
             int lifetimePoints = societyGroupPlayerData.m_LifetimePoints;
-
+            int pointsSpent = societyGroupPlayerData.m_PointsSpent;
+                       
             int WhiteTextHue = 2499;
 
             #region Background Images
@@ -301,7 +302,7 @@ namespace Server.Gumps
 
                 #region Server Rankings
 
-                    case SocietiesGroupPageDisplayType.ServerRankings:
+                case SocietiesGroupPageDisplayType.ServerRankings:
 
                 #region Header Images
 
@@ -533,6 +534,207 @@ namespace Server.Gumps
                 #region Spend Points
 
                 case SocietiesGroupPageDisplayType.SpendPoints:
+
+                    #region Header Images
+
+                    AddImage(462, 60, 103);
+                    AddImage(322, 60, 103);
+                    AddImage(102, 60, 103);
+                    AddImage(205, 60, 103);
+                    AddImage(102, 48, 103);
+                    AddImage(233, 48, 103);
+                    AddImage(325, 48, 103);
+                    AddImage(462, 48, 103);
+                    AddImage(112, 58, 5104, 2052);
+                    AddImage(191, 58, 5104, 2052);
+                    AddImage(234, 58, 5104, 2052);
+                    AddImage(298, 58, 5104, 2052);
+                    AddImage(347, 58, 5104, 2052);
+                    AddImage(504, 58, 5104, 2052);
+                    AddImage(431, 58, 5104, 2052);
+
+                    #endregion
+
+                    AddImage(203, 40, 1141);
+                    AddLabel(Utility.CenteredTextOffset(350, societiesGroupName), 42, societiesGroupTextHue, societiesGroupName);
+
+                    startX = 268;
+                    startY = 57;
+
+                    #region Societies Images
+
+                    switch (m_SocietiesGroup)
+                    {
+                        case SocietiesGroupType.FishermansCircle:
+                            AddItem(startX + 34, startY + 19, 3520);
+                            AddItem(startX + 66, startY + 48, 3656);
+                            AddItem(startX + 35, startY + 36, 2476);
+                            AddItem(startX + 76, startY + 39, 2467);
+                            AddItem(startX + 45, startY + 35, 15113);
+                            break;
+
+                        case SocietiesGroupType.SmithingOrder:
+                            AddItem(startX + 36, startY + 29, 5073);
+                            AddItem(startX + 86, startY + 29, 5096);
+                            AddItem(startX + 50, startY + 39, 7035);
+                            AddItem(startX + 54, startY + 37, 5050);
+                            AddItem(startX + 47, startY + 33, 5181);
+                            break;
+
+                        case SocietiesGroupType.TradesmanUnion:
+                            AddItem(startX + 29, startY + 27, 4142);
+                            AddItem(startX + 37, startY + 23, 4150);
+                            AddItem(startX + 61, startY + 35, 2920);
+                            AddItem(startX + 49, startY + 25, 2921);
+                            AddItem(startX + 67, startY + 47, 4148);
+                            AddItem(startX + 48, startY + 31, 4189);
+                            AddItem(startX + 57, startY + 27, 2581);
+                            AddItem(startX + 36, startY + 20, 2503);
+                            AddItem(startX + 45, startY + 14, 4172);
+                            break;
+
+                        case SocietiesGroupType.ArtificersEnclave:
+                            AddItem(startX + 62, startY + 30, 2942, 2500);
+                            AddItem(startX + 37, startY + 16, 2943, 2500);
+                            AddItem(startX + 40, startY + 20, 4031);
+                            AddItem(startX + 65, startY + 19, 6237);
+                            AddItem(startX + 59, startY + 37, 3626);
+                            AddItem(startX + 45, startY + 13, 3643, 2415);
+                            AddItem(startX + 40, startY + 29, 5357);
+                            AddItem(startX + 44, startY + 31, 5357);
+                            AddItem(startX + 65, startY + 43, 3622);
+                            break;
+
+                        case SocietiesGroupType.SeafarersLeague:
+                            AddItem(startX + 70, startY + 40, 5370);
+                            AddItem(startX + 46, startY + 3, 709);
+                            break;
+
+                        case SocietiesGroupType.AdventurersLodge:
+                            AddItem(startX + 57, startY + 24, 4967);
+                            AddItem(startX + 49, startY + 35, 4970);
+                            AddItem(startX + 64, startY + 49, 2648);
+                            AddItem(startX + 34, startY + 38, 5356);
+                            AddItem(startX + 40, startY + 45, 3922);
+                            AddItem(startX + 1, startY + 30, 3898);
+                            AddItem(startX + 50, startY + 25, 5365);
+                            break;
+
+                        case SocietiesGroupType.ZoologicalFoundation:
+                            AddItem(startX + 50, startY + 40, 2476);
+                            AddItem(startX + 47, startY + 31, 3191);
+                            AddItem(startX + 51, startY + 29, 3191);
+                            AddItem(startX + 50, startY + 30, 3713);
+                            break;
+
+                        case SocietiesGroupType.ThievesGuild:
+                            AddItem(startX + 58, startY + 39, 5373);
+                            AddItem(startX + 48, startY + 33, 3589);
+                            break;
+
+                        case SocietiesGroupType.FarmersCooperative:
+                            AddItem(startX + 54, startY + 23, 18240);
+                            break;
+
+                        case SocietiesGroupType.MonsterHuntersSociety:
+                            AddItem(startX + 32, startY + 26, 7433);
+                            AddItem(startX + 34, startY + 38, 4655);
+                            AddItem(startX + 54, startY + 23, 7438);
+                            AddItem(startX + 27, startY + 40, 7782);
+                            AddItem(startX + 44, startY + 38, 3910);
+                            break;
+                    }
+
+                    #endregion
+
+                    AddLabel(143, 93, societiesGroupTextHue, availablePoints + " Points Available");
+
+                    AddLabel(451, 67, 2420, "Total Points Spent");
+                    AddLabel(Utility.CenteredTextOffset(510, pointsSpent.ToString()) , 87, WhiteTextHue, pointsSpent.ToString());			        
+
+                    AddLabel(449, 109, 2603, "Total Points Earned");
+                    AddLabel(Utility.CenteredTextOffset(510, lifetimePoints.ToString()), 129, WhiteTextHue, lifetimePoints.ToString());			        
+
+                    List<SocietyRewardItem> itemList = SocietiesRewards.SocietyRewardList[m_SocietiesGroup];
+
+                    int totalItems = itemList.Count;
+                    int totalItemPages = (int)(Math.Ceiling((double)totalItems / (double)RewardItemsPerPage));
+
+                    if (m_RewardPage >= totalItemPages)
+                        m_RewardPage = 0;
+
+                    if (m_RewardPage < 0)
+                        m_RewardPage = 0;
+
+                    int itemStartIndex = m_RewardPage * RewardItemsPerPage;
+                    int itemEndIndex = (m_RewardPage * RewardItemsPerPage) + (RewardItemsPerPage - 1);
+
+                    if (itemEndIndex >= totalItems)
+                        itemEndIndex = totalItems - 1;
+
+                    int itemCount = itemEndIndex - itemStartIndex;
+
+                    for (int a = 0; a < itemCount + 1; a++)
+                    {
+                        if (totalItems == 0)
+                            continue;
+
+                        switch (a)
+                        {
+                            case 0: startX = 108; startY = 198; break;
+                            case 1: startX = 458; startY = 198; break;
+                            case 2: startX = 108; startY = 312; break;
+                            case 3: startX = 458; startY = 312; break;
+                        }                        
+
+                        int itemIndex = itemStartIndex + a;
+
+                        if (itemIndex >= itemList.Count)
+                            continue;
+
+                        SocietyRewardItem item = itemList[itemIndex];
+
+                        if (item == null)
+                            continue;                        
+                        
+                        //Item 
+                        AddItem(startX - 113 + item.ItemIconOffsetX, startY - 18 + item.ItemIconOffsetY, item.ItemIconItemId, item.ItemIconHue);
+                        AddLabel(startX, startY, WhiteTextHue, item.ItemName);
+                        AddLabel(startX, startY + 20, 53, "Cost");
+                        AddLabel(startX + 40, startY + 20, societiesGroupTextHue, item.ItemCost.ToString() + " Points");
+                        AddLabel(startX, startY + 40, 2599, "Info");
+                        AddButton(startX + 33, startY + 43, 1209, 1210, 20 + a, GumpButtonType.Reply, 0);
+                        AddLabel(startX + 62, startY + 40, 63, "Purchase");
+                        AddButton(startX + 124, startY + 38, 2151, 2154, 10 + a, GumpButtonType.Reply, 0);
+                    }
+
+                    bool previousPagesExist = false;
+                    bool morePagesExist = false;
+
+                    if (m_RewardPage > 0)
+                        previousPagesExist = true;
+
+                    if (m_RewardPage < totalItemPages - 1)
+                        morePagesExist = true;
+                    
+                    if (previousPagesExist)
+                        AddButton(327, 254, 9900, 9900, 5, GumpButtonType.Reply, 0);
+
+                    if (previousPagesExist || morePagesExist)
+                        AddLabel(303, 278, WhiteTextHue, "More Items");
+
+                    if (morePagesExist)
+                        AddButton(326, 302, 9906, 9906, 6, GumpButtonType.Reply, 0);
+
+                    AddButton(35, 416, 4014, 4016, 2, GumpButtonType.Reply, 0);
+                    AddLabel(69, 416, WhiteTextHue, "Previous Society");
+
+                    AddButton(516, 416, 4005, 4007, 3, GumpButtonType.Reply, 0);
+                    AddLabel(552, 416, WhiteTextHue, "Next Society");
+
+                    AddButton(259, 415, 4008, 4010, 4, GumpButtonType.Reply, 0);
+                    AddLabel(296, 416, 149, "View Job Contracts");
+
                 break;
 
                 #endregion                
@@ -611,6 +813,10 @@ namespace Server.Gumps
 
                         //Spend Points
                         case 5:
+                            m_SocietiesGroupPageDisplay = SocietiesGroupPageDisplayType.SpendPoints;
+
+                            m_Player.SendSound(OpenGumpSound); 
+
                             closeGump = false;
                         break;
                     }
@@ -633,7 +839,7 @@ namespace Server.Gumps
                         }                        
 
                         closeGump = false;
-                    }                    
+                    }
                 break;
 
                 #endregion
@@ -757,7 +963,7 @@ namespace Server.Gumps
                         case 4:
                             m_SocietiesGroupPageDisplay = SocietiesGroupPageDisplayType.Jobs;
 
-                            m_Player.SendSound(OpenGumpSound);
+                            m_Player.SendSound(ChangePageSound);
 
                             closeGump = false;
                         break;
@@ -766,12 +972,16 @@ namespace Server.Gumps
                         case 5:
                             m_RewardPage--;
 
+                            m_Player.SendSound(SelectionSound);
+
                             closeGump = false;
                         break;
 
                         //Next Rewards Page
                         case 6:
                             m_RewardPage++;
+
+                            m_Player.SendSound(SelectionSound);
 
                             closeGump = false;
                         break; 
@@ -794,57 +1004,68 @@ namespace Server.Gumps
                         bool purchaseAllowed = true;
 
                         int pointsCost = 0;
+                        
+                        Item rewardItem = (Item)Activator.CreateInstance(item.ItemType);
 
-                        if (availablePoints >= pointsCost)
+                        if (rewardItem == null)
                         {
-                            Item rewardItem = (Item)Activator.CreateInstance(item.ItemType);
+                        }
 
-                            if (rewardItem == null)
+                        else if (!purchaseAllowed && m_Player.AccessLevel == AccessLevel.Player)
+                        {
+                            rewardItem.Delete();
+
+                            m_Player.SendMessage("Reward purchases are not allowed in this area.");
+                        }
+
+                        else if (item.ItemCost > availablePoints && m_Player.AccessLevel == AccessLevel.Player)
+                        {
+                            rewardItem.Delete();
+
+                            m_Player.SendMessage("You do not have enough points available to spend in this society to purchase that item.");
+                        }
+
+                        else if (m_Player.Backpack.TotalItems + rewardItem.TotalItems > m_Player.Backpack.MaxItems && m_Player.AccessLevel == AccessLevel.Player)
+                        {
+                            rewardItem.Delete();
+
+                            m_Player.SendMessage("Your backpack contains too many items to purchase this item. Please remove some items and try again.");
+                        }
+
+                        else if (m_Player.Backpack.TotalWeight + rewardItem.TotalWeight > m_Player.MaxWeight && m_Player.AccessLevel == AccessLevel.Player)
+                        {
+                            rewardItem.Delete();
+
+                            m_Player.SendMessage("Your backpack is too heavy to purchase this item. Please remove some items and try again.");
+                        }
+
+                        else
+                        {
+                            if (m_Player.AccessLevel == AccessLevel.Player)
                             {
-                            }
+                                societyGroupPlayerData.m_PointsAvailable -= pointsCost;
+                                societyGroupPlayerData.m_PointsSpent += pointsCost;
 
-                            else if (!purchaseAllowed)
-                            {
-                                rewardItem.Delete();
-
-                                m_Player.SendMessage("Reward purchases are not allowed in this area.");
-                            }
-
-                            else if (m_Player.Backpack.TotalItems + rewardItem.TotalItems > m_Player.Backpack.MaxItems)
-                            {
-                                rewardItem.Delete();
-
-                                m_Player.SendMessage("Your backpack contains too many items to purchase this item. Please remove some items and try again.");
-                            }
-
-                            else if (m_Player.Backpack.TotalWeight + rewardItem.TotalWeight > m_Player.MaxWeight)
-                            {
-                                rewardItem.Delete();
-
-                                m_Player.SendMessage("Your backpack is too heavy to purchase this item. Please remove some items and try again.");
+                                m_Player.SendMessage("You purchase the item.");
                             }
 
                             else
-                            {
-                                societyGroupPlayerData.m_PointsAvailable -= pointsCost;
+                                m_Player.SendMessage("You use your godly powers to purchase the item.");
 
-                                m_Player.SendSound(PurchaseSound);
-                                m_Player.SendMessage("You purchase the item.");
+                            m_Player.SendSound(PurchaseSound);                                
 
-                                rewardItem.ItemGroup = ItemGroupType.PurchasedReward;
+                            rewardItem.ItemGroup = ItemGroupType.PurchasedReward;
 
-                                m_Player.Backpack.DropItem(rewardItem);
-                            }
+                            m_Player.Backpack.DropItem(rewardItem);
                         }
 
-                        else                            
-                            m_Player.SendMessage("You do not have enough points earned within this society to purchase this item.");                        
+                        closeGump = false;
                     }
 
                     //Item Info
                     if (info.ButtonID >= 20 && info.ButtonID < 30)
                     {
-                        int itemSelectionIndex = info.ButtonID - 10;
+                        int itemSelectionIndex = info.ButtonID - 20;
                         int itemSelected = (m_RewardPage * RewardItemsPerPage) + itemSelectionIndex;
 
                         if (itemSelected >= totalItems)
@@ -855,11 +1076,23 @@ namespace Server.Gumps
                         if (item == null)
                             return;
 
-                        //Display Item Info
-                        //m_Player.SendMessage(item.ItemDescription);
-                    }
+                        string description = "";
 
-                    closeGump = false;
+                        if (item.ItemDescription != null)
+                        {
+                            for (int a = 0; a < item.ItemDescription.Count; a++)
+                            {
+                                description += item.ItemDescription[a];
+
+                                if (a < item.ItemDescription.Count - 1)
+                                    description += " ";
+                            }
+                        }
+
+                        m_Player.SendMessage(description);
+
+                        closeGump = false;
+                    }                    
                 break;
 
                 #endregion                
