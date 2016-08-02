@@ -33,7 +33,7 @@ namespace Server
         }
 
         [Constructable]
-        public ArenaGroupController(): base(3823)
+        public ArenaGroupController(): base(3804)
         {
             Movable = false;
         }
@@ -78,7 +78,7 @@ namespace Server
         public static List<ArenaController> m_Instances = new List<ArenaController>();
 
         [Constructable]
-        public ArenaController(): base(3823)
+        public ArenaController(): base(4479)
         {
             Movable = false;
 
@@ -89,6 +89,14 @@ namespace Server
 
         public ArenaController(Serial serial): base(serial)
         {
+        }
+
+        public override bool CanBeSeenBy(Mobile from)
+        {
+            if (from.AccessLevel > AccessLevel.Player)
+                return true;
+
+            return false;
         }
 
         public bool IsWithin(Point3D location)
@@ -138,17 +146,116 @@ namespace Server
     public class ArenaTile : Item
     {
         public enum ArenaTileType
-        {            
+        {
+            StartLocation,           
+            WallLocation,
+            ExitLocation
         }
 
-        [Constructable]
-        public ArenaTile(): base(0x0)
+        public ArenaTileType m_TileType = ArenaTileType.StartLocation;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public ArenaTileType TileType
         {
+            get { return m_TileType; }
+            set
+            {
+                m_TileType = value;
+
+                switch (m_TileType)
+                {
+                    case ArenaTileType.StartLocation:
+                        TeamNumber = 0; 
+                        PlayerNumber = 0; 
+
+                        ItemID = 6178;
+                    break;
+                    case ArenaTileType.WallLocation:
+                        TeamNumber = 0;
+                        PlayerNumber = 0; 
+
+                        ItemID = 6182; 
+                        Hue = 2267; 
+                    break;
+                    case ArenaTileType.ExitLocation:
+                        TeamNumber = -1;
+                        PlayerNumber = -1; 
+
+                        ItemID = 6179; 
+                        Hue = 2265; 
+                    break;
+                }
+            }
+        }
+
+        public int m_TeamNumber = 0;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int TeamNumber
+        {
+            get { return m_TeamNumber; }
+            set
+            {
+                m_TeamNumber = value;
+
+                switch (m_TeamNumber)
+                {
+                    case -1: Hue = 0; break;
+
+                    case 0: Hue = 201; break;
+                    case 1: Hue = 239; break;
+                    case 2: Hue = 2127; break;
+                    case 3: Hue = 57; break;
+                }
+            }
+        }
+
+        public int m_PlayerNumber = 0;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int PlayerNumber
+        {
+            get { return m_PlayerNumber; }
+            set { m_PlayerNumber = value; }
+        }
+        
+        [Constructable]
+        public ArenaTile(): base(6178)
+        {
+            Name = "arena tile";
+
             Movable = false;
+
+            TeamNumber = 0;
         }
 
         public ArenaTile(Serial serial): base(serial)
         {
+        }
+
+        public override void OnSingleClick(Mobile from)
+        {
+            switch (TileType)
+            {
+                case ArenaTileType.StartLocation:
+                    LabelTo(from, "Arena Start Location");
+                    LabelTo(from, "(Team " + m_TeamNumber.ToString() + ")");
+                break;
+
+                case ArenaTileType.WallLocation:
+                    LabelTo(from, "Arena Wall Location" + m_PlayerNumber.ToString());
+                    LabelTo(from, "(Player " + m_PlayerNumber.ToString() + ")");
+                break;
+
+                case ArenaTileType.ExitLocation:
+                    LabelTo(from, "Arena Exit Location");
+                break;
+            }
+        }
+
+        public override bool CanBeSeenBy(Mobile from)
+        {
+            if (from.AccessLevel > AccessLevel.Player)
+                return true;
+
+            return false;
         }
 
         public override void Serialize(GenericWriter writer)
@@ -157,6 +264,9 @@ namespace Server
             writer.Write((int)0);
 
             //Version 0
+            writer.Write((int)m_TileType);
+            writer.Write(m_TeamNumber);
+            writer.Write(m_PlayerNumber);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -167,6 +277,9 @@ namespace Server
             //Version 0
             if (version >= 0)
             {
+                TileType = (ArenaTileType)reader.ReadInt();
+                TeamNumber = reader.ReadInt();
+                PlayerNumber = reader.ReadInt();
             }
         }
     }
