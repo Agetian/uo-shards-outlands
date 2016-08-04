@@ -137,15 +137,10 @@ namespace Server.Items
                 from.SendMessage("That action is temporarily disabled.");
                 return;
             }
+
 			if ( !Movable )
 				return;
-
-            if (Engines.ConPVP.DuelContext.CheckSuddenDeath(from))
-            {
-                from.SendMessage(0x22, "You cannot use this item when in sudden death.");
-                return;
-            }
-
+            
 			if ( from.InRange( this.GetWorldLocation(), 1 ) )
 			{
 				if ( !RequireFreeHand || HasFreeHand( from ) )
@@ -195,11 +190,8 @@ namespace Server.Items
 			m.RevealingAction();
 
 			m.PlaySound( 0x2D6 );
-
-			#region Dueling
-			if ( !Engines.ConPVP.DuelContext.IsFreeConsume( m ) )
-				m.AddToBackpack( new Bottle() );
-			#endregion
+			
+			m.AddToBackpack( new Bottle() );			
 
 			if ( m.Body.IsHuman /*&& !m.Mounted*/ )
 				m.Animate( 34, 5, 1, true, false, 0 );

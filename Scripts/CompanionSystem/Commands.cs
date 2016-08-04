@@ -11,7 +11,6 @@ using Server.Accounting;
 using Server.Targeting;
 using Server.Targets;
 using Server.Gumps;
-using Server.Engines.Help;
 using Server.Regions;
 using Server.Spells;
 using Server.Custom;

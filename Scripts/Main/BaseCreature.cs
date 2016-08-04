@@ -6205,16 +6205,6 @@ namespace Server.Mobiles
                     return true;
             }
 
-            #region Dueling
-            if (Region.IsPartOf(typeof(Engines.ConPVP.SafeZone)) && m is PlayerMobile)
-            {
-                PlayerMobile pm = (PlayerMobile)m;
-
-                if (pm.DuelContext == null || pm.DuelPlayer == null || !pm.DuelContext.Started || pm.DuelContext.Finished || pm.DuelPlayer.Eliminated)
-                    return true;
-            }
-            #endregion
-
             return base.OnMoveOver(m);
         }
 

@@ -76,13 +76,10 @@ namespace Server.SkillHandlers
 					{
 						new InternalTimer( from, (Item)targeted, m_Potion ).Start();
 
-						from.PlaySound( 0x4F );						
-
-						if ( !Engines.ConPVP.DuelContext.IsFreeConsume( from ) )
-						{
-							m_Potion.Consume();
-							from.AddToBackpack( new Bottle() );
-						}
+						from.PlaySound( 0x4F );		
+						
+						m_Potion.Consume();
+						from.AddToBackpack( new Bottle() );						
 					}
 
 					else

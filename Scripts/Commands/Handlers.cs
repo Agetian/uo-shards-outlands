@@ -172,21 +172,6 @@ namespace Server.Commands
 				}
 				else
 				{
-					if ( from.AccessLevel == AccessLevel.Counselor )
-					{
-						Engines.Help.PageEntry pe = Engines.Help.PageQueue.GetEntry( targ );
-
-						if ( pe == null || pe.Handler != from )
-						{
-							if ( pe == null )
-								from.SendMessage( "You may only use this command on someone who has paged you." );
-							else
-								from.SendMessage( "You may only use this command if you are handling their help page." );
-
-							return;
-						}
-					}
-
 					if ( targ.AddToBackpack( held ) )
 						from.SendMessage( "The item they were holding has been placed into their backpack." );
 					else
@@ -1371,10 +1356,12 @@ namespace Server.Commands
 			{
 				if ( targeted is Mobile )
 				{
+                    /*
 					if( ((Mobile)targeted).AccessLevel >= from.AccessLevel && targeted != from )
 						from.SendMessage( "You can't do that to someone with higher Accesslevel than you!" );
 					else
 						from.SendGump( new StuckMenu( from, (Mobile) targeted, false ) );
+                    */
 				}
 			}
 		}

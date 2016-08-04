@@ -57,13 +57,7 @@ namespace Server.SkillHandlers
 
                 if (BaseBoat.FindBoatAt(bc_Target.Location, bc_Target.Map) != null)
                     from.SendMessage("You may not calm targets in sea vessels.");
-
-                else if (from.Region.IsPartOf(typeof(Engines.ConPVP.SafeZone)))
-                    from.SendMessage("You may not peacemake in this area.");
-
-                else if (bc_Target.Region.IsPartOf(typeof(Engines.ConPVP.SafeZone)))
-                    from.SendMessage("You may not peacemake there.");
-
+                    
                 else if (!m_Instrument.IsChildOf(from.Backpack))
                     from.SendLocalizedMessage(1062488); // The instrument you are trying to play is no longer in your backpack!				
 

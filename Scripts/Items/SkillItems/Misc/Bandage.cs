@@ -146,10 +146,7 @@ namespace Server.Items
                         PlayerMobile playerTarget = targeted as PlayerMobile;
                         
                         if (BandageContext.BeginHeal(from, (Mobile)targeted) != null)
-                        {
-                            if (!Engines.ConPVP.DuelContext.IsFreeConsume(from))
-                                m_Bandage.Consume();
-                        }
+                            m_Bandage.Consume();                        
                     }
 
                     else
@@ -296,16 +293,7 @@ namespace Server.Items
                 patientNumber = -1;
                 playSound = false;
             }
-
-            else if (Engines.ConPVP.DuelContext.CheckSuddenDeath(m_Patient))
-            {
-                healDamage = false;
-
-                m_Healer.SendMessage(0x22, "You cannot use this item when in sudden death.");
-
-                return;
-            }
-
+                
             else if (m_Patient.Hidden && m_Patient != m_Healer)
             {
                 healDamage = false;

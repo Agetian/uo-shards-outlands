@@ -49,9 +49,8 @@ namespace Server.Items
 			if ( DoStrength( from ) )
 			{
 				BasePotion.PlayDrinkEffect( from );
-
-				if ( !Engines.ConPVP.DuelContext.IsFreeConsume( from ) )
-				this.Consume();
+				
+				Consume();
 			}
 		}
 	}

@@ -1,17 +1,7 @@
-﻿/***************************************************************************
- *                            SellingPersistance.cs
- *                          ------------------------
- *   begin                : August 1, 2010
- *   author               : Sean Stavropoulos
- *   email                : sean.stavro@gmail.com
- *
- *
- ***************************************************************************/
-using System;
+﻿using System;
 using Server.Commands;
 using System.Collections;
 using System.Collections.Generic;
-using Server.Engines.Reports;
 using System.Net;
 
 namespace Server.Custom
@@ -28,10 +18,8 @@ namespace Server.Custom
         {
             get { return "Selling Persistance - Internal"; }
         }
-
-
-        public SellingPersistance()
-            : base(1)
+        
+        public SellingPersistance(): base(1)
 		{
 			Movable = false;
 

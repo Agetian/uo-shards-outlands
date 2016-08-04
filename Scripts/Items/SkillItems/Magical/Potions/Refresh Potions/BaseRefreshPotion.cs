@@ -37,14 +37,12 @@ namespace Server.Items
 				from.Stam += Scale( from, (int)(Refresh * from.StamMax) );
 
 				BasePotion.PlayDrinkEffect( from );
+				
+				Consume();
+			}
 
-				if ( !Engines.ConPVP.DuelContext.IsFreeConsume( from ) )
-				    this.Consume();
-			}
-			else
-			{
-				from.SendMessage( "You decide against drinking this potion, as you are already at full stamina." );
-			}
+			else			
+				from.SendMessage( "You decide against drinking this potion, as you are already at full stamina." );			
 		}
 	}
 }

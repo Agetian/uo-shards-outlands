@@ -3,7 +3,6 @@ using Server.Items;
 using Server.Network;
 using Server.Spells;
 using Server.Mobiles;
-using Server.Engines.ConPVP;
 
 namespace Server.Items
 {
@@ -103,7 +102,7 @@ namespace Server.Items
         {
             double arrowChance = 0.4;
 
-            if (attacker.Player && arrowChance >= Utility.RandomDouble() && !DuelContext.IsFreeConsume(attacker))
+            if (attacker.Player && arrowChance >= Utility.RandomDouble())
                 Ammo.MoveToWorld(new Point3D(defender.X + Utility.RandomMinMax(-1, 1), defender.Y + Utility.RandomMinMax(-1, 1), defender.Z), defender.Map);
 
             base.OnMiss(attacker, defender);
@@ -113,7 +112,7 @@ namespace Server.Items
         {
             Container pack = attacker.Backpack;
 
-            if (attacker.Player && !DuelContext.IsFreeConsume(attacker) && (pack == null || !pack.ConsumeTotal(AmmoType, 1)))
+            if (attacker.Player && (pack == null || !pack.ConsumeTotal(AmmoType, 1)))
             {
                 attacker.StealthAttackActive = false;
                 attacker.StealthAttackReady = false;

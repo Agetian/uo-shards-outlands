@@ -1281,18 +1281,6 @@ namespace Server.Spells
             if (map == null)
                 return false;
 
-            #region Dueling
-            Engines.ConPVP.SafeZone sz = (Engines.ConPVP.SafeZone)Region.Find(loc, map).GetRegion(typeof(Engines.ConPVP.SafeZone));
-
-            if (sz != null)
-            {
-                PlayerMobile pm = (PlayerMobile)caster;
-
-                if (pm == null || pm.DuelContext == null || !pm.DuelContext.Started || pm.DuelPlayer == null || pm.DuelPlayer.Eliminated)
-                    return true;
-            }
-            #endregion
-
             GuardedRegion reg = (GuardedRegion)Region.Find(loc, map).GetRegion(typeof(GuardedRegion));
 
             return (reg != null && !reg.IsDisabled());

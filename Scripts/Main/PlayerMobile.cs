@@ -7,8 +7,6 @@ using Server.Misc;
 using Server.Items;
 using Server.Gumps;
 using Server.Multis;
-using Server.Engines.Help;
-using Server.Engines.ConPVP;
 using Server.ContextMenus;
 using Server.Network;
 using Server.Spells;
@@ -1096,7 +1094,6 @@ namespace Server.Mobiles
 
                 player.m_GameTime += gameTime;
 
-                player.m_SpeechLog = null;
                 player.LastOnline = DateTime.UtcNow;
                 player.SetSallos(false);
 
@@ -1832,11 +1829,6 @@ namespace Server.Mobiles
 
         public override bool AllowItemUse(Item item)
         {
-            #region Dueling
-            if (m_DuelContext != null && !m_DuelContext.AllowItemUse(this, item))
-                return false;
-            #endregion
-
             return DesignContext.Check(this);
         }
 
@@ -2597,9 +2589,6 @@ namespace Server.Mobiles
 
         public override bool AllowSkillUse(SkillName skill)
         {       
-            if (m_DuelContext != null && !m_DuelContext.AllowSkillUse(this, skill))
-                return false;        
-
             return DesignContext.Check(this);
         }
 
@@ -2764,12 +2753,7 @@ namespace Server.Mobiles
         {
             if (!base.CheckEquip(item))
                 return false;
-
-            #region Dueling
-            if (m_DuelContext != null && !m_DuelContext.AllowItemEquip(this, item))
-                return false;
-            #endregion
-                        
+                                    
             if (this.AccessLevel < AccessLevel.GameMaster && item.Layer != Layer.Mount && this.HasTrade)
             {
                 BounceInfo bounce = item.GetBounce();
@@ -2915,12 +2899,7 @@ namespace Server.Mobiles
                 BoatOccupied = null;
             else
                 BoatOccupied = boat;
-
-            #region Dueling
-            if (m_DuelContext != null)
-                m_DuelContext.OnLocationChanged(this);
-            #endregion
-
+            
             DesignContext context = m_DesignContext;
 
             if (context == null || m_NoRecursion)
@@ -2965,16 +2944,6 @@ namespace Server.Mobiles
                     return true;
             }
 
-            #region Dueling
-            if (Region.IsPartOf(typeof(Engines.ConPVP.SafeZone)) && m is PlayerMobile)
-            {
-                PlayerMobile pm = (PlayerMobile)m;
-
-                if (pm.DuelContext == null || pm.DuelPlayer == null || !pm.DuelContext.Started || pm.DuelContext.Finished || pm.DuelPlayer.Eliminated)
-                    return true;
-            }
-            #endregion
-
             return base.OnMoveOver(m);
         }
 
@@ -3000,12 +2969,7 @@ namespace Server.Mobiles
             if (AccessLevel == AccessLevel.Player)
                 if (Mount != null)
                     Mount.Rider = null;
-
-            #region Dueling
-            if (m_DuelContext != null)
-                m_DuelContext.OnMapChanged(this);
-            #endregion
-
+            
             DesignContext context = m_DesignContext;
 
             if (context == null || m_NoRecursion)
@@ -3414,8 +3378,7 @@ namespace Server.Mobiles
             if (NpcGuild == NpcGuild.ThievesGuild)
                 return;
 
-            bool justiceDisabledZone = DuelContext != null ||
-                                        SpellHelper.InBuccs(Map, Location) || SpellHelper.InYewOrcFort(Map, Location) || SpellHelper.InYewCrypts(Map, Location) ||
+            bool justiceDisabledZone = SpellHelper.InBuccs(Map, Location) || SpellHelper.InYewOrcFort(Map, Location) || SpellHelper.InYewCrypts(Map, Location) ||
                                         GreyZoneTotem.InGreyZoneTotemArea(Location, Map) || Hotspot.InHotspotArea(Location, Map, true);
             
             //Player, Paladin, and Murderer Handling
@@ -3610,10 +3573,7 @@ namespace Server.Mobiles
 
             if ((carnage || violentDeath))
                 CustomizationAbilities.PlayerDeathExplosion(Location, Map, carnage, violentDeath);
-
-            if (m_DuelContext != null)
-                m_DuelContext.OnDeath(this, c);
-
+            
             if (m_BuffTable != null)
             {
                 List<BuffInfo> list = new List<BuffInfo>();
@@ -4163,7 +4123,7 @@ namespace Server.Mobiles
 
         public override bool CheckPoisonImmunity(Mobile from, Poison poison)
         {
-            if (Young && (DuelContext == null || !DuelContext.Started || DuelContext.Finished))
+            if (Young)
                 return true;
 
             return base.CheckPoisonImmunity(from, poison);
@@ -4171,7 +4131,7 @@ namespace Server.Mobiles
 
         public override void OnPoisonImmunity(Mobile from, Poison poison)
         {
-            if (this.Young && (DuelContext == null || !DuelContext.Started || DuelContext.Finished))
+            if (Young)
                 SendLocalizedMessage(502808); // You would have been poisoned, were you not new to the land of Britannia. Be careful in the future.
             else
                 base.OnPoisonImmunity(from, poison);
@@ -4896,40 +4856,7 @@ namespace Server.Mobiles
                     amount = 0;
                 }
             }
-        }
-                
-        #region Dueling
-
-        private Engines.ConPVP.DuelContext m_DuelContext;
-        private Engines.ConPVP.DuelPlayer m_DuelPlayer;
-
-        public Engines.ConPVP.DuelContext DuelContext
-        {
-            get { return m_DuelContext; }
-        }
-
-        public Engines.ConPVP.DuelPlayer DuelPlayer
-        {
-            get { return m_DuelPlayer; }
-            set
-            {
-                bool wasInTourny = (m_DuelContext != null && !m_DuelContext.Finished && m_DuelContext.m_Tournament != null);
-
-                m_DuelPlayer = value;
-
-                if (m_DuelPlayer == null)
-                    m_DuelContext = null;
-                else
-                    m_DuelContext = m_DuelPlayer.Participant.Context;
-
-                bool isInTourny = (m_DuelContext != null && !m_DuelContext.Finished && m_DuelContext.m_Tournament != null);
-
-                if (wasInTourny != isInTourny)
-                    SendEverything();
-            }
-        }
-
-        #endregion
+        }           
 
         #region MyRunUO Invalidation
 
@@ -5400,25 +5327,7 @@ namespace Server.Mobiles
         {
             return base.HandlesOnSpeech(from);
         }
-
-        #region Speech log
-        private SpeechLog m_SpeechLog;
-
-        public SpeechLog SpeechLog { get { return m_SpeechLog; } }
-
-        public override void OnSpeech(SpeechEventArgs e)
-        {
-            if (SpeechLog.Enabled && this.NetState != null)
-            {
-                if (m_SpeechLog == null)
-                    m_SpeechLog = new SpeechLog();
-
-                m_SpeechLog.Add(e.Mobile, e.Speech);
-            }
-        }
-
-        #endregion
-
+        
         #region Recipes
 
         private Dictionary<int, bool> m_AcquiredRecipes;

@@ -60,8 +60,7 @@ namespace Server.Items
 			{
 				BasePotion.PlayDrinkEffect( from );
 
-				if ( !Engines.ConPVP.DuelContext.IsFreeConsume( from ) )
-				    Consume();
+				Consume();
 			}
 		}
 	}

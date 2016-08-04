@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Sockets;
 using Server;
 using Server.Accounting;
-using Server.Engines.Help;
 using Server.Items;
 using Server.Gumps;
 using Server.Mobiles;
@@ -383,11 +382,11 @@ namespace Server.Commands.Generic
 			Mobile from = e.Mobile;
 
 			CommandLogging.WriteLine( from, "{0} {1} {2} {3} \"{4}\"", from.AccessLevel, CommandLogging.Format( from ), m_InGump ? "messaging" : "telling", CommandLogging.Format( mob ), e.ArgString );
-
-			if ( m_InGump )
-				mob.SendGump( new MessageSentGump( mob, from.Name, e.ArgString ) );
-			else
-				mob.SendMessage( e.ArgString );
+                        
+			//if ( m_InGump )
+				//mob.SendGump( new MessageSentGump( mob, from.Name, e.ArgString ) );
+			//else
+				mob.SendMessage( e.ArgString );           
 		}
 	}
 

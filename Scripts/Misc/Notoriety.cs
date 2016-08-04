@@ -70,58 +70,6 @@ namespace Server.Misc
 
             Map map = from.Map;
             
-            #region ConPVP / Arenas / Battlegrounds
-            PlayerMobile pmFrom = from as PlayerMobile;
-            PlayerMobile pmTarg = target as PlayerMobile;
-
-            if (pmFrom == null && from is BaseCreature)
-            {
-                BaseCreature bcFrom = (BaseCreature)from;
-
-                if (bcFrom.Summoned)
-                    pmFrom = bcFrom.SummonMaster as PlayerMobile;
-            }
-
-            if (pmTarg == null && target is BaseCreature)
-            {
-                BaseCreature bcTarg = (BaseCreature)target;
-
-                if (bcTarg.Summoned)
-                    pmTarg = bcTarg.SummonMaster as PlayerMobile;
-            }
-
-            if (pmFrom != null && pmTarg != null)
-            {
-                if (pmFrom.DuelContext != pmTarg.DuelContext && ((pmFrom.DuelContext != null && pmFrom.DuelContext.Started) || (pmTarg.DuelContext != null && pmTarg.DuelContext.Started)))
-                    return false;
-
-                if (pmFrom.DuelContext != null && pmFrom.DuelContext == pmTarg.DuelContext && ((pmFrom.DuelContext.StartedReadyCountdown && !pmFrom.DuelContext.Started) || pmFrom.DuelContext.Tied || pmFrom.DuelPlayer.Eliminated || pmTarg.DuelPlayer.Eliminated))
-                    return false;
-
-                if (pmFrom.DuelPlayer != null && !pmFrom.DuelPlayer.Eliminated && pmFrom.DuelContext != null && pmFrom.DuelContext.IsSuddenDeath)
-                    return false;
-
-                if (pmFrom.DuelContext != null && pmFrom.DuelContext == pmTarg.DuelContext && pmFrom.DuelContext.m_Tournament != null && pmFrom.DuelContext.m_Tournament.IsNotoRestricted && pmFrom.DuelPlayer != null && pmTarg.DuelPlayer != null && pmFrom.DuelPlayer.Participant != pmTarg.DuelPlayer.Participant)
-                    return false;
-
-                if (pmFrom.DuelContext != null && pmFrom.DuelContext == pmTarg.DuelContext && pmFrom.DuelContext.Started)
-                    return true;
-            }
-
-            if ((pmFrom != null && pmFrom.DuelContext != null && pmFrom.DuelContext.Started) || (pmTarg != null && pmTarg.DuelContext != null && pmTarg.DuelContext.Started))
-                return false;
-
-            Engines.ConPVP.SafeZone sz = from.Region.GetRegion(typeof(Engines.ConPVP.SafeZone)) as Engines.ConPVP.SafeZone;
-
-            if (sz != null /*&& sz.IsDisabled()*/ )
-                return false;
-
-            sz = target.Region.GetRegion(typeof(Engines.ConPVP.SafeZone)) as Engines.ConPVP.SafeZone;
-
-            if (sz != null /*&& sz.IsDisabled()*/ )
-                return false;
-            #endregion
-            
             //Young Player Handling
             bool fromYoung = from is PlayerMobile && ((PlayerMobile)from).Young;
 
@@ -390,15 +338,7 @@ namespace Server.Misc
                 if (m_TargetController.AccessLevel > AccessLevel.Player)
                     return Notoriety.CanBeAttacked;
             }
-
-            //Consensual PvP
-            if (pm_Source != null && pm_Target != null)
-            {
-                //Duel
-                if (pm_Source.DuelContext != null && pm_Source.DuelContext.StartedBeginCountdown && !pm_Source.DuelContext.Finished && pm_Source.DuelContext == pm_Target.DuelContext)
-                    return pm_Source.DuelContext.IsAlly(pm_Source, pm_Target) ? Notoriety.Ally : Notoriety.Enemy;
-            }
-
+            
             //Enemy of One
             if (pm_Source != null && bc_Target != null)
             {

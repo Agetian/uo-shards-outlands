@@ -278,7 +278,7 @@ namespace Server.Misc
 				if ( region.Map == map ) {
 					GuardedRegion gr = region as GuardedRegion;
 
-					if ( gr != null && ( !gr.IsDisabled() || gr is Server.Engines.ConPVP.SafeZone ) ) {
+					if ( gr != null && ( !gr.IsDisabled()) ) {
 						Serialize( gr );
 					}
 				}

@@ -154,9 +154,6 @@ namespace Server.Spells
             if (m_Scroll != null || !m_Caster.Player)
                 return true;
             
-            if (Engines.ConPVP.DuelContext.IsFreeConsume(m_Caster))
-                return true;
-
             Container pack = m_Caster.Backpack;
 
             if (pack == null)
@@ -542,15 +539,7 @@ namespace Server.Spells
 
             else if (CheckNextSpellTime && DateTime.UtcNow < m_Caster.NextSpellTime)            
                 m_Caster.SendLocalizedMessage(502644); // You have not yet recovered from casting a spell.            
-
-            #region Dueling
-
-            else if (m_Caster is PlayerMobile && ((PlayerMobile)m_Caster).DuelContext != null && !((PlayerMobile)m_Caster).DuelContext.AllowSpellCast(m_Caster, this))
-            {
-            }
-
-            #endregion
-
+                
             else if (m_Caster.Mana >= ScaleMana(GetMana()))
             {
                 if (m_Caster.Spell == null && m_Caster.CheckSpellCast(this) && CheckCast() && m_Caster.Region.OnBeginSpellCast(m_Caster, this))
