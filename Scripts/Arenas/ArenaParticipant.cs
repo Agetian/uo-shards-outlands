@@ -13,21 +13,29 @@ namespace Server
         public enum EventStatusType
         {
             Waiting,
-            Playing,
-            Eliminated
+            Playing,            
+            PostBattle,
+            Eliminated,
+            Inactive
         }
 
         public enum FightStatusType
-        {
-            Waiting,
+        {            
             Alive,
             Dead,
-            Disqualified
+            Disqualified,
+            PostBattle
         }
 
+        public DateTime m_LastEventTime = DateTime.UtcNow;
+
         public PlayerMobile m_Player;
+        public ArenaTeam m_ArenaTeam;
+        public ArenaFight m_ArenaFight;
+        public ArenaGroupController m_ArenaGroupController;
+
         public EventStatusType m_EventStatus = EventStatusType.Waiting;
-        public FightStatusType m_FightStatus = FightStatusType.Waiting;
+        public FightStatusType m_FightStatus = FightStatusType.Alive;
 
         public int m_DamageDealt = 0;
         public int m_DamageReceived = 0;
@@ -52,13 +60,14 @@ namespace Server
             if (!m_Player.Alive)
                 return false;
 
+            if (m_Player.NetState == null)
+                return false;
+
             return true;
         }
 
         public void ResetArenaFightValues()
         {
-            m_FightStatus = FightStatusType.Waiting;
-
             m_DamageDealt = 0;
             m_DamageReceived = 0;
             m_LowestHealth = 0;
@@ -82,7 +91,11 @@ namespace Server
             writer.Write((int)0);
 
             //Version 0
+            writer.Write(m_LastEventTime);
             writer.Write(m_Player);
+            writer.Write(m_ArenaTeam);
+            writer.Write(m_ArenaFight);
+            writer.Write(m_ArenaGroupController);
             writer.Write((int)m_EventStatus);
             writer.Write((int)m_FightStatus);
             writer.Write(m_DamageDealt);
@@ -107,7 +120,11 @@ namespace Server
             //Version 0
             if (version >= 0)
             {
+                m_LastEventTime = reader.ReadDateTime();
                 m_Player = reader.ReadMobile() as PlayerMobile;
+                m_ArenaTeam = (ArenaTeam)reader.ReadItem();
+                m_ArenaFight = (ArenaFight)reader.ReadItem();
+                m_ArenaGroupController = (ArenaGroupController)reader.ReadItem();
                 m_EventStatus = (EventStatusType)reader.ReadInt();
                 m_FightStatus = (FightStatusType)reader.ReadInt();
                 m_DamageDealt = reader.ReadInt();

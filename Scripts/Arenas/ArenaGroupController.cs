@@ -38,9 +38,16 @@ namespace Server
 
         public List<ArenaTeam> m_Teams = new List<ArenaTeam>();
 
+        public DateTime m_NextParticipantAudit = DateTime.UtcNow;
+
         private Timer m_Timer;
 
-        public static int TeamsRequired = 2;        
+        public static int TeamsRequired = 2;
+
+        public static TimeSpan LoggedOutPlayerTimeoutThreshold = TimeSpan.FromMinutes(10);
+        public static TimeSpan ParticipantAuditInterval = TimeSpan.FromMinutes(5);
+
+        public static bool RemoveFromQueueAfterMatch = true;
 
         [Constructable]
         public ArenaGroupController(): base(3804)
@@ -76,10 +83,19 @@ namespace Server
             {
                 playerParticipant = new ArenaParticipant(player);
 
+                if (player.m_CompetitionContext != null)
+                    player.m_CompetitionContext.Delete();
+
+                player.m_CompetitionContext = new CompetitionContext();
+                player.m_CompetitionContext.m_ArenaParticipant = playerParticipant;
+
                 ArenaTeam arenaTeam = new ArenaTeam();
 
                 arenaTeam.m_Participants.Add(playerParticipant);
                 m_Teams.Add(arenaTeam);
+
+                playerParticipant.m_ArenaTeam = arenaTeam;
+                playerParticipant.m_ArenaGroupController = this;
 
                 //TEST
                 player.Say("Joining the Arena Queue");
@@ -124,6 +140,9 @@ namespace Server
             foreach (ArenaController arenaController in m_Arenas)
             {
                 if (arenaController == null) 
+                    continue;
+
+                if (!arenaController.Enabled)
                     continue;
 
                 if (arenaController.m_ArenaFight == null)
@@ -175,6 +194,8 @@ namespace Server
                     if (arenaParticipant.Deleted) continue;
 
                     arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.Playing;
+                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Alive;
+
                     arenaParticipant.ResetArenaFightValues();
                 }
 
@@ -184,6 +205,105 @@ namespace Server
             ArenaFight arenaFight = new ArenaFight(arenaController, m_SelectedTeams);
 
             arenaController.m_ArenaFight = arenaFight;
+        }
+
+        public void MatchComplete(ArenaFight arenaFight)
+        {
+            //Remove Player from System After Match
+            if (RemoveFromQueueAfterMatch && arenaFight != null)
+            {
+                Queue m_Queue = new Queue();
+
+                foreach (ArenaTeam arenaTeam in arenaFight.m_Teams)
+                {
+                    if (arenaTeam == null) continue;
+                    if (arenaTeam.Deleted) continue;
+
+                    foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                    {
+                        if (arenaParticipant == null) continue;
+                        if (arenaParticipant.Deleted) continue;
+
+                        m_Queue.Enqueue(arenaParticipant);
+                    }
+                }
+
+                while (m_Queue.Count > 0)
+                {
+                    ArenaParticipant arenaParticipant = (ArenaParticipant)m_Queue.Dequeue();
+
+                    if (arenaParticipant.m_Player != null)
+                        PlayerQuit(arenaParticipant.m_Player);
+                }                
+            }
+
+            if (arenaFight != null)
+                arenaFight.Delete();
+        }
+
+        public void AuditParticipants()
+        {
+            //TEST: Do Not Do During in Tournament (Only Clear All After Tournament Completion)
+
+            Queue m_Queue = new Queue();
+
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                {
+                    if (arenaParticipant == null) continue;
+                    if (arenaParticipant.Deleted) continue;
+
+                    if (arenaParticipant.m_EventStatus == ArenaParticipant.EventStatusType.Inactive && DateTime.UtcNow >= arenaParticipant.m_LastEventTime + LoggedOutPlayerTimeoutThreshold)
+                        m_Queue.Enqueue(arenaParticipant);
+                }
+            }
+
+            while (m_Queue.Count > 0)
+            {
+                ArenaParticipant arenaParticipant = (ArenaParticipant)m_Queue.Dequeue();
+
+                if (arenaParticipant.m_Player != null)
+                    PlayerQuit(arenaParticipant.m_Player);
+            }
+
+            m_NextParticipantAudit = DateTime.UtcNow + ParticipantAuditInterval;
+        }
+
+        public void PlayerQuit(PlayerMobile player)
+        {
+            if (player == null) 
+                return;
+
+            ArenaParticipant arenaParticipant = GetPlayerParticipant(player);
+
+            if (arenaParticipant == null)
+                return;
+
+            if (player.m_CompetitionContext != null)
+            {
+                player.m_CompetitionContext.Delete();
+                player.m_CompetitionContext = null;
+            }
+
+            if (arenaParticipant.m_ArenaTeam != null)
+            {
+                if (arenaParticipant.m_ArenaTeam.m_Participants.Contains(arenaParticipant))
+                    arenaParticipant.m_ArenaTeam.m_Participants.Remove(arenaParticipant);
+
+                if (arenaParticipant.m_ArenaTeam.m_Participants.Count == 0)
+                {
+                    if (m_Teams.Contains(arenaParticipant.m_ArenaTeam))
+                        m_Teams.Remove(arenaParticipant.m_ArenaTeam);
+
+                    arenaParticipant.m_ArenaTeam.Delete();
+                }                
+            }
+
+            arenaParticipant.Delete();
         }
 
         public class ArenaGroupControllerTimer : Timer
@@ -211,11 +331,14 @@ namespace Server
                     return;
                 }
 
-                if (m_ArenaGroupController.GetReadyTeams().Count >= ArenaGroupController.TeamsRequired)
-                {
-                    ArenaController emptyArena = m_ArenaGroupController.GetAvailableArena();
+                if (DateTime.UtcNow >= m_ArenaGroupController.m_NextParticipantAudit)                
+                    m_ArenaGroupController.AuditParticipants();                
 
-                    if (emptyArena != null)                    
+                ArenaController emptyArena = m_ArenaGroupController.GetAvailableArena();
+
+                if (emptyArena != null)
+                {
+                    if (m_ArenaGroupController.GetReadyTeams().Count >= ArenaGroupController.TeamsRequired)
                         m_ArenaGroupController.StartMatch();                    
                 }
             }

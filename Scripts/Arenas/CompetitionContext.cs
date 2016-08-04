@@ -15,13 +15,7 @@ namespace Server
 {
     public class CompetitionContext: Item
     {
-        public static void Initialize()
-        {
-            //EventSink.Speech += new SpeechEventHandler(EventSink_Speech);
-            //EventSink.Login += new LoginEventHandler(EventSink_Login);
-
-            //CommandSystem.Register("vli", AccessLevel.GameMaster, new CommandEventHandler(vli_oc));
-        }
+        public ArenaParticipant m_ArenaParticipant;
 
         [Constructable]
         public CompetitionContext(): base(0x0)
@@ -34,99 +28,125 @@ namespace Server
         {
         }
 
-        public virtual bool AllowFreeConsume(PlayerMobile player)
+        #region OnEvents
+
+        public void OnMapChanged(PlayerMobile player)
         {
-            return true;
+            OnLocationChanged(player);
         }
 
-        public virtual bool AllowItemEquip(PlayerMobile player, Item item)
+        public void OnLocationChanged(PlayerMobile player)
         {
-            return true;
-        }
-
-        public virtual bool AllowItemRemove(PlayerMobile player, Item item)
-        {
-            return true;
-        }
-
-        public virtual bool AllowItemUse(PlayerMobile player, Item item)
-        {
-            return true;
-        }
-
-        public virtual bool AllowSkillUse(PlayerMobile player, SkillName skill)
-        {
-            return true;
-        }
-
-        public virtual bool AllowSpellCast(PlayerMobile player, Spell spell)
-        {
-            return true;
-        }
-
-        public virtual void CancelSpell(PlayerMobile player)
-        {
-            if (player.Spell is Spell)
+            if (m_ArenaParticipant != null)
             {
-                Spell spell = player.Spell as Spell;
-                spell.Disturb(DisturbType.Kill);
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    m_ArenaParticipant.m_ArenaFight.OnLocationChanged(player);
+            }
+        }
+
+        public void OnDeath(PlayerMobile player, Container corpse)
+        {
+            if (m_ArenaParticipant != null)
+            {
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    m_ArenaParticipant.m_ArenaFight.OnDeath(player, corpse);
+            }
+        }
+
+        public bool AllowFreeConsume(PlayerMobile player)
+        {
+            if (m_ArenaParticipant != null)
+            {
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    return m_ArenaParticipant.m_ArenaFight.AllowFreeConsume(player);
             }
 
-            Targeting.Target.Cancel(player);
+            return true;
         }
 
-        public virtual void ClearEffects(PlayerMobile player)
+        public bool AllowItemEquip(PlayerMobile player, Item item)
         {
-            SpecialAbilities.ClearSpecialEffects(player);
-
-            player.RemoveStatMod("[Magic] Str Offset");
-            player.RemoveStatMod("[Magic] Dex Offset");
-            player.RemoveStatMod("[Magic] Int Offset");
-
-            player.Paralyzed = false;
-            player.Hidden = false;
-
-            player.MagicDamageAbsorb = 0;
-            player.MeleeDamageAbsorb = 0;
-
-            Spells.Second.ProtectionSpell.Registry.Remove(player);
-            player.EndAction(typeof(DefensiveSpell));
-
-            TransformationSpellHelper.RemoveContext(player, true);
-
-            BaseArmor.ValidateMobile(player);
-            BaseClothing.ValidateMobile(player);
-
-            player.Hits = player.HitsMax;
-            player.Stam = player.StamMax;
-            player.Mana = player.ManaMax;
-
-            player.Poison = null;            
-        }
-
-        public virtual void RemoveAggressions(PlayerMobile player)
-        {
-            /*
-            for (int i = 0; i < m_Participants.Count; ++i)
+            if (m_ArenaParticipant != null)
             {
-                Participant p = (Participant)m_Participants[i];
-
-                for (int j = 0; j < p.Players.Length; ++j)
-                {
-                    DuelPlayer dp = (DuelPlayer)p.Players[j];
-
-                    if (dp == null || dp.Mobile == mob)
-                        continue;
-
-                    mob.RemoveAggressed(dp.Mobile);
-                    mob.RemoveAggressor(dp.Mobile);
-                    dp.Mobile.RemoveAggressed(mob);
-                    dp.Mobile.RemoveAggressor(mob);
-                }
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    return m_ArenaParticipant.m_ArenaFight.AllowItemEquip(player, item);
             }
-            */
+
+            return true;
         }
 
+        public bool AllowItemRemove(PlayerMobile player, Item item)
+        {
+            if (m_ArenaParticipant != null)
+            {
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    return m_ArenaParticipant.m_ArenaFight.AllowItemRemove(player, item);
+            }
+
+            return true;
+        }
+
+        public bool AllowItemUse(PlayerMobile player, Item item)
+        {
+            if (m_ArenaParticipant != null)
+            {
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    return m_ArenaParticipant.m_ArenaFight.AllowItemUse(player, item);
+            }
+
+            return true;
+        }
+
+        public bool AllowSkillUse(PlayerMobile player, SkillName skill)
+        {
+            if (m_ArenaParticipant != null)
+            {
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    return m_ArenaParticipant.m_ArenaFight.AllowSkillUse(player, skill);
+            }
+
+            return true;
+        }
+
+        public bool AllowSpellCast(PlayerMobile player, Spell spell)
+        {
+            if (m_ArenaParticipant != null)
+            {
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    return m_ArenaParticipant.m_ArenaFight.AllowSpellCast(player, spell);
+            }
+            
+            return true;
+        }
+
+        public void CancelSpell(PlayerMobile player)
+        {
+            if (m_ArenaParticipant != null)
+            {
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    m_ArenaParticipant.m_ArenaFight.CancelSpell(player);       
+            }           
+        }
+
+        public void ClearEffects(PlayerMobile player)
+        {
+            if (m_ArenaParticipant != null)
+            {
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    m_ArenaParticipant.m_ArenaFight.ClearEffects(player);    
+            } 
+        }
+
+        public void RemoveAggressions(PlayerMobile player)
+        {
+            if (m_ArenaParticipant != null)
+            {
+                if (m_ArenaParticipant.m_ArenaFight != null)
+                    m_ArenaParticipant.m_ArenaFight.RemoveAggressions(player); 
+            } 
+        }
+
+        #endregion
 
         public override void Serialize(GenericWriter writer)
         {
@@ -134,6 +154,7 @@ namespace Server
             writer.Write((int)0);
 
             //Version 0
+            writer.Write(m_ArenaParticipant);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -143,22 +164,17 @@ namespace Server
 
             //Version 0
             if (version >= 0)
-            {                
+            {
+                m_ArenaParticipant = (ArenaParticipant)reader.ReadItem();
             }
+
+            //-----
+
+            if (m_ArenaParticipant == null)
+                Delete();
+
+            else if (m_ArenaParticipant.Deleted)
+                Delete();
         }
     }
-
-    /*
-    public class NewDuelContext : CompetitionContext
-    {
-    }
-
-    public class TournamentContext : CompetitionContext
-    {
-    }
-
-    public class BattlegroundContext : CompetitionContext
-    {
-    }
-    */
 }

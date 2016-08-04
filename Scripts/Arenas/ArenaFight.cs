@@ -7,6 +7,7 @@ using Server.Gumps;
 using Server.Items;
 using Server.Mobiles;
 using Server.Network;
+using Server.Spells;
 
 namespace Server
 {
@@ -35,11 +36,36 @@ namespace Server
 
         public CompetitionContext m_CompetitionContext;
 
+        public static void Initialize()
+        {
+            //EventSink.Speech += new SpeechEventHandler(EventSink_Speech);
+            //EventSink.Login += new LoginEventHandler(EventSink_Login);
+
+            //CommandSystem.Register("vli", AccessLevel.GameMaster, new CommandEventHandler(vli_oc));
+        }
+
         [Constructable]
         public ArenaFight(ArenaController arenaController, List<ArenaTeam> teams): base(0x0)
         {
             m_ArenaController = arenaController;
             m_Teams = teams;
+
+            if (arenaController == null || teams == null)
+            {
+                Delete();
+                return;
+            }
+
+            foreach (ArenaTeam arenaTeam in teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                {
+                    arenaParticipant.m_ArenaFight = this;
+                }
+            }
 
             Visible = false;
             Movable = false;
@@ -51,6 +77,150 @@ namespace Server
         public ArenaFight(Serial serial) : base(serial)
         {
         }
+
+        #region OnEvents
+
+        public virtual void OnMapChanged(PlayerMobile player)
+        {
+            OnLocationChanged(player);
+        }
+
+        public virtual void OnLocationChanged(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            ArenaParticipant arenaParticipant = GetParticipant(player);
+
+            if (arenaParticipant != null && m_ArenaController != null)
+            {
+                if (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive && !m_ArenaController.IsWithin(player.Location))
+                {
+                    arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.Inactive;
+                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Disqualified;
+
+                    if (player.Map == Map.Internal)
+                    {
+                        ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+
+                        if (exitTile != null)
+                            player.LogoutLocation = exitTile.Location;
+                    }
+
+                    if (!CheckTeamsRemaining())
+                        StartPostBattle();
+                }                
+            }
+        }
+
+        public virtual void OnDeath(PlayerMobile player, Container corpse)
+        {
+            ArenaParticipant arenaParticipant = GetParticipant(player);
+
+            if (arenaParticipant != null)
+            {
+                if (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive)
+                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Dead;
+            }
+
+            if (!CheckTeamsRemaining())
+                StartPostBattle();
+        }
+
+        public virtual bool AllowFreeConsume(PlayerMobile player)
+        {
+            return true;
+        }
+
+        public virtual bool AllowItemEquip(PlayerMobile player, Item item)
+        {
+            return true;
+        }
+
+        public virtual bool AllowItemRemove(PlayerMobile player, Item item)
+        {
+            return true;
+        }
+
+        public virtual bool AllowItemUse(PlayerMobile player, Item item)
+        {
+            return true;
+        }
+
+        public virtual bool AllowSkillUse(PlayerMobile player, SkillName skill)
+        {
+            return true;
+        }
+
+        public virtual bool AllowSpellCast(PlayerMobile player, Spell spell)
+        {
+            return true;
+        }
+
+        public virtual void CancelSpell(PlayerMobile player)
+        {
+            if (player.Spell is Spell)
+            {
+                Spell spell = player.Spell as Spell;
+                spell.Disturb(DisturbType.Kill);
+            }
+
+            Targeting.Target.Cancel(player);
+        }
+
+        public virtual void ClearEffects(PlayerMobile player)
+        {
+            SpecialAbilities.ClearSpecialEffects(player);
+
+            player.RemoveStatMod("[Magic] Str Offset");
+            player.RemoveStatMod("[Magic] Dex Offset");
+            player.RemoveStatMod("[Magic] Int Offset");
+
+            player.Paralyzed = false;
+            player.Hidden = false;
+
+            player.MagicDamageAbsorb = 0;
+            player.MeleeDamageAbsorb = 0;
+
+            Spells.Second.ProtectionSpell.Registry.Remove(player);
+            player.EndAction(typeof(DefensiveSpell));
+
+            TransformationSpellHelper.RemoveContext(player, true);
+
+            BaseArmor.ValidateMobile(player);
+            BaseClothing.ValidateMobile(player);
+
+            player.Hits = player.HitsMax;
+            player.Stam = player.StamMax;
+            player.Mana = player.ManaMax;
+
+            player.Poison = null;
+        }
+
+        public virtual void RemoveAggressions(PlayerMobile player)
+        {
+            /*
+            for (int i = 0; i < m_Participants.Count; ++i)
+            {
+                Participant p = (Participant)m_Participants[i];
+
+                for (int j = 0; j < p.Players.Length; ++j)
+                {
+                    DuelPlayer dp = (DuelPlayer)p.Players[j];
+
+                    if (dp == null || dp.Mobile == mob)
+                        continue;
+
+                    mob.RemoveAggressed(dp.Mobile);
+                    mob.RemoveAggressor(dp.Mobile);
+                    dp.Mobile.RemoveAggressed(mob);
+                    dp.Mobile.RemoveAggressor(mob);
+                }
+            }
+            */
+        }
+
+        #endregion
 
         public ArenaParticipant GetParticipant(PlayerMobile player)
         {
@@ -68,29 +238,7 @@ namespace Server
 
             return null;
         }
-
-        public void OnPlayerDeath(PlayerMobile player)
-        {
-            ArenaParticipant arenaParticipant = GetParticipant(player);
-
-            if (arenaParticipant != null)            
-                arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Dead;
-
-            if (!CheckTeamsRemaining())
-                StartPostBattle();
-        }
-
-        public void OnPlayerLogoutOrDisconnection(PlayerMobile player)
-        {
-            ArenaParticipant arenaParticipant = GetParticipant(player);
-
-            if (arenaParticipant != null)
-                arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Disqualified;
-
-            if (!CheckTeamsRemaining())
-                StartPostBattle();
-        }
-
+        
         public bool CheckTeamsRemaining()
         {
             int teamCount = m_Teams.Count;
@@ -109,6 +257,8 @@ namespace Server
                     teamsRemaining--;
                     continue;
                 }
+
+                arenaTeam.m_LastEventTime = DateTime.UtcNow;
 
                 int participantCount = arenaTeam.m_Participants.Count;
                 int playersEliminated = 0;
@@ -139,12 +289,11 @@ namespace Server
                         continue;
                     }
 
-                    if (!arenaParticipant.m_Player.Alive)
-                        playersEliminated++;
-
-                    //TEST: USE THIS EVENTUALLY
-                    //if (arenaParticipant.m_FightStatus != ArenaParticipant.FightStatusType.Alive)
-                        //playersEliminated++;
+                    if (arenaParticipant.m_EventStatus != ArenaParticipant.EventStatusType.Inactive)
+                        arenaParticipant.m_LastEventTime = DateTime.UtcNow;
+                    
+                    if (arenaParticipant.m_FightStatus != ArenaParticipant.FightStatusType.Alive)
+                        playersEliminated++;                    
                 }
 
                 if (playersEliminated >= participantCount)
@@ -165,14 +314,45 @@ namespace Server
 
         public void StartFight()
         {
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                {
+                    if (arenaParticipant == null) continue;
+                    if (arenaParticipant.Deleted) continue;
+
+                    arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.Playing;
+                }
+            }
+
             m_FightPhase = FightPhaseType.Fight;
             m_PhaseTimeRemaining = TimeSpan.FromDays(1);
         }
 
         public void StartPostBattle()
         {
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                {
+                    if (arenaParticipant == null) continue;
+                    if (arenaParticipant.Deleted) continue;
+                    
+                    if (arenaParticipant.m_EventStatus != ArenaParticipant.EventStatusType.Inactive)                    
+                        arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.PostBattle;
+
+                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.PostBattle;
+                }
+            }
+
             m_FightPhase = FightPhaseType.PostBattle;
-            m_PhaseTimeRemaining = TimeSpan.FromSeconds(30);
+            m_PhaseTimeRemaining = TimeSpan.FromSeconds(10);
         }
 
         public void FightCompleted()
@@ -195,7 +375,15 @@ namespace Server
                     if (arenaParticipant == null) continue;
                     if (arenaParticipant.Deleted) continue;
 
-                    arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.Waiting;
+                    if (arenaParticipant.m_EventStatus != ArenaParticipant.EventStatusType.Inactive)
+                    {
+                        arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.Waiting;
+                        arenaParticipant.m_LastEventTime = DateTime.UtcNow;
+                    }
+
+                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Alive;
+
+                    arenaParticipant.m_ArenaFight = null;                    
 
                     //TEST: Record Player Fight Data
                 }
@@ -207,7 +395,8 @@ namespace Server
                 m_Timer = null;
             }
 
-            Delete();
+            if (m_ArenaController != null)
+                m_ArenaController.MatchComplete();
         }
 
         public class ArenaFightTimer : Timer

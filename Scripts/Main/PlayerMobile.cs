@@ -1262,7 +1262,8 @@ namespace Server.Mobiles
         public Guild Guild = null;
         public GuildMemberEntry m_GuildMemberEntry = null;
         public GuildSettings m_GuildSettings = null;
-        public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;        
+        public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;
+        public CompetitionContext m_CompetitionContext = null;
 
         public override bool KeepsItemsOnDeath { get { return (AccessLevel > AccessLevel.Player); } }
 
@@ -2899,6 +2900,9 @@ namespace Server.Mobiles
                 BoatOccupied = null;
             else
                 BoatOccupied = boat;
+
+            if (m_CompetitionContext != null)
+                m_CompetitionContext.OnLocationChanged(this);
             
             DesignContext context = m_DesignContext;
 
@@ -2969,6 +2973,9 @@ namespace Server.Mobiles
             if (AccessLevel == AccessLevel.Player)
                 if (Mount != null)
                     Mount.Rider = null;
+
+            if (m_CompetitionContext != null)
+                m_CompetitionContext.OnMapChanged(this);
             
             DesignContext context = m_DesignContext;
 
@@ -3280,9 +3287,9 @@ namespace Server.Mobiles
             return result;
         }
 
-        public override void OnDeath(Container c)
+        public override void OnDeath(Container corpse)
         {
-            base.OnDeath(c);
+            base.OnDeath(corpse);
 
             SpecialAbilities.ClearSpecialEffects(this);
 
@@ -3314,14 +3321,14 @@ namespace Server.Mobiles
 
             MeerMage.StopEffect(this, false);
 
-            SkillHandlers.StolenItem.ReturnOnDeath(this, c);
+            SkillHandlers.StolenItem.ReturnOnDeath(this, corpse);
 
             if (m_PermaFlags.Count > 0)
             {
                 m_PermaFlags.Clear();
 
-                if (c is Corpse)
-                    ((Corpse)c).Criminal = true;
+                if (corpse is Corpse)
+                    ((Corpse)corpse).Criminal = true;
 
                 if (SkillHandlers.Stealing.ClassicMode)
                     Criminal = true;
@@ -3573,6 +3580,9 @@ namespace Server.Mobiles
 
             if ((carnage || violentDeath))
                 CustomizationAbilities.PlayerDeathExplosion(Location, Map, carnage, violentDeath);
+
+            if (m_CompetitionContext != null)
+                m_CompetitionContext.OnDeath(this, corpse);
             
             if (m_BuffTable != null)
             {
@@ -4300,6 +4310,7 @@ namespace Server.Mobiles
             writer.Write(m_ShortTermElapse);
             writer.Write(GameTime);
             writer.Write(m_GuildSettings);
+            writer.Write(m_CompetitionContext);
 
             writer.Write((int)m_HairModID);
             writer.Write((int)m_HairModHue);
@@ -4395,6 +4406,7 @@ namespace Server.Mobiles
                 m_ShortTermElapse = reader.ReadTimeSpan();
                 m_GameTime = reader.ReadTimeSpan();
                 m_GuildSettings = (GuildSettings)reader.ReadItem();
+                m_CompetitionContext = (CompetitionContext)reader.ReadItem();
 
                 m_HairModID = reader.ReadInt();
                 m_HairModHue = reader.ReadInt();
@@ -4941,6 +4953,9 @@ namespace Server.Mobiles
 
             if (m_SocietiesPlayerSettings != null)
                 m_SocietiesPlayerSettings.Delete();
+
+            if (m_CompetitionContext != null)
+                m_CompetitionContext.Delete();
         }
 
         #endregion
