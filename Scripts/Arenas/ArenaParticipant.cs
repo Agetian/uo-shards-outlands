@@ -41,6 +41,7 @@ namespace Server
         public int m_DamageReceived = 0;
         public int m_LowestHealth = 0;
 
+        public List<ArenaSpellUsage> m_SpellUsages = new List<ArenaSpellUsage>();
         public List<ArenaItemUsage> m_ItemUsages = new List<ArenaItemUsage>();
 
         [Constructable]
@@ -81,6 +82,32 @@ namespace Server
             }
         }
 
+        public ArenaSpellUsage GetSpellUsage(Type type)
+        {
+            foreach (ArenaSpellUsage arenaSpellUsage in m_SpellUsages)
+            {
+                if (arenaSpellUsage == null) continue;
+
+                if (arenaSpellUsage.m_SpellType == type)                
+                    return arenaSpellUsage;
+            }
+
+            return null;
+        }
+
+        public ArenaItemUsage GetItemUsage(Type type)
+        {
+            foreach (ArenaItemUsage arenaItemUsage in m_ItemUsages)
+            {
+                if (arenaItemUsage == null) continue;
+
+                if (arenaItemUsage.m_ItemType == type)
+                    return arenaItemUsage;
+            }
+
+            return null;
+        }
+
         public ArenaParticipant(Serial serial): base(serial)
         {
         }
@@ -101,6 +128,15 @@ namespace Server
             writer.Write(m_DamageDealt);
             writer.Write(m_DamageReceived);
             writer.Write(m_LowestHealth);
+
+            writer.Write(m_SpellUsages.Count);
+            for (int a = 0; a < m_SpellUsages.Count; a++)
+            {
+                if (m_SpellUsages[a].m_SpellType == null)
+                    writer.Write("null");
+                else
+                    writer.Write(m_SpellUsages[a].m_SpellType.ToString());
+            }
 
             writer.Write(m_ItemUsages.Count);
             for (int a = 0; a < m_ItemUsages.Count; a++)
@@ -131,6 +167,21 @@ namespace Server
                 m_DamageReceived = reader.ReadInt();
                 m_LowestHealth = reader.ReadInt();
 
+                int spellUsages = reader.ReadInt();
+                for (int a = 0; a < spellUsages; a++)
+                {
+                    string typeText = reader.ReadString();
+                    Type spellType = null;
+
+                    if (typeText != "null")
+                        spellType = Type.GetType(typeText);
+
+                    int usages = reader.ReadInt();
+
+                    if (spellType != null)
+                        m_SpellUsages.Add(new ArenaSpellUsage(spellType, usages));
+                }
+
                 int itemUsages = reader.ReadInt();
                 for (int a = 0; a < itemUsages; a++)
                 {
@@ -146,6 +197,18 @@ namespace Server
                         m_ItemUsages.Add(new ArenaItemUsage(itemType, usages));
                 }
             }
+        }
+    }
+
+    public class ArenaSpellUsage
+    {
+        public Type m_SpellType;
+        public int m_Uses;
+
+        public ArenaSpellUsage(Type itemType, int uses)
+        {
+            m_SpellType = itemType;
+            m_Uses = uses;
         }
     }
 
