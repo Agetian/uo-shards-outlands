@@ -147,10 +147,7 @@ namespace Server
 
         public void CreateSpellRestrictionEntries()
         {
-            //Custom Restrictions
-            m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(ReactiveArmorSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
-            m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(HealSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
-            
+            //Custom Restrictions            
             m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(PoisonSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
             m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(PoisonFieldSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
 
