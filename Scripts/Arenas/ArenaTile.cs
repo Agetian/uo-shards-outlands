@@ -52,7 +52,7 @@ namespace Server
 
                     case ArenaTileType.WallLocation:
                         TeamNumber = -1;
-                        PlayerNumber = -1;
+                        PlayerNumber = 0;
 
                         ItemID = 6182;
                         Hue = 2267;
@@ -128,11 +128,12 @@ namespace Server
             {
                 case ArenaTileType.StartLocation:
                     LabelTo(from, "Arena Start Location");
-                    LabelTo(from, "(Team " + m_TeamNumber.ToString() + ")");
+                    LabelTo(from, "(Team " + m_TeamNumber.ToString() + " / Player " + m_PlayerNumber.ToString() + ")");
                 break;
 
                 case ArenaTileType.WallLocation:
-                    LabelTo(from, "Arena Wall Location");                   
+                    LabelTo(from, "Arena Wall Location");
+                    LabelTo(from, "(Player " + m_PlayerNumber.ToString() + ")");
                 break;
 
                 case ArenaTileType.ExitLocation:

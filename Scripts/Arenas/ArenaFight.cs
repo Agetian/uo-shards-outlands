@@ -23,50 +23,28 @@ namespace Server
 
         public ArenaController m_ArenaController;
 
+        public ArenaMatch m_ArenaMatch;
         public FightPhaseType m_FightPhase = FightPhaseType.StartCountdown;
         public TimeSpan m_PhaseTimeRemaining = TimeSpan.FromSeconds(10);
+        public TimeSpan m_RoundTimeRemaining = TimeSpan.FromMinutes(3);
+
+        public bool m_SuddenDeath = false;
+        public int m_SuddenDeathTickCounter = 0;
+        public TimeSpan m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(3);
 
         public List<ArenaTeam> m_Teams = new List<ArenaTeam>();
 
         public static TimeSpan TimerTickDuration = TimeSpan.FromSeconds(1);
 
         public Timer m_Timer;
-
+        
         //----
 
         public CompetitionContext m_CompetitionContext;
-
-        public static void Initialize()
-        {
-            //EventSink.Speech += new SpeechEventHandler(EventSink_Speech);
-            //EventSink.Login += new LoginEventHandler(EventSink_Login);
-
-            //CommandSystem.Register("vli", AccessLevel.GameMaster, new CommandEventHandler(vli_oc));
-        }
-
+        
         [Constructable]
-        public ArenaFight(ArenaController arenaController, List<ArenaTeam> teams): base(0x0)
+        public ArenaFight(): base(0x0)
         {
-            m_ArenaController = arenaController;
-            m_Teams = teams;
-
-            if (arenaController == null || teams == null)
-            {
-                Delete();
-                return;
-            }
-
-            foreach (ArenaTeam arenaTeam in teams)
-            {
-                if (arenaTeam == null) continue;
-                if (arenaTeam.Deleted) continue;
-
-                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
-                {
-                    arenaParticipant.m_ArenaFight = this;
-                }
-            }
-
             Visible = false;
             Movable = false;
 
@@ -175,6 +153,7 @@ namespace Server
             player.RemoveStatMod("[Magic] Str Offset");
             player.RemoveStatMod("[Magic] Dex Offset");
             player.RemoveStatMod("[Magic] Int Offset");
+            //TEST: CLEAR MAGIC RESIST POTION
 
             player.Paralyzed = false;
             player.Hidden = false;
@@ -306,6 +285,171 @@ namespace Server
             return true;
         }
 
+        public void Initialize()
+        {
+            if (m_ArenaController == null) return;
+            if (m_ArenaController.Deleted) return;
+            if (m_ArenaMatch == null) return;
+            if (m_ArenaMatch.Deleted) return;
+            if (m_ArenaMatch.m_Ruleset == null) return;
+            if (m_ArenaMatch.m_Ruleset.Deleted) return;
+
+            //TEST: APPLY RULESET FEATURES
+
+            ArenaRuleset ruleset = m_ArenaMatch.m_Ruleset;
+
+            switch (ruleset.m_RoundDuration)
+            {
+                case ArenaRuleset.RoundDurationType.ThreeMinutes:
+                    m_RoundTimeRemaining = TimeSpan.FromMinutes(3);
+                    m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(3);
+                break;
+
+                case ArenaRuleset.RoundDurationType.FiveMinutes:
+                    m_RoundTimeRemaining = TimeSpan.FromMinutes(5);
+                    m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(5);
+                break;
+
+                case ArenaRuleset.RoundDurationType.TenMinutes:
+                    m_RoundTimeRemaining = TimeSpan.FromMinutes(10);
+                    m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(10);
+                break;
+
+                case ArenaRuleset.RoundDurationType.FifteenMinutes:
+                    m_RoundTimeRemaining = TimeSpan.FromMinutes(15);
+                    m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(15);
+                break;
+
+                case ArenaRuleset.RoundDurationType.TwentyMinutes:
+                    m_RoundTimeRemaining = TimeSpan.FromMinutes(20);
+                    m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(20);
+                break;
+            }
+
+            int teamSize = ruleset.TeamSize;
+            
+            for (int a = 0; a < teamSize; a++)
+            {
+                ArenaTile wallTile = m_ArenaController.GetWallTile(a);
+
+                ArenaWall wall = new ArenaWall(); 
+
+                if (wallTile != null)
+                {
+                    switch (wallTile.Facing)
+                    {
+                        case Server.Direction.West: wall.ItemID = 128; break;
+                        case Server.Direction.East: wall.ItemID = 128; break;
+
+                        case Server.Direction.North: wall.ItemID = 128; break;
+                        case Server.Direction.South: wall.ItemID = 128; break;
+                    }
+
+                    wall.MoveToWorld(wallTile.Location, wallTile.Map);
+
+                    m_ArenaController.m_Walls.Add(wall);
+                }
+
+                else
+                {
+                    //TEST: MISSING WALL TILE
+                }
+            }
+
+            for (int a = 0; a < m_Teams.Count; a++)
+            {
+                ArenaTeam arenaTeam = m_Teams[a];
+
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                for (int b = 0; b < arenaTeam.m_Participants.Count; b++)
+                {
+                    ArenaParticipant participant = arenaTeam.m_Participants[b];
+
+                    if (participant == null) continue;
+                    if (participant.Deleted) continue;
+                    if (participant.m_Player == null) continue;
+                    if (participant.m_Player.Deleted) continue;
+
+                    PlayerMobile player = participant.m_Player;
+
+                    ClearEffects(player);
+
+                    ArenaTile playerStartingTile = m_ArenaController.GetPlayerStartingTile(a, b);
+
+                    if (playerStartingTile != null)
+                    {
+                        player.Location = playerStartingTile.Location;
+                        player.Map = playerStartingTile.Map;
+
+                        player.Direction = playerStartingTile.Facing;
+                    }
+
+                    else
+                    {
+                        //TEST: SET DEFAULT PLAYER LOCATION (IF TILES MISSING)
+                    }
+
+                    //TEST: Participant Settings Set
+
+                    //TEST: ADD COMPETITION CONTEXT                    
+
+                    //TEST: FREEZE PLAYER UNTIL FIGHT START
+                }
+            }
+
+            /*
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant participant in arenaTeam.m_Participants)
+                {
+                }
+            }
+             * */
+        }
+
+        public void SendArenaParticipantsSound(int sound)
+        {
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                {
+                    if (arenaParticipant == null) continue;
+                    if (arenaParticipant.Deleted) continue;
+                    if (arenaParticipant.m_Player == null) continue;
+                    if (arenaParticipant.m_Player.Deleted) continue;
+
+                    arenaParticipant.m_Player.SendSound(sound);
+                }
+            }
+        }
+
+        public void SendArenaParticipantsMessage(string text, int hue)
+        {
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                {
+                    if (arenaParticipant == null) continue;
+                    if (arenaParticipant.Deleted) continue;
+                    if (arenaParticipant.m_Player == null) continue;
+                    if (arenaParticipant.m_Player.Deleted) continue;
+
+                    arenaParticipant.m_Player.SendMessage(hue, text);
+                }
+            }
+        }
+
         public void StartCountdown()
         {
             m_FightPhase = FightPhaseType.StartCountdown;
@@ -314,6 +458,13 @@ namespace Server
 
         public void StartFight()
         {
+            if (m_ArenaController == null) return;
+            if (m_ArenaController.Deleted) return;
+
+            m_ArenaController.ClearWalls();
+
+            //TEST: SEND SOUND TO PLAYERS
+
             foreach (ArenaTeam arenaTeam in m_Teams)
             {
                 if (arenaTeam == null) continue;
@@ -325,6 +476,8 @@ namespace Server
                     if (arenaParticipant.Deleted) continue;
 
                     arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.Playing;
+
+                    //TEST: UNFREEZE
                 }
             }
 
@@ -332,6 +485,10 @@ namespace Server
             m_PhaseTimeRemaining = TimeSpan.FromDays(1);
         }
 
+        public void StartSuddenDeath()
+        {
+        }
+        
         public void StartPostBattle()
         {
             foreach (ArenaTeam arenaTeam in m_Teams)
@@ -350,7 +507,7 @@ namespace Server
                     arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.PostBattle;
                 }
             }
-
+            
             m_FightPhase = FightPhaseType.PostBattle;
             m_PhaseTimeRemaining = TimeSpan.FromSeconds(10);
         }
@@ -363,6 +520,7 @@ namespace Server
 
         public void ClearFight()
         {
+            /*
             foreach (ArenaTeam arenaTeam in m_Teams)
             {
                 if (arenaTeam == null) continue;
@@ -388,6 +546,7 @@ namespace Server
                     //TEST: Record Player Fight Data
                 }
             }
+            */
 
             if (m_Timer != null)
             {
@@ -445,19 +604,59 @@ namespace Server
 
                         if (m_ArenaFight.m_PhaseTimeRemaining.TotalSeconds <= 0)
                         {
+                            m_ArenaFight.SendArenaParticipantsSound(0x4B7); //0x0F5 //0x4D5 //0x485 //0x100
+                            m_ArenaFight.SendArenaParticipantsMessage("Battle begins!", 63);
+
                             m_ArenaFight.StartFight();
                             return;
+                        }
+
+                        else
+                        {
+                            m_ArenaFight.SendArenaParticipantsSound(0x4D3); //0x0FA //0x49D
+                            m_ArenaFight.SendArenaParticipantsMessage("Battle will begin in " + m_ArenaFight.m_PhaseTimeRemaining.TotalSeconds.ToString() + "...", 2599);
                         }
                     break;
 
                     case FightPhaseType.Fight:
-                        m_ArenaFight.m_ArenaController.PublicOverheadMessage(MessageType.Regular, 0, false, "Fight");
-
                         if (!m_ArenaFight.CheckTeamsRemaining())
                         {
                             m_ArenaFight.StartPostBattle();
                             return;
                         }
+
+                        if (m_ArenaFight.m_SuddenDeath)
+                        {
+                            m_ArenaFight.m_SuddenDeathTickCounter++;
+                            m_ArenaFight.m_SuddenDeathTimeRemaining = m_ArenaFight.m_SuddenDeathTimeRemaining.Subtract(ArenaFight.TimerTickDuration);
+
+                            m_ArenaFight.m_ArenaController.PublicOverheadMessage(MessageType.Regular, 0, false, "Sudden Death: " + m_ArenaFight.m_SuddenDeathTimeRemaining.TotalSeconds.ToString());
+
+                            if (m_ArenaFight.m_SuddenDeathTimeRemaining.TotalSeconds <= 0)
+                            {
+                                m_ArenaFight.StartPostBattle();
+
+                                return;
+                            }
+                        }
+
+                        else
+                        {
+                            m_ArenaFight.m_RoundTimeRemaining = m_ArenaFight.m_RoundTimeRemaining.Subtract(ArenaFight.TimerTickDuration);
+
+                            m_ArenaFight.m_ArenaController.PublicOverheadMessage(MessageType.Regular, 0, false, "Fight: " + m_ArenaFight.m_RoundTimeRemaining.TotalSeconds.ToString());
+                        
+                            if (m_ArenaFight.m_RoundTimeRemaining.TotalSeconds <= 0)
+                            {
+                                m_ArenaFight.m_SuddenDeath = true;
+
+                                m_ArenaFight.SendArenaParticipantsSound(0x4D5);
+                                m_ArenaFight.SendArenaParticipantsMessage("Sudden Death begins!", 2116);
+
+                                m_ArenaFight.StartSuddenDeath();
+                                return;
+                            }
+                        }                        
                     break;
 
                     case FightPhaseType.PostBattle:
@@ -498,8 +697,14 @@ namespace Server
 
             //Version 0
             writer.Write(m_ArenaController);
+            writer.Write(m_ArenaMatch);
             writer.Write((int)m_FightPhase);
             writer.Write(m_PhaseTimeRemaining);
+            writer.Write(m_RoundTimeRemaining);
+
+            writer.Write(m_SuddenDeath);
+            writer.Write(m_SuddenDeathTickCounter);
+            writer.Write(m_SuddenDeathTimeRemaining);            
 
             writer.Write(m_Teams.Count);
             for (int a = 0; a < m_Teams.Count; a++)
@@ -519,8 +724,14 @@ namespace Server
             if (version >= 0)
             {
                 m_ArenaController = (ArenaController)reader.ReadItem();
+                m_ArenaMatch = (ArenaMatch)reader.ReadItem();
                 m_FightPhase = (FightPhaseType)reader.ReadInt();
                 m_PhaseTimeRemaining = reader.ReadTimeSpan();
+                m_RoundTimeRemaining = reader.ReadTimeSpan();
+
+                m_SuddenDeath = reader.ReadBool();
+                m_SuddenDeathTickCounter = reader.ReadInt();
+                m_SuddenDeathTimeRemaining = reader.ReadTimeSpan();
 
                 int teamsCount = reader.ReadInt();
                 for (int a = 0; a < teamsCount; a++)

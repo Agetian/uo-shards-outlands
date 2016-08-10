@@ -23,6 +23,29 @@ namespace Server
 {
     public class ArenaRuleset: Item
     {
+        public enum MatchTypeType
+        {
+            Unranked1vs1,
+            Unranked2vs2,
+            Unranked3vs3,
+            Unranked4vs4,
+
+            Ranked1vs1,
+            Ranked2vs2,
+            Ranked3vs3,
+            Ranked4vs4,
+        }
+
+        public enum ArenaRulesetFailureType
+        {
+            None,
+            Dead,
+            NotInArenaRegion,
+            Transformed,
+            EquipmentRestriction,
+            WeaponPoisonedAtStart
+        }
+
         public enum EquipmentRestrictionType
         {
             GMRegularMaterials,
@@ -42,8 +65,7 @@ namespace Server
             FiveMinutes,
             TenMinutes,
             FifteenMinutes,
-            TwentyMinutes,
-            Unlimited
+            TwentyMinutes
         }
 
         public enum SuddenDeathModeType
@@ -61,72 +83,36 @@ namespace Server
             NoHealingAllowed
         }
 
-        public static int MaxTeamSize = 4;
-
-        public int m_TeamSize = 1;
+        public MatchTypeType m_MatchType = MatchTypeType.Unranked1vs1;
+                
         [CommandProperty(AccessLevel.GameMaster)]
         public int TeamSize
         {
-            get { return m_TeamSize; }
-            set
+            get
             {
-                m_TeamSize = value;
+                switch (m_MatchType)
+                {
+                    case MatchTypeType.Unranked1vs1: return 1; break;
+                    case MatchTypeType.Unranked2vs2: return 2; break;
+                    case MatchTypeType.Unranked3vs3: return 3; break;
+                    case MatchTypeType.Unranked4vs4: return 4; break;
 
-                if (MaxTeamSize < 1)
-                    MaxTeamSize = 1;
+                    case MatchTypeType.Ranked1vs1: return 1; break;
+                    case MatchTypeType.Ranked2vs2: return 2; break;
+                    case MatchTypeType.Ranked3vs3: return 3; break;
+                    case MatchTypeType.Ranked4vs4: return 4; break;
+                }
 
-                if (m_TeamSize > MaxTeamSize)
-                    m_TeamSize = MaxTeamSize;
-            }
+                return 1;
+            }            
         }
 
         public EquipmentRestrictionType m_EquipmentRestriction = EquipmentRestrictionType.GMRegularMaterials;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public EquipmentRestrictionType EquipmentRestriction
-        {
-            get { return m_EquipmentRestriction; }
-            set { m_EquipmentRestriction = value; }
-        }
-
         public ResourceConsumptionType m_ResourceConsumption = ResourceConsumptionType.Normal;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public ResourceConsumptionType ResourceConsumption
-        {
-            get { return m_ResourceConsumption; }
-            set { m_ResourceConsumption = value; }
-        }
-
         public bool m_AllowPoisonedWeapons = false;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public bool AllowPoisonedWeapons
-        {
-            get { return m_AllowPoisonedWeapons; }
-            set { m_AllowPoisonedWeapons = value; }
-        }
-
         public bool m_ItemsLoseDurability = true;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public bool ItemsLoseDurability
-        {
-            get { return m_ItemsLoseDurability; }
-            set { m_ItemsLoseDurability = value; }
-        }
-
-        public RoundDurationType m_RoundDuration = RoundDurationType.TenMinutes;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public RoundDurationType RoundDuration
-        {
-            get { return m_RoundDuration; }
-            set { m_RoundDuration = value; }
-        }
-
+        public RoundDurationType m_RoundDuration = RoundDurationType.ThreeMinutes; //TEST: Ten Minutes
         public SuddenDeathModeType m_SuddenDeathMode = SuddenDeathModeType.DamageIncreasedTwentyFivePercentPerMinute;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public SuddenDeathModeType SuddenDeathMode
-        {
-            get { return m_SuddenDeathMode; }
-            set { m_SuddenDeathMode = value; }
-        }
 
         public List<ArenaSpellRestriction> m_SpellRestrictions = new List<ArenaSpellRestriction>();
         public List<ArenaItemRestriction> m_ItemRestrictions = new List<ArenaItemRestriction>();
@@ -317,13 +303,32 @@ namespace Server
             return true;
         }
 
+        public ArenaRulesetFailureType CheckForRulesetViolations(PlayerMobile player)
+        {
+            if (player == null) return ArenaRulesetFailureType.NotInArenaRegion;
+            if (player.Deleted) return ArenaRulesetFailureType.NotInArenaRegion;
+
+            if (!player.Alive)
+                return ArenaRulesetFailureType.Dead;            
+            
+            //TEST: Not in Arena Zone
+
+            //TEST: Disguised / Polymorphed / Incognito
+
+            //TEST: Restricted Equipment
+
+            //TEST: Weapon Poisoned At Start
+
+            return ArenaRulesetFailureType.None;
+        }
+
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
             writer.Write((int)0);
 
             //Version 0
-            writer.Write(m_TeamSize);
+            writer.Write((int)m_MatchType);
             writer.Write((int)m_EquipmentRestriction);
             writer.Write((int)m_ResourceConsumption);
             writer.Write(m_AllowPoisonedWeapons);
@@ -362,13 +367,13 @@ namespace Server
             //Version 0
             if (version >= 0)
             {
-                TeamSize = reader.ReadInt();
-                EquipmentRestriction = (EquipmentRestrictionType)reader.ReadInt();
-                ResourceConsumption = (ResourceConsumptionType)reader.ReadInt();
-                AllowPoisonedWeapons = reader.ReadBool();
-                ItemsLoseDurability = reader.ReadBool();
-                RoundDuration = (RoundDurationType)reader.ReadInt();
-                SuddenDeathMode = (SuddenDeathModeType)reader.ReadInt();
+                m_MatchType = (MatchTypeType)reader.ReadInt();
+                m_EquipmentRestriction = (EquipmentRestrictionType)reader.ReadInt();
+                m_ResourceConsumption = (ResourceConsumptionType)reader.ReadInt();
+                m_AllowPoisonedWeapons = reader.ReadBool();
+                m_ItemsLoseDurability = reader.ReadBool();
+                m_RoundDuration = (RoundDurationType)reader.ReadInt();
+                m_SuddenDeathMode = (SuddenDeathModeType)reader.ReadInt();
 
                 int spellRestrictionCount = reader.ReadInt();
                 for (int a = 0; a < spellRestrictionCount; a++)

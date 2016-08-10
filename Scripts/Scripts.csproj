@@ -92,10 +92,13 @@
     <Compile Include="Arenas\ArenaController.cs" />
     <Compile Include="Arenas\ArenaFight.cs" />
     <Compile Include="Arenas\ArenaGroupController.cs" />
+    <Compile Include="Arenas\ArenaMatch.cs" />
     <Compile Include="Arenas\ArenaParticipant.cs" />
     <Compile Include="Arenas\ArenaRuleset.cs" />
     <Compile Include="Arenas\ArenaTeam.cs" />
     <Compile Include="Arenas\ArenaTile.cs" />
+    <Compile Include="Arenas\ArenaTournament.cs" />
+    <Compile Include="Arenas\ArenaWall.cs" />
     <Compile Include="Arenas\CompetitionContext.cs" />
     <Compile Include="Captcha\Captcha.cs" />
     <Compile Include="Captcha\CaptchaGump.cs" />

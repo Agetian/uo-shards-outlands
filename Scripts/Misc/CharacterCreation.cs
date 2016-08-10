@@ -198,23 +198,13 @@ namespace Server.Misc
                 newChar.BankBox.DropItem(ticket);
             }
             
-            CityInfo[] ci = new CityInfo[12];
+            CityInfo[] ci = new CityInfo[2];
 
-            ci[0] = new CityInfo("", "", 1503, 1621, 21, Map.Felucca);
-            ci[1] = new CityInfo("", "", 1503, 1613, 21, Map.Felucca);
-            ci[2] = new CityInfo("", "", 1431, 1720, 20, Map.Felucca);
-            ci[3] = new CityInfo("", "", 1495, 1623, 20, Map.Felucca);
-            ci[4] = new CityInfo("", "", 1587, 1596, 20, Map.Felucca);
-            ci[5] = new CityInfo("", "", 1587, 1586, 20, Map.Felucca);
-            ci[6] = new CityInfo("", "", 1579, 1596, 20, Map.Felucca);
-            ci[7] = new CityInfo("", "", 1579, 1586, 20, Map.Felucca);
-            ci[8] = new CityInfo("", "", 1495, 1687, 20, Map.Felucca);
-            ci[9] = new CityInfo("", "", 1503, 1620, 21, Map.Felucca);
-            ci[10] = new CityInfo("", "", 1503, 1614, 21, Map.Felucca);
-            ci[11] = new CityInfo("", "", 1494, 1608, 21, Map.Felucca);
+            ci[0] = new CityInfo("", "", 1604, 1524, 20, Map.Felucca);
+            ci[1] = new CityInfo("", "", 1605, 1524, 20, Map.Felucca);
 
             Random rand = new Random();
-            int cityIndex = rand.Next(0, 11);
+            int cityIndex = rand.Next(0, 1);
 
             CityInfo city = ci[cityIndex];
 

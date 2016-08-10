@@ -36,18 +36,16 @@ namespace Server
             }
         }
 
-        public List<ArenaTeam> m_Teams = new List<ArenaTeam>();
+        public List<ArenaMatch> m_MatchListings = new List<ArenaMatch>();
+        public List<ArenaTournament> m_Tournaments = new List<ArenaTournament>();        
+        
+        public DateTime m_NextListingAudit = DateTime.UtcNow;
 
-        public DateTime m_NextParticipantAudit = DateTime.UtcNow;
+        private Timer m_Timer;        
 
-        private Timer m_Timer;
-
-        public static int TeamsRequired = 2;
-
+        public static int TeamsRequired = 2;        
+        public static TimeSpan AuditInterval = TimeSpan.FromMinutes(5);
         public static TimeSpan LoggedOutPlayerTimeoutThreshold = TimeSpan.FromMinutes(10);
-        public static TimeSpan ParticipantAuditInterval = TimeSpan.FromMinutes(5);
-
-        public static bool RemoveFromQueueAfterMatch = true;
 
         [Constructable]
         public ArenaGroupController(): base(3804)
@@ -77,6 +75,236 @@ namespace Server
             if (player == null)
                 return;
 
+            //TEST: REPLACE WITH GUMP
+            if (m_MatchListings.Count == 0)
+            {
+                ArenaMatch arenaMatch = new ArenaMatch(this, player);
+                
+                ArenaTeam team = new ArenaTeam();
+                ArenaParticipant participant = new ArenaParticipant(player);
+
+                team.m_Participants.Add(participant);
+                arenaMatch.m_Teams.Add(team);
+                
+                arenaMatch.m_MatchStatus = ArenaMatch.MatchStatusType.Listed;
+
+                m_MatchListings.Add(arenaMatch);
+            }
+
+            else
+            {
+                ArenaMatch arenaMatch = m_MatchListings[0];
+
+                bool foundPlayer = false;
+
+                foreach (ArenaTeam team in arenaMatch.m_Teams)
+                {
+                    foreach (ArenaParticipant participant in team.m_Participants)
+                    {
+                        if (participant.m_Player == player)
+                            foundPlayer = true;
+                    }
+                }
+
+                if (foundPlayer)
+                    return;
+
+                ArenaTeam newTeam = new ArenaTeam();
+                ArenaParticipant newParticipant = new ArenaParticipant(player);
+
+                newTeam.m_Participants.Add(newParticipant);
+                arenaMatch.m_Teams.Add(newTeam);
+
+                arenaMatch.m_CreatorReady = true;
+            }
+        }
+
+        public void AuditListings()
+        {
+            m_NextListingAudit = DateTime.UtcNow + AuditInterval;
+        }
+
+        public ArenaController GetAvailableArena()
+        {
+            ArenaController arena = null;
+
+            foreach (ArenaController arenaController in m_Arenas)
+            {
+                if (arenaController == null)
+                    continue;
+
+                if (!arenaController.Enabled)
+                    continue;
+
+                if (arenaController.m_ArenaFight == null)
+                    return arenaController;
+
+                if (arenaController.m_ArenaFight.Deleted)
+                    return arenaController;
+            }
+
+            return arena;
+        }
+
+        public class ArenaGroupControllerTimer : Timer
+        {
+            public ArenaGroupController m_ArenaGroupController;
+
+            public ArenaGroupControllerTimer(ArenaGroupController arenaGroupController): base(TimeSpan.Zero, TimeSpan.FromSeconds(3))
+            {
+                m_ArenaGroupController = arenaGroupController;
+
+                Priority = TimerPriority.OneSecond;
+            }
+
+            protected override void OnTick()
+            {
+                if (m_ArenaGroupController == null)
+                {
+                    Stop();
+                    return;
+                }
+
+                if (m_ArenaGroupController.Deleted)
+                {
+                    Stop();
+                    return;        
+                }
+               
+                if (DateTime.UtcNow >= m_ArenaGroupController.m_NextListingAudit)
+                    m_ArenaGroupController.AuditListings();                
+
+                ArenaController emptyArena = m_ArenaGroupController.GetAvailableArena();
+
+                if (emptyArena != null)
+                {
+                    foreach (ArenaMatch arenaMatch in m_ArenaGroupController.m_MatchListings)
+                    {
+                        if (arenaMatch == null) continue;
+                        if (arenaMatch.Deleted) continue;
+
+                        if (DateTime.UtcNow < arenaMatch.m_NextReadyCheck) continue;
+                        if (!arenaMatch.IsReadyToStart()) continue;
+
+                        List<KeyValuePair<PlayerMobile, ArenaRuleset.ArenaRulesetFailureType>> m_RulesetViolations = new List<KeyValuePair<PlayerMobile, ArenaRuleset.ArenaRulesetFailureType>>();
+
+                        bool rulesetViolationExists = false;
+
+                        foreach (ArenaTeam arenaTeam in arenaMatch.m_Teams)
+                        {
+                            if (arenaTeam == null) continue;
+                            if (arenaTeam.Deleted) continue;
+
+                            foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                            {
+                                if (arenaParticipant == null) continue;
+                                if (arenaParticipant.Deleted) continue;
+                                if (arenaParticipant.m_Player == null) continue;
+                                if (arenaParticipant.Deleted == null) continue;
+
+                                if (arenaMatch.m_Ruleset == null) continue;
+
+                                ArenaRuleset.ArenaRulesetFailureType rulesetFailure = arenaMatch.m_Ruleset.CheckForRulesetViolations(arenaParticipant.m_Player);
+
+                                m_RulesetViolations.Add(new KeyValuePair<PlayerMobile, ArenaRuleset.ArenaRulesetFailureType>(arenaParticipant.m_Player, rulesetFailure));
+
+                                if (rulesetFailure != ArenaRuleset.ArenaRulesetFailureType.None)
+                                    rulesetViolationExists = true;
+                            }
+                        }
+
+                        if (rulesetViolationExists)
+                        {
+                            //TEST: SEND VIOLATION GUMP TO ALL TEAM MEMBERS OF EACH TIME                            
+
+                            arenaMatch.m_NextReadyCheck = DateTime.UtcNow + ArenaMatch.ReadyCheckInterval;
+                        }
+
+                        else
+                        {
+                            arenaMatch.m_MatchStatus = ArenaMatch.MatchStatusType.Fighting;
+
+                            ArenaFight arenaFight = new ArenaFight();                            
+
+                            arenaFight.m_ArenaController = emptyArena;
+                            arenaFight.m_ArenaMatch = arenaMatch;
+
+                            for (int a = 0; a < arenaMatch.m_Teams.Count; a++)
+                            {
+                                arenaFight.m_Teams.Add(arenaMatch.m_Teams[a]);
+                            }
+
+                            emptyArena.m_ArenaFight = arenaFight;
+
+                            arenaFight.Initialize();
+                        }
+                    }
+                }                
+            }
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0);
+
+            //Version 0
+            writer.Write(m_MatchListings.Count);
+            for (int a = 0; a < m_MatchListings.Count; a++)
+            {
+                writer.Write(m_MatchListings[a]);
+            }
+
+            writer.Write(m_Tournaments.Count);
+            for (int a = 0; a < m_Tournaments.Count; a++)
+            {
+                writer.Write(m_Tournaments[a]);
+            }
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+                int matchListingsCount = reader.ReadInt();
+                for (int a = 0; a < matchListingsCount; a++)
+                {
+                    m_MatchListings.Add(reader.ReadItem() as ArenaMatch);
+                }
+
+                int tournamentsCount = reader.ReadInt();
+                for (int a = 0; a < tournamentsCount; a++)
+                {
+                    m_Tournaments.Add(reader.ReadItem() as ArenaTournament);
+                }
+            }
+
+            //-----
+
+            m_Instances.Add(this);
+
+            m_Timer = new ArenaGroupControllerTimer(this);
+            m_Timer.Start();
+        }
+    }
+}
+
+#region OLD VERSION
+
+/*
+        public override void OnDoubleClick(Mobile from)
+        {
+            base.OnDoubleClick(from);
+            
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
+                return;
+            
             ArenaParticipant playerParticipant = GetPlayerParticipant(player);
 
             if (playerParticipant == null)
@@ -99,11 +327,11 @@ namespace Server
 
                 //TEST
                 player.Say("Joining the Arena Queue");
-            }
+            }            
         }
         
         public ArenaParticipant GetPlayerParticipant(PlayerMobile player)
-        {
+        {            
             foreach (ArenaTeam arenaTeam in m_Teams)
             {
                 if (arenaTeam == null) continue;
@@ -114,7 +342,7 @@ namespace Server
                 return arenaParticipant;
             }
 
-            return null;
+            return null;             
         }
 
         public List<ArenaTeam> GetReadyTeams()
@@ -243,8 +471,6 @@ namespace Server
 
         public void AuditParticipants()
         {
-            //TEST: Do Not Do During in Tournament (Only Clear All After Tournament Completion)
-
             Queue m_Queue = new Queue();
 
             foreach (ArenaTeam arenaTeam in m_Teams)
@@ -305,79 +531,6 @@ namespace Server
 
             arenaParticipant.Delete();
         }
+        */
 
-        public class ArenaGroupControllerTimer : Timer
-        {
-            public ArenaGroupController m_ArenaGroupController;
-
-            public ArenaGroupControllerTimer(ArenaGroupController arenaGroupController): base(TimeSpan.Zero, TimeSpan.FromSeconds(3))
-            {
-                m_ArenaGroupController = arenaGroupController;
-
-                Priority = TimerPriority.OneSecond;
-            }
-
-            protected override void OnTick()
-            {
-                if (m_ArenaGroupController == null)
-                {
-                    Stop();
-                    return;
-                }
-
-                if (m_ArenaGroupController.Deleted)
-                {
-                    Stop();
-                    return;
-                }
-
-                if (DateTime.UtcNow >= m_ArenaGroupController.m_NextParticipantAudit)                
-                    m_ArenaGroupController.AuditParticipants();                
-
-                ArenaController emptyArena = m_ArenaGroupController.GetAvailableArena();
-
-                if (emptyArena != null)
-                {
-                    if (m_ArenaGroupController.GetReadyTeams().Count >= ArenaGroupController.TeamsRequired)
-                        m_ArenaGroupController.StartMatch();                    
-                }
-            }
-        }
-
-        public override void Serialize(GenericWriter writer)
-        {
-            base.Serialize(writer);
-            writer.Write((int)0);
-
-            //Version 0
-            writer.Write(m_Teams.Count);
-            for (int a = 0; a < m_Teams.Count; a++)
-            {
-                writer.Write(m_Teams[a]);
-            }
-        }
-
-        public override void Deserialize(GenericReader reader)
-        {
-            base.Deserialize(reader);
-            int version = reader.ReadInt();
-
-            //Version 0
-            if (version >= 0)
-            {
-                int teamsCount = reader.ReadInt();
-                for (int a = 0; a < teamsCount; a++)
-                {
-                    m_Teams.Add(reader.ReadItem() as ArenaTeam);
-                }
-            }
-
-            //-----
-
-            m_Instances.Add(this);
-
-            m_Timer = new ArenaGroupControllerTimer(this);
-            m_Timer.Start();
-        }
-    }
-}
+#endregion

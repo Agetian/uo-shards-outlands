@@ -60,6 +60,8 @@ namespace Server
                 return arenaTiles;
             }
         }
+
+        public List<Item> m_Walls = new List<Item>();
         
         [Constructable]
         public ArenaController(): base(4479)
@@ -114,6 +116,61 @@ namespace Server
             return null;
         }
 
+        public ArenaTile GetPlayerStartingTile(int team, int playerNumber)
+        {
+            foreach (ArenaTile arenaTile in m_ArenaTiles)
+            {
+                if (arenaTile == null) continue;
+                if (arenaTile.Deleted) continue;
+
+                if (arenaTile.m_TileType == ArenaTile.ArenaTileType.StartLocation)
+                {
+                    if (arenaTile.m_TeamNumber == team && arenaTile.m_PlayerNumber == playerNumber)
+                        return arenaTile;
+                }
+            }
+
+            return null;
+        }
+
+        public ArenaTile GetWallTile(int position)
+        {
+            foreach (ArenaTile arenaTile in m_ArenaTiles)
+            {
+                if (arenaTile == null) continue;
+                if (arenaTile.Deleted) continue;
+
+                if (arenaTile.m_TileType == ArenaTile.ArenaTileType.WallLocation)
+                {
+                    if (arenaTile.m_PlayerNumber == position)
+                        return arenaTile;
+                }
+            }
+
+            return null;
+        }
+
+        public void ClearWalls()
+        {
+            Queue m_Queue = new Queue();
+
+            foreach (Item item in m_Walls)
+            {
+                if (item == null) continue;
+                if (item.Deleted) continue;
+
+                m_Queue.Enqueue(item);
+            }
+
+            while (m_Queue.Count > 0)
+            {
+                Item item = (Item)m_Queue.Dequeue();
+                item.Delete();
+            }
+
+            m_Walls.Clear();
+        }
+
         public void MatchComplete()
         {
             if (m_ArenaFight != null)
@@ -147,8 +204,8 @@ namespace Server
 
             //TEST: Clear Items from Arena
             
-            if (m_ArenaGroupController != null)
-                m_ArenaGroupController.MatchComplete(m_ArenaFight);
+            //if (m_ArenaGroupController != null)
+                //m_ArenaGroupController.MatchComplete(m_ArenaFight);
 
             m_ArenaFight = null;
         }
@@ -163,6 +220,12 @@ namespace Server
             writer.Write(m_Enabled);
             writer.Write(m_Boundary);
             writer.Write(m_ArenaFight);
+
+            writer.Write(m_Walls.Count);
+            for (int a = 0; a < m_Walls.Count; a++)
+            {
+                writer.Write(m_Walls[a]);
+            }
         }
 
         public override void Deserialize(GenericReader reader)
@@ -177,6 +240,12 @@ namespace Server
                 Enabled = reader.ReadBool();
                 Boundary = reader.ReadRect2D();
                 m_ArenaFight = reader.ReadItem() as ArenaFight;
+
+                int staticWallsCount = reader.ReadInt();
+                for (int a = 0; a < staticWallsCount; a++)
+                {
+                    m_Walls.Add(reader.ReadItem());
+                }
             }
 
             //-----
