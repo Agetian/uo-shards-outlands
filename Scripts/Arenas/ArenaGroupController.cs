@@ -76,6 +76,9 @@ namespace Server
                 return;
 
             //TEST: REPLACE WITH GUMP
+            player.CloseGump(typeof(ArenaGump));
+            player.SendGump(new ArenaGump(player));
+
             if (m_MatchListings.Count == 0)
             {
                 ArenaMatch arenaMatch = new ArenaMatch(this, player);

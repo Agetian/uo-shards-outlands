@@ -139,15 +139,6 @@ namespace Server
 
             m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(ParalyzeSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
             m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(ParalyzeFieldSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
-            
-            m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(SummonCreatureSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
-            m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(BladeSpiritsSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
-            m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(EnergyVortexSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
-            m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(SummonDaemonSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
-            m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(AirElementalSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
-            m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(EarthElementalSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
-            m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(FireElementalSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
-            m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(WaterElementalSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
 
             m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(MeteorSwarmSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));
             m_SpellRestrictions.Add(new ArenaSpellRestriction(typeof(ChainLightningSpell), ArenaSpellRestriction.SpellRestrictionModeType.Unlimited));

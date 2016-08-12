@@ -92,6 +92,7 @@
     <Compile Include="Arenas\ArenaController.cs" />
     <Compile Include="Arenas\ArenaFight.cs" />
     <Compile Include="Arenas\ArenaGroupController.cs" />
+    <Compile Include="Arenas\ArenaGump.cs" />
     <Compile Include="Arenas\ArenaMatch.cs" />
     <Compile Include="Arenas\ArenaParticipant.cs" />
     <Compile Include="Arenas\ArenaRuleset.cs" />
