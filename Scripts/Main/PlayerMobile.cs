@@ -983,10 +983,10 @@ namespace Server.Mobiles
 
             from.FollowersMax = 5;
 
-            PlayerMobile pm_From = from as PlayerMobile;
+            PlayerMobile player = from as PlayerMobile;
 
-            if (pm_From != null)
-                pm_From.m_SessionStart = DateTime.UtcNow;
+            if (player != null)
+                player.m_SessionStart = DateTime.UtcNow;
 
             if (AccountHandler.LockdownLevel > AccessLevel.Player)
             {
@@ -1015,37 +1015,38 @@ namespace Server.Mobiles
                 return;
             }
 
-            if (pm_From != null)
+            if (player != null)
             {
-                if ((pm_From.Young || pm_From.Companion) && !YoungChatListeners.Contains(pm_From))
-                    YoungChatListeners.Add(pm_From);
+                if ((player.Young || player.Companion) && !YoungChatListeners.Contains(player))
+                    YoungChatListeners.Add(player);
                 
                 //TEST: Implement Fix for this?
                 //pm_From.ClaimAutoStabledPets();
 
-                if (pm_From.AccessLevel > AccessLevel.Player)
-                    pm_From.Send(SpeedControl.MountSpeed);
+                if (player.AccessLevel > AccessLevel.Player)
+                    player.Send(SpeedControl.MountSpeed);
             }
             
             //Damage Tracker
-            pm_From.m_DamageTracker = new DamageTracker(pm_From);
+            player.m_DamageTracker = new DamageTracker(player);
 
-            Guilds.OnLogin(pm_From);
-            Faction.OnLogin(pm_From);
-            TitlePersistance.OnLogin(pm_From);
-            AchievementsPersistance.OnLogin(pm_From);
-            CaptchaPersistance.OnLogin(pm_From);
-            PlayerCustomization.OnLogin(pm_From);          
-            ChatPersistance.OnLogin(pm_From);
-            MHSPersistance.CheckAndCreateMHSAccountEntry(pm_From);
-            EventCalendarPersistance.CheckAndCreateEventCalendarAccount(pm_From);
-            Societies.OnLogin(pm_From);
+            Guilds.OnLogin(player);
+            Faction.OnLogin(player);
+            TitlePersistance.OnLogin(player);
+            AchievementsPersistance.OnLogin(player);
+            CaptchaPersistance.OnLogin(player);
+            PlayerCustomization.OnLogin(player);          
+            ChatPersistance.OnLogin(player);
+            MHSPersistance.CheckAndCreateMHSAccountEntry(player);
+            EventCalendarPersistance.CheckAndCreateEventCalendarAccount(player);
+            Societies.OnLogin(player);
+            ArenaPlayerSettings.OnLogin(player);
 
             //Dungeon Armor
-            AspectGear.CheckForAndUpdateAspectArmorProperties(pm_From);
+            AspectGear.CheckForAndUpdateAspectArmorProperties(player);
 
             //OverloadProtectionSystem
-            pm_From.SystemOverloadActions = 0;
+            player.SystemOverloadActions = 0;
         }
 
         private static void EventSink_Connected(ConnectedEventArgs e)
@@ -1263,6 +1264,8 @@ namespace Server.Mobiles
         public GuildMemberEntry m_GuildMemberEntry = null;
         public GuildSettings m_GuildSettings = null;
         public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;
+        public ArenaPlayerSettings m_ArenaPlayerSettings = null;
+
         public CompetitionContext m_CompetitionContext = null;
 
         public override bool KeepsItemsOnDeath { get { return (AccessLevel > AccessLevel.Player); } }
@@ -2901,8 +2904,10 @@ namespace Server.Mobiles
             else
                 BoatOccupied = boat;
 
+            /*
             if (m_CompetitionContext != null)
                 m_CompetitionContext.OnLocationChanged(this);
+            */
             
             DesignContext context = m_DesignContext;
 
@@ -2974,8 +2979,10 @@ namespace Server.Mobiles
                 if (Mount != null)
                     Mount.Rider = null;
 
+            /*
             if (m_CompetitionContext != null)
                 m_CompetitionContext.OnMapChanged(this);
+            */
             
             DesignContext context = m_DesignContext;
 
@@ -3581,8 +3588,10 @@ namespace Server.Mobiles
             if ((carnage || violentDeath))
                 CustomizationAbilities.PlayerDeathExplosion(Location, Map, carnage, violentDeath);
 
+            /*
             if (m_CompetitionContext != null)
                 m_CompetitionContext.OnDeath(this, corpse);
+            */
             
             if (m_BuffTable != null)
             {
@@ -4311,6 +4320,7 @@ namespace Server.Mobiles
             writer.Write(GameTime);
             writer.Write(m_GuildSettings);
             writer.Write(m_CompetitionContext);
+            writer.Write(m_ArenaPlayerSettings);
 
             writer.Write((int)m_HairModID);
             writer.Write((int)m_HairModHue);
@@ -4407,6 +4417,7 @@ namespace Server.Mobiles
                 m_GameTime = reader.ReadTimeSpan();
                 m_GuildSettings = (GuildSettings)reader.ReadItem();
                 m_CompetitionContext = (CompetitionContext)reader.ReadItem();
+                m_ArenaPlayerSettings = (ArenaPlayerSettings)reader.ReadItem();
 
                 m_HairModID = reader.ReadInt();
                 m_HairModHue = reader.ReadInt();
@@ -4953,6 +4964,9 @@ namespace Server.Mobiles
 
             if (m_SocietiesPlayerSettings != null)
                 m_SocietiesPlayerSettings.Delete();
+
+            if (m_ArenaPlayerSettings != null)
+                m_ArenaPlayerSettings.Delete();
 
             if (m_CompetitionContext != null)
                 m_CompetitionContext.Delete();

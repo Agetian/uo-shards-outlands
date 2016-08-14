@@ -101,6 +101,7 @@
     <Compile Include="Arenas\ArenaTournament.cs" />
     <Compile Include="Arenas\ArenaWall.cs" />
     <Compile Include="Arenas\CompetitionContext.cs" />
+    <Compile Include="Arenas\ArenaPlayerSettings.cs" />
     <Compile Include="Captcha\Captcha.cs" />
     <Compile Include="Captcha\CaptchaGump.cs" />
     <Compile Include="Casino\LiarsDice.cs" />

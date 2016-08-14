@@ -28,6 +28,7 @@ namespace Server
         {
         }
 
+        /*
         #region OnEvents
 
         public void OnMapChanged(PlayerMobile player)
@@ -147,6 +148,7 @@ namespace Server
         }
 
         #endregion
+        */
 
         public override void Serialize(GenericWriter writer)
         {

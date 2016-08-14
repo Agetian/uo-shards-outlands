@@ -64,6 +64,19 @@ namespace Server
             return null;
         }
 
+        public void LeaveTeam(ArenaParticipant participant)
+        {
+            if (participant == null)
+                return;
+
+            if (m_Participants.Contains(participant))
+                m_Participants.Remove(participant);
+
+            participant.Delete();
+
+            //TEST: BROADCAST TO REST OF TEAM THAT PLAYER HAS LEFT
+        }
+
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);

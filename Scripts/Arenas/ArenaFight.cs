@@ -298,34 +298,9 @@ namespace Server
 
             ArenaRuleset ruleset = m_ArenaMatch.m_Ruleset;
 
-            switch (ruleset.m_RoundDuration)
-            {
-                case ArenaRuleset.RoundDurationType.ThreeMinutes:
-                    m_RoundTimeRemaining = TimeSpan.FromMinutes(3);
-                    m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(3);
-                break;
-
-                case ArenaRuleset.RoundDurationType.FiveMinutes:
-                    m_RoundTimeRemaining = TimeSpan.FromMinutes(5);
-                    m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(5);
-                break;
-
-                case ArenaRuleset.RoundDurationType.TenMinutes:
-                    m_RoundTimeRemaining = TimeSpan.FromMinutes(10);
-                    m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(10);
-                break;
-
-                case ArenaRuleset.RoundDurationType.FifteenMinutes:
-                    m_RoundTimeRemaining = TimeSpan.FromMinutes(15);
-                    m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(15);
-                break;
-
-                case ArenaRuleset.RoundDurationType.TwentyMinutes:
-                    m_RoundTimeRemaining = TimeSpan.FromMinutes(20);
-                    m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(20);
-                break;
-            }
-
+            m_RoundTimeRemaining = ArenaRuleset.GetRoundDuration(ruleset.m_RoundDuration);
+            m_SuddenDeathTimeRemaining = ArenaRuleset.GetSuddenDeathDuration(ruleset.m_RoundDuration);
+            
             int teamSize = ruleset.TeamSize;
             
             for (int a = 0; a < teamSize; a++)

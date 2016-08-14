@@ -74,11 +74,15 @@ namespace Server
 
             if (player == null)
                 return;
+                        
+            ArenaGumpObject arenaGumpObject = new ArenaGumpObject(player, this);
 
-            //TEST: REPLACE WITH GUMP
+            player.SendSound(0x055);
+
             player.CloseGump(typeof(ArenaGump));
-            player.SendGump(new ArenaGump(player));
+            player.SendGump(new ArenaGump(player, arenaGumpObject));
 
+            /*
             if (m_MatchListings.Count == 0)
             {
                 ArenaMatch arenaMatch = new ArenaMatch(this, player);
@@ -120,6 +124,7 @@ namespace Server
 
                 arenaMatch.m_CreatorReady = true;
             }
+            */
         }
 
         public void AuditListings()
@@ -147,6 +152,44 @@ namespace Server
             }
 
             return arena;
+        }
+
+        public List<ArenaMatch> GetArenaMatches(PlayerMobile player)
+        {
+            List<ArenaMatch> m_FilteredMatches = new List<ArenaMatch>();
+
+            foreach (ArenaMatch arenaMatch in m_MatchListings)
+            {
+                if (arenaMatch == null) continue;
+                if (arenaMatch.Deleted) continue;
+
+                if (arenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Listed) continue;
+                if (arenaMatch.m_Ruleset == null) continue;
+                if (arenaMatch.m_Ruleset.Deleted) continue;
+                if (arenaMatch.m_Creator == null) continue;
+
+                if (arenaMatch.m_Creator == player)
+                {
+                    m_FilteredMatches.Add(arenaMatch);
+                    continue;
+                }
+
+                if (arenaMatch.m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.GuildOnly)
+                {
+                    if (arenaMatch.m_Creator.Party == null) continue;
+                    if (arenaMatch.m_Creator.Party != player.Party) continue;
+                }
+
+                if (arenaMatch.m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.PartyOnly)
+                {
+                    if (arenaMatch.m_Creator.Guild == null) continue;
+                    if (arenaMatch.m_Creator.Guild != player.Guild) continue;
+                }
+
+                m_FilteredMatches.Add(arenaMatch);
+            }
+
+            return m_FilteredMatches;
         }
 
         public class ArenaGroupControllerTimer : Timer
@@ -295,245 +338,3 @@ namespace Server
         }
     }
 }
-
-#region OLD VERSION
-
-/*
-        public override void OnDoubleClick(Mobile from)
-        {
-            base.OnDoubleClick(from);
-            
-            PlayerMobile player = from as PlayerMobile;
-
-            if (player == null)
-                return;
-            
-            ArenaParticipant playerParticipant = GetPlayerParticipant(player);
-
-            if (playerParticipant == null)
-            {
-                playerParticipant = new ArenaParticipant(player);
-
-                if (player.m_CompetitionContext != null)
-                    player.m_CompetitionContext.Delete();
-
-                player.m_CompetitionContext = new CompetitionContext();
-                player.m_CompetitionContext.m_ArenaParticipant = playerParticipant;
-
-                ArenaTeam arenaTeam = new ArenaTeam();
-
-                arenaTeam.m_Participants.Add(playerParticipant);
-                m_Teams.Add(arenaTeam);
-
-                playerParticipant.m_ArenaTeam = arenaTeam;
-                playerParticipant.m_ArenaGroupController = this;
-
-                //TEST
-                player.Say("Joining the Arena Queue");
-            }            
-        }
-        
-        public ArenaParticipant GetPlayerParticipant(PlayerMobile player)
-        {            
-            foreach (ArenaTeam arenaTeam in m_Teams)
-            {
-                if (arenaTeam == null) continue;
-                if (arenaTeam.Deleted) continue;
-
-                ArenaParticipant arenaParticipant = arenaTeam.GetPlayerParticipant(player);
-
-                return arenaParticipant;
-            }
-
-            return null;             
-        }
-
-        public List<ArenaTeam> GetReadyTeams()
-        {
-            List<ArenaTeam> m_ReadyTeams = new List<ArenaTeam>();
-
-            foreach (ArenaTeam arenaTeam in m_Teams)
-            {
-                if (arenaTeam == null) continue;
-                if (arenaTeam.Deleted) continue;
-
-                if (arenaTeam.IsReadyForEvent())
-                    m_ReadyTeams.Add(arenaTeam);
-            }
-
-            return m_ReadyTeams;
-        }
-
-        public ArenaController GetAvailableArena()
-        {
-            ArenaController arena = null;
-
-            foreach (ArenaController arenaController in m_Arenas)
-            {
-                if (arenaController == null) 
-                    continue;
-
-                if (!arenaController.Enabled)
-                    continue;
-
-                if (arenaController.m_ArenaFight == null)
-                    return arenaController;
-
-                if (arenaController.m_ArenaFight.Deleted)
-                    return arenaController;
-            }
-
-            return arena;
-        }
-
-        public void StartMatch()
-        {
-            ArenaController arenaController = GetAvailableArena();
-            List<ArenaTeam> m_ReadyTeams = GetReadyTeams();
-
-            if (arenaController == null) return;
-            if (m_ReadyTeams.Count < TeamsRequired) return;
-
-            Dictionary<ArenaTeam, double> dictReadyTeams = new Dictionary<ArenaTeam,double>();
-
-            foreach(ArenaTeam arenaTeam in m_ReadyTeams)
-            {
-                if (arenaTeam == null) continue;
-                if (arenaTeam.Deleted) continue;
-
-                dictReadyTeams.Add(arenaTeam, (DateTime.UtcNow - arenaTeam.m_LastEventTime).TotalMinutes);
-            }
-
-            List<KeyValuePair<ArenaTeam, double>> m_SortedTeams = new List<KeyValuePair<ArenaTeam, double>>();
-
-            foreach (KeyValuePair<ArenaTeam, double> pair in dictReadyTeams.OrderByDescending(key => key.Value))
-            {
-                m_SortedTeams.Add(pair);
-            }
-
-            List<ArenaTeam> m_SelectedTeams = new List<ArenaTeam>();
-
-            for (int a = 0; a < TeamsRequired; a++)
-            {
-                ArenaTeam arenaTeam = m_ReadyTeams[a];
-
-                arenaTeam.m_LastEventTime = DateTime.UtcNow;
-
-                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
-                {
-                    if (arenaParticipant == null) continue;
-                    if (arenaParticipant.Deleted) continue;
-
-                    arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.Playing;
-                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Alive;
-
-                    arenaParticipant.ResetArenaFightValues();
-                }
-
-                m_SelectedTeams.Add(arenaTeam);
-            }
-
-            ArenaFight arenaFight = new ArenaFight(arenaController, m_SelectedTeams);
-
-            arenaController.m_ArenaFight = arenaFight;
-        }
-
-        public void MatchComplete(ArenaFight arenaFight)
-        {
-            //Remove Player from System After Match
-            if (RemoveFromQueueAfterMatch && arenaFight != null)
-            {
-                Queue m_Queue = new Queue();
-
-                foreach (ArenaTeam arenaTeam in arenaFight.m_Teams)
-                {
-                    if (arenaTeam == null) continue;
-                    if (arenaTeam.Deleted) continue;
-
-                    foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
-                    {
-                        if (arenaParticipant == null) continue;
-                        if (arenaParticipant.Deleted) continue;
-
-                        m_Queue.Enqueue(arenaParticipant);
-                    }
-                }
-
-                while (m_Queue.Count > 0)
-                {
-                    ArenaParticipant arenaParticipant = (ArenaParticipant)m_Queue.Dequeue();
-
-                    if (arenaParticipant.m_Player != null)
-                        PlayerQuit(arenaParticipant.m_Player);
-                }                
-            }
-
-            if (arenaFight != null)
-                arenaFight.Delete();
-        }
-
-        public void AuditParticipants()
-        {
-            Queue m_Queue = new Queue();
-
-            foreach (ArenaTeam arenaTeam in m_Teams)
-            {
-                if (arenaTeam == null) continue;
-                if (arenaTeam.Deleted) continue;
-
-                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
-                {
-                    if (arenaParticipant == null) continue;
-                    if (arenaParticipant.Deleted) continue;
-
-                    if (arenaParticipant.m_EventStatus == ArenaParticipant.EventStatusType.Inactive && DateTime.UtcNow >= arenaParticipant.m_LastEventTime + LoggedOutPlayerTimeoutThreshold)
-                        m_Queue.Enqueue(arenaParticipant);
-                }
-            }
-
-            while (m_Queue.Count > 0)
-            {
-                ArenaParticipant arenaParticipant = (ArenaParticipant)m_Queue.Dequeue();
-
-                if (arenaParticipant.m_Player != null)
-                    PlayerQuit(arenaParticipant.m_Player);
-            }
-
-            m_NextParticipantAudit = DateTime.UtcNow + ParticipantAuditInterval;
-        }
-
-        public void PlayerQuit(PlayerMobile player)
-        {
-            if (player == null) 
-                return;
-
-            ArenaParticipant arenaParticipant = GetPlayerParticipant(player);
-
-            if (arenaParticipant == null)
-                return;
-
-            if (player.m_CompetitionContext != null)
-            {
-                player.m_CompetitionContext.Delete();
-                player.m_CompetitionContext = null;
-            }
-
-            if (arenaParticipant.m_ArenaTeam != null)
-            {
-                if (arenaParticipant.m_ArenaTeam.m_Participants.Contains(arenaParticipant))
-                    arenaParticipant.m_ArenaTeam.m_Participants.Remove(arenaParticipant);
-
-                if (arenaParticipant.m_ArenaTeam.m_Participants.Count == 0)
-                {
-                    if (m_Teams.Contains(arenaParticipant.m_ArenaTeam))
-                        m_Teams.Remove(arenaParticipant.m_ArenaTeam);
-
-                    arenaParticipant.m_ArenaTeam.Delete();
-                }                
-            }
-
-            arenaParticipant.Delete();
-        }
-        */
-
-#endregion

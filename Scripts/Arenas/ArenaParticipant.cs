@@ -30,9 +30,9 @@ namespace Server
         public DateTime m_LastEventTime = DateTime.UtcNow;
 
         public PlayerMobile m_Player;
-        public ArenaTeam m_ArenaTeam;
-        public ArenaFight m_ArenaFight;
-        public ArenaGroupController m_ArenaGroupController;
+        public ArenaMatch m_ArenaMatch;
+
+        public bool m_ReadyToggled = false;
 
         public EventStatusType m_EventStatus = EventStatusType.Waiting;
         public FightStatusType m_FightStatus = FightStatusType.Alive;
@@ -45,9 +45,22 @@ namespace Server
         public List<ArenaItemUsage> m_ItemUsages = new List<ArenaItemUsage>();
 
         [Constructable]
-        public ArenaParticipant(PlayerMobile player): base(0x0)
+        public ArenaParticipant(PlayerMobile player, ArenaMatch arenaMatch, int teamIndex): base(0x0)
         {
             m_Player = player;
+            m_ArenaMatch = arenaMatch;
+
+            if (m_ArenaMatch == null)
+                Delete();
+
+            ArenaTeam team1 = m_ArenaMatch.GetTeam(0);
+            ArenaTeam team2 = m_ArenaMatch.GetTeam(1);
+
+            if (team1 != null && teamIndex == 0)
+                team1.m_Participants.Add(this);
+
+            if (team2 != null && teamIndex == 1)
+                team2.m_Participants.Add(this);
 
             Visible = false;
             Movable = false;
@@ -57,11 +70,14 @@ namespace Server
         {
             if (m_Player == null)
                 return false;
-
+            
             if (!m_Player.Alive)
                 return false;
 
             if (m_Player.NetState == null)
+                return false;
+
+            if (!m_ReadyToggled)
                 return false;
 
             return true;
@@ -120,9 +136,9 @@ namespace Server
             //Version 0
             writer.Write(m_LastEventTime);
             writer.Write(m_Player);
-            writer.Write(m_ArenaTeam);
-            writer.Write(m_ArenaFight);
-            writer.Write(m_ArenaGroupController);
+            writer.Write(m_ArenaMatch);
+
+            writer.Write(m_ReadyToggled);
             writer.Write((int)m_EventStatus);
             writer.Write((int)m_FightStatus);
             writer.Write(m_DamageDealt);
@@ -158,9 +174,9 @@ namespace Server
             {
                 m_LastEventTime = reader.ReadDateTime();
                 m_Player = reader.ReadMobile() as PlayerMobile;
-                m_ArenaTeam = (ArenaTeam)reader.ReadItem();
-                m_ArenaFight = (ArenaFight)reader.ReadItem();
-                m_ArenaGroupController = (ArenaGroupController)reader.ReadItem();
+                m_ArenaMatch = (ArenaMatch)reader.ReadItem();
+
+                m_ReadyToggled = reader.ReadBool();
                 m_EventStatus = (EventStatusType)reader.ReadInt();
                 m_FightStatus = (FightStatusType)reader.ReadInt();
                 m_DamageDealt = reader.ReadInt();
@@ -197,6 +213,11 @@ namespace Server
                         m_ItemUsages.Add(new ArenaItemUsage(itemType, usages));
                 }
             }
+
+            //----
+
+            if (m_ArenaMatch == null)
+                Delete();
         }
     }
 

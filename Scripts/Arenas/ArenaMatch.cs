@@ -15,7 +15,6 @@ namespace Server
     {
         public enum MatchStatusType
         {
-            Configuration,
             Listed,
             Fighting
         }
@@ -32,7 +31,7 @@ namespace Server
 
         public static TimeSpan ReadyCheckInterval = TimeSpan.FromSeconds(60);
 
-        public MatchStatusType m_MatchStatus = MatchStatusType.Configuration;        
+        public MatchStatusType m_MatchStatus = MatchStatusType.Listed;        
         public ArenaRuleset m_Ruleset = new ArenaRuleset();        
         public ArenaFight m_ArenaFight;
         public List<ArenaTeam> m_Teams = new List<ArenaTeam>();
@@ -50,6 +49,90 @@ namespace Server
 
         public ArenaMatch(Serial serial): base(serial)
         {
+        }
+
+        public ArenaTeam GetTeam(int index)
+        {
+            for (int a = 0; a < m_Teams.Count; a++)
+            {
+                if (m_Teams[a] == null) continue;
+                if (m_Teams[a].Deleted) continue;
+
+                if (a == index)
+                    return m_Teams[a];
+            }
+
+            return null;
+        }
+
+        public ArenaParticipant GetParticipant(PlayerMobile player)
+        {
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant participant in arenaTeam.m_Participants)
+                {
+                    if (participant == null) continue;
+                    if (participant.Deleted) continue;
+
+                    if (participant.m_Player == player)
+                        return participant;
+                }                
+            }
+
+            return null;
+        }
+
+        public void LeaveMatch(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            ArenaTeam playerTeam = null;
+            ArenaParticipant playerParticipant = null;
+
+            foreach (ArenaTeam team in m_Teams)
+            {
+                if (team == null) continue;
+                if (team.Deleted) continue;
+
+                playerTeam = team;
+                playerParticipant = team.GetPlayerParticipant(player);
+            }
+
+            if (playerTeam != null && playerParticipant != null)
+            {
+                if (playerTeam.m_Participants.Contains(playerParticipant))
+                    playerTeam.m_Participants.Remove(playerParticipant);
+
+                playerParticipant.Delete();
+            }            
+
+            //TEST: BROADCAST TO REST OF MATCH PARTICIPANTS THAT PLAYER HAS LEFT
+        }
+
+        public bool CanPlayerJoinTeam(PlayerMobile player, int teamIndex)
+        {
+            if (player == null) return false;
+            if (m_Ruleset == null) return false;
+            if (m_Ruleset.Deleted) return false;
+            if (m_Creator == null) return false;
+
+            if (m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.GuildOnly)
+            {
+                if (m_Creator.Guild == null) return false;
+                if (m_Creator.Guild != player.Guild) return false;
+            }
+
+            if (m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.PartyOnly)
+            {
+                if (m_Creator.Party == null) return false;
+                if (m_Creator.Party != player.Party) return false;
+            }            
+
+            return true;
         }
 
         public bool IsReadyToStart()
