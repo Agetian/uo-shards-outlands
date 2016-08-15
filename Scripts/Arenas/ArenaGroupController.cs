@@ -76,55 +76,11 @@ namespace Server
                 return;
                         
             ArenaGumpObject arenaGumpObject = new ArenaGumpObject(player, this);
-
+            
             player.SendSound(0x055);
 
             player.CloseGump(typeof(ArenaGump));
             player.SendGump(new ArenaGump(player, arenaGumpObject));
-
-            /*
-            if (m_MatchListings.Count == 0)
-            {
-                ArenaMatch arenaMatch = new ArenaMatch(this, player);
-                
-                ArenaTeam team = new ArenaTeam();
-                ArenaParticipant participant = new ArenaParticipant(player);
-
-                team.m_Participants.Add(participant);
-                arenaMatch.m_Teams.Add(team);
-                
-                arenaMatch.m_MatchStatus = ArenaMatch.MatchStatusType.Listed;
-
-                m_MatchListings.Add(arenaMatch);
-            }
-
-            else
-            {
-                ArenaMatch arenaMatch = m_MatchListings[0];
-
-                bool foundPlayer = false;
-
-                foreach (ArenaTeam team in arenaMatch.m_Teams)
-                {
-                    foreach (ArenaParticipant participant in team.m_Participants)
-                    {
-                        if (participant.m_Player == player)
-                            foundPlayer = true;
-                    }
-                }
-
-                if (foundPlayer)
-                    return;
-
-                ArenaTeam newTeam = new ArenaTeam();
-                ArenaParticipant newParticipant = new ArenaParticipant(player);
-
-                newTeam.m_Participants.Add(newParticipant);
-                arenaMatch.m_Teams.Add(newTeam);
-
-                arenaMatch.m_CreatorReady = true;
-            }
-            */
         }
 
         public void AuditListings()

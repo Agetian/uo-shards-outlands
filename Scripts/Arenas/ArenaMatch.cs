@@ -84,7 +84,7 @@ namespace Server
 
             return null;
         }
-
+        
         public void LeaveMatch(PlayerMobile player)
         {
             if (player == null)
@@ -113,7 +113,7 @@ namespace Server
             //TEST: BROADCAST TO REST OF MATCH PARTICIPANTS THAT PLAYER HAS LEFT
         }
 
-        public bool CanPlayerJoinTeam(PlayerMobile player, int teamIndex)
+        public bool CanPlayerJoinMatch(PlayerMobile player)
         {
             if (player == null) return false;
             if (m_Ruleset == null) return false;
