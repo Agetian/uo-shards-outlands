@@ -18,7 +18,7 @@ namespace Server.Custom
         {
             Raft,
             Debris
-            //SmallBoat,            
+            //SmallShip,            
         }
 
         [Constructable]
@@ -263,7 +263,7 @@ namespace Server.Custom
                 break;
 
                     /*
-                case ShipwreckType.SmallBoat:
+                case ShipwreckType.SmallShip:
                     GroupItem(new Static(0), 0, 0, 0, 0, "a shipwreck");
                 break;
                 */                
@@ -458,17 +458,17 @@ namespace Server.Custom
 
             if (player != null)
             {
-                if (!player.Deleted && player.BoatOccupied != null)
+                if (!player.Deleted && player.ShipOccupied != null)
                 {
                     int doubloonValue = Utility.RandomMinMax(minDoubloons, maxDoubloons);
                     
-                    if (player.BoatOccupied.DepositDoubloons(doubloonValue))
+                    if (player.ShipOccupied.DepositDoubloons(doubloonValue))
                     {
                         Doubloon doubloonPile = new Doubloon(doubloonValue);
                         player.SendSound(doubloonPile.GetDropSound());
                         doubloonPile.Delete();
 
-                        //player.BoatOccupied.doubloonsEarned += doubloonValue;
+                        //player.ShipOccupied.doubloonsEarned += doubloonValue;
 
                         player.SendMessage("You have recovered " + doubloonValue.ToString() + " doubloons from the cargo! The coins have been placed in your ship's hold.");
 
@@ -540,11 +540,11 @@ namespace Server.Custom
                 newLocation.Y = y;
                 newLocation.Z = -5;
 
-                bool waterTile = BaseBoat.IsWaterTile(newLocation, Map);
+                bool waterTile = BaseShip.IsWaterTile(newLocation, Map);
 
                 if (waterTile)
                 {
-                    if (BaseBoat.FindBoatAt(newLocation, Map) != null)
+                    if (BaseShip.FindShipAt(newLocation, Map) != null)
                         continue;
 
                     SpellHelper.AdjustField(ref spawnLocation, Map, 12, false);
@@ -578,9 +578,9 @@ namespace Server.Custom
                 break;
 
                 case 2:
-                    if (player.BoatOccupied != null)
+                    if (player.ShipOccupied != null)
                     {
-                        if (!player.BoatOccupied.Deleted && player.BoatOccupied.m_SinkTimer == null)
+                        if (!player.ShipOccupied.Deleted && player.ShipOccupied.m_SinkTimer == null)
                         {
                             count = Utility.RandomMinMax(2, 4);
 
@@ -589,7 +589,7 @@ namespace Server.Custom
                                 BaseCreature bc_Creature = new ColossusTermite();
 
                                 bc_Creature.m_WasFishedUp = true;
-                                bc_Creature.MoveToWorld(player.BoatOccupied.GetRandomEmbarkLocation(false), from.Map);
+                                bc_Creature.MoveToWorld(player.ShipOccupied.GetRandomEmbarkLocation(false), from.Map);
                                 spawnedCreatures = true;
                             }
                         }

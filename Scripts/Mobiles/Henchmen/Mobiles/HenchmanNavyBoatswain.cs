@@ -10,7 +10,7 @@ using Server.Mobiles;
 
 namespace Server.Custom
 {
-    public class HenchmanNavyBoatswain : BaseHenchman
+    public class HenchmanNavyShipswain : BaseHenchman
 	{
         public override string[] recruitSpeech  { get { return new string[] {   "Order and discipline are my craft. I shall endeavor to see them instilled amongst your crew.",
                                                                                 };
@@ -32,11 +32,11 @@ namespace Server.Custom
         public override HenchmanGroupType HenchmanGroup { get { return HenchmanGroupType.Navy; } }
 
 		[Constructable]
-		public HenchmanNavyBoatswain() : base()
+		public HenchmanNavyShipswain() : base()
 		{
             SpeechHue = Utility.RandomBlueHue();
 
-            Title = "the boatswain";                 
+            Title = "the shipswain";                 
 
             SetStr(50);
             SetDex(50);
@@ -67,7 +67,7 @@ namespace Server.Custom
             MinTameSkill = 100;
 		}
 
-        public override string TamedDisplayName { get { return "Boatswain"; } }
+        public override string TamedDisplayName { get { return "Shipswain"; } }
 
         public override int TamedItemId { get { return 8454; } }
         public override int TamedItemHue { get { return 0; } }
@@ -161,7 +161,7 @@ namespace Server.Custom
             PvPAbilityDamageScalar = BaseCreature.BasePvPAbilityDamageScalar * BaseCreature.BasePvPHenchmenDamageScalar;
         }
         
-        public HenchmanNavyBoatswain(Serial serial): base(serial)
+        public HenchmanNavyShipswain(Serial serial): base(serial)
         {
         }    
 

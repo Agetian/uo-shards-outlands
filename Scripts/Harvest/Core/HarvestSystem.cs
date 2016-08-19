@@ -165,7 +165,7 @@ namespace Server.Engines.Harvest
                     
                     else
                     {
-                        BaseBoat ownerBoat = BaseBoat.FindBoatAt(from.Location, from.Map);
+                        BaseShip ownerShip = BaseShip.FindShipAt(from.Location, from.Map);
                         
                         if (item is MessageInABottle)
                         {                         
@@ -173,11 +173,11 @@ namespace Server.Engines.Harvest
 
                         else if (item is RawFish || item is RawLargeFish)
                         {
-                            if (ownerBoat != null)
+                            if (ownerShip != null)
                             {
-                                if (ownerBoat.IsOwner(from) || ownerBoat.IsCoOwner(from) || ownerBoat.IsFriend(from))
+                                if (ownerShip.IsOwner(from) || ownerShip.IsCoOwner(from) || ownerShip.IsFriend(from))
                                 {
-                                    //ownerBoat.fishCaught++;
+                                    //ownerShip.fishCaught++;
                                 }
                             }
                         }

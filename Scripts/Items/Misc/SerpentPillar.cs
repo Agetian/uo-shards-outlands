@@ -58,15 +58,15 @@ namespace Server.Items
 
 			if ( !e.Handled && from.InRange( this, 10 ) && e.Speech.ToLower() == this.Word )
 			{
-				BaseBoat boat = BaseBoat.FindBoatAt( from, from.Map );
+				BaseShip ship = BaseShip.FindShipAt( from, from.Map );
                 
-				if ( boat == null )
+				if ( ship == null )
 					return;
 
 				if ( !this.Active )
 				{
-					if ( boat.TillerMan != null )
-						boat.TillerMan.Say( 502507 ); // Ar, Legend has it that these pillars are inactive! No man knows how it might be undone!
+					if ( ship.TillerMan != null )
+						ship.TillerMan.Say( 502507 ); // Ar, Legend has it that these pillars are inactive! No man knows how it might be undone!
 
 					return;
 				}
@@ -74,14 +74,14 @@ namespace Server.Items
                 
                 if (T2AAccess.IsT2A(m_Destination.Start, from.Map))
                 {
-                    if (boat.Map != null && boat.Map != Map.Internal)
+                    if (ship.Map != null && ship.Map != Map.Internal)
                     {
-                        MultiComponentList mcl = boat.Components;
+                        MultiComponentList mcl = ship.Components;
 
-                        IPooledEnumerable eable = boat.Map.GetClientsInBounds(new Rectangle2D(boat.X + mcl.Min.X, boat.Y + mcl.Min.Y, mcl.Width, mcl.Height));
+                        IPooledEnumerable eable = ship.Map.GetClientsInBounds(new Rectangle2D(ship.X + mcl.Min.X, ship.Y + mcl.Min.Y, mcl.Width, mcl.Height));
 
                         foreach (NetState ns in eable)
-                            if (ns != null && ns.Mobile != null && boat.Contains((Mobile)ns.Mobile) && !T2AAccess.HasAccess(ns.Mobile))
+                            if (ns != null && ns.Mobile != null && ship.Contains((Mobile)ns.Mobile) && !T2AAccess.HasAccess(ns.Mobile))
                             {
                                 eable.Free();
                                 from.SendMessage("One or more players on board does not have access to T2A at this time.");
@@ -104,20 +104,20 @@ namespace Server.Items
 
 					Point3D dest = new Point3D( x, y, z );
 
-					if ( boat.CanFit( dest, map, boat.ItemID ) )
+					if ( ship.CanFit( dest, map, ship.ItemID ) )
 					{
-						int xOffset = x - boat.X;
-						int yOffset = y - boat.Y;
-						int zOffset = z - boat.Z;
+						int xOffset = x - ship.X;
+						int yOffset = y - ship.Y;
+						int zOffset = z - ship.Z;
 
-						boat.Teleport( xOffset, yOffset, zOffset );
+						ship.Teleport( xOffset, yOffset, zOffset );
 
 						return;
 					}
 				}
 
-				if ( boat.TillerMan != null )
-					boat.TillerMan.Say( 502508 ); // Ar, I refuse to take that matey through here!
+				if ( ship.TillerMan != null )
+					ship.TillerMan.Say( 502508 ); // Ar, I refuse to take that matey through here!
 			}
 		}
 

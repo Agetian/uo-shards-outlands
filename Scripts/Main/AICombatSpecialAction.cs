@@ -156,7 +156,7 @@ namespace Server.Mobiles
 
         public static bool CanDoThrowShipBomb(BaseCreature creature)
         {
-            BaseBoat targetBoat = null;
+            BaseShip targetShip = null;
 
             if (creature.Combatant != null)
             {
@@ -165,47 +165,47 @@ namespace Server.Mobiles
 
                 if (bc_Combatant != null)
                 {
-                    if (bc_Combatant.BoatOccupied != null && bc_Combatant.BoatOccupied != creature.BoatOccupied)
+                    if (bc_Combatant.ShipOccupied != null && bc_Combatant.ShipOccupied != creature.ShipOccupied)
                     {
-                        if (!bc_Combatant.BoatOccupied.Deleted && bc_Combatant.BoatOccupied.m_SinkTimer == null && Utility.GetDistance(creature.Location, bc_Combatant.BoatOccupied.Location) <= 8)
-                            targetBoat = bc_Combatant.BoatOccupied;
+                        if (!bc_Combatant.ShipOccupied.Deleted && bc_Combatant.ShipOccupied.m_SinkTimer == null && Utility.GetDistance(creature.Location, bc_Combatant.ShipOccupied.Location) <= 8)
+                            targetShip = bc_Combatant.ShipOccupied;
                     }
                 }
 
                 if (pm_Combatant != null)
                 {
-                    if (pm_Combatant.BoatOccupied != null && pm_Combatant.BoatOccupied != creature.BoatOccupied)
+                    if (pm_Combatant.ShipOccupied != null && pm_Combatant.ShipOccupied != creature.ShipOccupied)
                     {
-                        if (!pm_Combatant.BoatOccupied.Deleted && pm_Combatant.BoatOccupied.m_SinkTimer == null && Utility.GetDistance(creature.Location, pm_Combatant.BoatOccupied.Location) <= 8)
-                            targetBoat = pm_Combatant.BoatOccupied;
+                        if (!pm_Combatant.ShipOccupied.Deleted && pm_Combatant.ShipOccupied.m_SinkTimer == null && Utility.GetDistance(creature.Location, pm_Combatant.ShipOccupied.Location) <= 8)
+                            targetShip = pm_Combatant.ShipOccupied;
                     }
                 }
             }
 
-            if (targetBoat == null)
+            if (targetShip == null)
             {
-                if (creature.BoatOccupied != null)
+                if (creature.ShipOccupied != null)
                 {
-                    if (creature.BoatOccupied.BoatCombatant != null && creature.BoatOccupied.BoatCombatant != creature.BoatOccupied)
+                    if (creature.ShipOccupied.ShipCombatant != null && creature.ShipOccupied.ShipCombatant != creature.ShipOccupied)
                     {
-                        if (creature.BoatOccupied.BoatCombatant != null)
+                        if (creature.ShipOccupied.ShipCombatant != null)
                         {
-                            if (!creature.BoatOccupied.BoatCombatant.Deleted && creature.BoatOccupied.BoatCombatant.m_SinkTimer == null && Utility.GetDistance(creature.Location, creature.BoatOccupied.BoatCombatant.Location) <= 8)
-                                targetBoat = creature.BoatOccupied.BoatCombatant;
+                            if (!creature.ShipOccupied.ShipCombatant.Deleted && creature.ShipOccupied.ShipCombatant.m_SinkTimer == null && Utility.GetDistance(creature.Location, creature.ShipOccupied.ShipCombatant.Location) <= 8)
+                                targetShip = creature.ShipOccupied.ShipCombatant;
                         }
                     }
                 }
             }
 
-            bool targetBoatValid = false;
+            bool targetShipValid = false;
 
-            if (targetBoat != null && targetBoat != creature.BoatOccupied)
+            if (targetShip != null && targetShip != creature.ShipOccupied)
             {
-                if (targetBoat.GetBoatToLocationDistance(targetBoat, creature.Location) <= 8)
-                    targetBoatValid = true;
+                if (targetShip.GetShipToLocationDistance(targetShip, creature.Location) <= 8)
+                    targetShipValid = true;
             }
 
-            return targetBoatValid;
+            return targetShipValid;
         }
 
         public static bool CanDoCauseWounds(BaseCreature creature)
@@ -502,7 +502,7 @@ namespace Server.Mobiles
             if (creature == null)
                 return false;
 
-            BaseBoat targetBoat = null;
+            BaseShip targetShip = null;
 
             if (creature.Combatant != null)
             {
@@ -511,39 +511,39 @@ namespace Server.Mobiles
 
                 if (bc_Combatant != null)
                 {
-                    if (bc_Combatant.BoatOccupied != null && bc_Combatant.BoatOccupied != creature.BoatOccupied)
+                    if (bc_Combatant.ShipOccupied != null && bc_Combatant.ShipOccupied != creature.ShipOccupied)
                     {
-                        if (!bc_Combatant.BoatOccupied.Deleted && bc_Combatant.BoatOccupied.m_SinkTimer == null && Utility.GetDistance(creature.Location, bc_Combatant.BoatOccupied.Location) <= 8)
-                            targetBoat = bc_Combatant.BoatOccupied;
+                        if (!bc_Combatant.ShipOccupied.Deleted && bc_Combatant.ShipOccupied.m_SinkTimer == null && Utility.GetDistance(creature.Location, bc_Combatant.ShipOccupied.Location) <= 8)
+                            targetShip = bc_Combatant.ShipOccupied;
                     }
                 }
 
                 if (pm_Combatant != null)
                 {
-                    if (pm_Combatant.BoatOccupied != null && pm_Combatant.BoatOccupied != creature.BoatOccupied)
+                    if (pm_Combatant.ShipOccupied != null && pm_Combatant.ShipOccupied != creature.ShipOccupied)
                     {
-                        if (!pm_Combatant.BoatOccupied.Deleted && pm_Combatant.BoatOccupied.m_SinkTimer == null && Utility.GetDistance(creature.Location, pm_Combatant.BoatOccupied.Location) <= 8)
-                            targetBoat = pm_Combatant.BoatOccupied;
+                        if (!pm_Combatant.ShipOccupied.Deleted && pm_Combatant.ShipOccupied.m_SinkTimer == null && Utility.GetDistance(creature.Location, pm_Combatant.ShipOccupied.Location) <= 8)
+                            targetShip = pm_Combatant.ShipOccupied;
                     }
                 }
             }
 
-            if (targetBoat == null)
+            if (targetShip == null)
             {
-                if (creature.BoatOccupied != null)
+                if (creature.ShipOccupied != null)
                 {
-                    if (creature.BoatOccupied.BoatCombatant != null && creature.BoatOccupied.BoatCombatant != creature.BoatOccupied)
+                    if (creature.ShipOccupied.ShipCombatant != null && creature.ShipOccupied.ShipCombatant != creature.ShipOccupied)
                     {
-                        if (creature.BoatOccupied.BoatCombatant != null)
+                        if (creature.ShipOccupied.ShipCombatant != null)
                         {
-                            if (!creature.BoatOccupied.BoatCombatant.Deleted && creature.BoatOccupied.BoatCombatant.m_SinkTimer == null && Utility.GetDistance(creature.Location, creature.BoatOccupied.BoatCombatant.Location) <= 8)
-                                targetBoat = creature.BoatOccupied.BoatCombatant;
+                            if (!creature.ShipOccupied.ShipCombatant.Deleted && creature.ShipOccupied.ShipCombatant.m_SinkTimer == null && Utility.GetDistance(creature.Location, creature.ShipOccupied.ShipCombatant.Location) <= 8)
+                                targetShip = creature.ShipOccupied.ShipCombatant;
                         }
                     }
                 }
             }
 
-            if (targetBoat == null || targetBoat == creature.BoatOccupied)
+            if (targetShip == null || targetShip == creature.ShipOccupied)
                 return false;
 
             if (creature.AIObject != null)
@@ -559,49 +559,49 @@ namespace Server.Mobiles
             else
                 creature.Animate(4, 4, 1, true, false, 0);
 
-            Timer.DelayCall(TimeSpan.FromSeconds(.5), delegate { StartThrowShipBomb(creature, targetBoat); });
+            Timer.DelayCall(TimeSpan.FromSeconds(.5), delegate { StartThrowShipBomb(creature, targetShip); });
 
             return true;
         }
 
-        public static void StartThrowShipBomb(BaseCreature creature, BaseBoat targetBoat)
+        public static void StartThrowShipBomb(BaseCreature creature, BaseShip targetShip)
         {
             Timer.DelayCall(TimeSpan.FromSeconds(.3), delegate { Effects.PlaySound(creature.Location, creature.Map, 0x666); });
 
-            Point3D randomShipLocation = targetBoat.GetRandomEmbarkLocation(true);
+            Point3D randomShipLocation = targetShip.GetRandomEmbarkLocation(true);
 
             IEntity startLocation = new Entity(Serial.Zero, new Point3D(creature.Location.X, creature.Location.Y, creature.Location.Z + 10), creature.Map);
-            IEntity endLocation = new Entity(Serial.Zero, new Point3D(randomShipLocation.X, randomShipLocation.Y, randomShipLocation.Z + 5), targetBoat.Map);
+            IEntity endLocation = new Entity(Serial.Zero, new Point3D(randomShipLocation.X, randomShipLocation.Y, randomShipLocation.Z + 5), targetShip.Map);
 
             Effects.SendMovingEffect(startLocation, endLocation, 0x1C19, 10, 0, false, false, 0, 0);
 
-            int distance = targetBoat.GetBoatToLocationDistance(targetBoat, creature.Location);
+            int distance = targetShip.GetShipToLocationDistance(targetShip, creature.Location);
 
             double destinationDelay = (double)distance * .06;
             double explosionDelay = (double)distance * .16;
 
-            Timer.DelayCall(TimeSpan.FromSeconds(destinationDelay), delegate { Effects.SendLocationEffect(endLocation.Location, targetBoat.Map, 0x1C19, 20); });
-            Timer.DelayCall(TimeSpan.FromSeconds(explosionDelay), delegate { DetonateShipBomb(creature, targetBoat, randomShipLocation); });
+            Timer.DelayCall(TimeSpan.FromSeconds(destinationDelay), delegate { Effects.SendLocationEffect(endLocation.Location, targetShip.Map, 0x1C19, 20); });
+            Timer.DelayCall(TimeSpan.FromSeconds(explosionDelay), delegate { DetonateShipBomb(creature, targetShip, randomShipLocation); });
         }
 
-        public static void DetonateShipBomb(BaseCreature creature, BaseBoat targetBoat, Point3D location)
+        public static void DetonateShipBomb(BaseCreature creature, BaseShip targetShip, Point3D location)
         {
-            IEntity explosionLocation = new Entity(Serial.Zero, new Point3D(location.X, location.Y, location.Z - 1), targetBoat.Map);
+            IEntity explosionLocation = new Entity(Serial.Zero, new Point3D(location.X, location.Y, location.Z - 1), targetShip.Map);
 
             Effects.SendLocationParticles(explosionLocation, Utility.RandomList(0x36BD, 0x36BF, 0x36CB, 0x36BC), 30, 7, 5044);
-            Effects.PlaySound(explosionLocation, targetBoat.Map, 0x11D);
+            Effects.PlaySound(explosionLocation, targetShip.Map, 0x11D);
 
-            BaseBoat boatAtLocation = BaseBoat.FindBoatAt(location, targetBoat.Map);
+            BaseShip shipAtLocation = BaseShip.FindShipAt(location, targetShip.Map);
 
-            if (boatAtLocation != null)
+            if (shipAtLocation != null)
             {
-                int boatDamage = Utility.RandomMinMax(10, 20);
+                int shipDamage = Utility.RandomMinMax(10, 20);
 
-                boatAtLocation.ReceiveDamage(null, null, boatDamage, DamageType.Hull);
+                shipAtLocation.ReceiveDamage(null, null, shipDamage, DamageType.Hull);
 
                 int mobileDamage = Utility.RandomMinMax(10, 20);
 
-                IPooledEnumerable eable = targetBoat.Map.GetObjectsInRange(location, 1);
+                IPooledEnumerable eable = targetShip.Map.GetObjectsInRange(location, 1);
 
                 foreach (object obj in eable)
                 {

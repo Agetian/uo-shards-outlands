@@ -10,7 +10,7 @@ namespace Server.Items
 
 	public class Plank : Item, ILockable
 	{
-		private BaseBoat m_Boat;
+		private BaseShip m_Ship;
 		private PlankSide m_Side;
 		private bool m_Locked;
         private bool m_broken = false;
@@ -18,9 +18,9 @@ namespace Server.Items
 
 		private Timer m_CloseTimer;
 
-		public Plank( BaseBoat boat, PlankSide side, uint keyValue ) : base( 0x3EB1 + (int)side )
+		public Plank( BaseShip ship, PlankSide side, uint keyValue ) : base( 0x3EB1 + (int)side )
 		{
-			m_Boat = boat;
+			m_Ship = ship;
 			m_Side = side;
 			m_KeyValue = keyValue;
 			m_Locked = true;
@@ -38,7 +38,7 @@ namespace Server.Items
 
 			writer.Write( (int) 0 );//version
 
-			writer.Write( m_Boat );
+			writer.Write( m_Ship );
 			writer.Write( (int) m_Side );
 			writer.Write( m_Locked );
 			writer.Write( m_KeyValue );
@@ -54,12 +54,12 @@ namespace Server.Items
 			{
 				case 0:
 				{
-					m_Boat = reader.ReadItem() as BaseBoat;
+					m_Ship = reader.ReadItem() as BaseShip;
 					m_Side = (PlankSide) reader.ReadInt();
 					m_Locked = reader.ReadBool();
 					m_KeyValue = reader.ReadUInt();
 
-					if ( m_Boat == null )
+					if ( m_Ship == null )
 						Delete();
 
 					break;
@@ -74,7 +74,7 @@ namespace Server.Items
 		}
 
 		[CommandProperty( AccessLevel.GameMaster )]
-		public BaseBoat Boat{ get{ return m_Boat; } set{ m_Boat = value; } }
+		public BaseShip Ship{ get{ return m_Ship; } set{ m_Ship = value; } }
 
 		[CommandProperty( AccessLevel.GameMaster )]
 		public PlankSide Side{ get{ return m_Side; } set{ m_Side = value; } }
@@ -138,8 +138,8 @@ namespace Server.Items
 				case 0x3E85: ItemID = 0x3E84; break;
 			}
 
-			if ( m_Boat != null )
-				m_Boat.Refresh();
+			if ( m_Ship != null )
+				m_Ship.Refresh();
 		}
 		
         public void DestroyOpen()
@@ -192,8 +192,8 @@ namespace Server.Items
 				case 0x3E84: ItemID = 0x3E85; break;
 			}
 
-			if ( m_Boat != null )
-				m_Boat.Refresh();
+			if ( m_Ship != null )
+				m_Ship.Refresh();
 		}
 
 		public override void OnDoubleClickDead( Mobile from )
@@ -209,12 +209,12 @@ namespace Server.Items
 			//OVERRIDE: No Longer Using Planks
             return;
             
-            if ( m_Boat == null )
+            if ( m_Ship == null )
 				return;
 
 			if ( from.InRange( GetWorldLocation(), 13 ) )
 			{
-				if ( m_Boat.Contains( from ) )
+				if ( m_Ship.Contains( from ) )
 				{
 					if ( IsOpen )
 						Close();

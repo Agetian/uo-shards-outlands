@@ -57,9 +57,9 @@ namespace Server.Custom
                 return;
             }
 
-            if (player.BoatOccupied == null)
+            if (player.ShipOccupied == null)
             {
-                from.SendMessage("You must be onboard a boat in order to use that.");
+                from.SendMessage("You must be onboard a ship in order to use that.");
                 return;
             }
 
@@ -93,15 +93,15 @@ namespace Server.Custom
                 if (player == null)
                     return;
 
-                if (player.BoatOccupied == null)
+                if (player.ShipOccupied == null)
                 {
-                    from.SendMessage("You must stay onboard your boat to continue your fishing action.");                    
+                    from.SendMessage("You must stay onboard your ship to continue your fishing action.");                    
                     return;
                 }
 
-                else if (player.BoatOccupied.Deleted)
+                else if (player.ShipOccupied.Deleted)
                 {
-                    from.SendMessage("The boat you were fishing from no longer exists.");
+                    from.SendMessage("The ship you were fishing from no longer exists.");
                     return;
                 }
 
@@ -123,7 +123,7 @@ namespace Server.Custom
                 else
                     targetLocation = new Entity(Serial.Zero, new Point3D(location), map);
 
-                bool isWaterTile = BaseBoat.IsWaterTile(targetLocation.Location, map);
+                bool isWaterTile = BaseShip.IsWaterTile(targetLocation.Location, map);
 
                 if (!isWaterTile)
                 {

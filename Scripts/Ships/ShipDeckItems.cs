@@ -12,17 +12,17 @@ namespace Server.Items
 {
     public static class ShipDeckItems
     {
-        public static void GenerateShipDeckItems(BaseBoat boat)
+        public static void GenerateShipDeckItems(BaseShip ship)
         {
-            if (boat == null) return;
-            if (boat.Deleted) return;
+            if (ship == null) return;
+            if (ship.Deleted) return;
 
             int shipLevel = 1;
 
-            if (boat is MediumBoat || boat is MediumDragonBoat) shipLevel = 2;
-            if (boat is LargeBoat || boat is LargeDragonBoat) shipLevel = 3;
-            if (boat is CarrackBoat) shipLevel = 4;
-            if (boat is GalleonBoat) shipLevel = 5;
+            if (ship is MediumShip || ship is MediumDragonShip) shipLevel = 2;
+            if (ship is LargeShip || ship is LargeDragonShip) shipLevel = 3;
+            if (ship is Carrack) shipLevel = 4;
+            if (ship is Galleon) shipLevel = 5;
 
             int deckItems = 5 + (shipLevel * 3);            
         }

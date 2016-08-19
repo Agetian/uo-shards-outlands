@@ -133,7 +133,7 @@ namespace Server.Spells.Fourth
 		{
 			PlayerMobile pm = Caster as PlayerMobile;
 
-            BaseBoat boat = BaseBoat.FindBoatAt(loc, map);
+            BaseShip ship = BaseShip.FindShipAt(loc, map);
 
             WarpBlockerTotem recallBlocker = WarpBlockerTotem.RecallBlockerTriggered(Caster, WarpBlockerTotem.MovementMode.RecallIn, loc, map);
 
@@ -199,7 +199,7 @@ namespace Server.Spells.Fourth
                 Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.
             }
 
-            else if (boat != null && boat.Owner != Caster)
+            else if (ship != null && ship.Owner != Caster)
             {
                 Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.
             }
@@ -278,32 +278,32 @@ namespace Server.Spells.Fourth
 						from.SendLocalizedMessage( 502354 ); // Target is not marked.
 				}
 
-                else if (o is BoatRune)
+                else if (o is ShipRune)
                 {
-                    BoatRune rune = (BoatRune)o;
-                    BaseBoat m_Boat;
+                    ShipRune rune = (ShipRune)o;
+                    BaseShip m_Ship;
 
-                    if (rune.m_Boat != null)
+                    if (rune.m_Ship != null)
                     {
-                        m_Boat = rune.m_Boat;
+                        m_Ship = rune.m_Ship;
 
-                        if (m_Boat.Deleted)
+                        if (m_Ship.Deleted)
                         {
-                            from.SendMessage("The boat bound to this rune no longer exists.");     
+                            from.SendMessage("The ship bound to this rune no longer exists.");     
                             return;
                         }
 
-                        if (m_Boat.Owner == from)
+                        if (m_Ship.Owner == from)
                         {
-                            m_Boat.TransferEmbarkedMobile(from);
-                            m_Owner.Effect(m_Boat.GetRandomEmbarkLocation(true), m_Boat.Map, false);
+                            m_Ship.TransferEmbarkedMobile(from);
+                            m_Owner.Effect(m_Ship.GetRandomEmbarkLocation(true), m_Ship.Map, false);
                         }
                         else
                             from.SendMessage("You must be the owner of that ship to use this rune.");
                     }
 
                     else                    
-                        from.SendMessage("The boat bound to this rune no longer exists.");                                   
+                        from.SendMessage("The ship bound to this rune no longer exists.");                                   
                 }
 
 				else if ( o is HouseRaffleDeed && ((HouseRaffleDeed)o).ValidLocation() )

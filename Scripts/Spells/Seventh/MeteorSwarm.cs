@@ -153,14 +153,14 @@ namespace Server.Spells.Seventh
 
                     if (bc_Target != null)
                     {
-                        if (bc_Target.BoatOccupied != null)
-                            damage *= BaseBoat.shipBasedAoESpellDamageToCreatureScalar;
+                        if (bc_Target.ShipOccupied != null)
+                            damage *= BaseShip.shipBasedAoESpellDamageToCreatureScalar;
                     }
 
                     if (pm_Target != null)
                     {
-                        if (pm_Target.BoatOccupied != null)
-                            damage *= BaseBoat.shipBasedAoESpellDamageToPlayerScalar;
+                        if (pm_Target.ShipOccupied != null)
+                            damage *= BaseShip.shipBasedAoESpellDamageToPlayerScalar;
                     }
 
                     damage *= GetDamageScalar(mobile, damageBonus);

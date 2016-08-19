@@ -254,11 +254,11 @@ namespace Server.Custom
                 newLocation.Y = y;
                 newLocation.Z = -5;
 
-                bool waterTile = BaseBoat.IsWaterTile(newLocation, Map);
+                bool waterTile = BaseShip.IsWaterTile(newLocation, Map);
 
                 if (waterTile)
                 {
-                    if (BaseBoat.FindBoatAt(newLocation, Map) != null)
+                    if (BaseShip.FindShipAt(newLocation, Map) != null)
                         continue;
 
                     SpellHelper.AdjustField(ref spawnLocation, Map, 12, false);

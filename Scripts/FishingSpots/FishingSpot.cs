@@ -186,7 +186,7 @@ namespace Server.Custom
         {
             base.OnBeforeSpawn(location, m);
 
-            if (!BaseBoat.IsWaterTile(location, m))
+            if (!BaseShip.IsWaterTile(location, m))
                 Delete();
         }
 

@@ -170,9 +170,9 @@ namespace Server.Custom
             foreach (OceanHotspotParticipantEntry entry in m_Participants)
             {
                 if (entry == null) continue;
-                if (entry.m_Boat == null) continue;
-                if (entry.m_Boat.Deleted) continue;
-                if (entry.m_Boat.m_SinkTimer != null) continue;
+                if (entry.m_Ship == null) continue;
+                if (entry.m_Ship.Deleted) continue;
+                if (entry.m_Ship.m_SinkTimer != null) continue;
 
                 entry.m_Points = Math.Ceiling(entry.m_Points);                    
             }
@@ -180,19 +180,19 @@ namespace Server.Custom
 
         public void DistributeRewards()
         {
-            Dictionary<BaseBoat, int> m_ValidParticipants = new Dictionary<BaseBoat, int>();
+            Dictionary<BaseShip, int> m_ValidParticipants = new Dictionary<BaseShip, int>();
 
             foreach (OceanHotspotParticipantEntry entry in m_Participants)
             {
-                if (entry.m_Boat == null) continue;
-                if (entry.m_Boat.Deleted) continue;
-                if (entry.m_Boat.m_SinkTimer != null) continue;
+                if (entry.m_Ship == null) continue;
+                if (entry.m_Ship.Deleted) continue;
+                if (entry.m_Ship.m_SinkTimer != null) continue;
 
-                m_ValidParticipants.Add(entry.m_Boat, (int)entry.m_Points);
+                m_ValidParticipants.Add(entry.m_Ship, (int)entry.m_Points);
             }
 
             int TotalValues = 0;
-            foreach (KeyValuePair<BaseBoat, int> pair in m_ValidParticipants)
+            foreach (KeyValuePair<BaseShip, int> pair in m_ValidParticipants)
             {
                 TotalValues += pair.Value;
             }
@@ -203,13 +203,13 @@ namespace Server.Custom
             double AdditionalAmount = 0.0;
 
             //Determine Reward                      
-            foreach (KeyValuePair<BaseBoat, int> pair in m_ValidParticipants)
+            foreach (KeyValuePair<BaseShip, int> pair in m_ValidParticipants)
             {
                 AdditionalAmount = (double)pair.Value / (double)TotalValues;
 
                 if (ItemCheck >= CumulativeAmount && ItemCheck < (CumulativeAmount + AdditionalAmount))
                 {
-                    BaseBoat winner = pair.Key;
+                    BaseShip winner = pair.Key;
 
                     //Determine Reward
 
@@ -226,24 +226,24 @@ namespace Server.Custom
 
             double pointsTickScalar = EventTickInterval / 60;
 
-            List<BaseBoat> m_Boats = new List<BaseBoat>();
+            List<BaseShip> m_Ships = new List<BaseShip>();
 
-            foreach (BaseBoat boat in BaseBoat.m_Instances)
+            foreach (BaseShip ship in BaseShip.m_Instances)
             {
-                if (boat == null) continue;
-                if (boat.Deleted) continue;
-                if (boat.m_SinkTimer != null) continue;
-                if (boat.MobileControlType != MobileControlType.Player) continue;                
-                if (!(Utility.IsInArea(boat.Location, TopLeftAreaPoint, BottomRightAreaPoint))) continue;               
+                if (ship == null) continue;
+                if (ship.Deleted) continue;
+                if (ship.m_SinkTimer != null) continue;
+                if (ship.MobileControlType != MobileControlType.Player) continue;                
+                if (!(Utility.IsInArea(ship.Location, TopLeftAreaPoint, BottomRightAreaPoint))) continue;               
 
-                m_Boats.Add(boat);
+                m_Ships.Add(ship);
             }
 
-            foreach (BaseBoat boat in m_Boats)
+            foreach (BaseShip ship in m_Ships)
             {
-                OceanHotspotParticipantEntry entry = GetParticipationEntry(boat);
+                OceanHotspotParticipantEntry entry = GetParticipationEntry(ship);
 
-                if (m_Boats.Count == 1)
+                if (m_Ships.Count == 1)
                     entry.m_Points += (pointsTickScalar * ControlledPointsPerMinute);
 
                 else
@@ -251,17 +251,17 @@ namespace Server.Custom
             }
         }
 
-        public OceanHotspotParticipantEntry GetParticipationEntry(BaseBoat boat)
+        public OceanHotspotParticipantEntry GetParticipationEntry(BaseShip ship)
         {
             foreach (OceanHotspotParticipantEntry entry in m_Participants)
             {
                 if (entry == null) continue;
 
-                if (entry.m_Boat == boat)
+                if (entry.m_Ship == ship)
                     return entry;
             }
 
-            OceanHotspotParticipantEntry newEntry = new OceanHotspotParticipantEntry(boat);
+            OceanHotspotParticipantEntry newEntry = new OceanHotspotParticipantEntry(ship);
 
             m_Participants.Add(newEntry);
 
@@ -290,7 +290,7 @@ namespace Server.Custom
             writer.Write(m_Participants.Count);
             for (int a = 0; a < m_Participants.Count; a++)
             {
-                writer.Write(m_Participants[a].m_Boat);
+                writer.Write(m_Participants[a].m_Ship);
                 writer.Write(m_Participants[a].m_Points);
             }
         }
@@ -310,10 +310,10 @@ namespace Server.Custom
                 int participantsCount = reader.ReadInt();
                 for (int a = 0; a < participantsCount; a++)
                 {
-                    BaseBoat boat = (BaseBoat)reader.ReadItem();
+                    BaseShip ship = (BaseShip)reader.ReadItem();
                     int points = reader.ReadInt();
 
-                    OceanHotspotParticipantEntry entry = new OceanHotspotParticipantEntry(boat);
+                    OceanHotspotParticipantEntry entry = new OceanHotspotParticipantEntry(ship);
                     entry.m_Points = points;
 
                     m_Participants.Add(entry);
@@ -329,12 +329,12 @@ namespace Server.Custom
 
     public class OceanHotspotParticipantEntry
     {
-        public BaseBoat m_Boat;
+        public BaseShip m_Ship;
         public double m_Points = 0;
 
-        public OceanHotspotParticipantEntry(BaseBoat boat)
+        public OceanHotspotParticipantEntry(BaseShip ship)
         {
-            m_Boat = boat;
+            m_Ship = ship;
         }
     }
 

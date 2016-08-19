@@ -39,8 +39,8 @@ namespace Server.Mobiles
 
         public TimeSpan CombatantTimeout = TimeSpan.FromSeconds(10);
 
-        public DateTime m_LastBoatCombatantSelected;
-        public TimeSpan BoatCombatantTimeout = TimeSpan.FromSeconds(10);       
+        public DateTime m_LastShipCombatantSelected;
+        public TimeSpan ShipCombatantTimeout = TimeSpan.FromSeconds(10);       
 
         public DateTime m_NextSpeechAllowed;
         public TimeSpan NextSpeechDelay = TimeSpan.FromSeconds(30);
@@ -57,7 +57,7 @@ namespace Server.Mobiles
         public int totalIntervals = 25;
 
         public List<Mobile> m_Creatures = new List<Mobile>();
-        public BaseBoat m_BoatCombatant;
+        public BaseShip m_ShipCombatant;
 
         public string[] idleSpeech
         {
@@ -189,17 +189,17 @@ namespace Server.Mobiles
             BaseCreature bc_Attacker = attacker as BaseCreature;
             PlayerMobile pm_Attacker = attacker as PlayerMobile;
 
-            BaseBoat sourceBoat = null;
+            BaseShip sourceShip = null;
             Point3D location = attacker.Location;
             Map map = attacker.Map;
 
             if (bc_Attacker != null)
             {
-                if (bc_Attacker.BoatOccupied != null)
+                if (bc_Attacker.ShipOccupied != null)
                 {
-                    if (!bc_Attacker.BoatOccupied.Deleted && bc_Attacker.BoatOccupied.m_SinkTimer == null)
+                    if (!bc_Attacker.ShipOccupied.Deleted && bc_Attacker.ShipOccupied.m_SinkTimer == null)
                     {
-                        location = bc_Attacker.BoatOccupied.GetRandomEmbarkLocation(true);
+                        location = bc_Attacker.ShipOccupied.GetRandomEmbarkLocation(true);
                         map = bc_Attacker.Map;
                     }
                 }
@@ -207,11 +207,11 @@ namespace Server.Mobiles
 
             if (pm_Attacker != null)
             {
-                if (pm_Attacker.BoatOccupied != null)
+                if (pm_Attacker.ShipOccupied != null)
                 {
-                    if (!pm_Attacker.BoatOccupied.Deleted && pm_Attacker.BoatOccupied.m_SinkTimer == null)
+                    if (!pm_Attacker.ShipOccupied.Deleted && pm_Attacker.ShipOccupied.m_SinkTimer == null)
                     {
-                        location = pm_Attacker.BoatOccupied.GetRandomEmbarkLocation(true);
+                        location = pm_Attacker.ShipOccupied.GetRandomEmbarkLocation(true);
                         map = pm_Attacker.Map;
                     }
                 }
@@ -275,17 +275,17 @@ namespace Server.Mobiles
             BaseCreature bc_Attacker = from as BaseCreature;
             PlayerMobile pm_Attacker = from as PlayerMobile;
 
-            BaseBoat sourceBoat = null;
+            BaseShip sourceShip = null;
             Point3D location = from.Location;
             Map map = from.Map;
 
             if (bc_Attacker != null)
             {
-                if (bc_Attacker.BoatOccupied != null)
+                if (bc_Attacker.ShipOccupied != null)
                 {
-                    if (!bc_Attacker.BoatOccupied.Deleted && bc_Attacker.BoatOccupied.m_SinkTimer == null)
+                    if (!bc_Attacker.ShipOccupied.Deleted && bc_Attacker.ShipOccupied.m_SinkTimer == null)
                     {
-                        location = bc_Attacker.BoatOccupied.GetRandomEmbarkLocation(true);
+                        location = bc_Attacker.ShipOccupied.GetRandomEmbarkLocation(true);
                         map = bc_Attacker.Map;
                     }
                 }
@@ -293,11 +293,11 @@ namespace Server.Mobiles
 
             if (pm_Attacker != null)
             {
-                if (pm_Attacker.BoatOccupied != null)
+                if (pm_Attacker.ShipOccupied != null)
                 {
-                    if (!pm_Attacker.BoatOccupied.Deleted && pm_Attacker.BoatOccupied.m_SinkTimer == null)
+                    if (!pm_Attacker.ShipOccupied.Deleted && pm_Attacker.ShipOccupied.m_SinkTimer == null)
                     {
-                        location = pm_Attacker.BoatOccupied.GetRandomEmbarkLocation(true);
+                        location = pm_Attacker.ShipOccupied.GetRandomEmbarkLocation(true);
                         map = pm_Attacker.Map;
                     }
                 }
@@ -331,17 +331,17 @@ namespace Server.Mobiles
             BaseCreature bc_Attacker = from as BaseCreature;
             PlayerMobile pm_Attacker = from as PlayerMobile;
 
-            BaseBoat sourceBoat = null;
+            BaseShip sourceShip = null;
             Point3D location = from.Location;
             Map map = from.Map;
 
             if (bc_Attacker != null)
             {
-                if (bc_Attacker.BoatOccupied != null)
+                if (bc_Attacker.ShipOccupied != null)
                 {
-                    if (!bc_Attacker.BoatOccupied.Deleted && bc_Attacker.BoatOccupied.m_SinkTimer == null)
+                    if (!bc_Attacker.ShipOccupied.Deleted && bc_Attacker.ShipOccupied.m_SinkTimer == null)
                     {
-                        location = bc_Attacker.BoatOccupied.GetRandomEmbarkLocation(true);
+                        location = bc_Attacker.ShipOccupied.GetRandomEmbarkLocation(true);
                         map = bc_Attacker.Map;
                     }
                 }
@@ -349,11 +349,11 @@ namespace Server.Mobiles
 
             if (pm_Attacker != null)
             {
-                if (pm_Attacker.BoatOccupied != null)
+                if (pm_Attacker.ShipOccupied != null)
                 {
-                    if (!pm_Attacker.BoatOccupied.Deleted && pm_Attacker.BoatOccupied.m_SinkTimer == null)
+                    if (!pm_Attacker.ShipOccupied.Deleted && pm_Attacker.ShipOccupied.m_SinkTimer == null)
                     {
-                        location = pm_Attacker.BoatOccupied.GetRandomEmbarkLocation(true);
+                        location = pm_Attacker.ShipOccupied.GetRandomEmbarkLocation(true);
                         map = pm_Attacker.Map;
                     }
                 }
@@ -480,27 +480,27 @@ namespace Server.Mobiles
 
             int tentacles = 1 + (int)(Math.Ceiling(5 * spawnPercent));
 
-            foreach (BaseBoat targetBoat in BaseBoat.m_Instances)
+            foreach (BaseShip targetShip in BaseShip.m_Instances)
             {
-                if (targetBoat.Deleted) continue;
+                if (targetShip.Deleted) continue;
 
-                if (targetBoat.m_SinkTimer != null)
+                if (targetShip.m_SinkTimer != null)
                 {
-                    if (targetBoat.m_SinkTimer.Running)
+                    if (targetShip.m_SinkTimer.Running)
                         continue;
                 }
 
-                int distance = Utility.GetDistance(Location, targetBoat.Location);
+                int distance = Utility.GetDistance(Location, targetShip.Location);
 
                 if (distance > 30)
                     continue;
 
-                if (targetBoat.MobileControlType != MobileControlType.Player)
+                if (targetShip.MobileControlType != MobileControlType.Player)
                     continue;
 
                 for (int a = 0; a < tentacles; a++)
                 {
-                    SpawnTentacle(targetBoat.GetRandomEmbarkLocation(true), targetBoat.Map);
+                    SpawnTentacle(targetShip.GetRandomEmbarkLocation(true), targetShip.Map);
                 }
             }
         }
@@ -591,40 +591,40 @@ namespace Server.Mobiles
                    });
                 }
 
-                foreach (BaseBoat targetBoat in BaseBoat.m_Instances)
+                foreach (BaseShip targetShip in BaseShip.m_Instances)
                 {
-                    if (targetBoat.Deleted) continue;
+                    if (targetShip.Deleted) continue;
 
-                    if (targetBoat.m_SinkTimer != null)
+                    if (targetShip.m_SinkTimer != null)
                     {
-                        if (targetBoat.m_SinkTimer.Running)
+                        if (targetShip.m_SinkTimer.Running)
                             continue;
                     }
 
-                    int distance = targetBoat.GetBoatToLocationDistance(targetBoat, location);
+                    int distance = targetShip.GetShipToLocationDistance(targetShip, location);
 
                     if (distance > radius)
                         continue;
 
-                    if (targetBoat.MobileControlType != MobileControlType.Player)
+                    if (targetShip.MobileControlType != MobileControlType.Player)
                         continue;
 
                     //Ship Impact
-                    double targetBoatDistance = Utility.GetDistanceToSqrt(location, targetBoat.Location);
-                    double targetBoatDelay = (double)distance * .125;
-                    double impactBoatnDelay = targetBoatDelay - (targetBoatDelay * .5 * spawnPercent);
+                    double targetShipDistance = Utility.GetDistanceToSqrt(location, targetShip.Location);
+                    double targetShipDelay = (double)distance * .125;
+                    double impactShipnDelay = targetShipDelay - (targetShipDelay * .5 * spawnPercent);
 
-                    Timer.DelayCall(TimeSpan.FromSeconds(targetBoatDelay), delegate
+                    Timer.DelayCall(TimeSpan.FromSeconds(targetShipDelay), delegate
                     {
                         if (this == null) return;
                         if (Deleted || !Alive) return;
-                        if (targetBoat == null) return;
-                        if (targetBoat.Deleted || targetBoat.m_SinkTimer != null) return;
+                        if (targetShip == null) return;
+                        if (targetShip.Deleted || targetShip.m_SinkTimer != null) return;
 
-                        if (targetBoat.TillerMan != null)
+                        if (targetShip.TillerMan != null)
                         {
-                            if (!targetBoat.TillerMan.Deleted)
-                                targetBoat.TillerMan.Say("Yar, the wind be tearing our ship an' sails ta' shreds!");
+                            if (!targetShip.TillerMan.Deleted)
+                                targetShip.TillerMan.Say("Yar, the wind be tearing our ship an' sails ta' shreds!");
                         }
 
                         int debrisCount = (int)(Math.Ceiling((double)gustStrength / 2));
@@ -636,7 +636,7 @@ namespace Server.Mobiles
                             debris.ItemID = Utility.RandomList(8766, 8767, 8768, 8769, 8770, 8771, 8772, 8773, 8774, 8775, 8776, 8777);
                             debris.Hue = 2498;
 
-                            Point3D debrisLocation = targetBoat.GetRandomEmbarkLocation(false);
+                            Point3D debrisLocation = targetShip.GetRandomEmbarkLocation(false);
                             SpellHelper.AdjustField(ref debrisLocation, map, 12, false);
 
                             debris.MoveToWorld(debrisLocation, map);
@@ -646,26 +646,26 @@ namespace Server.Mobiles
 
                         double shipDamage = gustStrength * Utility.RandomMinMax(20, 30);
 
-                        if (targetBoat.SailPoints > 0)
+                        if (targetShip.SailPoints > 0)
                         {
                             shipDamage *= .75;
-                            targetBoat.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Sails);
+                            targetShip.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Sails);
 
                             shipDamage *= .25;
-                            targetBoat.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Hull);
+                            targetShip.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Hull);
                         }
 
                         else
                         {
                             shipDamage *= .5;
-                            targetBoat.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Hull);
+                            targetShip.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Hull);
                         }
                     });
 
                     //Mobile Impacts
                     Queue m_Queue = new Queue();
 
-                    foreach (Mobile mobile in targetBoat.GetMobilesOnBoat(false, false))
+                    foreach (Mobile mobile in targetShip.GetMobilesOnShip(false, false))
                     {
                         if (mobile == this) continue;
                         if (!mobile.CanBeDamaged()) continue;
@@ -793,11 +793,11 @@ namespace Server.Mobiles
                         {
                             if (Utility.RandomDouble() <= .33)
                             {
-                                BaseBoat boatCheck = BaseBoat.FindBoatAt(newLocation, map);
+                                BaseShip shipCheck = BaseShip.FindShipAt(newLocation, map);
 
-                                if (boatCheck == null)
+                                if (shipCheck == null)
                                 {
-                                    if (BaseBoat.IsWaterTile(newLocation, map))
+                                    if (BaseShip.IsWaterTile(newLocation, map))
                                         Effects.SendLocationEffect(newLocation, map, 0x352D, 7);
                                 }
 
@@ -808,7 +808,7 @@ namespace Server.Mobiles
                                     water.Hue = 2120;
 
                                     Effects.PlaySound(newLocation, map, 0x027);
-                                    newLocation.Z = boatCheck.Z + 2;
+                                    newLocation.Z = shipCheck.Z + 2;
 
                                     water.MoveToWorld(newLocation, map);
                                 }
@@ -817,26 +817,26 @@ namespace Server.Mobiles
                     }
                 }
 
-                foreach (BaseBoat targetBoat in BaseBoat.m_Instances)
+                foreach (BaseShip targetShip in BaseShip.m_Instances)
                 {
-                    if (targetBoat.Deleted) continue;
+                    if (targetShip.Deleted) continue;
 
-                    if (targetBoat.m_SinkTimer != null)
+                    if (targetShip.m_SinkTimer != null)
                     {
-                        if (targetBoat.m_SinkTimer.Running)
+                        if (targetShip.m_SinkTimer.Running)
                             continue;
                     }
 
-                    int distance = Utility.GetDistance(Location, targetBoat.Location);
+                    int distance = Utility.GetDistance(Location, targetShip.Location);
 
                     if (distance > radius)
                         continue;
 
-                    if (targetBoat.MobileControlType != MobileControlType.Player)
+                    if (targetShip.MobileControlType != MobileControlType.Player)
                         continue;
 
                     //Tillerman Announcement
-                    double targetTillermanDistance = Utility.GetDistanceToSqrt(location, targetBoat.Location);
+                    double targetTillermanDistance = Utility.GetDistanceToSqrt(location, targetShip.Location);
                     double targetTillermanDelay = (double)distance * .125;
                     double impactTillermanDelay = targetTillermanDelay - (targetTillermanDelay * .5 * spawnPercent);
 
@@ -844,19 +844,19 @@ namespace Server.Mobiles
                     {
                         if (this == null) return;
                         if (Deleted || !Alive) return;
-                        if (targetBoat == null) return;
-                        if (targetBoat.Deleted || targetBoat.m_SinkTimer != null) return;
+                        if (targetShip == null) return;
+                        if (targetShip.Deleted || targetShip.m_SinkTimer != null) return;
 
-                        if (targetBoat.TillerMan != null)
+                        if (targetShip.TillerMan != null)
                         {
-                            if (!targetBoat.TillerMan.Deleted)
-                                targetBoat.TillerMan.Say("Yar, the seas be flooding our ship an' soakin' our gunpowder!");
+                            if (!targetShip.TillerMan.Deleted)
+                                targetShip.TillerMan.Say("Yar, the seas be flooding our ship an' soakin' our gunpowder!");
                         }
 
                         //Mobile Impacts
                         Queue m_Queue = new Queue();
 
-                        foreach (Mobile mobile in targetBoat.GetMobilesOnBoat(false, false))
+                        foreach (Mobile mobile in targetShip.GetMobilesOnShip(false, false))
                         {
                             if (mobile == this) continue;
                             if (!mobile.CanBeDamaged()) continue;
@@ -908,19 +908,19 @@ namespace Server.Mobiles
 
                         double shipDamage = waveStrength * Utility.RandomMinMax(20, 30);
 
-                        if (targetBoat.GunPoints > 0)
+                        if (targetShip.GunPoints > 0)
                         {
                             shipDamage *= .75;
-                            targetBoat.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Guns);
+                            targetShip.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Guns);
 
                             shipDamage *= .25;
-                            targetBoat.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Hull);
+                            targetShip.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Hull);
                         }
 
                         else
                         {
                             shipDamage *= .5;
-                            targetBoat.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Hull);
+                            targetShip.ReceiveDamage(null, null, (int)(Math.Ceiling(shipDamage)), DamageType.Hull);
                         }
                     });
                 } 
@@ -980,22 +980,22 @@ namespace Server.Mobiles
                     });
                 }
 
-                foreach (BaseBoat targetBoat in BaseBoat.m_Instances)
+                foreach (BaseShip targetShip in BaseShip.m_Instances)
                 {
-                    if (targetBoat.Deleted) continue;
+                    if (targetShip.Deleted) continue;
 
-                    if (targetBoat.m_SinkTimer != null)
+                    if (targetShip.m_SinkTimer != null)
                     {
-                        if (targetBoat.m_SinkTimer.Running)
+                        if (targetShip.m_SinkTimer.Running)
                             continue;
                     }
 
-                    int distance = Utility.GetDistance(Location, targetBoat.Location);
+                    int distance = Utility.GetDistance(Location, targetShip.Location);
 
                     if (distance > 30)
                         continue;
 
-                    if (targetBoat.MobileControlType != MobileControlType.Player)
+                    if (targetShip.MobileControlType != MobileControlType.Player)
                         continue;
 
                     for (int a = 0; a < cycles; a++)
@@ -1007,7 +1007,7 @@ namespace Server.Mobiles
 
                             List<Mobile> m_PossibleMobiles = new List<Mobile>();
 
-                            foreach (Mobile mobile in targetBoat.GetMobilesOnBoat(false, false))
+                            foreach (Mobile mobile in targetShip.GetMobilesOnShip(false, false))
                             {
                                 if (mobile == null) continue;
                                 if (mobile == this) continue;
@@ -1094,11 +1094,11 @@ namespace Server.Mobiles
                         {
                             if (Utility.RandomDouble() <= .66)
                             {
-                                BaseBoat boatCheck = BaseBoat.FindBoatAt(newLocation, map);
+                                BaseShip shipCheck = BaseShip.FindShipAt(newLocation, map);
 
-                                if (boatCheck == null)
+                                if (shipCheck == null)
                                 {
-                                    if (BaseBoat.IsWaterTile(newLocation, map))
+                                    if (BaseShip.IsWaterTile(newLocation, map))
                                         Effects.SendLocationEffect(newLocation, map, 0x352D, 7);
                                 }
 
@@ -1109,7 +1109,7 @@ namespace Server.Mobiles
                                     water.Hue = 2120;
 
                                     Effects.PlaySound(newLocation, map, 0x027);
-                                    newLocation.Z = boatCheck.Z + 2;
+                                    newLocation.Z = shipCheck.Z + 2;
 
                                     water.MoveToWorld(newLocation, map);
                                 }
@@ -1120,7 +1120,7 @@ namespace Server.Mobiles
 
                 Location = Home;
                 Combatant = null;
-                m_BoatCombatant = null;
+                m_ShipCombatant = null;
 
                 return;
             }
@@ -1267,11 +1267,11 @@ namespace Server.Mobiles
                         {
                             if (Utility.RandomDouble() <= .66)
                             {
-                                BaseBoat boatCheck = BaseBoat.FindBoatAt(newLocation, map);
+                                BaseShip shipCheck = BaseShip.FindShipAt(newLocation, map);
 
-                                if (boatCheck == null)
+                                if (shipCheck == null)
                                 {
-                                    if (BaseBoat.IsWaterTile(newLocation, map))
+                                    if (BaseShip.IsWaterTile(newLocation, map))
                                         Effects.SendLocationEffect(newLocation, map, 0x352D, 7);
                                 }
 
@@ -1282,7 +1282,7 @@ namespace Server.Mobiles
                                     water.Hue = 2120;
 
                                     Effects.PlaySound(newLocation, map, 0x027);
-                                    newLocation.Z = boatCheck.Z + 2;
+                                    newLocation.Z = shipCheck.Z + 2;
 
                                     water.MoveToWorld(newLocation, map);
                                 }
@@ -1317,35 +1317,35 @@ namespace Server.Mobiles
                 Hidden = false;
 
                 Combatant = null;
-                m_BoatCombatant = null;
+                m_ShipCombatant = null;
 
-                List<BaseBoat> m_PossibleBoatCombatants = new List<BaseBoat>();
+                List<BaseShip> m_PossibleShipCombatants = new List<BaseShip>();
 
-                foreach (BaseBoat targetBoat in BaseBoat.m_Instances)
+                foreach (BaseShip targetShip in BaseShip.m_Instances)
                 {
-                    if (targetBoat.Deleted) continue;
-                    if (targetBoat.MobileControlType != MobileControlType.Player) continue;
+                    if (targetShip.Deleted) continue;
+                    if (targetShip.MobileControlType != MobileControlType.Player) continue;
 
-                    if (targetBoat.m_SinkTimer != null)
+                    if (targetShip.m_SinkTimer != null)
                     {
-                        if (targetBoat.m_SinkTimer.Running)
+                        if (targetShip.m_SinkTimer.Running)
                             continue;
                     }
 
-                    int distance = Utility.GetDistance(Location, targetBoat.Location);
+                    int distance = Utility.GetDistance(Location, targetShip.Location);
 
                     if (distance > 30)
                         continue;
 
-                    if (targetBoat.MobileControlType != MobileControlType.Player)
+                    if (targetShip.MobileControlType != MobileControlType.Player)
                         continue;
 
-                    m_PossibleBoatCombatants.Add(targetBoat);
+                    m_PossibleShipCombatants.Add(targetShip);
                 }
 
-                if (m_PossibleBoatCombatants.Count > 0)
+                if (m_PossibleShipCombatants.Count > 0)
                 {
-                    Location = m_PossibleBoatCombatants[Utility.RandomMinMax(0, m_PossibleBoatCombatants.Count - 1)].Location;
+                    Location = m_PossibleShipCombatants[Utility.RandomMinMax(0, m_PossibleShipCombatants.Count - 1)].Location;
 
                     int radius = 2;
 
@@ -1373,11 +1373,11 @@ namespace Server.Mobiles
                             {
                                 if (Utility.RandomDouble() <= .66)
                                 {
-                                    BaseBoat boatCheck = BaseBoat.FindBoatAt(newLocation, map);
+                                    BaseShip shipCheck = BaseShip.FindShipAt(newLocation, map);
 
-                                    if (boatCheck == null)
+                                    if (shipCheck == null)
                                     {
-                                        if (BaseBoat.IsWaterTile(newLocation, map))
+                                        if (BaseShip.IsWaterTile(newLocation, map))
                                             Effects.SendLocationEffect(newLocation, map, 0x352D, 7);
                                     }
 
@@ -1388,7 +1388,7 @@ namespace Server.Mobiles
                                         water.Hue = 2120;
 
                                         Effects.PlaySound(newLocation, map, 0x027);
-                                        newLocation.Z = boatCheck.Z + 2;
+                                        newLocation.Z = shipCheck.Z + 2;
 
                                         water.MoveToWorld(newLocation, map);
                                     }
@@ -1408,22 +1408,22 @@ namespace Server.Mobiles
                 BaseCreature bc_Combatant = Combatant as BaseCreature;
                 PlayerMobile pm_Combatant = Combatant as PlayerMobile;
 
-                //If Combatant is on Boat, Set Boat to Be Target Boat
+                //If Combatant is on Ship, Set Ship to Be Target Ship
                 if (bc_Combatant != null)
                 {
-                    if (bc_Combatant.BoatOccupied != null)
+                    if (bc_Combatant.ShipOccupied != null)
                     {
-                        if (!bc_Combatant.BoatOccupied.Deleted && bc_Combatant.BoatOccupied.m_SinkTimer == null)
-                            m_BoatCombatant = bc_Combatant.BoatOccupied;
+                        if (!bc_Combatant.ShipOccupied.Deleted && bc_Combatant.ShipOccupied.m_SinkTimer == null)
+                            m_ShipCombatant = bc_Combatant.ShipOccupied;
                     }
                 }
 
                 if (pm_Combatant != null)
                 {
-                    if (pm_Combatant.BoatOccupied != null)
+                    if (pm_Combatant.ShipOccupied != null)
                     {
-                        if (!pm_Combatant.BoatOccupied.Deleted && pm_Combatant.BoatOccupied.m_SinkTimer == null)
-                            m_BoatCombatant = pm_Combatant.BoatOccupied;
+                        if (!pm_Combatant.ShipOccupied.Deleted && pm_Combatant.ShipOccupied.m_SinkTimer == null)
+                            m_ShipCombatant = pm_Combatant.ShipOccupied;
                     }
                 }
 
@@ -1434,10 +1434,10 @@ namespace Server.Mobiles
                         SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, .5, true, 0, false, "", "", "-1");
                 }
 
-                //If In Range of BoatCombatant, Don't Move
-                if (m_BoatCombatant != null)
+                //If In Range of ShipCombatant, Don't Move
+                if (m_ShipCombatant != null)
                 {
-                    if (!m_BoatCombatant.Deleted && m_BoatCombatant.m_SinkTimer == null && m_BoatCombatant.GetBoatToLocationDistance(m_BoatCombatant, Location) <= 4)
+                    if (!m_ShipCombatant.Deleted && m_ShipCombatant.m_SinkTimer == null && m_ShipCombatant.GetShipToLocationDistance(m_ShipCombatant, Location) <= 4)
                         SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, .5, true, 0, false, "", "", "-1");
                 }
             }
@@ -1448,53 +1448,53 @@ namespace Server.Mobiles
                 //Haven't Made an Attack in A While
                 if (LastCombatTime + CombatantTimeout < DateTime.UtcNow)
                 {
-                    //Validate Boat Combatant
-                    if (m_BoatCombatant != null)
+                    //Validate Ship Combatant
+                    if (m_ShipCombatant != null)
                     {
-                        if (m_BoatCombatant.Deleted || m_BoatCombatant.m_SinkTimer != null || Utility.GetDistance(Location, m_BoatCombatant.Location) > 30)
-                            m_BoatCombatant = null;
+                        if (m_ShipCombatant.Deleted || m_ShipCombatant.m_SinkTimer != null || Utility.GetDistance(Location, m_ShipCombatant.Location) > 30)
+                            m_ShipCombatant = null;
 
-                        else if (m_LastBoatCombatantSelected + BoatCombatantTimeout > DateTime.UtcNow)                        
-                            m_BoatCombatant = null;
+                        else if (m_LastShipCombatantSelected + ShipCombatantTimeout > DateTime.UtcNow)                        
+                            m_ShipCombatant = null;
                     }
 
                     //Determine Ship Combatant
-                    if (m_BoatCombatant == null)
+                    if (m_ShipCombatant == null)
                     {
-                        m_LastBoatCombatantSelected = DateTime.UtcNow;
+                        m_LastShipCombatantSelected = DateTime.UtcNow;
 
-                        Dictionary<BaseBoat, int> m_PossibleBoatCombatants = new Dictionary<BaseBoat, int>();
+                        Dictionary<BaseShip, int> m_PossibleShipCombatants = new Dictionary<BaseShip, int>();
 
-                        foreach (BaseBoat targetBoat in BaseBoat.m_Instances)
+                        foreach (BaseShip targetShip in BaseShip.m_Instances)
                         {
-                            if (targetBoat.Deleted) continue;
-                            if (targetBoat.MobileControlType != MobileControlType.Player) continue;
+                            if (targetShip.Deleted) continue;
+                            if (targetShip.MobileControlType != MobileControlType.Player) continue;
 
-                            if (targetBoat.m_SinkTimer != null)
+                            if (targetShip.m_SinkTimer != null)
                             {
-                                if (targetBoat.m_SinkTimer.Running)
+                                if (targetShip.m_SinkTimer.Running)
                                     continue;
                             }
 
-                            int distance = Utility.GetDistance(Location, targetBoat.Location);
+                            int distance = Utility.GetDistance(Location, targetShip.Location);
 
                             if (distance > 30) continue;
 
                             int weightValue = 0;
                             int distanceWeight = 0;
-                            double hullPercentLost = 1 - ((double)targetBoat.HitPoints / (double)targetBoat.MaxHitPoints);
+                            double hullPercentLost = 1 - ((double)targetShip.HitPoints / (double)targetShip.MaxHitPoints);
 
                             weightValue += (int)(hullPercentLost * 10);
                             weightValue += 11 - (int)(Math.Ceiling((double)distance / 3));
 
-                            m_PossibleBoatCombatants.Add(targetBoat, weightValue);
+                            m_PossibleShipCombatants.Add(targetShip, weightValue);
                         }
 
-                        if (m_PossibleBoatCombatants.Count > 0)
+                        if (m_PossibleShipCombatants.Count > 0)
                         {
                             int TotalValues = 0;
 
-                            foreach (KeyValuePair<BaseBoat, int> pair in m_PossibleBoatCombatants)
+                            foreach (KeyValuePair<BaseShip, int> pair in m_PossibleShipCombatants)
                             {
                                 TotalValues += pair.Value;
                             }
@@ -1505,14 +1505,14 @@ namespace Server.Mobiles
 
                             bool foundDirection = true;
 
-                            foreach (KeyValuePair<BaseBoat, int> pair in m_PossibleBoatCombatants)
+                            foreach (KeyValuePair<BaseShip, int> pair in m_PossibleShipCombatants)
                             {
                                 AdditionalAmount = (double)pair.Value / (double)TotalValues;
 
                                 //Set Ship Target
                                 if (ActionCheck >= CumulativeAmount && ActionCheck < (CumulativeAmount + AdditionalAmount))
                                 {
-                                    m_BoatCombatant = pair.Key;
+                                    m_ShipCombatant = pair.Key;
                                     break;
                                 }
 
@@ -1522,12 +1522,12 @@ namespace Server.Mobiles
                     }
                 }
 
-                //Move Towards Target Boat
-                if (m_BoatCombatant != null && !CantWalk && !Frozen && AIObject.NextMove <= DateTime.UtcNow)
+                //Move Towards Target Ship
+                if (m_ShipCombatant != null && !CantWalk && !Frozen && AIObject.NextMove <= DateTime.UtcNow)
                 {
-                    if (m_BoatCombatant.m_SinkTimer == null && !m_BoatCombatant.Deleted && m_BoatCombatant.GetBoatToLocationDistance(m_BoatCombatant, Location) > 4)
+                    if (m_ShipCombatant.m_SinkTimer == null && !m_ShipCombatant.Deleted && m_ShipCombatant.GetShipToLocationDistance(m_ShipCombatant, Location) > 4)
                     {
-                        AIObject.WalkToLocation(m_BoatCombatant.Location, 1, false, 0, 0);
+                        AIObject.WalkToLocation(m_ShipCombatant.Location, 1, false, 0, 0);
                         DelayNextMovement(CurrentSpeed);   
                     }
 
@@ -1550,14 +1550,14 @@ namespace Server.Mobiles
                     }
                 }
 
-                if (!validAttackTarget && m_BoatCombatant != null)
+                if (!validAttackTarget && m_ShipCombatant != null)
                 {
-                    int distance =  m_BoatCombatant.GetBoatToLocationDistance(m_BoatCombatant, Location);
+                    int distance =  m_ShipCombatant.GetShipToLocationDistance(m_ShipCombatant, Location);
 
-                    if (m_BoatCombatant.m_SinkTimer == null && !m_BoatCombatant.Deleted && distance <= 4)
+                    if (m_ShipCombatant.m_SinkTimer == null && !m_ShipCombatant.Deleted && distance <= 4)
                     {
                         validAttackTarget = true;
-                        MeleeAttackShip(m_BoatCombatant);
+                        MeleeAttackShip(m_ShipCombatant);
                     }
                 }
 
@@ -1607,27 +1607,27 @@ namespace Server.Mobiles
 
                         if (!validAttackTarget)
                         {
-                            List<BaseBoat> m_NearbyBoats = new List<BaseBoat>();
+                            List<BaseShip> m_NearbyShips = new List<BaseShip>();
 
-                            foreach (BaseBoat targetBoat in BaseBoat.m_Instances)
+                            foreach (BaseShip targetShip in BaseShip.m_Instances)
                             {
-                                if (targetBoat.Deleted) continue;
-                                if (targetBoat.MobileControlType != MobileControlType.Player) continue;
+                                if (targetShip.Deleted) continue;
+                                if (targetShip.MobileControlType != MobileControlType.Player) continue;
 
-                                int distance = Utility.GetDistance(Location, targetBoat.Location);
+                                int distance = Utility.GetDistance(Location, targetShip.Location);
                                 if (distance > 4) continue;   
 
-                                if (targetBoat.m_SinkTimer != null)
+                                if (targetShip.m_SinkTimer != null)
                                 {
-                                    if (targetBoat.m_SinkTimer.Running)
+                                    if (targetShip.m_SinkTimer.Running)
                                         continue;
                                 }                          
 
-                                m_NearbyBoats.Add(targetBoat);
+                                m_NearbyShips.Add(targetShip);
                             }
 
-                            if (m_NearbyBoats.Count > 0)
-                                MeleeAttackShip(m_NearbyBoats[Utility.RandomMinMax(0, m_NearbyBoats.Count - 1)]);
+                            if (m_NearbyShips.Count > 0)
+                                MeleeAttackShip(m_NearbyShips[Utility.RandomMinMax(0, m_NearbyShips.Count - 1)]);
                         }                        
 
                         m_NextNonCombatantAttackCheckAllowed = DateTime.UtcNow + NextNonCombatantAttackDelay;
@@ -1675,7 +1675,7 @@ namespace Server.Mobiles
                 if (this == null) return;
                 if (Deleted || !Alive) return;
 
-                BaseBoat boatOccupied = null;
+                BaseShip shipOccupied = null;
                 
                 Queue m_Queue = new Queue();
 
@@ -1734,19 +1734,19 @@ namespace Server.Mobiles
                     {
                         damage *= 2;
 
-                        if (bc_Target.BoatOccupied != null)
+                        if (bc_Target.ShipOccupied != null)
                         {
-                            if (!bc_Target.BoatOccupied.Deleted && bc_Target.BoatOccupied.m_SinkTimer == null)
-                                boatOccupied = bc_Target.BoatOccupied;
+                            if (!bc_Target.ShipOccupied.Deleted && bc_Target.ShipOccupied.m_SinkTimer == null)
+                                shipOccupied = bc_Target.ShipOccupied;
                         }
                     }
 
                     if (pm_Target != null)
                     {
-                        if (pm_Target.BoatOccupied != null)
+                        if (pm_Target.ShipOccupied != null)
                         {
-                            if (!pm_Target.BoatOccupied.Deleted && pm_Target.BoatOccupied.m_SinkTimer == null)
-                                boatOccupied = pm_Target.BoatOccupied;
+                            if (!pm_Target.ShipOccupied.Deleted && pm_Target.ShipOccupied.m_SinkTimer == null)
+                                shipOccupied = pm_Target.ShipOccupied;
                         }
                     }
 
@@ -1781,9 +1781,9 @@ namespace Server.Mobiles
                     AOS.Damage(mobile, (int)damage, 100, 100, 0, 0, 0);
                 }
 
-                if (boatOccupied != null)
+                if (shipOccupied != null)
                 {
-                    if (!boatOccupied.Deleted && boatOccupied.m_SinkTimer == null)
+                    if (!shipOccupied.Deleted && shipOccupied.m_SinkTimer == null)
                     {
                         int projectiles = Utility.RandomMinMax(3, 5);
 
@@ -1809,15 +1809,15 @@ namespace Server.Mobiles
                                 case 11: debrisOffsetX = 5; debrisOffsetY = -5; break;
                             }
 
-                            Point3D targetPoint = boatOccupied.GetRandomEmbarkLocation(true);
+                            Point3D targetPoint = shipOccupied.GetRandomEmbarkLocation(true);
                             Point3D newLocation = new Point3D(targetPoint.X + debrisOffsetX, targetPoint.Y + debrisOffsetY, targetPoint.Z);
 
-                            IEntity effectStartLocation = new Entity(Serial.Zero, new Point3D(targetPoint.X, targetPoint.Y, targetPoint.Z + 2), boatOccupied.Map);
-                            IEntity effectEndLocation = new Entity(Serial.Zero, new Point3D(newLocation.X, newLocation.Y, newLocation.Z + 30), boatOccupied.Map);
+                            IEntity effectStartLocation = new Entity(Serial.Zero, new Point3D(targetPoint.X, targetPoint.Y, targetPoint.Z + 2), shipOccupied.Map);
+                            IEntity effectEndLocation = new Entity(Serial.Zero, new Point3D(newLocation.X, newLocation.Y, newLocation.Z + 30), shipOccupied.Map);
 
                             newLocation.Z += 5;
 
-                            Effects.PlaySound(targetPoint, boatOccupied.Map, 0x50F);
+                            Effects.PlaySound(targetPoint, shipOccupied.Map, 0x50F);
                             Effects.SendMovingEffect(effectStartLocation, effectEndLocation, Utility.RandomList(3117, 3118, 3119, 3120, 3553, 7127, 7130, 7128, 7131), particleSpeed, 0, false, false, 0, 0);
                         }
 
@@ -1826,16 +1826,16 @@ namespace Server.Mobiles
 
                         int hullDamage = Utility.RandomMinMax(minDamage, maxDamage);
 
-                        boatOccupied.ReceiveDamage(null, null, hullDamage, DamageType.Hull);
+                        shipOccupied.ReceiveDamage(null, null, hullDamage, DamageType.Hull);
                     }
                 }
             });
         }
 
-        public void MeleeAttackShip(BaseBoat boat)
+        public void MeleeAttackShip(BaseShip ship)
         {
-            if (boat == null) return;
-            if (boat.Deleted || boat.m_SinkTimer != null) return;
+            if (ship == null) return;
+            if (ship.Deleted || ship.m_SinkTimer != null) return;
 
             double spawnPercent = (double)intervalCount / (double)totalIntervals;
             double attackDelay = NextMeleeAttackDelayMax - (AttackMaxReduction * spawnPercent);
@@ -1845,10 +1845,10 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, 2, true, 0, false, "", "", "-1");
 
-            Point3D targetLocation = boat.Location;
-            Map map = boat.Map;
+            Point3D targetLocation = ship.Location;
+            Map map = ship.Map;
 
-            Direction = Utility.GetDirection(Location, boat.Location);
+            Direction = Utility.GetDirection(Location, ship.Location);
 
             Timer.DelayCall(TimeSpan.FromSeconds(.2), delegate
             {
@@ -1864,12 +1864,12 @@ namespace Server.Mobiles
                 if (this == null) return;
                 if (Deleted || !Alive) return;
 
-                if (boat == null) return;
-                if (boat.Deleted) return;
+                if (ship == null) return;
+                if (ship.Deleted) return;
 
-                if (boat.m_SinkTimer != null)
+                if (ship.m_SinkTimer != null)
                 {
-                    if (boat.m_SinkTimer.Running)
+                    if (ship.m_SinkTimer.Running)
                         return;
                 }
 
@@ -1897,15 +1897,15 @@ namespace Server.Mobiles
                         case 11: debrisOffsetX = 5; debrisOffsetY = -5; break;
                     }
 
-                    Point3D targetPoint = boat.GetRandomEmbarkLocation(true);
+                    Point3D targetPoint = ship.GetRandomEmbarkLocation(true);
                     Point3D newLocation = new Point3D(targetPoint.X + debrisOffsetX, targetPoint.Y + debrisOffsetY, targetPoint.Z);
 
-                    IEntity effectStartLocation = new Entity(Serial.Zero, new Point3D(targetPoint.X, targetPoint.Y, targetPoint.Z + 2), boat.Map);
-                    IEntity effectEndLocation = new Entity(Serial.Zero, new Point3D(newLocation.X, newLocation.Y, newLocation.Z + 30), boat.Map);
+                    IEntity effectStartLocation = new Entity(Serial.Zero, new Point3D(targetPoint.X, targetPoint.Y, targetPoint.Z + 2), ship.Map);
+                    IEntity effectEndLocation = new Entity(Serial.Zero, new Point3D(newLocation.X, newLocation.Y, newLocation.Z + 30), ship.Map);
                     
                     newLocation.Z += 5;
 
-                    Effects.PlaySound(targetPoint, boat.Map, 0x50F);
+                    Effects.PlaySound(targetPoint, ship.Map, 0x50F);
                     Effects.SendMovingEffect(effectStartLocation, effectEndLocation, Utility.RandomList(3117, 3118, 3119, 3120, 3553, 7127, 7130, 7128, 7131), particleSpeed, 0, false, false, 0, 0);
                 }
 
@@ -1914,7 +1914,7 @@ namespace Server.Mobiles
 
                 int hullDamage = Utility.RandomMinMax(minDamage, maxDamage);
                 
-                boat.ReceiveDamage(null, null, hullDamage, DamageType.Hull);
+                ship.ReceiveDamage(null, null, hullDamage, DamageType.Hull);
             });      
         }
 
@@ -1929,7 +1929,7 @@ namespace Server.Mobiles
 
         protected override bool OnMove(Direction d)
         {     
-            if (Utility.RandomDouble() <= .33 && BoatOccupied == null)
+            if (Utility.RandomDouble() <= .33 && ShipOccupied == null)
             {
                 Effects.PlaySound(Location, Map, Utility.RandomList(0x026, 0x025));
                 Effects.SendLocationEffect(Location, Map, 0x352D, 7);

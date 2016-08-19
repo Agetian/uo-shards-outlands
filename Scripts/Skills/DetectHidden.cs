@@ -55,20 +55,20 @@ namespace Server.SkillHandlers
 				else 
 					p = from.Location;
 
-                //Boat Searching: Automatic Success for Owner, Co-Owner, Owner 
-                BaseBoat boat = BaseBoat.FindBoatAt(p, from.Map);
+                //Ship Searching: Automatic Success for Owner, Co-Owner, Owner 
+                BaseShip ship = BaseShip.FindShipAt(p, from.Map);
 
-                if (boat != null)
+                if (ship != null)
                 {
-                    if (!boat.Contains(from))
+                    if (!ship.Contains(from))
                     {
-                        from.SendMessage("You must be onboard this boat in order to search it.");
+                        from.SendMessage("You must be onboard this ship in order to search it.");
                         return;
                     }
 
-                    if (boat.IsFriend(from) || boat.IsCoOwner(from) || boat.IsOwner(from))
+                    if (ship.IsFriend(from) || ship.IsCoOwner(from) || ship.IsOwner(from))
                     {
-                        List<Mobile> m_MobilesOnBoard = boat.GetMobilesOnBoat(false, true);
+                        List<Mobile> m_MobilesOnBoard = ship.GetMobilesOnShip(false, true);
 
                         foreach (Mobile mobile in m_MobilesOnBoard)
                         {

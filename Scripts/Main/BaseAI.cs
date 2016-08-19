@@ -1070,7 +1070,7 @@ namespace Server.Mobiles
                             {
                                 if (iCurrDist > weapon.MaxRange || !bc_Creature.InLOS(bc_Creature.Combatant))
                                 {
-                                    if (bc_Creature.BoatOccupied != null)
+                                    if (bc_Creature.ShipOccupied != null)
                                     {
                                         if (Utility.RandomDouble() < .33)
                                         {
@@ -1105,7 +1105,7 @@ namespace Server.Mobiles
 
                             if ((iCurrDist > bc_Creature.CreatureSpellRange) || !bc_Creature.InLOS(bc_Creature.Combatant))
                             {
-                                if (bc_Creature.BoatOccupied != null)
+                                if (bc_Creature.ShipOccupied != null)
                                 {
                                     if (Utility.RandomDouble() < .33)
                                     {
@@ -1132,7 +1132,7 @@ namespace Server.Mobiles
                             break;
 
                         case CombatRange.Withdraw:
-                            if (!bc_Creature.InLOS(bc_Creature.Combatant) && bc_Creature.BoatOccupied == null)
+                            if (!bc_Creature.InLOS(bc_Creature.Combatant) && bc_Creature.ShipOccupied == null)
                             {
                                 WalkToMobile(bc_Creature.Combatant, 1, bRun, 0, 1);
 
@@ -1142,7 +1142,7 @@ namespace Server.Mobiles
                                 break;
                             }
 
-                            if (iCurrDist < (GetCreatureWithdrawDistance(bc_Creature) - 1) && bc_Creature.BoatOccupied == null)
+                            if (iCurrDist < (GetCreatureWithdrawDistance(bc_Creature) - 1) && bc_Creature.ShipOccupied == null)
                             {
                                 Point3D newPoint;
                                 Dictionary<Direction, int> DictNewDirection = new Dictionary<Direction, int>();
@@ -4789,13 +4789,13 @@ namespace Server.Mobiles
 
                     if (bc_Target != null)
                     {
-                        if (bc_Target.BoatOccupied != null)
+                        if (bc_Target.ShipOccupied != null)
                             ignoreBonusAggro = true;
                     }
 
                     if (pm_Target != null)
                     {
-                        if (pm_Target.BoatOccupied != null)
+                        if (pm_Target.ShipOccupied != null)
                             ignoreBonusAggro = true;
                     }
 

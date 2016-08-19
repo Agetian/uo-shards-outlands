@@ -84,15 +84,15 @@ namespace Server
                 displayedDamage *= 1 + bc_Target.DiscordEffect;
 
                 //Ship Combat
-                if (BaseBoat.UseShipBasedDamageModifer(from, bc_Target))
-                    displayedDamage *= BaseBoat.shipBasedDamageToCreatureScalar;
+                if (BaseShip.UseShipBasedDamageModifer(from, bc_Target))
+                    displayedDamage *= BaseShip.shipBasedDamageToCreatureScalar;
             }
 
             //Ship Combat
             if (pm_Target != null)
             {
-                if (BaseBoat.UseShipBasedDamageModifer(from, pm_Target))
-                    displayedDamage *= BaseBoat.shipBasedDamageToPlayerScalar;
+                if (BaseShip.UseShipBasedDamageModifer(from, pm_Target))
+                    displayedDamage *= BaseShip.shipBasedDamageToPlayerScalar;
             }
 
             return (int)(Math.Round(displayedDamage));

@@ -12,19 +12,19 @@ namespace Server.Items
 {
     public static class ShipLoot
     {
-        public static void GenerateShipLoot(BaseBoat boat)
+        public static void GenerateShipLoot(BaseShip ship)
         {
-            if (boat == null) return;
-            if (boat.Deleted) return;
-            if (boat.Hold == null) return;
-            if (boat.Hold.Deleted) return;
+            if (ship == null) return;
+            if (ship.Deleted) return;
+            if (ship.Hold == null) return;
+            if (ship.Hold.Deleted) return;
 
             int shipLevel = 1;
 
-            if (boat is MediumBoat || boat is MediumDragonBoat) shipLevel = 2;
-            if (boat is LargeBoat || boat is LargeDragonBoat) shipLevel = 3;
-            if (boat is CarrackBoat) shipLevel = 4;
-            if (boat is GalleonBoat) shipLevel = 5;
+            if (ship is MediumShip || ship is MediumDragonShip) shipLevel = 2;
+            if (ship is LargeShip || ship is LargeDragonShip) shipLevel = 3;
+            if (ship is Carrack) shipLevel = 4;
+            if (ship is Galleon) shipLevel = 5;
 
             int gold = 0;
             int cannonShot = 0;    
@@ -36,7 +36,7 @@ namespace Server.Items
             double prestigeScrollChance = 0;
             double craftingComponentChance = 0;
 
-            switch (boat.MobileFactionType)
+            switch (ship.MobileFactionType)
             {
                 case MobileFactionType.Fishing:
                     gold = 500 + (Utility.RandomMinMax(200 * (shipLevel - 1), 300 * (shipLevel - 1)));                    
@@ -106,30 +106,30 @@ namespace Server.Items
             }
 
             if (gold > 0)
-                boat.Hold.DropItem(new Gold(gold));            
+                ship.Hold.DropItem(new Gold(gold));            
 
             //if (cannonShot > 0)
-                //boat.Hold.DropItem(new CannonShot(cannonShot));
+                //ship.Hold.DropItem(new CannonShot(cannonShot));
 
             if (boards > 0)
-                boat.Hold.DropItem(new Board(boards));
+                ship.Hold.DropItem(new Board(boards));
 
             if (cloth > 0)
-                boat.Hold.DropItem(new Cloth(cloth));
+                ship.Hold.DropItem(new Cloth(cloth));
 
             if (ironIngots > 0)
-                boat.Hold.DropItem(new IronIngot(ironIngots));
+                ship.Hold.DropItem(new IronIngot(ironIngots));
           
             if (Utility.RandomDouble() < rareChance)
             {
                 Item item = GetShipRare();
                 
                 if (item != null)
-                    boat.Hold.DropItem(item);               
+                    ship.Hold.DropItem(item);               
             }
 
             if (Utility.RandomDouble() < craftingComponentChance)
-                boat.Hold.DropItem(CraftingComponent.GetRandomCraftingComponent(1));
+                ship.Hold.DropItem(CraftingComponent.GetRandomCraftingComponent(1));
         }
 
         public static Item GetShipRare()

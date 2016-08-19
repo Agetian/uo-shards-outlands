@@ -10,7 +10,7 @@ using Server.Mobiles;
 
 namespace Server.Custom
 {
-    public class HenchmanPirateBoatswain : BaseHenchman
+    public class HenchmanPirateShipswain : BaseHenchman
 	{
         public override string[] recruitSpeech  { get { return new string[] {   "Aye, you'll be needin' me to do yer dirty work, I imagin'.",
                                                                                 };
@@ -32,11 +32,11 @@ namespace Server.Custom
         public override HenchmanGroupType HenchmanGroup { get { return HenchmanGroupType.Pirate; } }
 
 		[Constructable]
-		public HenchmanPirateBoatswain() : base()
+		public HenchmanPirateShipswain() : base()
 		{
             SpeechHue = Utility.RandomRedHue();
 
-            Title = "the boatswain";
+            Title = "the shipswain";
 
             SetStr(75);
             SetDex(50);
@@ -67,7 +67,7 @@ namespace Server.Custom
             MinTameSkill = 100;
 		}
 
-        public override string TamedDisplayName { get { return "Boatswain"; } }
+        public override string TamedDisplayName { get { return "Shipswain"; } }
 
         public override int TamedItemId { get { return 8454; } }
         public override int TamedItemHue { get { return 0; } }
@@ -159,7 +159,7 @@ namespace Server.Custom
             PvPAbilityDamageScalar = BaseCreature.BasePvPAbilityDamageScalar * BaseCreature.BasePvPHenchmenDamageScalar;
         }
         
-        public HenchmanPirateBoatswain(Serial serial): base(serial)
+        public HenchmanPirateShipswain(Serial serial): base(serial)
         {
         }    
 

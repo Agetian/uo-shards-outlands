@@ -77,13 +77,13 @@ namespace Server.Mobiles
         {
             base.OnThink();
 
-            if (m_NextShipEntangleAllowed <= DateTime.UtcNow && BoatOccupied != null)
+            if (m_NextShipEntangleAllowed <= DateTime.UtcNow && ShipOccupied != null)
             {
-                if (BoatOccupied.Deleted || BoatOccupied.m_SinkTimer != null)
+                if (ShipOccupied.Deleted || ShipOccupied.m_SinkTimer != null)
                     return;
 
-                BoatOccupied.TempSpeedModifier = 0;
-                BoatOccupied.TempSpeedModifierExpiration = DateTime.UtcNow + ShipEntangleDuration;                
+                ShipOccupied.TempSpeedModifier = 0;
+                ShipOccupied.TempSpeedModifierExpiration = DateTime.UtcNow + ShipEntangleDuration;                
 
                 PublicOverheadMessage(Network.MessageType.Regular, 0, false, "*entangles the ship*");
 

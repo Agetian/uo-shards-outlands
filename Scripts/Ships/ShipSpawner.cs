@@ -85,7 +85,7 @@ namespace Server.Items
             set { m_PreferredDirection = value; }
         }
 
-        public List<BaseBoat> m_Boats = new List<BaseBoat>();
+        public List<BaseShip> m_Ships = new List<BaseShip>();
         public DateTime m_LastActivity = DateTime.UtcNow;
         public TimeSpan m_NextActivity;
 
@@ -111,18 +111,18 @@ namespace Server.Items
 
         public override void OnSingleClick(Mobile from)
         {
-            LabelTo(from, "Ships Active: " + m_Boats.Count.ToString() + " / " + m_ShipCount.ToString());
+            LabelTo(from, "Ships Active: " + m_Ships.Count.ToString() + " / " + m_ShipCount.ToString());
             LabelTo(from, "[Double Click to Delete All Ships]");
         }
 
         public override void OnDoubleClick(Mobile from)
         {
-            int boatCount = m_Boats.Count;
+            int shipCount = m_Ships.Count;
 
-            for (int a = 0; a < boatCount; a++)
+            for (int a = 0; a < shipCount; a++)
             {
-                if (m_Boats[0] != null)
-                    m_Boats[0].Delete();
+                if (m_Ships[0] != null)
+                    m_Ships[0].Delete();
             }
         }
 
@@ -146,11 +146,11 @@ namespace Server.Items
             writer.Write(m_MinSpawnTime);
             writer.Write(m_MaxSpawnTime);
 
-            writer.Write(m_Boats.Count);
+            writer.Write(m_Ships.Count);
 
-            foreach (BaseBoat boat in m_Boats)
+            foreach (BaseShip ship in m_Ships)
             {
-                writer.Write(boat);
+                writer.Write(ship);
             }
 
             writer.Write(m_LastActivity);
@@ -166,7 +166,7 @@ namespace Server.Items
             int version = reader.ReadInt();
 
             //Version 0
-            m_Boats = new List<BaseBoat>();
+            m_Ships = new List<BaseShip>();
 
             m_Activated = reader.ReadBool();
             m_ShipTypes = reader.ReadString();
@@ -177,11 +177,11 @@ namespace Server.Items
             m_MinSpawnTime = reader.ReadInt();
             m_MaxSpawnTime = reader.ReadInt();
 
-            int boatCount = reader.ReadInt();
-            for (int a = 0; a < boatCount; a++)
+            int shipCount = reader.ReadInt();
+            for (int a = 0; a < shipCount; a++)
             {
-                BaseBoat boat = (BaseBoat)reader.ReadItem();
-                m_Boats.Add(boat);
+                BaseShip ship = (BaseShip)reader.ReadItem();
+                m_Ships.Add(ship);
             }
 
             m_LastActivity = reader.ReadDateTime();
@@ -203,13 +203,13 @@ namespace Server.Items
             }
         }
 
-        public static BaseBoat RandomizeBoat(Dictionary<Type, int> boatChances)
+        public static BaseShip RandomizeShip(Dictionary<Type, int> shipChances)
         {
-            BaseBoat boat = null;
+            BaseShip ship = null;
 
             int TotalValues = 0;
 
-            foreach (KeyValuePair<Type, int> pair in boatChances)
+            foreach (KeyValuePair<Type, int> pair in shipChances)
             {
                 TotalValues += pair.Value;
             }
@@ -220,211 +220,213 @@ namespace Server.Items
 
             bool foundDirection = true;
 
-            foreach (KeyValuePair<Type, int> pair in boatChances)
+            foreach (KeyValuePair<Type, int> pair in shipChances)
             {
                 AdditionalAmount = (double)pair.Value / (double)TotalValues;
 
                 if (ActionCheck >= CumulativeAmount && ActionCheck < (CumulativeAmount + AdditionalAmount))
                 {
-                    boat = (BaseBoat)Activator.CreateInstance(pair.Key);
+                    ship = (BaseShip)Activator.CreateInstance(pair.Key);
                     break;
                 }
 
                 CumulativeAmount += AdditionalAmount;
             }  
 
-            return boat;
+            return ship;
         }
 
-        public static BaseBoat GetRandomBoatType(string boatString)
+        public static BaseShip GetRandomShipType(string shipString)
         {
-            BaseBoat boat = null;
+            BaseShip ship = null;
 
-            int randomBoat;
+            int randomShip;
 
-            string shipString = boatString.Trim();
-            boatString = shipString.ToLower();
+            shipString = shipString.Trim();
+            shipString = shipString.ToLower();
 
-            string[] boatTypes = boatString.Split(',');
+            string[] shipTypes = shipString.Split(',');
 
-            string newBoat = boatTypes[Utility.RandomMinMax(0, boatTypes.Length - 1)];
+            string newShip = shipTypes[Utility.RandomMinMax(0, shipTypes.Length - 1)];
 
-            Dictionary<Type, int> DictBoatOptions = new Dictionary<Type, int>();
+            Dictionary<Type, int> DictShipOptions = new Dictionary<Type, int>();
 
-            switch (newBoat)
+            /*
+            switch (newShip)
             {
-                case "smallbritainnavyboat": boat = new SmallBritainNavyBoat(); break;
-                case "mediumbritainnavyboat": boat = new MediumBritainNavyBoat(); break;
-                case "largebritainnavyboat": boat = new LargeBritainNavyBoat(); break;
-                case "carrackbritainnavyboat": boat = new CarrackBritainNavyBoat(); break;
-                case "galleonbritainnavyboat": boat = new GalleonBritainNavyBoat(); break;
+                case "smallbritainnavyship": ship = new SmallBritainNavyShip(); break;
+                case "mediumbritainnavyship": ship = new MediumBritainNavyShip(); break;
+                case "largebritainnavyship": ship = new LargeBritainNavyShip(); break;
+                case "carrackbritainnavyship": ship = new CarrackBritainNavyShip(); break;
+                case "galleonbritainnavyship": ship = new GalleonBritainNavyShip(); break;
 
-                case "smallfishingboat": boat = new SmallFishingBoat(); break;
-                case "mediumfishingboat": boat = new MediumFishingBoat(); break;
-                case "largefishingboat": boat = new LargeFishingBoat(); break;
-                case "carrackfishingboat": boat = new CarrackFishingBoat(); break;
-                case "galleonfishingboat": boat = new GalleonFishingBoat(); break;
+                case "smallfishingship": ship = new SmallFishingShip(); break;
+                case "mediumfishingship": ship = new MediumFishingShip(); break;
+                case "largefishingship": ship = new LargeFishingShip(); break;
+                case "carrackfishingship": ship = new FishingCarrack(); break;
+                case "galleonfishingship": ship = new GalleonFishingShip(); break;
 
-                case "smallpirateboat": boat = new SmallPirateBoat(); break;
-                case "mediumpirateboat": boat = new MediumPirateBoat(); break;
-                case "largepirateboat": boat = new LargePirateBoat(); break;
-                case "carrackpirateboat": boat = new CarrackPirateBoat(); break;
-                case "galleonpirateboat": boat = new GalleonPirateBoat(); break;
+                case "smallpirateship": ship = new SmallPirateShip(); break;
+                case "mediumpirateship": ship = new MediumPirateShip(); break;
+                case "largepirateship": ship = new LargePirateShip(); break;
+                case "carrackpirateship": ship = new CarrackPirateShip(); break;
+                case "galleonpirateship": ship = new GalleonPirateShip(); break;
 
-                case "smallundeadboat": boat = new SmallUndeadBoat(); break;
-                case "mediumundeadboat": boat = new MediumUndeadBoat(); break;
-                case "largeundeadboat": boat = new LargeUndeadBoat(); break;
-                case "carrackundeadboat": boat = new CarrackUndeadBoat(); break;
-                case "galleonundeadboat": boat = new GalleonUndeadBoat(); break;
+                case "smallundeadship": ship = new SmallUndeadShip(); break;
+                case "mediumundeadship": ship = new MediumUndeadShip(); break;
+                case "largeundeadship": ship = new LargeUndeadShip(); break;
+                case "carrackundeadship": ship = new CarrackUndeadShip(); break;
+                case "galleonundeadship": ship = new GalleonUndeadShip(); break;
 
-                case "smallorghereimboat": boat = new SmallOrghereimBoat(); break;
-                case "mediumorghereimboat": boat = new MediumOrghereimBoat(); break;
-                case "largeorghereimboat": boat = new LargeOrghereimBoat(); break;
-                case "carrackorghereimboat": boat = new CarrackOrghereimBoat(); break;
-                case "galleonorghereimboat": boat = new GalleonOrghereimBoat(); break;
+                case "smallorghereimship": ship = new SmallOrghereimShip(); break;
+                case "mediumorghereimship": ship = new MediumOrghereimShip(); break;
+                case "largeorghereimship": ship = new LargeOrghereimShip(); break;
+                case "carrackorghereimship": ship = new CarrackOrghereimShip(); break;
+                case "galleonorghereimship": ship = new GalleonOrghereimShip(); break;
 
-                case "smallorcboat": boat = new SmallOrcBoat(); break;
-                case "mediumorcboat": boat = new MediumOrcBoat(); break;
-                case "largeorcboat": boat = new LargeOrcBoat(); break;
-                case "carrackorcboat": boat = new CarrackOrcBoat(); break;
-                case "galleonorcboat": boat = new GalleonOrcBoat(); break;
+                case "smallorcship": ship = new SmallOrcShip(); break;
+                case "mediumorcship": ship = new MediumOrcShip(); break;
+                case "largeorcship": ship = new LargeOrcShip(); break;
+                case "carrackorcship": ship = new CarrackOrcShip(); break;
+                case "galleonorcship": ship = new GalleonOrcShip(); break;
 
-                case "anybritainboat":
+                case "anybritainship":
 
-                    DictBoatOptions.Add(typeof(SmallBritainNavyBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumBritainNavyBoat), 4);
-                    DictBoatOptions.Add(typeof(LargeBritainNavyBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackBritainNavyBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonBritainNavyBoat), 1);
+                    DictShipOptions.Add(typeof(SmallBritainNavyShip), 5);
+                    DictShipOptions.Add(typeof(MediumBritainNavyShip), 4);
+                    DictShipOptions.Add(typeof(LargeBritainNavyShip), 3);
+                    DictShipOptions.Add(typeof(CarrackBritainNavyShip), 2);
+                    DictShipOptions.Add(typeof(GalleonBritainNavyShip), 1);
 
-                    boat = RandomizeBoat(DictBoatOptions);
+                    ship = RandomizeShip(DictShipOptions);
                 break;
 
-                case "anyfishingboat":
+                case "anyfishingship":
 
-                    DictBoatOptions.Add(typeof(SmallFishingBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumFishingBoat), 4);
-                    DictBoatOptions.Add(typeof(LargeFishingBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackFishingBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonFishingBoat), 1);
+                    DictShipOptions.Add(typeof(SmallFishingShip), 5);
+                    DictShipOptions.Add(typeof(MediumFishingShip), 4);
+                    DictShipOptions.Add(typeof(LargeFishingShip), 3);
+                    DictShipOptions.Add(typeof(FishingCarrack), 2);
+                    DictShipOptions.Add(typeof(GalleonFishingShip), 1);
 
-                    boat = RandomizeBoat(DictBoatOptions);
+                    ship = RandomizeShip(DictShipOptions);
                 break;
 
-                case "anypirateboat":
+                case "anypirateship":
 
-                    DictBoatOptions.Add(typeof(SmallPirateBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumPirateBoat), 4);
-                    DictBoatOptions.Add(typeof(LargePirateBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackPirateBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonPirateBoat), 1);
+                    DictShipOptions.Add(typeof(SmallPirateShip), 5);
+                    DictShipOptions.Add(typeof(MediumPirateShip), 4);
+                    DictShipOptions.Add(typeof(LargePirateShip), 3);
+                    DictShipOptions.Add(typeof(CarrackPirateShip), 2);
+                    DictShipOptions.Add(typeof(GalleonPirateShip), 1);
 
-                    boat = RandomizeBoat(DictBoatOptions);
+                    ship = RandomizeShip(DictShipOptions);
                 break;
 
-                case "anyundeadboat":
+                case "anyundeadship":
 
-                    DictBoatOptions.Add(typeof(SmallUndeadBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumUndeadBoat), 4);
-                    DictBoatOptions.Add(typeof(LargeUndeadBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackUndeadBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonUndeadBoat), 1);
+                    DictShipOptions.Add(typeof(SmallUndeadShip), 5);
+                    DictShipOptions.Add(typeof(MediumUndeadShip), 4);
+                    DictShipOptions.Add(typeof(LargeUndeadShip), 3);
+                    DictShipOptions.Add(typeof(CarrackUndeadShip), 2);
+                    DictShipOptions.Add(typeof(GalleonUndeadShip), 1);
 
-                    boat = RandomizeBoat(DictBoatOptions);
+                    ship = RandomizeShip(DictShipOptions);
                 break;
 
-                case "anyorghereimboat":
+                case "anyorghereimship":
 
-                    DictBoatOptions.Add(typeof(SmallOrghereimBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumOrghereimBoat), 4);
-                    DictBoatOptions.Add(typeof(LargeOrghereimBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackOrghereimBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonOrghereimBoat), 1);
+                    DictShipOptions.Add(typeof(SmallOrghereimShip), 5);
+                    DictShipOptions.Add(typeof(MediumOrghereimShip), 4);
+                    DictShipOptions.Add(typeof(LargeOrghereimShip), 3);
+                    DictShipOptions.Add(typeof(CarrackOrghereimShip), 2);
+                    DictShipOptions.Add(typeof(GalleonOrghereimShip), 1);
 
-                    boat = RandomizeBoat(DictBoatOptions);
+                    ship = RandomizeShip(DictShipOptions);
                 break;
 
-                case "anyorcboat":
+                case "anyorcship":
 
-                    DictBoatOptions.Add(typeof(SmallOrcBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumOrcBoat), 4);
-                    DictBoatOptions.Add(typeof(LargeOrcBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackOrcBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonOrcBoat), 1);
+                    DictShipOptions.Add(typeof(SmallOrcShip), 5);
+                    DictShipOptions.Add(typeof(MediumOrcShip), 4);
+                    DictShipOptions.Add(typeof(LargeOrcShip), 3);
+                    DictShipOptions.Add(typeof(CarrackOrcShip), 2);
+                    DictShipOptions.Add(typeof(GalleonOrcShip), 1);
 
-                    boat = RandomizeBoat(DictBoatOptions);
+                    ship = RandomizeShip(DictShipOptions);
                 break;
 
                 case "anyship":
 
-                    DictBoatOptions.Add(typeof(SmallBritainNavyBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumBritainNavyBoat), 4);
-                    DictBoatOptions.Add(typeof(LargeBritainNavyBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackBritainNavyBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonBritainNavyBoat), 1);
+                    DictShipOptions.Add(typeof(SmallBritainNavyShip), 5);
+                    DictShipOptions.Add(typeof(MediumBritainNavyShip), 4);
+                    DictShipOptions.Add(typeof(LargeBritainNavyShip), 3);
+                    DictShipOptions.Add(typeof(CarrackBritainNavyShip), 2);
+                    DictShipOptions.Add(typeof(GalleonBritainNavyShip), 1);
 
-                    DictBoatOptions.Add(typeof(SmallFishingBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumFishingBoat), 4);
-                    DictBoatOptions.Add(typeof(LargeFishingBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackFishingBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonFishingBoat), 1);
+                    DictShipOptions.Add(typeof(SmallFishingShip), 5);
+                    DictShipOptions.Add(typeof(MediumFishingShip), 4);
+                    DictShipOptions.Add(typeof(LargeFishingShip), 3);
+                    DictShipOptions.Add(typeof(FishingCarrack), 2);
+                    DictShipOptions.Add(typeof(GalleonFishingShip), 1);
 
-                    DictBoatOptions.Add(typeof(SmallPirateBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumPirateBoat), 4);
-                    DictBoatOptions.Add(typeof(LargePirateBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackPirateBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonPirateBoat), 1);
+                    DictShipOptions.Add(typeof(SmallPirateShip), 5);
+                    DictShipOptions.Add(typeof(MediumPirateShip), 4);
+                    DictShipOptions.Add(typeof(LargePirateShip), 3);
+                    DictShipOptions.Add(typeof(CarrackPirateShip), 2);
+                    DictShipOptions.Add(typeof(GalleonPirateShip), 1);
 
-                    DictBoatOptions.Add(typeof(SmallUndeadBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumUndeadBoat), 4);
-                    DictBoatOptions.Add(typeof(LargeUndeadBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackUndeadBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonUndeadBoat), 1);
+                    DictShipOptions.Add(typeof(SmallUndeadShip), 5);
+                    DictShipOptions.Add(typeof(MediumUndeadShip), 4);
+                    DictShipOptions.Add(typeof(LargeUndeadShip), 3);
+                    DictShipOptions.Add(typeof(CarrackUndeadShip), 2);
+                    DictShipOptions.Add(typeof(GalleonUndeadShip), 1);
 
-                    DictBoatOptions.Add(typeof(SmallOrghereimBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumOrghereimBoat), 4);
-                    DictBoatOptions.Add(typeof(LargeOrghereimBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackOrghereimBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonOrghereimBoat), 1);
+                    DictShipOptions.Add(typeof(SmallOrghereimShip), 5);
+                    DictShipOptions.Add(typeof(MediumOrghereimShip), 4);
+                    DictShipOptions.Add(typeof(LargeOrghereimShip), 3);
+                    DictShipOptions.Add(typeof(CarrackOrghereimShip), 2);
+                    DictShipOptions.Add(typeof(GalleonOrghereimShip), 1);
 
-                    DictBoatOptions.Add(typeof(SmallOrcBoat), 5);
-                    DictBoatOptions.Add(typeof(MediumOrcBoat), 4);
-                    DictBoatOptions.Add(typeof(LargeOrcBoat), 3);
-                    DictBoatOptions.Add(typeof(CarrackOrcBoat), 2);
-                    DictBoatOptions.Add(typeof(GalleonOrcBoat), 1);
+                    DictShipOptions.Add(typeof(SmallOrcShip), 5);
+                    DictShipOptions.Add(typeof(MediumOrcShip), 4);
+                    DictShipOptions.Add(typeof(LargeOrcShip), 3);
+                    DictShipOptions.Add(typeof(CarrackOrcShip), 2);
+                    DictShipOptions.Add(typeof(GalleonOrcShip), 1);
 
-                    boat = RandomizeBoat(DictBoatOptions);
+                    ship = RandomizeShip(DictShipOptions);
 
                 break;
             }
+            */
 
-            return boat;
+            return ship;
         }
 
         public override void OnAfterDelete()
         {           
-            int boatCount = m_Boats.Count;
+            int shipCount = m_Ships.Count;
 
-            for (int a = 0; a < boatCount; a++)
+            for (int a = 0; a < shipCount; a++)
             {
-                m_Boats[0].Delete();
+                m_Ships[0].Delete();
             }
 
             base.OnAfterDelete();            
         }
 
-        public void ShipSunk(BaseBoat boat)
+        public void ShipSunk(BaseShip ship)
         {
-            m_Boats.Remove(boat);
+            m_Ships.Remove(ship);
 
-            foreach (BaseBoat checkboat in BaseBoat.m_Instances)
+            foreach (BaseShip checkship in BaseShip.m_Instances)
             {
-                if (checkboat != null)
+                if (checkship != null)
                 {
-                    if (checkboat.BoatCombatant != null)
+                    if (checkship.ShipCombatant != null)
                     {
-                        if (checkboat.BoatCombatant == boat)
-                            checkboat.BoatCombatant = null;
+                        if (checkship.ShipCombatant == ship)
+                            checkship.ShipCombatant = null;
                     }
                 }
             }
@@ -452,9 +454,9 @@ namespace Server.Items
 
                 if (nextSpawnTime < DateTime.UtcNow)
                 {
-                    if (m_ShipSpawner.m_Boats.Count < m_ShipSpawner.ShipCount)
+                    if (m_ShipSpawner.m_Ships.Count < m_ShipSpawner.ShipCount)
                     {
-                        int shipsNeeded = m_ShipSpawner.ShipCount - m_ShipSpawner.m_Boats.Count;
+                        int shipsNeeded = m_ShipSpawner.ShipCount - m_ShipSpawner.m_Ships.Count;
                         int shipsSpawned = 0;
 
                         if (!m_ShipSpawner.SpawnAllAvailable)
@@ -466,14 +468,14 @@ namespace Server.Items
                         //Ships Needed
                         for (int a = 0; a < shipsNeeded; a++)
                         {
-                            BaseBoat boat = GetRandomBoatType(m_ShipSpawner.m_ShipTypes);
+                            BaseShip ship = GetRandomShipType(m_ShipSpawner.m_ShipTypes);
 
-                            if (boat == null)
+                            if (ship == null)
                                 continue;
 
                             bool shipSpawned = false;
 
-                            //Make 50 Attempts to Find Randomized Location for Boat Spawn Point Before Aborting
+                            //Make 50 Attempts to Find Randomized Location for Ship Spawn Point Before Aborting
                             for (int b = 0; b < 50; b++)
                             {
                                 if (shipSpawned)                                
@@ -509,64 +511,64 @@ namespace Server.Items
                                 {
                                     case Direction.North:
                                         newDirection = Direction.North;
-                                        shipFacingItemID = boat.NorthID;
+                                        shipFacingItemID = ship.NorthID;
                                     break;
 
                                     case Direction.Up:
                                         newDirection = Direction.North;
-                                        shipFacingItemID = boat.NorthID;
+                                        shipFacingItemID = ship.NorthID;
                                     break;
 
                                     case Direction.East:
                                         newDirection = Direction.East;
-                                        shipFacingItemID = boat.EastID;
+                                        shipFacingItemID = ship.EastID;
                                     break;
 
                                     case Direction.Right:
                                         newDirection = Direction.East;
-                                        shipFacingItemID = boat.EastID;
+                                        shipFacingItemID = ship.EastID;
                                     break;
 
                                     case Direction.South:
                                         newDirection = Direction.South;
-                                        shipFacingItemID = boat.SouthID;
+                                        shipFacingItemID = ship.SouthID;
                                     break;
 
                                     case Direction.Down:
                                         newDirection = Direction.South;
-                                        shipFacingItemID = boat.SouthID;
+                                        shipFacingItemID = ship.SouthID;
                                     break;
 
                                     case Direction.West:
                                         newDirection = Direction.West;
-                                        shipFacingItemID = boat.WestID;
+                                        shipFacingItemID = ship.WestID;
                                     break;
 
                                     case Direction.Left:
                                         newDirection = Direction.West;
-                                        shipFacingItemID = boat.WestID;
+                                        shipFacingItemID = ship.WestID;
                                     break;
 
                                     default:
                                         newDirection = Direction.North;
-                                        shipFacingItemID = boat.NorthID;
+                                        shipFacingItemID = ship.NorthID;
                                     break; 
                                 }
 
-                                if (boat.CanFit(newLocation, m_ShipSpawner.Map, shipFacingItemID))
+                                if (ship.CanFit(newLocation, m_ShipSpawner.Map, shipFacingItemID))
                                 {
                                     m_ShipSpawner.m_LastActivity = DateTime.UtcNow;
 
-                                    boat.MoveToWorld(newLocation, m_ShipSpawner.Map);
-                                    m_ShipSpawner.m_Boats.Add(boat);
-                                    boat.m_ShipSpawner = m_ShipSpawner;
+                                    ship.MoveToWorld(newLocation, m_ShipSpawner.Map);
+                                    m_ShipSpawner.m_Ships.Add(ship);
+                                    ship.m_ShipSpawner = m_ShipSpawner;
 
                                     Timer.DelayCall(TimeSpan.FromSeconds(.200), delegate
                                     {
-                                        if (boat != null)
+                                        if (ship != null)
                                         {
-                                            if (!boat.Deleted && boat.CanFit(newLocation, m_ShipSpawner.Map, shipFacingItemID))                                            
-                                                boat.SetFacing(newDirection);                                            
+                                            if (!ship.Deleted && ship.CanFit(newLocation, m_ShipSpawner.Map, shipFacingItemID))                                            
+                                                ship.SetFacing(newDirection);                                            
                                         }
                                     });
 
@@ -582,36 +584,36 @@ namespace Server.Items
                                     {
                                         case 1:
                                             newDirection = Direction.North;
-                                            shipFacingItemID = boat.NorthID;
+                                            shipFacingItemID = ship.NorthID;
                                             break;
 
                                         case 2:
                                             newDirection = Direction.East;
-                                            shipFacingItemID = boat.EastID;
+                                            shipFacingItemID = ship.EastID;
                                             break;
 
                                         case 3:
                                             newDirection = Direction.South;
-                                            shipFacingItemID = boat.SouthID;
+                                            shipFacingItemID = ship.SouthID;
                                             break;
 
                                         case 4:
                                             newDirection = Direction.West;
-                                            shipFacingItemID = boat.WestID;
+                                            shipFacingItemID = ship.WestID;
                                             break;
                                     }
 
-                                    if (boat.CanFit(newLocation, m_ShipSpawner.Map, shipFacingItemID))
+                                    if (ship.CanFit(newLocation, m_ShipSpawner.Map, shipFacingItemID))
                                     {
                                         m_ShipSpawner.m_LastActivity = DateTime.UtcNow;
 
-                                        boat.MoveToWorld(newLocation, m_ShipSpawner.Map);
-                                        m_ShipSpawner.m_Boats.Add(boat);
-                                        boat.m_ShipSpawner = m_ShipSpawner;
+                                        ship.MoveToWorld(newLocation, m_ShipSpawner.Map);
+                                        m_ShipSpawner.m_Ships.Add(ship);
+                                        ship.m_ShipSpawner = m_ShipSpawner;
 
                                         Timer.DelayCall(TimeSpan.FromSeconds(.200), delegate
                                         {
-                                            boat.SetFacing(newDirection);
+                                            ship.SetFacing(newDirection);
                                         });
 
                                         shipSpawned = true;
@@ -620,7 +622,7 @@ namespace Server.Items
                             }
 
                             if (!shipSpawned)
-                                boat.Delete();
+                                ship.Delete();
                         }
                     }
                 }

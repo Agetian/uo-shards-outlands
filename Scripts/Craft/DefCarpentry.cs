@@ -343,45 +343,15 @@ namespace Server.Engines.Craft
             AddRes(index, typeof(Hammer), "Hammer", 1, "You require a hammer to construct a ship repair tool");
             AddRes(index, typeof(Saw), "Saw", 1, "You require a saw to construct a ship repair tool");
 
-            index = AddCraft(1, typeof(SmallBoatDeed), "Ship Items", "Small Boat Deed", 70.0, 75.0, typeof(ShipParts), "Ship Parts", 10, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(SmallDragonBoatDeed), "Ship Items", "Small Dragon Boat Deed", 70.0, 75.0, typeof(ShipParts), "Ship Parts", 11, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(MediumBoatDeed), "Ship Items", "Medium Boat Deed", 80.0, 85.0, typeof(ShipParts), "Ship Parts", 12, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(MediumDragonBoatDeed), "Ship Items", "Medium Dragon Boat Deed", 80.0, 85.0, typeof(ShipParts), "Ship Parts", 13, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(LargeBoatDeed), "Ship Items", "Large Boat Deed", 85, 90.0, typeof(ShipParts), "Ship Parts", 16, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(LargeDragonBoatDeed), "Ship Items", "Large Dragon Boat Deed ", 85.0, 90.0, typeof(ShipParts), "Ship Parts", 17, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(CarrackBoatDeed), "Ship Items", "Carrack Deed ", 90.0, 95.0, typeof(ShipParts), "Ship Parts", 20, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(GalleonBoatDeed), "Ship Items", "Galleon Deed", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 30, "You do not have the neccessary number of ship parts to construct that ship.");
-
-            index = AddCraft(1, typeof(SmallFishermansBoatDeed), "Ship Items", "Small Fisherman's Boat Deed", 65.0, 70.0, typeof(ShipParts), "Ship Parts", 5, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(MediumFishermansBoatDeed), "Ship Items", "Medium Fisherman's Boat Deed", 75.0, 80.0, typeof(ShipParts), "Ship Parts", 6, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(LargeFishermansBoatDeed), "Ship Items", "Large Fisherman's Boat Deed", 85, 90.0, typeof(ShipParts), "Ship Parts", 8, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(CarrackFishermansBoatDeed), "Ship Items", "Fisherman's Carrack Deed ", 90.0, 95.0, typeof(ShipParts), "Ship Parts", 10, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(GalleonFishermansBoatDeed), "Ship Items", "Fisherman's Galleon Deed", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 15, "You do not have the neccessary number of ship parts to construct that ship.");
-
-            /*
-            index = AddCraft(1, typeof(CrowsNestUpgrade), "Ship Items", "Ship Upgrade: Crows Nest", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 1, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(ExpandedHoldUpgrade), "Ship Items", "Ship Upgrade: Expanded Hold", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 1, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(FishingTrawlerUpgrade), "Ship Items", "Ship Upgrade: Fishing Trawler", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 1, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(SecureHoldUpgrade), "Ship Items", "Ship Upgrade: Secure Hold", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 1, "You do not have the neccessary number of ship parts to construct that upgrade.");
-
-            index = AddCraft(1, typeof(BoardingHooksUpgrade), "Ship Items", "Ship Upgrade: Boarding Hooks", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 2, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(ExceptionalRigging), "Ship Items", "Ship Upgrade: Exceptional Rigging", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 2, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(MastercraftCannonsUpgrade), "Ship Items", "Ship Upgrade: Mastercraft Cannons", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 2, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(ReinforcedHullUpgrade), "Ship Items", "Ship Upgrade: Reinforced Hull", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 2, "You do not have the neccessary number of ship parts to construct that upgrade.");
-
-            index = AddCraft(1, typeof(BritainNavyPaintUpgrade), "Ship Items", "Ship Paint: Britain Naval Forces", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 3, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(FishermanPaintUpgrade), "Ship Items", "Ship Paint: Fisherman", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 3, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(PiratePaintUpgrade), "Ship Items", "Ship Paint: Pirate", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 3, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(UndeadPaintUpgrade), "Ship Items", "Ship Paint: Undead", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 3, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(OrcPaintUpgrade), "Ship Items", "Ship Paint: Orc", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 3, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(OrghereimPaintUpgrade), "Ship Items", "Ship Paint: Orghereim", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 3, "You do not have the neccessary number of ship parts to construct that upgrade.");
-
-            index = AddCraft(1, typeof(BritainNavyThemeUpgrade), "Ship Items", "Ship Theme: Britain Naval Forces", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 4, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(FishermanThemeUpgrade), "Ship Items", "Ship Theme: Fisherman", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 4, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(PirateThemeUpgrade), "Ship Items", "Ship Theme: Pirate", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 4, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            index = AddCraft(1, typeof(UndeadThemeUpgrade), "Ship Items", "Ship Theme: Undead", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 4, "You do not have the neccessary number of ship parts to construct that upgrade.");
-            */
-
+            index = AddCraft(1, typeof(SmallShipDeed), "Ship Items", "Small Ship Deed", 70.0, 75.0, typeof(ShipParts), "Ship Parts", 10, "You do not have the neccessary number of ship parts to construct that ship.");
+            index = AddCraft(1, typeof(SmallDragonShipDeed), "Ship Items", "Small Dragon Ship Deed", 70.0, 75.0, typeof(ShipParts), "Ship Parts", 11, "You do not have the neccessary number of ship parts to construct that ship.");
+            index = AddCraft(1, typeof(MediumShipDeed), "Ship Items", "Medium Ship Deed", 80.0, 85.0, typeof(ShipParts), "Ship Parts", 12, "You do not have the neccessary number of ship parts to construct that ship.");
+            index = AddCraft(1, typeof(MediumDragonShipDeed), "Ship Items", "Medium Dragon Ship Deed", 80.0, 85.0, typeof(ShipParts), "Ship Parts", 13, "You do not have the neccessary number of ship parts to construct that ship.");
+            index = AddCraft(1, typeof(LargeShipDeed), "Ship Items", "Large Ship Deed", 85, 90.0, typeof(ShipParts), "Ship Parts", 16, "You do not have the neccessary number of ship parts to construct that ship.");
+            index = AddCraft(1, typeof(LargeDragonShipDeed), "Ship Items", "Large Dragon Ship Deed ", 85.0, 90.0, typeof(ShipParts), "Ship Parts", 17, "You do not have the neccessary number of ship parts to construct that ship.");
+            index = AddCraft(1, typeof(CarrackShipDeed), "Ship Items", "Carrack Deed ", 90.0, 95.0, typeof(ShipParts), "Ship Parts", 20, "You do not have the neccessary number of ship parts to construct that ship.");
+            index = AddCraft(1, typeof(GalleonShipDeed), "Ship Items", "Galleon Deed", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 30, "You do not have the neccessary number of ship parts to construct that ship.");
+            
             AddCraft(1, typeof(CarpentryMouldTier2), "Tools", "Carpentry Mould: Tier 1-2", 100, 100, typeof(Board), 1044041, 200, 1044351);
             AddCraft(1, typeof(CarpentryMouldTier4), "Tools", "Carpentry Mould: Tier 3-4", 105, 105, typeof(Board), 1044041, 225, 1044351);
             AddCraft(1, typeof(CarpentryMouldTier6), "Tools", "Carpentry Mould: Tier 5-6", 110, 110, typeof(Board), 1044041, 250, 1044351);

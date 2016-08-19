@@ -1391,16 +1391,16 @@ namespace Server.Mobiles
                 {
                     SetUniqueAI();
 
-                    BaseBoat boat = BaseBoat.FindBoatAt(Location, Map);
+                    BaseShip ship = BaseShip.FindShipAt(Location, Map);
 
-                    if (boat != null)
+                    if (ship != null)
                     {
                         DictCombatFlee[CombatFlee.Flee50] = 0;
                         DictCombatFlee[CombatFlee.Flee25] = 0;
                         DictCombatFlee[CombatFlee.Flee10] = 0;
                         DictCombatFlee[CombatFlee.Flee5] = 0;
 
-                        BoatOccupied = boat;
+                        ShipOccupied = ship;
                         ReturnsHome = false;
                     }
 
@@ -1765,12 +1765,12 @@ namespace Server.Mobiles
             double averageEpicActionDelay = ((double)CombatEpicActionMinDelay + (double)CombatEpicActionMaxDelay) / 2;
             double averageHealActionDelay = ((double)CombatHealActionMinDelay + (double)CombatHealActionMaxDelay) / 2;
 
-            bool isOnBoat = false;
+            bool isOnShip = false;
 
-            BaseBoat boat = BaseBoat.FindBoatAt(Location, Map);
+            BaseShip ship = BaseShip.FindShipAt(Location, Map);
 
-            if (boat != null)
-                isOnBoat = true;
+            if (ship != null)
+                isOnShip = true;
 
             double attackSpeed = 5.0;
 
@@ -1805,7 +1805,7 @@ namespace Server.Mobiles
 
             double expectedMeleeDPS = expectedHitsPerSecond * averageDamage * mageAIPenaltyToMeleeDPS * meleeMagePenaltyToMeleeDPS;
 
-            if (isRanged && !isOnBoat)
+            if (isRanged && !isOnShip)
                 expectedMeleeDPS *= 1.2;
 
             double movementScalar = 1 + ((1 - ActiveSpeed) / 15);
@@ -1968,8 +1968,8 @@ namespace Server.Mobiles
 
             double finalValue = damageDPS * survivalScalar * miscScalars;
 
-            //Boat Loot Adjustment
-            if (isOnBoat)
+            //Ship Loot Adjustment
+            if (isOnShip)
                 finalValue *= 1.0;
 
             if (from != null && showFactors)
@@ -3176,8 +3176,8 @@ namespace Server.Mobiles
             }
 
             //Ship-Based Combat
-            if (BaseBoat.UseShipBasedDamageModifer(from, this))
-                damage = (double)amount * BaseBoat.shipBasedDamageToCreatureScalar;
+            if (BaseShip.UseShipBasedDamageModifer(from, this))
+                damage = (double)amount * BaseShip.shipBasedDamageToCreatureScalar;
 
             int oldHits = this.Hits;
 
@@ -4673,7 +4673,7 @@ namespace Server.Mobiles
             writer.Write(m_NextWaypointAction);
             writer.Write(m_NextExperienceGain);
             writer.Write(m_LastActivated);
-            writer.Write(m_BoatOccupied);
+            writer.Write(m_ShipOccupied);
             writer.Write(m_XMLSpawner);
             writer.Write(m_ExperienceLevel);
             writer.Write(m_TimeStabled);
@@ -4810,7 +4810,7 @@ namespace Server.Mobiles
                 m_NextWaypointAction = reader.ReadDateTime();
                 m_NextExperienceGain = reader.ReadDateTime();
                 m_LastActivated = reader.ReadDateTime();
-                m_BoatOccupied = reader.ReadItem() as BaseBoat;
+                m_ShipOccupied = reader.ReadItem() as BaseShip;
                 m_XMLSpawner = reader.ReadItem() as XmlSpawner;
                 m_ExperienceLevel = reader.ReadInt();
                 m_TimeStabled = reader.ReadDateTime();
@@ -6598,12 +6598,12 @@ namespace Server.Mobiles
         {
             if (Controlled && ControlMaster is PlayerMobile)
             {
-                BaseBoat boat = BaseBoat.FindBoatAt(Location, Map);
+                BaseShip ship = BaseShip.FindShipAt(Location, Map);
 
-                if (boat == null)
-                    m_BoatOccupied = null;
+                if (ship == null)
+                    m_ShipOccupied = null;
                 else
-                    m_BoatOccupied = boat;
+                    m_ShipOccupied = ship;
             }
 
             CheckAIActive();
@@ -8342,15 +8342,15 @@ namespace Server.Mobiles
                             double doubloonAmount = 0;
                             bool doubloonsValid = false;
 
-                            bool validBoat = false;
+                            bool validShip = false;
 
-                            if (BoatOccupied != null)
+                            if (ShipOccupied != null)
                             {
-                                if (!BoatOccupied.Deleted)
-                                    validBoat = true;
+                                if (!ShipOccupied.Deleted)
+                                    validShip = true;
                             }
 
-                            if (validBoat || IsOceanCreature)
+                            if (validShip || IsOceanCreature)
                             {
                                 if (DoubloonValue > 0)
                                 {
@@ -8908,9 +8908,9 @@ namespace Server.Mobiles
 
             Custom.BaseHenchman bc_Henchman = this as Custom.BaseHenchman;
 
-            //Force Henchmen to Return to Melee Weapons When Not on Boats and Ranged Isn't Their Primary Weapon
+            //Force Henchmen to Return to Melee Weapons When Not on Ships and Ranged Isn't Their Primary Weapon
 
-            if (CanSwitchWeapons && Combatant != null && bc_Henchman != null && BoatOccupied == null && Backpack != null && !BardPacified)
+            if (CanSwitchWeapons && Combatant != null && bc_Henchman != null && ShipOccupied == null && Backpack != null && !BardPacified)
             {
                 if (bc_Henchman.HenchmanHumanoid)
                 {
@@ -9412,20 +9412,20 @@ namespace Server.Mobiles
             base.MoveToWorld(newLocation, map);
 
             //Adding a Creature to a Ship
-            BaseBoat boat = BaseBoat.FindBoatAt(Location, Map);
+            BaseShip ship = BaseShip.FindShipAt(Location, Map);
 
-            if (boat == null)
-                m_BoatOccupied = null;
+            if (ship == null)
+                m_ShipOccupied = null;
 
             else
             {
-                m_BoatOccupied = boat;
+                m_ShipOccupied = ship;
 
                 if (!(Controlled && ControlMaster is PlayerMobile))
                 {
                     BardImmune = true;
-                    boat.Crew.Add(this);
-                    boat.EmbarkedMobiles.Add(this);
+                    ship.Crew.Add(this);
+                    ship.EmbarkedMobiles.Add(this);
                 }
             }
             
@@ -9657,9 +9657,9 @@ namespace Server.Mobiles
         [CommandProperty(AccessLevel.GameMaster)]
         public DateTime LastActivated { get { return m_LastActivated; } set { m_LastActivated = value; } }
 
-        private BaseBoat m_BoatOccupied = null;
+        private BaseShip m_ShipOccupied = null;
         [CommandProperty(AccessLevel.GameMaster)]
-        public BaseBoat BoatOccupied { get { return m_BoatOccupied; } set { m_BoatOccupied = value; } }
+        public BaseShip ShipOccupied { get { return m_ShipOccupied; } set { m_ShipOccupied = value; } }
 
         private bool m_NoKillAwards = false;
         [CommandProperty(AccessLevel.GameMaster)]

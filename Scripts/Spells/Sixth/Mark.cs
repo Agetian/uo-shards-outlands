@@ -89,7 +89,7 @@ namespace Server.Spells.Sixth
                 Caster.SendLocalizedMessage(501802); // Thy spell doth not appear to work...
             }
 
-            else if (BaseBoat.FindBoatAt(Caster.Location, Caster.Map) != null)
+            else if (BaseShip.FindShipAt(Caster.Location, Caster.Map) != null)
             {
                 Caster.SendMessage("You cannot mark a location at sea.");
             }

@@ -76,7 +76,7 @@ namespace Server.Mobiles
         {
             base.OnThink();
            
-            if (Utility.RandomDouble() < 0.05 && DateTime.UtcNow > m_NextVanishAllowed && BoatOccupied == null)
+            if (Utility.RandomDouble() < 0.05 && DateTime.UtcNow > m_NextVanishAllowed && ShipOccupied == null)
             {
                 if (Combatant != null && !Hidden && !Paralyzed && !BardProvoked && !BardPacified)
                 {

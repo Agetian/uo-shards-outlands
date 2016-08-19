@@ -102,11 +102,11 @@ namespace Server.Custom
                     return;
                 }
                                 
-                if (BaseBoat.IsWaterTile(targetLocation.Location, map))
+                if (BaseShip.IsWaterTile(targetLocation.Location, map))
                 {
-                    BaseBoat boatAtLocation = BaseBoat.FindBoatAt(targetLocation.Location, map);
+                    BaseShip shipAtLocation = BaseShip.FindShipAt(targetLocation.Location, map);
 
-                    if (boatAtLocation == null)
+                    if (shipAtLocation == null)
                     {
                         from.SendMessage("You may only place those on dry land.");
                         return;

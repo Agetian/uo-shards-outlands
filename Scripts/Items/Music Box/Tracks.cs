@@ -38,17 +38,17 @@ namespace Server.Items.MusicBox
         }
     }
 
-    public class BoatTravelSong : MusicBoxTrack
+    public class ShipTravelSong : MusicBoxTrack
     {
         [Constructable]
-        public BoatTravelSong()
+        public ShipTravelSong()
             : base(1075163)
         {
             Song = MusicName.Sailing;
-            //Name = "Boat Travel";
+            //Name = "Ship Travel";
         }
 
-        public BoatTravelSong(Serial s)
+        public ShipTravelSong(Serial s)
             : base(s)
         {
         }

@@ -26,7 +26,7 @@ namespace Server
             Rear
         }
 
-        public BaseBoat m_Boat;
+        public BaseShip m_Ship;
 
         public CannonType m_CannonType = CannonType.Small;
         public CannonPosition m_CannonPosition = CannonPosition.Left;
@@ -63,51 +63,51 @@ namespace Server
 
         #region Place Ship Cannon
 
-        public static void PlaceShipCannon(BaseBoat boat, Point3D point, CannonType cannonType, CannonPosition cannonPosition)
+        public static void PlaceShipCannon(BaseShip ship, Point3D point, CannonType cannonType, CannonPosition cannonPosition)
         {
-            if (boat == null)
+            if (ship == null)
                 return;
 
             ShipCannon shipCannon = new ShipCannon();
 
             shipCannon.Visible = false;
 
-            shipCannon.m_Boat = boat;
+            shipCannon.m_Ship = ship;
             shipCannon.m_CannonType = cannonType;
             shipCannon.m_CannonPosition = cannonPosition;
             shipCannon.m_xOffset = point.X;
             shipCannon.m_yOffset = point.Y;
             shipCannon.m_zOffset = point.Z;
 
-            Point3D cannonLocation = boat.GetRotatedLocation(point.X, point.Y, 0);
+            Point3D cannonLocation = ship.GetRotatedLocation(point.X, point.Y, 0);
 
-            shipCannon.MoveToWorld(new Point3D(boat.Location.X + cannonLocation.X, boat.Location.Y + cannonLocation.Y, boat.Location.Z + cannonLocation.Z), boat.Map);
-            shipCannon.BoatFacingChange(boat.Facing);
-            shipCannon.Z = boat.Location.Z + cannonLocation.Z + shipCannon.GetAdjustedCannonZOffset();
+            shipCannon.MoveToWorld(new Point3D(ship.Location.X + cannonLocation.X, ship.Location.Y + cannonLocation.Y, ship.Location.Z + cannonLocation.Z), ship.Map);
+            shipCannon.ShipFacingChange(ship.Facing);
+            shipCannon.Z = ship.Location.Z + cannonLocation.Z + shipCannon.GetAdjustedCannonZOffset();
 
-            shipCannon.Hue = boat.CannonHue;
+            shipCannon.Hue = ship.CannonHue;
 
-            if (boat.MobileControlType != MobileControlType.Player)
+            if (ship.MobileControlType != MobileControlType.Player)
                 shipCannon.Ammunition = shipCannon.GetMaxAmmunition();
 
             shipCannon.Visible = true;
 
-            boat.m_Cannons.Add(shipCannon);
+            ship.m_Cannons.Add(shipCannon);
 
             switch (cannonPosition)
             {
-                case CannonPosition.Left: boat.m_LeftCannons.Add(shipCannon); break;
-                case CannonPosition.Right: boat.m_RightCannons.Add(shipCannon); break;
-                case CannonPosition.Front: boat.m_FrontCannons.Add(shipCannon); break;
-                case CannonPosition.Rear: boat.m_RearCannons.Add(shipCannon); break;
+                case CannonPosition.Left: ship.m_LeftCannons.Add(shipCannon); break;
+                case CannonPosition.Right: ship.m_RightCannons.Add(shipCannon); break;
+                case CannonPosition.Front: ship.m_FrontCannons.Add(shipCannon); break;
+                case CannonPosition.Rear: ship.m_RearCannons.Add(shipCannon); break;
             }
         }
 
         #endregion
 
-        #region Boat Facing Change
+        #region Ship Facing Change
 
-        public void BoatFacingChange(Direction direction)
+        public void ShipFacingChange(Direction direction)
         {
             switch (direction)
             {
@@ -283,12 +283,12 @@ namespace Server
 
         public int GetAdjustedCannonZOffset()
         {
-            if (m_Boat == null)
+            if (m_Ship == null)
                 return 0;
 
             int adjustZ = 0;
 
-            switch (m_Boat.Facing)
+            switch (m_Ship.Facing)
             {
                 case Direction.North:
                     if (Facing == Direction.West)
@@ -350,7 +350,7 @@ namespace Server
 
         public int GetMaxAmmunition()
         {
-            int maxAmmunition = BaseBoat.CannonMaxAmmunition;
+            int maxAmmunition = BaseShip.CannonMaxAmmunition;
 
             return maxAmmunition;
         }
@@ -359,12 +359,12 @@ namespace Server
         {    
             base.OnSingleClick(from);
 
-            if (m_Boat == null)
+            if (m_Ship == null)
                 return;
 
             LabelTo(from, "[Ammunition: {0}/{1}]", Ammunition, GetMaxAmmunition());
 
-            if (m_Boat.CannonCooldown <= DateTime.UtcNow)
+            if (m_Ship.CannonCooldown <= DateTime.UtcNow)
             {
                 if (Ammunition > 0)                    
                     LabelTo(from, "Ready to fire");                    
@@ -377,7 +377,7 @@ namespace Server
             {
                 if (Ammunition > 0)
                 {
-                    int secondsToFire = (int)(Math.Ceiling((m_Boat.CannonCooldown - DateTime.UtcNow).TotalSeconds));
+                    int secondsToFire = (int)(Math.Ceiling((m_Ship.CannonCooldown - DateTime.UtcNow).TotalSeconds));
 
                     if (secondsToFire == 0)                        
                         LabelTo(from, "Ready to fire");                        
@@ -395,7 +395,7 @@ namespace Server
 
         public override void OnDoubleClick(Mobile from)
         {
-            if (m_Boat == null)
+            if (m_Ship == null)
                 return;
 
             if (!from.Alive)
@@ -404,13 +404,13 @@ namespace Server
                 return;
             }
 
-            else if (!(m_Boat.IsOwner(from) || m_Boat.IsCoOwner(from)))
+            else if (!(m_Ship.IsOwner(from) || m_Ship.IsCoOwner(from)))
             {
                 from.SendMessage("You do not have permission to use this.");
                 return;
             }
 
-            else if (!m_Boat.Contains(from))
+            else if (!m_Ship.Contains(from))
             {
                 from.SendMessage("You cannot reach that.");
                 return;
@@ -422,7 +422,7 @@ namespace Server
                 return;
             }
 
-            else if (DateTime.UtcNow < m_Boat.CannonCooldown)
+            else if (DateTime.UtcNow < m_Ship.CannonCooldown)
             {
                 from.SendMessage("You must wait before firing another cannon volley.");
                 return;
@@ -467,14 +467,14 @@ namespace Server
 
         public void OnTarget(Mobile from, Point3D point, bool IsNPCShip, bool canHitCenter, bool canHitHold, bool canHitTillerman)
         {
-            if (m_Boat == null)
+            if (m_Ship == null)
                 return;
 
             Map map = from.Map;
-            BaseBoat targetBoat = BaseBoat.FindBoatAt(point, map);
+            BaseShip targetShip = BaseShip.FindShipAt(point, map);
 
             //For Player Ships
-            if (m_Boat.MobileControlType == MobileControlType.Player)
+            if (m_Ship.MobileControlType == MobileControlType.Player)
             {
                 if (!from.Player)
                     return;
@@ -485,13 +485,13 @@ namespace Server
                     return;
                 }
 
-                else if (!m_Boat.Contains(from))
+                else if (!m_Ship.Contains(from))
                 {
-                    from.SendMessage("You are no longer on the boat.");
+                    from.SendMessage("You are no longer on the ship.");
                     return;
                 }
 
-                else if (targetBoat == m_Boat)
+                else if (targetShip == m_Ship)
                 {
                     from.SendMessage("You may not fire onto your own ship!");
                     return;
@@ -503,7 +503,7 @@ namespace Server
                     return;
                 }
 
-                else if (DateTime.UtcNow < m_Boat.CannonCooldown)
+                else if (DateTime.UtcNow < m_Ship.CannonCooldown)
                 {
                     from.SendMessage("You must wait before firing another cannon volley.");
                     return;
@@ -517,15 +517,15 @@ namespace Server
             int cannonsFiring = 0;
 
             //Need At Least One Cannon With LOS to Target and In Range of Target For Volley To Be Valid
-            foreach (ShipCannon shipCannon in m_Boat.m_Cannons)
+            foreach (ShipCannon shipCannon in m_Ship.m_Cannons)
             {
                 //Cannon Has Ammunition and is on Correct Ship Side for Volley
                 if (shipCannon.Ammunition > 0 && shipCannon.Facing == Facing)
                 {
-                    cannonDelayTotal += BaseBoat.CannonCooldownTime;
+                    cannonDelayTotal += BaseShip.CannonCooldownTime;
                     cannonsFiring++;
 
-                    double modifiedRange = (double)BaseBoat.CannonMaxRange * m_Boat.CannonRangeScalar;
+                    double modifiedRange = (double)BaseShip.CannonMaxRange * m_Ship.CannonRangeScalar;
 
                     //Already Deterined to Be Valid Shot: NPC AI Ship
                     if (IsNPCShip)
@@ -551,26 +551,26 @@ namespace Server
             //Can Fire Cannon Volley
             if (volleyValid)
             {
-                if (m_Boat.TillerMan != null)
-                    m_Boat.TillerMan.Say("Firing cannons!");
+                if (m_Ship.TillerMan != null)
+                    m_Ship.TillerMan.Say("Firing cannons!");
 
-                m_Boat.LastCombatTime = DateTime.UtcNow;
+                m_Ship.LastCombatTime = DateTime.UtcNow;
 
                 //Ship Cooldown Time (Average of Delay for Each Cannon Type that is Firing)
                 double cooldown = cannonDelayTotal / cannonsFiring;
 
-                m_Boat.CannonCooldown = DateTime.UtcNow + TimeSpan.FromSeconds(cooldown);
-                m_Boat.StartCannonCooldown();
+                m_Ship.CannonCooldown = DateTime.UtcNow + TimeSpan.FromSeconds(cooldown);
+                m_Ship.StartCannonCooldown();
 
                 List<ShipCannon> cannonsToFire = new List<ShipCannon>();
                 
-                foreach (ShipCannon shipCannon in m_Boat.m_Cannons)
+                foreach (ShipCannon shipCannon in m_Ship.m_Cannons)
                 {
                     if (shipCannon.Ammunition > 0 && shipCannon.Facing == Facing)                    
                         cannonsToFire.Add(shipCannon);
                 }
 
-                int firingLoops = BaseBoat.CannonFiringLoops;
+                int firingLoops = BaseShip.CannonFiringLoops;
 
                 int cannonCount = cannonsToFire.Count;
 
@@ -597,34 +597,34 @@ namespace Server
                         }
 
                         //Check Accuracy
-                        double cannonAccuracy = BaseBoat.CannonAccuracy * m_Boat.CannonAccuracyModifer;
+                        double cannonAccuracy = BaseShip.CannonAccuracy * m_Ship.CannonAccuracyModifer;
 
                         double opponentMovementPenalty = 0;
                         double movementAccuracyPenalty = 0;
 
                         //Own Ship Movement Penalty
-                        TimeSpan timeStationary = DateTime.UtcNow - m_Boat.TimeLastMoved;
+                        TimeSpan timeStationary = DateTime.UtcNow - m_Ship.TimeLastMoved;
                         double secondsStationary = (double)timeStationary.TotalSeconds;
 
-                        if (secondsStationary > BaseBoat.CannonMovementAccuracyCooldown)
-                            secondsStationary = BaseBoat.CannonMovementAccuracyCooldown;
+                        if (secondsStationary > BaseShip.CannonMovementAccuracyCooldown)
+                            secondsStationary = BaseShip.CannonMovementAccuracyCooldown;
 
-                        if (targetBoat != null)
+                        if (targetShip != null)
                         {
-                            TimeSpan timeTargetStationary = DateTime.UtcNow - targetBoat.TimeLastMoved;
+                            TimeSpan timeTargetStationary = DateTime.UtcNow - targetShip.TimeLastMoved;
                             double secondsOpponentStationary = (double)timeStationary.TotalSeconds;
 
-                            if (secondsOpponentStationary > BaseBoat.CannonMovementAccuracyCooldown)
-                                secondsOpponentStationary = BaseBoat.CannonMovementAccuracyCooldown;
+                            if (secondsOpponentStationary > BaseShip.CannonMovementAccuracyCooldown)
+                                secondsOpponentStationary = BaseShip.CannonMovementAccuracyCooldown;
 
-                            opponentMovementPenalty = 1 - (BaseBoat.CannonTargetMovementMaxAccuracyPenalty * (1 - (secondsOpponentStationary / BaseBoat.CannonMovementAccuracyCooldown)));
+                            opponentMovementPenalty = 1 - (BaseShip.CannonTargetMovementMaxAccuracyPenalty * (1 - (secondsOpponentStationary / BaseShip.CannonMovementAccuracyCooldown)));
 
                             //No Movement Penalty to Shoot a Ship That is in Reduced Speed Mode
-                            if (targetBoat.ReducedSpeedMode)
+                            if (targetShip.ReducedSpeedMode)
                                 opponentMovementPenalty = 1;
                         }
 
-                        movementAccuracyPenalty = 1 - (BaseBoat.CannonMovementMaxAccuracyPenalty * (1 - (secondsStationary / BaseBoat.CannonMovementAccuracyCooldown)));
+                        movementAccuracyPenalty = 1 - (BaseShip.CannonMovementMaxAccuracyPenalty * (1 - (secondsStationary / BaseShip.CannonMovementAccuracyCooldown)));
 
                         double finalAccuracy = cannonAccuracy * movementAccuracyPenalty * opponentMovementPenalty;
 
@@ -638,28 +638,28 @@ namespace Server
 
                         Point3D cannonEndLocation = point;
 
-                        if (IsNPCShip && targetBoat != null)
+                        if (IsNPCShip && targetShip != null)
                         {
                             if (canHitCenter)
-                                cannonEndLocation = targetBoat.GetRandomEmbarkLocation(true);
+                                cannonEndLocation = targetShip.GetRandomEmbarkLocation(true);
 
                             else if (canHitHold && canHitTillerman)
                             {
                                 if (Utility.RandomDouble() < .5)
-                                    cannonEndLocation = targetBoat.Hold.Location;
+                                    cannonEndLocation = targetShip.Hold.Location;
 
                                 else
-                                    cannonEndLocation = targetBoat.TillerMan.Location;
+                                    cannonEndLocation = targetShip.TillerMan.Location;
                             }
 
                             else if (canHitHold && !canHitTillerman)
-                                cannonEndLocation = targetBoat.Hold.Location;
+                                cannonEndLocation = targetShip.Hold.Location;
 
                             else if (!canHitHold && canHitTillerman)
-                                cannonEndLocation = targetBoat.TillerMan.Location;
+                                cannonEndLocation = targetShip.TillerMan.Location;
                         }
 
-                        double delay = (BaseBoat.CannonLoopDelay * (a + 1) / (double)firingLoops) * b;
+                        double delay = (BaseShip.CannonLoopDelay * (a + 1) / (double)firingLoops) * b;
                         
                         Timer.DelayCall(TimeSpan.FromSeconds(delay), delegate
                         {
@@ -703,10 +703,10 @@ namespace Server
                 case Direction.West: { smokeLocation.X--; } break;
             }
 
-            if (m_Boat != null)
+            if (m_Ship != null)
             {
-                double gunsPercent = (double)((float)m_Boat.GunPoints / (float)m_Boat.MaxGunPoints);
-                double misfireChance = BaseBoat.CannonMaxMisfireChance * (1 - gunsPercent);
+                double gunsPercent = (double)((float)m_Ship.GunPoints / (float)m_Ship.MaxGunPoints);
+                double misfireChance = BaseShip.CannonMaxMisfireChance * (1 - gunsPercent);
 
                 double chance = Utility.RandomDouble();
 
@@ -716,11 +716,11 @@ namespace Server
                 //Misfire
                 if (chance < misfireChance)
                 {
-                    List<Mobile> m_MobilesOnBoat = m_Boat.GetMobilesOnBoat(true, true);
+                    List<Mobile> m_MobilesOnShip = m_Ship.GetMobilesOnShip(true, true);
 
-                    foreach (Mobile mobile in m_MobilesOnBoat)
+                    foreach (Mobile mobile in m_MobilesOnShip)
                     {
-                        if (m_Boat.IsOwner(mobile) || m_Boat.IsCoOwner(mobile) || m_Boat.IsFriend(mobile))
+                        if (m_Ship.IsOwner(mobile) || m_Ship.IsCoOwner(mobile) || m_Ship.IsFriend(mobile))
                             mobile.SendMessage("Misfire!");
                     }
 
@@ -730,7 +730,7 @@ namespace Server
                     return;
                 }
 
-                if (m_Boat.MobileFactionType == MobileFactionType.Undead)
+                if (m_Ship.MobileFactionType == MobileFactionType.Undead)
                 {
                     cannonballItemID = Utility.RandomList(6880, 6881, 6882, 6883, 6884);
                     smokeHue = 2630;
@@ -739,7 +739,7 @@ namespace Server
                 //Hit
                 if (hit)
                 {
-                    m_Boat.LastCombatTime = DateTime.UtcNow;
+                    m_Ship.LastCombatTime = DateTime.UtcNow;
 
                     Effects.PlaySound(shipCannon.Location, map, 0x664);
 
@@ -819,14 +819,14 @@ namespace Server
 
             Map map = Map;
 
-            BaseBoat boatFrom = BaseBoat.FindBoatAt(from.Location, map);
-            BaseBoat targetBoat = BaseBoat.FindBoatAt(targetLocation, map);
+            BaseShip shipFrom = BaseShip.FindShipAt(from.Location, map);
+            BaseShip targetShip = BaseShip.FindShipAt(targetLocation, map);
 
             bool hitObject = false;
-            bool hitBoat = false;
+            bool hitShip = false;
             bool showExplosion = true;
 
-            IPooledEnumerable nearbyMobiles = map.GetMobilesInRange(targetLocation, BaseBoat.CannonExplosionRange);
+            IPooledEnumerable nearbyMobiles = map.GetMobilesInRange(targetLocation, BaseShip.CannonExplosionRange);
 
             foreach (Mobile mobile in nearbyMobiles)
             {
@@ -836,29 +836,29 @@ namespace Server
 
             nearbyMobiles.Free();
 
-            List<Mobile> m_MobilesOnSourceBoat = new List<Mobile>();
+            List<Mobile> m_MobilesOnSourceShip = new List<Mobile>();
             List<Mobile> m_Targets = new List<Mobile>();
 
-            double baseCannonDamage = (double)(Utility.RandomMinMax(BaseBoat.CannonDamageMin, BaseBoat.CannonDamageMax));
+            double baseCannonDamage = (double)(Utility.RandomMinMax(BaseShip.CannonDamageMin, BaseShip.CannonDamageMax));
             
-            if (m_Boat == null)
-                m_MobilesOnSourceBoat.Add(from);
+            if (m_Ship == null)
+                m_MobilesOnSourceShip.Add(from);
 
             else
             {
-                baseCannonDamage = m_Boat.CannonDamageScalar * baseCannonDamage;
+                baseCannonDamage = m_Ship.CannonDamageScalar * baseCannonDamage;
 
-                m_MobilesOnSourceBoat = m_Boat.GetMobilesOnBoat(false, false);
+                m_MobilesOnSourceShip = m_Ship.GetMobilesOnShip(false, false);
             }
 
-            bool targetLocationIsBoat = false;
+            bool targetLocationIsShip = false;
 
-            if (targetBoat != null)
+            if (targetShip != null)
             {
-                targetLocationIsBoat = true;
-                m_Targets = targetBoat.GetMobilesOnBoat(false, false);
+                targetLocationIsShip = true;
+                m_Targets = targetShip.GetMobilesOnShip(false, false);
 
-                validTargets.Add(targetBoat);
+                validTargets.Add(targetShip);
             }
 
             else
@@ -880,7 +880,7 @@ namespace Server
                 PlayerMobile pm_Target;
                 BaseCreature bc_Target;
 
-                //Large Boss-Size Creature Hit: Don't Deal Damage to Boat Underneath it
+                //Large Boss-Size Creature Hit: Don't Deal Damage to Ship Underneath it
                 if (target is Mobile)
                 {
                     bc_Target = target as BaseCreature;
@@ -902,12 +902,12 @@ namespace Server
                     if (!mobile.Alive)
                         continue;
 
-                    //Mobile is somehow on boat that cannon is shooting from
-                    BaseBoat mobileBoat = BaseBoat.FindBoatAt(mobile.Location, mobile.Map);
+                    //Mobile is somehow on ship that cannon is shooting from
+                    BaseShip mobileShip = BaseShip.FindShipAt(mobile.Location, mobile.Map);
 
-                    if (m_Boat != null && mobileBoat != null)
+                    if (m_Ship != null && mobileShip != null)
                     {
-                        if (m_Boat == mobileBoat)
+                        if (m_Ship == mobileShip)
                             continue;
                     }
 
@@ -919,26 +919,26 @@ namespace Server
                     if (mobile.InRange(targetLocation, 0))
                         directHit = true;
 
-                    bool isOnWater = BaseBoat.IsWaterTile(mobile.Location, mobile.Map);
+                    bool isOnWater = BaseShip.IsWaterTile(mobile.Location, mobile.Map);
 
                     if (from != null || (SpellHelper.ValidIndirectTarget(from, mobile) && from.CanBeHarmful(mobile, false)))
                     {
                         //Player
                         if (pm_Target != null)
-                            damageDealt *= BaseBoat.CannonPlayerDamageMultiplier;
+                            damageDealt *= BaseShip.CannonPlayerDamageMultiplier;
 
                         //Creature
                         if (bc_Target != null)
                         {
                             if (bc_Target.IsOceanCreature)
-                                damageDealt *= BaseBoat.CannonOceanCreatureDamageMultiplier;
+                                damageDealt *= BaseShip.CannonOceanCreatureDamageMultiplier;
 
                             else
-                                damageDealt *= BaseBoat.CannonMobileDamageMultiplier;
+                                damageDealt *= BaseShip.CannonMobileDamageMultiplier;
                         }
 
                         if (!directHit)
-                            damageDealt *= BaseBoat.CannonIndirectHitDamageMultiplier;
+                            damageDealt *= BaseShip.CannonIndirectHitDamageMultiplier;
                         
                         if (dealDamage)
                         {
@@ -970,30 +970,30 @@ namespace Server
                     crate.TakeDamage(from, (int)damageDealt);
                 }
 
-                else if (target is BaseBoat && !largeCreatureHit)
+                else if (target is BaseShip && !largeCreatureHit)
                 {
-                    BaseBoat boatTarget = target as BaseBoat;
+                    BaseShip shipTarget = target as BaseShip;
 
-                    if (from != null && m_Boat != null && boatTarget != null)
+                    if (from != null && m_Ship != null && shipTarget != null)
                     {
-                        //Somehow Hitting Own Boat
-                        if (m_Boat == boatTarget)
+                        //Somehow Hitting Own Ship
+                        if (m_Ship == shipTarget)
                             continue;
 
-                        CannonDoHarmful(from, m_MobilesOnSourceBoat, m_Targets);
+                        CannonDoHarmful(from, m_MobilesOnSourceShip, m_Targets);
 
                         hitObject = true;
-                        hitBoat = true;
+                        hitShip = true;
 
                         bool dealDamage = true;
 
                         if (dealDamage)
                         {
-                            DamageType damageType = boatTarget.GetDamageTypeByTargetingMode(m_Boat.TargetingMode);
+                            DamageType damageType = shipTarget.GetDamageTypeByTargetingMode(m_Ship.TargetingMode);
 
                             int finalDamage = (int)(Math.Round(damageDealt));
 
-                            boatTarget.ReceiveDamage(from, m_Boat, finalDamage, damageType);
+                            shipTarget.ReceiveDamage(from, m_Ship, finalDamage, damageType);
                         }
                     }
                 }
@@ -1006,7 +1006,7 @@ namespace Server
                 int explosionHue = 0;
                 int explosionSound = 0x307;
 
-                if (m_Boat.MobileFactionType == MobileFactionType.Undead)
+                if (m_Ship.MobileFactionType == MobileFactionType.Undead)
                 {
                     explosionHue = 2630;
                     explosionSound = 0x56E;
@@ -1023,43 +1023,43 @@ namespace Server
                 Splash(targetLocation, map);
         }
 
-        public void CannonDoHarmful(Mobile from, List<Mobile> m_BoatAllies, List<Mobile> m_BoatTargets)
+        public void CannonDoHarmful(Mobile from, List<Mobile> m_ShipAllies, List<Mobile> m_ShipTargets)
         {
-            //Whoever shoots the cannon from the source boat attacks everyone on target boat
-            foreach (Mobile mobileTarget in m_BoatTargets)
+            //Whoever shoots the cannon from the source ship attacks everyone on target ship
+            foreach (Mobile mobileTarget in m_ShipTargets)
             {
                 if (from.CanBeHarmful(mobileTarget, false))
                     from.DoHarmful(mobileTarget);
             }
 
-            //All mobiles on boat attack everyone on target boat
-            foreach (Mobile boatAlly in m_BoatAllies)
+            //All mobiles on ship attack everyone on target ship
+            foreach (Mobile shipAlly in m_ShipAllies)
             {
-                if (boatAlly == from)
+                if (shipAlly == from)
                     continue;
 
-                //NPC Boat: Everyone Attacks Everyone on Target Boat
-                if (m_Boat.MobileControlType != MobileControlType.Player)
+                //NPC Ship: Everyone Attacks Everyone on Target Ship
+                if (m_Ship.MobileControlType != MobileControlType.Player)
                 {
-                    //Player Currently on an NPC Boat
-                    if (boatAlly is PlayerMobile)
+                    //Player Currently on an NPC Ship
+                    if (shipAlly is PlayerMobile)
                         continue;
 
-                    foreach (Mobile mobileTarget in m_BoatTargets)
+                    foreach (Mobile mobileTarget in m_ShipTargets)
                     {
-                        if (boatAlly.CanBeHarmful(mobileTarget, false))
-                            boatAlly.DoHarmful(mobileTarget);
+                        if (shipAlly.CanBeHarmful(mobileTarget, false))
+                            shipAlly.DoHarmful(mobileTarget);
                     }
                 }
 
-                //Player Boat: Everyone on Boat Makes Criminal Checks Against Target Boat Inhabitants
+                //Player Ship: Everyone on Ship Makes Criminal Checks Against Target Ship Inhabitants
                 else
                 {
                     bool isCriminal = false;
 
-                    foreach (Mobile mobileTarget in m_BoatTargets)
+                    foreach (Mobile mobileTarget in m_ShipTargets)
                     {
-                        if (Notoriety.Compute(boatAlly, mobileTarget) == Notoriety.Innocent && mobileTarget.Alive)
+                        if (Notoriety.Compute(shipAlly, mobileTarget) == Notoriety.Innocent && mobileTarget.Alive)
                         {
                             isCriminal = true;
                             break;
@@ -1067,14 +1067,14 @@ namespace Server
                     }
 
                     if (isCriminal)
-                        boatAlly.CriminalAction(false);
+                        shipAlly.CriminalAction(false);
                 }
             }
         }
 
         public static void Splash(Point3D point, Map map)
         {
-            BaseBoat boatCheck = BaseBoat.FindBoatAt(point, map);
+            BaseShip shipCheck = BaseShip.FindShipAt(point, map);
 
             bool foundAnyItem = false;
 
@@ -1091,12 +1091,12 @@ namespace Server
 
             itemsInRange.Free();
 
-            //Boat in Location
-            if (boatCheck != null)
+            //Ship in Location
+            if (shipCheck != null)
                 Effects.PlaySound(point, map, 0x148);
 
             //Water
-            else if (BaseBoat.IsWaterTile(point, map))
+            else if (BaseShip.IsWaterTile(point, map))
             {
                 if (!foundAnyItem)
                     Effects.SendLocationEffect(point, map, 0x352D, 7);
@@ -1111,10 +1111,10 @@ namespace Server
 
         public override void OnDelete()
         {
-            if (m_Boat != null)
+            if (m_Ship != null)
             {
-                if (m_Boat.m_Cannons.Contains(this))
-                    m_Boat.m_Cannons.Remove(this);
+                if (m_Ship.m_Cannons.Contains(this))
+                    m_Ship.m_Cannons.Remove(this);
             }
 
             base.OnDelete();
@@ -1126,7 +1126,7 @@ namespace Server
             writer.Write((int)0);
 
             //Version 0
-            writer.Write(m_Boat);
+            writer.Write(m_Ship);
             writer.Write((int)m_CannonType);
             writer.Write((int)m_CannonPosition);
             writer.Write(m_Ammunition);
@@ -1144,7 +1144,7 @@ namespace Server
             //Version 0
             if (version >= 0)
             {
-                m_Boat = (BaseBoat)reader.ReadItem();
+                m_Ship = (BaseShip)reader.ReadItem();
                 m_CannonType = (CannonType)reader.ReadInt();
                 m_CannonPosition = (CannonPosition)reader.ReadInt();
                 m_Ammunition = reader.ReadInt();
@@ -1158,16 +1158,16 @@ namespace Server
 
             Movable = false;
 
-            if (m_Boat != null)
+            if (m_Ship != null)
             {
-                m_Boat.m_Cannons.Add(this);
+                m_Ship.m_Cannons.Add(this);
 
                 switch (m_CannonPosition)
                 {
-                    case CannonPosition.Left: m_Boat.m_LeftCannons.Add(this); break;
-                    case CannonPosition.Right: m_Boat.m_RightCannons.Add(this); break;
-                    case CannonPosition.Front: m_Boat.m_FrontCannons.Add(this); break;
-                    case CannonPosition.Rear: m_Boat.m_RearCannons.Add(this); break;
+                    case CannonPosition.Left: m_Ship.m_LeftCannons.Add(this); break;
+                    case CannonPosition.Right: m_Ship.m_RightCannons.Add(this); break;
+                    case CannonPosition.Front: m_Ship.m_FrontCannons.Add(this); break;
+                    case CannonPosition.Rear: m_Ship.m_RearCannons.Add(this); break;
                 }
             }
         }

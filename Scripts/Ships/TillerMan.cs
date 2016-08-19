@@ -9,12 +9,12 @@ namespace Server.Items
 {
     public class TillerMan : Item
     {
-        private BaseBoat m_Boat;
-        public BaseBoat Boat { get { return m_Boat; } }
+        private BaseShip m_Ship;
+        public BaseShip Ship { get { return m_Ship; } }
 
-        public TillerMan(BaseBoat boat): base(0x3E4E)
+        public TillerMan(BaseShip ship): base(0x3E4E)
         {
-            m_Boat = boat;
+            m_Ship = ship;
             Movable = false;
         }
 
@@ -27,7 +27,7 @@ namespace Server.Items
             switch (dir)
             {
                 case Direction.South: ItemID = 0x3E4B; break;
-                case Direction.North: ItemID = m_Boat is GalleonBoat || m_Boat is CarrackBoat ? 0x3855 : 0x3E4E; break; //
+                case Direction.North: ItemID = m_Ship is Galleon || m_Ship is Carrack ? 0x3855 : 0x3E4E; break; //
                 case Direction.West: ItemID = 0x3E50; break;
                 case Direction.East: ItemID = 0x3E53; break;
             }
@@ -55,26 +55,26 @@ namespace Server.Items
 
         public override void AddNameProperty(ObjectPropertyList list)
         {
-            if (m_Boat != null && m_Boat.ShipName != null)
-                list.Add(1042884, m_Boat.ShipName); // the tiller man of the ~1_SHIP_NAME~
+            if (m_Ship != null && m_Ship.ShipName != null)
+                list.Add(1042884, m_Ship.ShipName); // the tiller man of the ~1_SHIP_NAME~
             else
                 base.AddNameProperty(list);
         }
 
         public override void OnSingleClick(Mobile from)
         {
-            int notoriety = BaseBoat.GetBoatNotoriety(from, m_Boat);
+            int notoriety = BaseShip.GetShipNotoriety(from, m_Ship);
             int labelHue = Notoriety.Hues[notoriety];
-            string shipLabel = m_Boat.Name;
+            string shipLabel = m_Ship.Name;
 
-            if (!(m_Boat.ShipName == "" || m_Boat.ShipName == null))
-                shipLabel += ": " + m_Boat.ShipName;
+            if (!(m_Ship.ShipName == "" || m_Ship.ShipName == null))
+                shipLabel += ": " + m_Ship.ShipName;
 
             //from.PrivateOverheadMessage(MessageType.Label, labelHue, false, shipLabel, from.NetState);
 
-            LabelTo(from, "Hull: {0} / {1}", m_Boat.HitPoints, m_Boat.MaxHitPoints);
-            LabelTo(from, "Sails: {0} / {1}", m_Boat.SailPoints, m_Boat.MaxSailPoints);
-            LabelTo(from, "Guns: {0} / {1}", m_Boat.GunPoints, m_Boat.MaxGunPoints);
+            LabelTo(from, "Hull: {0} / {1}", m_Ship.HitPoints, m_Ship.MaxHitPoints);
+            LabelTo(from, "Sails: {0} / {1}", m_Ship.SailPoints, m_Ship.MaxSailPoints);
+            LabelTo(from, "Guns: {0} / {1}", m_Ship.GunPoints, m_Ship.MaxGunPoints);
         }
 
         public override void OnDoubleClickDead(Mobile from)
@@ -84,21 +84,21 @@ namespace Server.Items
 
         public override void OnDoubleClick(Mobile from)
         {
-            if (m_Boat == null || from == null)
+            if (m_Ship == null || from == null)
                 return;
 
             //Ship Gump  
-            if (m_Boat.Owner != null)
+            if (m_Ship.Owner != null)
             {
-                //if (!m_Boat.m_ScuttleInProgress)
-                    //from.SendGump(new BoatGump(from, m_Boat));
+                //if (!m_Ship.m_ScuttleInProgress)
+                    //from.SendGump(new ShipGump(from, m_Ship));
             }
         }
 
         public override void OnAfterDelete()
         {
-            if (m_Boat != null)
-                m_Boat.Delete();
+            if (m_Ship != null)
+                m_Ship.Delete();
         }
 
         public override void Serialize(GenericWriter writer)
@@ -106,7 +106,7 @@ namespace Server.Items
             base.Serialize(writer);
             writer.Write((int)0);//version
 
-            writer.Write(m_Boat);
+            writer.Write(m_Ship);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -118,9 +118,9 @@ namespace Server.Items
             {
                 case 0:
                     {
-                        m_Boat = reader.ReadItem() as BaseBoat;
+                        m_Ship = reader.ReadItem() as BaseShip;
 
-                        if (m_Boat == null)
+                        if (m_Ship == null)
                             Delete();
 
                         break;

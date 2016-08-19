@@ -75,7 +75,7 @@ namespace Server.Gumps
                 AddBackground(0, 0, 220, 170, 5054);
                 AddBackground(10, 10, 200, 150, 3000);
 
-                AddHtml(20, 20, 180, 80, "Are you sure you wish to change your gender?", true, false); // Do you wish to dry dock this boat?
+                AddHtml(20, 20, 180, 80, "Are you sure you wish to change your gender?", true, false); // Do you wish to dry dock this ship?
 
                 AddHtmlLocalized(55, 100, 140, 25, 1011011, false, false); // CONTINUE
                 AddButton(20, 100, 4005, 4007, 2, GumpButtonType.Reply, 0);

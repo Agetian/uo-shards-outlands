@@ -54,7 +54,7 @@ namespace Server.SkillHandlers
                     else if (creature.Controlled && creature.ControlMaster != null)
                         from.SendLocalizedMessage(501590); // They are too loyal to their master to be provoked.	
 
-                    else if (BaseBoat.FindBoatAt(creature.Location, creature.Map) != null)
+                    else if (BaseShip.FindShipAt(creature.Location, creature.Map) != null)
                         from.SendMessage("You may not provoke creatures in sea vessels.");
 
                     else
@@ -106,7 +106,7 @@ namespace Server.SkillHandlers
                     else if (bc_FirstCreature.Map != bc_Target.Map || !bc_FirstCreature.InRange(bc_Target, BaseInstrument.GetBardRange(from, SkillName.Provocation)))
                         from.SendLocalizedMessage(1049450); // The creatures you are trying to provoke are too far away from each other for your music to have an effect.
 
-                    else if (BaseBoat.FindBoatAt(bc_Target.Location, bc_Target.Map) != null)
+                    else if (BaseShip.FindShipAt(bc_Target.Location, bc_Target.Map) != null)
                         from.SendMessage("You may not provoke creatures in sea vessels.");
 
                     else if (bc_FirstCreature != bc_Target)
@@ -194,7 +194,7 @@ namespace Server.SkillHandlers
                     if (bc_FirstCreature.Map != player.Map || !bc_FirstCreature.InRange(player, BaseInstrument.GetBardRange(from, SkillName.Provocation)))
                         from.SendLocalizedMessage(1049450); // The creatures you are trying to provoke are too far away from each other for your music to have an effect.
 
-                    else if (BaseBoat.FindBoatAt(player.Location, player.Map) != null)
+                    else if (BaseShip.FindShipAt(player.Location, player.Map) != null)
                         from.SendMessage("You may not provoke creatures in sea vessels.");
 
                     else

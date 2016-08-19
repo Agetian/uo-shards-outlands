@@ -149,7 +149,7 @@ namespace Server.Misc
 			if ( item is Fists )
 				return false;
 
-			if ( item is ICommodity || item is BaseBoat
+			if ( item is ICommodity || item is BaseShip
 				|| item is RawFish || item is RawLargeFish
 				|| item is BasePotion || item is Food
 				|| item is SpecialFishingNet

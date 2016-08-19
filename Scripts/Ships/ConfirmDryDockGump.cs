@@ -10,12 +10,12 @@ namespace Server.Multis
 	public class ConfirmDryDockGump : Gump
 	{
 		private Mobile m_From;
-		private BaseBoat m_Boat;
+		private BaseShip m_Ship;
 
-		public ConfirmDryDockGump( Mobile from, BaseBoat boat ) : base( 150, 200 )
+		public ConfirmDryDockGump( Mobile from, BaseShip ship ) : base( 150, 200 )
 		{
 			m_From = from;
-			m_Boat = boat;
+			m_Ship = ship;
 
 			m_From.CloseGump( typeof( ConfirmDryDockGump ) );
 
@@ -24,7 +24,7 @@ namespace Server.Multis
 			AddBackground( 0, 0, 220, 170, 5054 );
 			AddBackground( 10, 10, 200, 150, 3000 );
 
-			AddHtmlLocalized( 20, 20, 180, 80, 1018319, true, false ); // Do you wish to dry dock this boat?
+			AddHtmlLocalized( 20, 20, 180, 80, 1018319, true, false ); // Do you wish to dry dock this ship?
 
 			AddHtmlLocalized( 55, 100, 140, 25, 1011011, false, false ); // CONTINUE
 			AddButton( 20, 100, 4005, 4007, 2, GumpButtonType.Reply, 0 );
@@ -37,15 +37,15 @@ namespace Server.Multis
 		{
             if (info.ButtonID == 2)
             {
-                int doubloonsInHold = m_Boat.GetHoldDoubloonTotal(m_Boat);
+                int doubloonsInHold = m_Ship.GetHoldDoubloonTotal(m_Ship);
                 
                 if (!Banker.CanDepositUniqueCurrency(m_From, typeof(Doubloon), doubloonsInHold))                
                     m_From.SendMessage("Your bankbox would not be able to hold all of the doubloons from your ship's hold. You must clear out some items from your bank before you may dock this ship.");
                     
                 else
                 {                
-                    m_Boat.MoveHoldDoubloonsToBank(m_From, false);
-                    m_Boat.EndDryDock(m_From, doubloonsInHold);
+                    m_Ship.MoveHoldDoubloonsToBank(m_From, false);
+                    m_Ship.EndDryDock(m_From, doubloonsInHold);
                 }
             }
 		}

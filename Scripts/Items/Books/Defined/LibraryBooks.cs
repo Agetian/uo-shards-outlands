@@ -3816,7 +3816,7 @@ namespace Server.Items
 				new BookPageInfo
 				(
 					"Shrine of Humility. I",
-					"launch my boat from the",
+					"launch my ship from the",
 					"West side of the Island",
 					"of Valor, where I made",
 					"my daring escape from",
@@ -3828,7 +3828,7 @@ namespace Server.Items
 				(
 					"hissing tongues. Beautiful",
 					"blue waves washed over",
-					"the bow of the boat as",
+					"the bow of the ship as",
 					"dolphins played, merrily",
 					"leading me on. The voyage",
 					"is long and the water",
@@ -3925,7 +3925,7 @@ namespace Server.Items
 				(
 					"exchange a few words.",
 					"Shortly I was landing my",
-					"boat on the North end of",
+					"ship on the North end of",
 					"the Island of Ice. I",
 					"quickly made my way",
 					"through snow across the",
@@ -3999,7 +3999,7 @@ namespace Server.Items
 				),
 				new BookPageInfo
 				(
-					"and West. I land my boat",
+					"and West. I land my ship",
 					"just East of the Shrine",
 					"of Sacrifice, so my road",
 					"is West. Although I enjoy",

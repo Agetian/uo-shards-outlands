@@ -551,72 +551,72 @@ namespace Server.Misc
                 }
             }
 
-            //Boats: Players and Creatures Friendly to a Boat Can Freely Attack Non-Friendly Mobiles on their Boat
-            BaseBoat sourceBoat = null;
+            //Ships: Players and Creatures Friendly to a Ship Can Freely Attack Non-Friendly Mobiles on their Ship
+            BaseShip sourceShip = null;
 
             if (bc_Source != null)
             {
-                if (bc_Source.BoatOccupied != null)
-                    sourceBoat = bc_Source.BoatOccupied;
+                if (bc_Source.ShipOccupied != null)
+                    sourceShip = bc_Source.ShipOccupied;
             }
 
             if (pm_Source != null)
             {
-                if (pm_Source.BoatOccupied != null)
-                    sourceBoat = pm_Source.BoatOccupied;
+                if (pm_Source.ShipOccupied != null)
+                    sourceShip = pm_Source.ShipOccupied;
             }
 
-            if (sourceBoat != null)
+            if (sourceShip != null)
             {
-                BaseBoat targetBoat = null;
+                BaseShip targetShip = null;
 
                 if (bc_Target != null)
                 {
-                    if (bc_Target.BoatOccupied != null)
-                        targetBoat = bc_Target.BoatOccupied;
+                    if (bc_Target.ShipOccupied != null)
+                        targetShip = bc_Target.ShipOccupied;
                 }
 
                 if (pm_Target != null)
                 {
-                    if (pm_Target.BoatOccupied != null)
-                        targetBoat = pm_Target.BoatOccupied;
+                    if (pm_Target.ShipOccupied != null)
+                        targetShip = pm_Target.ShipOccupied;
                 }
 
-                //On Same Boat
-                if (sourceBoat != null && targetBoat != null && !sourceBoat.Deleted && !targetBoat.Deleted && sourceBoat == targetBoat)
+                //On Same Ship
+                if (sourceShip != null && targetShip != null && !sourceShip.Deleted && !targetShip.Deleted && sourceShip == targetShip)
                 {
                     bool sourceBelongs = false;
                     bool targetBelongs = false;
 
-                    //Source Belongs n the Boat
-                    if (sourceBoat.Crew.Contains(source) || sourceBoat.IsFriend(source) || sourceBoat.IsCoOwner(source) || sourceBoat.IsOwner(source))
+                    //Source Belongs n the Ship
+                    if (sourceShip.Crew.Contains(source) || sourceShip.IsFriend(source) || sourceShip.IsCoOwner(source) || sourceShip.IsOwner(source))
                         sourceBelongs = true;
 
-                    //Source's Owner Belongs on the Boat                    
+                    //Source's Owner Belongs on the Ship                    
                     else if (bc_Source != null)
                     {
                         if (m_SourceController != null)
                         {
-                            if (sourceBoat.Crew.Contains(m_SourceController) || sourceBoat.IsFriend(m_SourceController) || sourceBoat.IsCoOwner(m_SourceController) || sourceBoat.IsOwner(m_SourceController))
+                            if (sourceShip.Crew.Contains(m_SourceController) || sourceShip.IsFriend(m_SourceController) || sourceShip.IsCoOwner(m_SourceController) || sourceShip.IsOwner(m_SourceController))
                                 sourceBelongs = true;
                         }
                     }
 
-                    //Target Belongs On The Boat
-                    if (sourceBoat.Crew.Contains(target) || sourceBoat.IsFriend(target) || sourceBoat.IsCoOwner(target) || sourceBoat.IsOwner(target))
+                    //Target Belongs On The Ship
+                    if (sourceShip.Crew.Contains(target) || sourceShip.IsFriend(target) || sourceShip.IsCoOwner(target) || sourceShip.IsOwner(target))
                         targetBelongs = true;
 
-                    //Target's Owner Belongs On the Boat
+                    //Target's Owner Belongs On the Ship
                     else if (bc_Target != null)
                     {
                         if (m_TargetController != null)
                         {
-                            if (sourceBoat.Crew.Contains(m_TargetController) || sourceBoat.IsFriend(m_TargetController) || sourceBoat.IsCoOwner(m_TargetController) || sourceBoat.IsOwner(m_TargetController))
+                            if (sourceShip.Crew.Contains(m_TargetController) || sourceShip.IsFriend(m_TargetController) || sourceShip.IsCoOwner(m_TargetController) || sourceShip.IsOwner(m_TargetController))
                                 targetBelongs = true;
                         }
                     }
 
-                    //Target May Be Freely Attacked on Boat
+                    //Target May Be Freely Attacked on Ship
                     if (sourceBelongs && !targetBelongs)
                         return Notoriety.CanBeAttacked;
                 }

@@ -22,9 +22,9 @@ using Server.Engines.PartySystem;
 using Server.Commands;
 using Server.Custom;
 using Server.SkillHandlers;
-
 using Server.Regions;
 using System.Text;
+using System.Net;
 
 namespace Server.Mobiles
 {
@@ -50,7 +50,7 @@ namespace Server.Mobiles
         Paladin = 0x00010000,
         KilledByPaladin = 0x00020000,
         YewJailed = 0x00040000,
-        BoatMovement = 0x00080000
+        ShipMovement = 0x00080000
     }
 
     public enum NpcGuild
@@ -1118,7 +1118,36 @@ namespace Server.Mobiles
 
             if (player == null)
                 return;
-        } 
+        }
+
+        public static bool IPMatch(PlayerMobile player1, PlayerMobile player2)
+        {
+            if (player1 == null) return false;
+            if (player2 == null) return false;
+
+            Account account1 = player1.Account as Account;
+            Account account2 = player2.Account as Account;
+
+            if (account1 == null) return false;
+            if (account2 == null) return false;
+
+            foreach (IPAddress player1IPAddress in account1.LoginIPs)
+            {
+                if (player1IPAddress == null)
+                    continue;
+
+                foreach (IPAddress player2IPAddress in account2.LoginIPs)
+                {
+                    if (player2IPAddress == null)
+                        continue;
+
+                    if (player1IPAddress.Equals(player2IPAddress))
+                        return true;
+                }
+            }
+
+            return false;
+        }
 
         public void ResetRegenTimers()
         {
@@ -1235,27 +1264,27 @@ namespace Server.Mobiles
 
         public bool m_AutoStealth = true;
 
-        private BaseBoat m_BoatOccupied = null;
+        private BaseShip m_ShipOccupied = null;
         [CommandProperty(AccessLevel.GameMaster)]
-        public BaseBoat BoatOccupied
+        public BaseShip ShipOccupied
         { 
-            get { return m_BoatOccupied; }
+            get { return m_ShipOccupied; }
             set 
             {
-                BaseBoat m_OldValue = m_BoatOccupied;
+                BaseShip m_OldValue = m_ShipOccupied;
 
-                m_BoatOccupied = value;
+                m_ShipOccupied = value;
 
-                if (m_OldValue != m_BoatOccupied && HasGump(typeof(BoatHotbarGump)))
+                if (m_OldValue != m_ShipOccupied && HasGump(typeof(ShipHotbarGump)))
                 {
-                    CloseGump(typeof(BoatHotbarGump));
-                    SendGump(new BoatHotbarGump(this));
+                    ShipHotbarGumpObject shipHotbarGumpObject = new ShipHotbarGumpObject();
+
+                    CloseGump(typeof(ShipHotbarGump));
+                    SendGump(new ShipHotbarGump(this, shipHotbarGumpObject));
                 }
             }
         }
-
-        public BoatHotbarGump.ShipPlayerControlSettings m_ShipControlSettings = null;
-
+        
         public TitleCollection m_TitleCollection = null;
         public AchievementAccountEntry m_AchievementAccountEntry = null;
         public CaptchaAccountData m_CaptchaAccountData = null;
@@ -1440,10 +1469,10 @@ namespace Server.Mobiles
         }
 
         [CommandProperty(AccessLevel.GameMaster)]
-        public bool BoatMovement
+        public bool ShipMovement
         {
-            get { return GetFlag(PlayerFlag.BoatMovement); }
-            set { SetFlag(PlayerFlag.BoatMovement, value); }
+            get { return GetFlag(PlayerFlag.ShipMovement); }
+            set { SetFlag(PlayerFlag.ShipMovement, value); }
         }
 
         public PlayerTitleColors TitleColorState { get; set; }
@@ -2897,12 +2926,12 @@ namespace Server.Mobiles
             if (SpellHelper.IsFeluccaDungeon(Map, Location) || SpellHelper.IsDungeonBossArea(Map, Location) || SpellHelper.IsGraveYardArea(Map, Location))
                 EnterContestedRegion(false);
 
-            BaseBoat boat = BaseBoat.FindBoatAt(Location, Map);
+            BaseShip ship = BaseShip.FindShipAt(Location, Map);
 
-            if (boat == null)
-                BoatOccupied = null;
+            if (ship == null)
+                ShipOccupied = null;
             else
-                BoatOccupied = boat;
+                ShipOccupied = ship;
 
             /*
             if (m_CompetitionContext != null)
@@ -2961,7 +2990,7 @@ namespace Server.Mobiles
             bool InStamFreeRange = (int)GetDistanceToSqrt(StamFreeMoveSource) <= BaseCreature.StamFreeMoveRange;
 
             //Currently Allowed Stamina-Free Movement
-            if (StamFreeMoveExpiration > DateTime.UtcNow && InStamFreeRange || BoatOccupied != null)
+            if (StamFreeMoveExpiration > DateTime.UtcNow && InStamFreeRange || ShipOccupied != null)
                 return true;
 
             if (shoved.Blessed)
@@ -3026,7 +3055,7 @@ namespace Server.Mobiles
                 }
             }
 
-            if (BoatOccupied != null)
+            if (ShipOccupied != null)
                 return false;
 
             return disrupt;
@@ -4060,8 +4089,8 @@ namespace Server.Mobiles
             }
 
             //Ship-Based Combat
-            if (BaseBoat.UseShipBasedDamageModifer(from, this))
-                damage *= BaseBoat.shipBasedDamageToPlayerScalar;            
+            if (BaseShip.UseShipBasedDamageModifer(from, this))
+                damage *= BaseShip.shipBasedDamageToPlayerScalar;            
 
             if (damage < 1)
                 damage = 1;
@@ -4282,7 +4311,7 @@ namespace Server.Mobiles
             writer.Write((int)m_ShowProvocationDamage);
             writer.Write((int)m_ShowPoisonDamage);
             writer.Write(m_AutoStealth);
-            writer.Write(m_BoatOccupied);
+            writer.Write(m_ShipOccupied);
             writer.Write(KinPaintHue);
             writer.Write(KinPaintExpiration);
             writer.Write((int)m_ShowMeleeDamage);
@@ -4378,7 +4407,7 @@ namespace Server.Mobiles
                 m_ShowProvocationDamage = (DamageDisplayMode)reader.ReadInt();
                 m_ShowPoisonDamage = (DamageDisplayMode)reader.ReadInt();
                 m_AutoStealth = reader.ReadBool();
-                BoatOccupied = (BaseBoat)reader.ReadItem();
+                ShipOccupied = (BaseShip)reader.ReadItem();
                 KinPaintHue = reader.ReadInt();
                 KinPaintExpiration = reader.ReadDateTime();
                 m_ShowMeleeDamage = (DamageDisplayMode)reader.ReadInt();

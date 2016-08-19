@@ -10,8 +10,8 @@ namespace Server.Mobiles
     [CorpseName("a colossus termite corpse")]
     public class ColossusTermite : BaseCreature
     {
-        public DateTime m_NextBoatChewAllowed;
-        public TimeSpan NextBoatChewDelay = TimeSpan.FromSeconds(Utility.RandomMinMax(10, 20));
+        public DateTime m_NextShipChewAllowed;
+        public TimeSpan NextShipChewDelay = TimeSpan.FromSeconds(Utility.RandomMinMax(10, 20));
 
         [Constructable]
         public ColossusTermite(): base(AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4)
@@ -55,17 +55,17 @@ namespace Server.Mobiles
         {
             base.OnThink();
 
-            if (Utility.RandomDouble() < .05 && DateTime.UtcNow > m_NextBoatChewAllowed && BoatOccupied != null)
+            if (Utility.RandomDouble() < .05 && DateTime.UtcNow > m_NextShipChewAllowed && ShipOccupied != null)
             {
-                if (BoatOccupied.Deleted) return;
-                if (BoatOccupied.m_SinkTimer != null) return;
+                if (ShipOccupied.Deleted) return;
+                if (ShipOccupied.m_SinkTimer != null) return;
 
-                BoatOccupied.ReceiveDamage(this, null, Utility.RandomMinMax(10, 20), DamageType.Hull);
+                ShipOccupied.ReceiveDamage(this, null, Utility.RandomMinMax(10, 20), DamageType.Hull);
 
                 Say("*chews on the ship*");
                 SpecialAbilities.HinderSpecialAbility(1.0, this, this, 1.0, 1, true, Utility.RandomList(0x134, 0x133), false, "", "", "-1");
 
-                m_NextBoatChewAllowed = DateTime.UtcNow + NextBoatChewDelay;
+                m_NextShipChewAllowed = DateTime.UtcNow + NextShipChewDelay;
             }
         }
 

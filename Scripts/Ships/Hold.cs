@@ -10,10 +10,10 @@ namespace Server.Items
 {
     public class Hold : Container
     {
-        private BaseBoat m_Boat;
+        private BaseShip m_Ship;
 
         [CommandProperty(AccessLevel.GameMaster)]
-        public BaseBoat Boat { get { return m_Boat; } }
+        public BaseShip Ship { get { return m_Ship; } }
 
         public override int DefaultMaxWeight
 		{
@@ -23,9 +23,9 @@ namespace Server.Items
 			}
 		}
 
-        public Hold(BaseBoat boat): base(0x3EAE)
+        public Hold(BaseShip ship): base(0x3EAE)
         {
-            m_Boat = boat;
+            m_Ship = ship;
 
             Movable = false;                  
         }
@@ -47,7 +47,7 @@ namespace Server.Items
 
         public override bool OnDragDropInto(Mobile from, Item item, Point3D p)
         {
-            if (m_Boat == null || !m_Boat.Contains(from))
+            if (m_Ship == null || !m_Ship.Contains(from))
                 return false;
 
             return base.OnDragDropInto(from, item, p);
@@ -55,7 +55,7 @@ namespace Server.Items
 
         public override bool CheckLift(Mobile from, Item item, ref LRReason reject)
         {
-            if (m_Boat == null || !m_Boat.Contains(from))
+            if (m_Ship == null || !m_Ship.Contains(from))
                 return false;
 
             return base.CheckLift(from, item, ref reject);
@@ -63,11 +63,11 @@ namespace Server.Items
 
         public override bool OnDragDrop(Mobile from, Item item)
         {
-            if (m_Boat == null || !m_Boat.Contains(from))
+            if (m_Ship == null || !m_Ship.Contains(from))
                 return false;
 
             //Don't Have Normal Access
-            if (!(m_Boat.IsOwner(from) || m_Boat.IsCoOwner(from)))
+            if (!(m_Ship.IsOwner(from) || m_Ship.IsCoOwner(from)))
             {
                 //Item is Coming From Outside Hold
                 if (item.Parent != this)
@@ -82,7 +82,7 @@ namespace Server.Items
 
         public override bool CheckItemUse(Mobile from, Item item)
         {
-            if (item != this && (m_Boat == null || !m_Boat.Contains(from)))
+            if (item != this && (m_Ship == null || !m_Ship.Contains(from)))
                 return false;
 
             return base.CheckItemUse(from, item);
@@ -90,14 +90,14 @@ namespace Server.Items
 
         public override void OnAfterDelete()
         {
-            if (m_Boat != null)
-                m_Boat.Delete();
+            if (m_Ship != null)
+                m_Ship.Delete();
         }
 
         public override void OnDoubleClick(Mobile from)
         {
-            if (m_Boat == null) return;
-            if (m_Boat.Deleted) return;
+            if (m_Ship == null) return;
+            if (m_Ship.Deleted) return;
             if (this == null) return;
             if (Deleted) return;
 
@@ -108,31 +108,31 @@ namespace Server.Items
                 return;
             }
 
-            if (m_Boat == null || !m_Boat.Contains(from))     
+            if (m_Ship == null || !m_Ship.Contains(from))     
             {
                 from.SendMessage("You must be onboard that ship to access it's hold.");
                 return;
             }
 
-            //NPC Boat
-            if (m_Boat.MobileControlType != MobileControlType.Player)
+            //NPC Ship
+            if (m_Ship.MobileControlType != MobileControlType.Player)
             {
-                if (m_Boat.HasCrewAlive())
+                if (m_Ship.HasCrewAlive())
                 {
                     from.SendMessage("You cannot attempt to access that ship's hold while it's crew members still live.");
                     return;
                 }
             }
 
-            //Player Boat
+            //Player Ship
             else
             {
-                //Refresh Boat
-                if (m_Boat.IsOwner(from) || m_Boat.IsCoOwner(from) || m_Boat.IsFriend(from))            
-                    m_Boat.Refresh();            
+                //Refresh Ship
+                if (m_Ship.IsOwner(from) || m_Ship.IsCoOwner(from) || m_Ship.IsFriend(from))            
+                    m_Ship.Refresh();            
 
                 //Don't Have Access
-                if (!(m_Boat.IsOwner(from) || m_Boat.IsCoOwner(from)))
+                if (!(m_Ship.IsOwner(from) || m_Ship.IsCoOwner(from)))
                 {
                     from.SendMessage("You must use a lockpick to attempt to access that.");
                     return;
@@ -147,10 +147,10 @@ namespace Server.Items
             if (from == null || lockpick == null || this.Deleted || this == null)
                 return;
 
-            //NPC Boat
-            if (m_Boat.MobileControlType != MobileControlType.Player)
+            //NPC Ship
+            if (m_Ship.MobileControlType != MobileControlType.Player)
             {
-                if (m_Boat.HasCrewAlive())
+                if (m_Ship.HasCrewAlive())
                 {
                     from.SendMessage("You cannot access that ship's hold while it's crew members still live.");
                     return;
@@ -231,7 +231,7 @@ namespace Server.Items
             base.Serialize(writer);
 
             writer.Write((int)0);
-            writer.Write(m_Boat);
+            writer.Write(m_Ship);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -244,9 +244,9 @@ namespace Server.Items
             {
                 case 0:
                 {
-                    m_Boat = reader.ReadItem() as BaseBoat;
+                    m_Ship = reader.ReadItem() as BaseShip;
 
-                    if (m_Boat == null || Parent != null)
+                    if (m_Ship == null || Parent != null)
                         Delete();
 
                     Movable = false;

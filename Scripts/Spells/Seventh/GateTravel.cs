@@ -78,7 +78,7 @@ namespace Server.Spells.Seventh
                 return false;
             }
 
-            else if (BaseBoat.FindBoatAt(Caster.Location, Caster.Map) != null)
+            else if (BaseShip.FindShipAt(Caster.Location, Caster.Map) != null)
             {
                 Caster.SendMessage("You may not cast this spell while at sea.");
                 return false;
@@ -159,7 +159,7 @@ namespace Server.Spells.Seventh
 			else if ( SpellHelper.IsWindLoc( loc ) )			
 				Caster.SendLocalizedMessage( 501802 ); // Thy spell doth not appear to work...			
 
-            else if (BaseBoat.FindBoatAt(loc, map) != null)            
+            else if (BaseShip.FindShipAt(loc, map) != null)            
                 Caster.SendLocalizedMessage(501802); // Thy spell doth not appear to work...            
 
 			else if ( CheckSequence() && CheckCast() )
@@ -308,12 +308,12 @@ namespace Server.Spells.Seventh
 						from.SendLocalizedMessage( 502354 ); // Target is not marked.
 				}
 
-				else if ( o is Key && ((Key)o).KeyValue != 0 && ((Key)o).Link is BaseBoat )
+				else if ( o is Key && ((Key)o).KeyValue != 0 && ((Key)o).Link is BaseShip )
 				{
-				//	BaseBoat boat = ((Key)o).Link as BaseBoat;
+				//	BaseShip ship = ((Key)o).Link as BaseShip;
 
-				//	if ( !boat.Deleted && boat.CheckKey( ((Key)o).KeyValue ) )
-				//		m_Owner.Effect( boat.GetMarkedLocation(), boat.Map, false );
+				//	if ( !ship.Deleted && ship.CheckKey( ((Key)o).KeyValue ) )
+				//		m_Owner.Effect( ship.GetMarkedLocation(), ship.Map, false );
 				//	else
 
 					from.Send( new MessageLocalized( from.Serial, from.Body, MessageType.Regular, 0x3B2, 3, 501030, from.Name, "" ) ); // I can not gate travel from that object.

@@ -153,19 +153,19 @@ namespace Server.Items
                         from.AddToBackpack(new SpecialFishingNet());
                 }
 
-                BaseBoat ownerBoat = BaseBoat.FindBoatAt(from.Location, from.Map);
+                BaseShip ownerShip = BaseShip.FindShipAt(from.Location, from.Map);
 
                 PlayerMobile player = from as PlayerMobile;
 
-                if (ownerBoat != null && player != null)
+                if (ownerShip != null && player != null)
                 {
-                    if (ownerBoat.IsFriend(player) || ownerBoat.IsOwner(player) || ownerBoat.IsCoOwner(player))
+                    if (ownerShip.IsFriend(player) || ownerShip.IsOwner(player) || ownerShip.IsCoOwner(player))
                     {
                         double doubloonValue = Utility.RandomMinMax(5, 10);
 
                         int finalDoubloonAmount = (int)doubloonValue;
 
-                        bool shipOwner = ownerBoat.IsOwner(player);
+                        bool shipOwner = ownerShip.IsOwner(player);
                         bool bankDoubloonsValid = false;
                         bool holdPlacementValid = false;
 
@@ -180,7 +180,7 @@ namespace Server.Items
                         }                            
 
                         //Deposit Other Half in Ship
-                        if (ownerBoat.DepositDoubloons(finalDoubloonAmount))
+                        if (ownerShip.DepositDoubloons(finalDoubloonAmount))
                         {
                             Doubloon doubloonPile = new Doubloon(finalDoubloonAmount);
                             player.SendSound(doubloonPile.GetDropSound());
@@ -192,7 +192,7 @@ namespace Server.Items
                         if (shipOwner)
                         {
                             player.PirateScore += finalDoubloonAmount;
-                            //ownerBoat.doubloonsEarned += finalDoubloonAmount * 2;
+                            //ownerShip.doubloonsEarned += finalDoubloonAmount * 2;
 
                             if (bankDoubloonsValid && holdPlacementValid)
                                 player.SendMessage("You've received " + (finalDoubloonAmount * 2).ToString() + " doubloons for using a net! They have been evenly split between your bank box and your ship's hold.");
@@ -207,7 +207,7 @@ namespace Server.Items
                         else
                         {
                             player.PirateScore += finalDoubloonAmount;
-                            //ownerBoat.doubloonsEarned += finalDoubloonAmount;
+                            //ownerShip.doubloonsEarned += finalDoubloonAmount;
 
                             if (bankDoubloonsValid)
                                 player.SendMessage("You've earned " + finalDoubloonAmount.ToString() + " doubloons for using a net! They have been placed in your bank box.");

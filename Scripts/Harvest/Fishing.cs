@@ -162,7 +162,7 @@ namespace Server.Engines.Harvest
             double skillBase = from.Skills[SkillName.Fishing].Base;
             double skillValue = from.Skills[SkillName.Fishing].Value;
 
-            BaseBoat ownerBoat = BaseBoat.FindBoatAt(from.Location, from.Map);
+            BaseShip ownerShip = BaseShip.FindShipAt(from.Location, from.Map);
             double chanceModifier = 1;
             
             for (int i = 0; i < m_MutateTable.Length; ++i)
@@ -439,19 +439,19 @@ namespace Server.Engines.Harvest
 
                         sos.Completed = true;
                         
-                        BaseBoat ownerBoat = BaseBoat.FindBoatAt(from.Location, from.Map);
+                        BaseShip ownerShip = BaseShip.FindShipAt(from.Location, from.Map);
 
                         PlayerMobile player = from as PlayerMobile;
 
-                        if (ownerBoat != null && player != null)
+                        if (ownerShip != null && player != null)
                         {
-                            if (ownerBoat.IsFriend(player) || ownerBoat.IsOwner(player) || ownerBoat.IsCoOwner(player))
+                            if (ownerShip.IsFriend(player) || ownerShip.IsOwner(player) || ownerShip.IsCoOwner(player))
                             {
                                 double doubloonValue = Utility.RandomMinMax(25, 50);
                                 
                                 int finalDoubloonAmount = (int)doubloonValue;                                
 
-                                bool shipOwner = ownerBoat.IsOwner(player);
+                                bool shipOwner = ownerShip.IsOwner(player);
                                 bool bankDoubloonsValid = false;
                                 bool holdPlacementValid = false;
                                 
@@ -466,7 +466,7 @@ namespace Server.Engines.Harvest
                                 }
 
                                 //Deposit Other Half in Ship
-                                if (ownerBoat.DepositDoubloons(finalDoubloonAmount))
+                                if (ownerShip.DepositDoubloons(finalDoubloonAmount))
                                 {
                                     Doubloon doubloonPile = new Doubloon(finalDoubloonAmount);
                                     player.SendSound(doubloonPile.GetDropSound());
@@ -478,7 +478,7 @@ namespace Server.Engines.Harvest
                                 if (shipOwner)
                                 {                                    
                                     player.PirateScore += finalDoubloonAmount;
-                                    //ownerBoat.doubloonsEarned += finalDoubloonAmount * 2;
+                                    //ownerShip.doubloonsEarned += finalDoubloonAmount * 2;
 
                                     if (bankDoubloonsValid && holdPlacementValid)
                                         player.SendMessage("You've received " + (finalDoubloonAmount * 2).ToString() + " doubloons for completing a message in a bottle! They have been evenly split between your bank box and your ship's hold.");
@@ -492,7 +492,7 @@ namespace Server.Engines.Harvest
 
                                 else
                                 {
-                                    //ownerBoat.doubloonsEarned += finalDoubloonAmount;
+                                    //ownerShip.doubloonsEarned += finalDoubloonAmount;
                                     player.PirateScore += finalDoubloonAmount;
 
                                     if (bankDoubloonsValid)

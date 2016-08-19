@@ -65,7 +65,7 @@ namespace Server.Spells.Seventh
                 Caster.SendLocalizedMessage(500237); // Target can not be seen.
             }
 
-            else if (BaseBoat.FindBoatAt(p, Caster.Map) != null)
+            else if (BaseShip.FindShipAt(p, Caster.Map) != null)
                 Caster.SendMessage("That location is blocked.");
 
             else if (SpellHelper.CheckTown(p, Caster) && CheckSequence())

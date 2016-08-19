@@ -550,7 +550,7 @@ namespace Server.Items
                                     {
                                         Point3D componentPoint = new Point3D(newLocation.X - c, newLocation.Y - d, newLocation.Z);
 
-                                        if (!BaseBoat.IsWaterTile(componentPoint, m_FishingSpotSpawner.Map))
+                                        if (!BaseShip.IsWaterTile(componentPoint, m_FishingSpotSpawner.Map))
                                         {
                                             validWaterSpot = false;
                                             break;

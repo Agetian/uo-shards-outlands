@@ -12,17 +12,17 @@ namespace Server.Items
 {
     public static class ShipCrew
     {
-        public static void GenerateShipCrew(BaseBoat boat)
+        public static void GenerateShipCrew(BaseShip ship)
         {
-            if (boat == null) return;
-            if (boat.Deleted) return;
+            if (ship == null) return;
+            if (ship.Deleted) return;
 
             int shipLevel = 1;
 
-            if (boat is MediumBoat || boat is MediumDragonBoat) shipLevel = 2;
-            if (boat is LargeBoat || boat is LargeDragonBoat) shipLevel = 3;
-            if (boat is CarrackBoat) shipLevel = 4;
-            if (boat is GalleonBoat) shipLevel = 5;
+            if (ship is MediumShip || ship is MediumDragonShip) shipLevel = 2;
+            if (ship is LargeShip || ship is LargeDragonShip) shipLevel = 3;
+            if (ship is Carrack) shipLevel = 4;
+            if (ship is Galleon) shipLevel = 5;
 
             BaseCreature bc_Creature;
             Point3D creatureLocation;
@@ -32,7 +32,8 @@ namespace Server.Items
 
             Dictionary<Type, int> DictCrewOptions = new Dictionary<Type, int>();
 
-            switch (boat.MobileFactionType)
+            /*
+            switch (ship.MobileFactionType)
             {
                 case MobileFactionType.Fishing:
                     #region Fishing
@@ -40,14 +41,14 @@ namespace Server.Items
 
                     for (int a = 0; a < crewNumber; a++)
                     {
-                        creatureLocation = boat.GetRandomEmbarkLocation(true);
+                        creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                         bc_Creature = new Custom.Pirates.OceanFisherman();
                         bc_Creature.BardImmune = true;
-                        bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                        bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                        boat.Crew.Add(bc_Creature);
-                        boat.AddEmbarkedMobile(bc_Creature);
+                        ship.Crew.Add(bc_Creature);
+                        ship.AddEmbarkedMobile(bc_Creature);
                     }
                     #endregion
                 break;
@@ -58,49 +59,48 @@ namespace Server.Items
                     
                     for (int a = 0; a < crewNumber; a++)
                     {
-                        creatureLocation = boat.GetRandomEmbarkLocation(true);
+                        creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                         bc_Creature = new Custom.Pirates.OceanPirate();
                         bc_Creature.BardImmune = true;
-                        bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                        bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                        boat.Crew.Add(bc_Creature);
-                        boat.AddEmbarkedMobile(bc_Creature);
+                        ship.Crew.Add(bc_Creature);
+                        ship.AddEmbarkedMobile(bc_Creature);
                     }
 
                     if (Utility.RandomDouble() <= (.2 * shipLevel) )
                     {
-                        creatureLocation = boat.GetRandomEmbarkLocation(true);
+                        creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                         bc_Creature = new Custom.Pirates.PirateShipCarpenter();
                         bc_Creature.BardImmune = true;
-                        bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                        bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                        boat.Crew.Add(bc_Creature);
-                        boat.AddEmbarkedMobile(bc_Creature);
+                        ship.Crew.Add(bc_Creature);
+                        ship.AddEmbarkedMobile(bc_Creature);
                     }
 
                     if (Utility.RandomDouble() <= (.2 * shipLevel))
                     {
-                        creatureLocation = boat.GetRandomEmbarkLocation(true);
+                        creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                         bc_Creature = new Custom.Pirates.PirateSawbones();
                         bc_Creature.BardImmune = true;
-                        bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                        bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                        boat.Crew.Add(bc_Creature);
-                        boat.AddEmbarkedMobile(bc_Creature);
+                        ship.Crew.Add(bc_Creature);
+                        ship.AddEmbarkedMobile(bc_Creature);
                     }
 
-                    creatureLocation = boat.GetRandomEmbarkLocation(true);
+                    creatureLocation = ship.GetRandomEmbarkLocation(true);
 
-                    bc_Creature = new Custom.Pirates.OceanPirateCaptain(boat);
+                    bc_Creature = new Custom.Pirates.OceanPirateCaptain(ship);
                     bc_Creature.BardImmune = true;
-                    bc_Creature.MoveToWorld(creatureLocation, boat.Map);  
+                    bc_Creature.MoveToWorld(creatureLocation, ship.Map);  
 
-                    boat.Crew.Add(bc_Creature);
-                    boat.Owner = bc_Creature;
-                    boat.AddEmbarkedMobile(bc_Creature);
+                    ship.Crew.Add(bc_Creature);
+                    ship.AddEmbarkedMobile(bc_Creature);
                     
                     #endregion
                 break;
@@ -140,13 +140,13 @@ namespace Server.Items
                                 if (bc_Creature == null)
                                     continue;
 
-                                creatureLocation = boat.GetRandomEmbarkLocation(true);
+                                creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                                 bc_Creature.BardImmune = true;
-                                bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                                bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                                boat.Crew.Add(bc_Creature);
-                                boat.AddEmbarkedMobile(bc_Creature);
+                                ship.Crew.Add(bc_Creature);
+                                ship.AddEmbarkedMobile(bc_Creature);
 
                                 break;
                             }
@@ -157,39 +157,38 @@ namespace Server.Items
              
                     if (Utility.RandomDouble() <= (.2 * shipLevel ) )
                     {
-                        creatureLocation = boat.GetRandomEmbarkLocation(true);
+                        creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                         bc_Creature = new Custom.Pirates.BritainShipCarpenter();                        
                         bc_Creature.BardImmune = true;
-                        bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                        bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                        boat.Crew.Add(bc_Creature);
-                        boat.AddEmbarkedMobile(bc_Creature);
+                        ship.Crew.Add(bc_Creature);
+                        ship.AddEmbarkedMobile(bc_Creature);
 
                     }
 
                     if (Utility.RandomDouble() <= (.2 * shipLevel))
                     {
-                        creatureLocation = boat.GetRandomEmbarkLocation(true);
+                        creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                         bc_Creature = new Custom.Pirates.BritainShipSurgeon();
                         bc_Creature.BardImmune = true;
-                        bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                        bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                        boat.Crew.Add(bc_Creature);
-                        boat.AddEmbarkedMobile(bc_Creature);
+                        ship.Crew.Add(bc_Creature);
+                        ship.AddEmbarkedMobile(bc_Creature);
 
                     }
 
-                    creatureLocation = boat.GetRandomEmbarkLocation(true);
+                    creatureLocation = ship.GetRandomEmbarkLocation(true);
 
-                    bc_Creature = new Custom.Pirates.BritainShipCaptain(boat);
+                    bc_Creature = new Custom.Pirates.BritainShipCaptain(ship);
                     bc_Creature.BardImmune = true;
-                    bc_Creature.MoveToWorld(creatureLocation, boat.Map); 
+                    bc_Creature.MoveToWorld(creatureLocation, ship.Map); 
 
-                    boat.Crew.Add(bc_Creature);
-                    boat.Owner = bc_Creature;
-                    boat.AddEmbarkedMobile(bc_Creature);
+                    ship.Crew.Add(bc_Creature);
+                    ship.AddEmbarkedMobile(bc_Creature);
                     #endregion
                 break;                
 
@@ -233,13 +232,13 @@ namespace Server.Items
                                 if (bc_Creature is OrcishGrunt)                                                                    
                                     bc_Creature.PackItem(new Bow() { Movable = false, Hue = 0 });
 
-                                creatureLocation = boat.GetRandomEmbarkLocation(true);
+                                creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                                 bc_Creature.BardImmune = true;
-                                bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                                bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                                boat.Crew.Add(bc_Creature);
-                                boat.AddEmbarkedMobile(bc_Creature);
+                                ship.Crew.Add(bc_Creature);
+                                ship.AddEmbarkedMobile(bc_Creature);
 
 
                                 break;
@@ -287,13 +286,13 @@ namespace Server.Items
                                 if (bc_Creature is OrcishExecutioner || bc_Creature is OrcishSurjin)
                                     bc_Creature.PackItem(new Bow() { Movable = false, Hue = 0 });                                
 
-                                creatureLocation = boat.GetRandomEmbarkLocation(true);
+                                creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                                 bc_Creature.BardImmune = true;
-                                bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                                bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                                boat.Crew.Add(bc_Creature);
-                                boat.AddEmbarkedMobile(bc_Creature);
+                                ship.Crew.Add(bc_Creature);
+                                ship.AddEmbarkedMobile(bc_Creature);
 
                                 break;
                             }
@@ -346,13 +345,13 @@ namespace Server.Items
                                 if (bc_Creature is OrghereimSwordThane || bc_Creature is OrghereimShieldMaiden)
                                     bc_Creature.PackItem(new Bow() { Movable = false, Hue = 0 });                                
 
-                                creatureLocation = boat.GetRandomEmbarkLocation(true);
+                                creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                                 bc_Creature.BardImmune = true;
-                                bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                                bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                                boat.Crew.Add(bc_Creature);
-                                boat.AddEmbarkedMobile(bc_Creature);
+                                ship.Crew.Add(bc_Creature);
+                                ship.AddEmbarkedMobile(bc_Creature);
 
                                 break;
                             }
@@ -399,13 +398,13 @@ namespace Server.Items
                                 if (bc_Creature is OrghereimShieldMother)
                                     bc_Creature.PackItem(new Bow() { Movable = false, Hue = 0 });                                
 
-                                creatureLocation = boat.GetRandomEmbarkLocation(true);
+                                creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                                 bc_Creature.BardImmune = true;
-                                bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                                bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                                boat.Crew.Add(bc_Creature);
-                                boat.AddEmbarkedMobile(bc_Creature);
+                                ship.Crew.Add(bc_Creature);
+                                ship.AddEmbarkedMobile(bc_Creature);
 
                                 break;
                             }
@@ -422,14 +421,14 @@ namespace Server.Items
                     
                     for (int a = 0; a < crewNumber; a++)
                     {
-                        creatureLocation = boat.GetRandomEmbarkLocation(true);
+                        creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                         bc_Creature = new Custom.Pirates.SkeletalCrewman();
                         bc_Creature.BardImmune = true;
-                        bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                        bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                        boat.Crew.Add(bc_Creature);
-                        boat.AddEmbarkedMobile(bc_Creature);
+                        ship.Crew.Add(bc_Creature);
+                        ship.AddEmbarkedMobile(bc_Creature);
                     }
 
                     crewNumber = 3 + shipLevel;
@@ -469,13 +468,13 @@ namespace Server.Items
                                 if (bc_Creature == null)
                                     continue;
 
-                                creatureLocation = boat.GetRandomEmbarkLocation(true);
+                                creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                                 bc_Creature.BardImmune = true;
-                                bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                                bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                                boat.Crew.Add(bc_Creature);
-                                boat.AddEmbarkedMobile(bc_Creature);
+                                ship.Crew.Add(bc_Creature);
+                                ship.AddEmbarkedMobile(bc_Creature);
 
                                 break;
                             }
@@ -487,29 +486,31 @@ namespace Server.Items
                     int necromancers = (int)(Math.Ceiling((double)shipLevel / 2));
                     for (int a = 0; a < necromancers; a++)
                     {
-                        creatureLocation = boat.GetRandomEmbarkLocation(true);
+                        creatureLocation = ship.GetRandomEmbarkLocation(true);
 
                         bc_Creature = new Custom.Pirates.GhostShipNecromancer();
                         bc_Creature.BardImmune = true;
-                        bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                        bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                        boat.Crew.Add(bc_Creature);
-                        boat.AddEmbarkedMobile(bc_Creature);
+                        ship.Crew.Add(bc_Creature);
+                        ship.AddEmbarkedMobile(bc_Creature);
                     }
 
-                    creatureLocation = boat.GetRandomEmbarkLocation(true);
+                    creatureLocation = ship.GetRandomEmbarkLocation(true);
 
-                    bc_Creature = new Custom.Pirates.SkeletalCaptain(boat);
+                    bc_Creature = new Custom.Pirates.SkeletalCaptain(ship);
                     bc_Creature.BardImmune = true;
-                    bc_Creature.MoveToWorld(creatureLocation, boat.Map);
+                    bc_Creature.MoveToWorld(creatureLocation, ship.Map);
 
-                    boat.Crew.Add(bc_Creature);
-                    boat.Owner = bc_Creature;
-                    boat.AddEmbarkedMobile(bc_Creature);
+                    ship.Crew.Add(bc_Creature);
+                    ship.AddEmbarkedMobile(bc_Creature);
 
                     #endregion
                 break;
+
+             
             }
+               */
         }
     }
 }

@@ -11,8 +11,8 @@ namespace Server.Mobiles
     [CorpseName("a deep crab corpse")]
     public class DeepCrab : BaseCreature
     {
-        public DateTime m_NextBoatChewAllowed;
-        public TimeSpan NextBoatChewDelay = TimeSpan.FromSeconds(Utility.RandomMinMax(10, 20));
+        public DateTime m_NextShipChewAllowed;
+        public TimeSpan NextShipChewDelay = TimeSpan.FromSeconds(Utility.RandomMinMax(10, 20));
 
         [Constructable]
         public DeepCrab(): base(AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4)
@@ -68,15 +68,15 @@ namespace Server.Mobiles
         {
             base.OnThink();
 
-            if (DateTime.UtcNow > m_NextBoatChewAllowed && BoatOccupied != null)
+            if (DateTime.UtcNow > m_NextShipChewAllowed && ShipOccupied != null)
             {
-                if (BoatOccupied.Deleted || BoatOccupied.m_SinkTimer != null) return;                
+                if (ShipOccupied.Deleted || ShipOccupied.m_SinkTimer != null) return;                
 
                 Say("*chews on the ship*");
                 
                 SpecialAbilities.HinderSpecialAbility(1.0, this, this, 1.0, 3, true, 0, false, "", "", "-1");
                 
-                m_NextBoatChewAllowed = DateTime.UtcNow + NextBoatChewDelay;
+                m_NextShipChewAllowed = DateTime.UtcNow + NextShipChewDelay;
 
                 Point3D location = Location;
                 Map map = Map;
@@ -90,7 +90,7 @@ namespace Server.Mobiles
                         
                         LastCombatTime = LastCombatTime + TimeSpan.FromSeconds(1);
 
-                        BoatOccupied.ReceiveDamage(this, null, Utility.RandomMinMax(5, 10), DamageType.Hull);
+                        ShipOccupied.ReceiveDamage(this, null, Utility.RandomMinMax(5, 10), DamageType.Hull);
 
                         Animate(1, 6, 1, true, false, 0);
                         Effects.PlaySound(location, map, Utility.RandomList(0x134, 0x133));

@@ -121,7 +121,7 @@ namespace Server.Items
                 m_HitPoints = 0;
                 
                 PlayerMobile player = from as PlayerMobile;
-                BaseBoat playerBoat = BaseBoat.FindBoatAt(player.Location, player.Map);
+                BaseShip playerShip = BaseShip.FindShipAt(player.Location, player.Map);
 
                 int doubloonValue = 10;
 
@@ -132,17 +132,17 @@ namespace Server.Items
                     case CrateType.Gold: doubloonValue = Utility.RandomMinMax(100, 250); break;
                 }
 
-                if (player != null && playerBoat != null)
+                if (player != null && playerShip != null)
                 {
-                    if (!playerBoat.Deleted)
+                    if (!playerShip.Deleted)
                     {                        
-                        if (playerBoat.DepositDoubloons(doubloonValue))
+                        if (playerShip.DepositDoubloons(doubloonValue))
                         {
                             Doubloon doubloonPile = new Doubloon(doubloonValue);
                             player.SendSound(doubloonPile.GetDropSound());
                             doubloonPile.Delete();
 
-                            //playerBoat.doubloonsEarned += doubloonValue;
+                            //playerShip.doubloonsEarned += doubloonValue;
 
                             player.SendMessage("You have recovered " + doubloonValue.ToString() + " doubloons worth of materials in the cargo! The coins have been placed in your ship's hold.");
 

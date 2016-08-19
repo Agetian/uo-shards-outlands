@@ -55,7 +55,7 @@ namespace Server.SkillHandlers
                     return;
                 }
 
-                if (BaseBoat.FindBoatAt(bc_Target.Location, bc_Target.Map) != null)
+                if (BaseShip.FindShipAt(bc_Target.Location, bc_Target.Map) != null)
                     from.SendMessage("You may not calm targets in sea vessels.");
                     
                 else if (!m_Instrument.IsChildOf(from.Backpack))
