@@ -816,6 +816,11 @@ namespace Server
 
             protected override void OnTarget(Mobile from, object o)
             {
+                PlayerMobile player = m_Mobile as PlayerMobile;
+
+                if (player == null)
+                    return;
+
                 IPoint3D p = o as IPoint3D;
 
                 if (p != null)
@@ -830,11 +835,12 @@ namespace Server
 
                     if (shipAtLocation != null)
                     {
-                        if (shipAtLocation.Owner != null)
-                        {
-                            //if (!shipAtLocation.m_ScuttleInProgress)
-                                //from.SendGump(new ShipGump(from, shipAtLocation));
-                        }
+                        ShipGumpObject shipGumpObject = new ShipGumpObject(player, shipAtLocation, null);
+
+                        player.SendSound(0x055);
+
+                        player.CloseGump(typeof(ShipGump));
+                        player.SendGump(new ShipGump(player, shipGumpObject));
                     }
 
                     else

@@ -4,6 +4,7 @@ using Server.Multis;
 using Server.Network;
 using Server.Gumps;
 using Server.ContextMenus;
+using Server.Mobiles;
 
 namespace Server.Items
 {
@@ -76,23 +77,24 @@ namespace Server.Items
             LabelTo(from, "Sails: {0} / {1}", m_Ship.SailPoints, m_Ship.MaxSailPoints);
             LabelTo(from, "Guns: {0} / {1}", m_Ship.GunPoints, m_Ship.MaxGunPoints);
         }
-
-        public override void OnDoubleClickDead(Mobile from)
-        {
-            OnDoubleClick(from);
-        }
-
+        
         public override void OnDoubleClick(Mobile from)
         {
-            if (m_Ship == null || from == null)
+            if (m_Ship == null) return;
+
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
                 return;
 
-            //Ship Gump  
-            if (m_Ship.Owner != null)
-            {
-                //if (!m_Ship.m_ScuttleInProgress)
-                    //from.SendGump(new ShipGump(from, m_Ship));
-            }
+            ShipGumpObject shipGumpObject = new ShipGumpObject(player, m_Ship, null);
+
+            shipGumpObject.m_Ship = m_Ship;
+
+            player.SendSound(0x055);
+
+            player.CloseGump(typeof(ShipGump));
+            player.SendGump(new ShipGump(player, shipGumpObject));
         }
 
         public override void OnAfterDelete()
@@ -106,6 +108,7 @@ namespace Server.Items
             base.Serialize(writer);
             writer.Write((int)0);//version
 
+            //Version 0
             writer.Write(m_Ship);
         }
 
@@ -114,18 +117,14 @@ namespace Server.Items
             base.Deserialize(reader);
             int version = reader.ReadInt();
 
-            switch (version)
+            //Version 0
+            if (version >= 0)
             {
-                case 0:
-                    {
-                        m_Ship = reader.ReadItem() as BaseShip;
-
-                        if (m_Ship == null)
-                            Delete();
-
-                        break;
-                    }
+                m_Ship = reader.ReadItem() as BaseShip;                
             }
+
+            if (m_Ship == null)
+                Delete();
         }
     }
 }
