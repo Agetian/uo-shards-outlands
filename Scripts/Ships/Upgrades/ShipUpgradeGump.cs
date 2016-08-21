@@ -59,7 +59,7 @@ namespace Server
                 case ShipUpgrades.UpgradeType.Outfitting:
                 break;
 
-                case ShipUpgrades.UpgradeType.Flag:
+                case ShipUpgrades.UpgradeType.Banner:
                 break;
 
                 case ShipUpgrades.UpgradeType.Charm:
@@ -183,7 +183,7 @@ namespace Server
         public ShipUpgrades.PaintType m_Paint = ShipUpgrades.PaintType.None;
         public ShipUpgrades.CannonMetalType m_CannonMetal = ShipUpgrades.CannonMetalType.None;
         public ShipUpgrades.OutfittingType m_Outfitting = ShipUpgrades.OutfittingType.None;
-        public ShipUpgrades.FlagType m_Flag = ShipUpgrades.FlagType.None;
+        public ShipUpgrades.BannerType m_Flag = ShipUpgrades.BannerType.None;
         public ShipUpgrades.CharmType m_Charm = ShipUpgrades.CharmType.None;
         public ShipUpgrades.MinorAbilityType m_MinorAbility = ShipUpgrades.MinorAbilityType.None;
         public ShipUpgrades.MajorAbilityType m_MajorAbility = ShipUpgrades.MajorAbilityType.None;

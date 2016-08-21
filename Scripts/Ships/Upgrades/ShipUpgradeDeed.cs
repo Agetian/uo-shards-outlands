@@ -18,7 +18,7 @@ namespace Server.Items
         public ShipUpgrades.PaintType m_Paint = ShipUpgrades.PaintType.None;
         public ShipUpgrades.CannonMetalType m_CannonMetal = ShipUpgrades.CannonMetalType.None;
         public ShipUpgrades.OutfittingType m_Outfitting = ShipUpgrades.OutfittingType.None;
-        public ShipUpgrades.FlagType m_Flag = ShipUpgrades.FlagType.None;
+        public ShipUpgrades.BannerType m_Flag = ShipUpgrades.BannerType.None;
         public ShipUpgrades.CharmType m_Charm = ShipUpgrades.CharmType.None;
         public ShipUpgrades.MinorAbilityType m_MinorAbility = ShipUpgrades.MinorAbilityType.None;
         public ShipUpgrades.MajorAbilityType m_MajorAbility = ShipUpgrades.MajorAbilityType.None;
@@ -66,7 +66,7 @@ namespace Server.Items
                 case ShipUpgrades.UpgradeType.CannonMetal: shipUpgradeGumpObject.m_CannonMetal = m_CannonMetal; break;
 
                 case ShipUpgrades.UpgradeType.Outfitting: shipUpgradeGumpObject.m_Outfitting = m_Outfitting; break;
-                case ShipUpgrades.UpgradeType.Flag: shipUpgradeGumpObject.m_Flag = m_Flag; break;
+                case ShipUpgrades.UpgradeType.Banner: shipUpgradeGumpObject.m_Flag = m_Flag; break;
                 case ShipUpgrades.UpgradeType.Charm: shipUpgradeGumpObject.m_Charm = m_Charm; break;
 
                 case ShipUpgrades.UpgradeType.MinorAbility: shipUpgradeGumpObject.m_MinorAbility = m_MinorAbility; break;
@@ -89,7 +89,7 @@ namespace Server.Items
                 case ShipUpgrades.UpgradeType.CannonMetal: doubloonCost = 1000; break;
 
                 case ShipUpgrades.UpgradeType.Outfitting: doubloonCost = 2000; break;
-                case ShipUpgrades.UpgradeType.Flag: doubloonCost = 1000; break;
+                case ShipUpgrades.UpgradeType.Banner: doubloonCost = 1000; break;
                 case ShipUpgrades.UpgradeType.Charm: doubloonCost = 1000; break;
 
                 case ShipUpgrades.UpgradeType.MinorAbility: doubloonCost = 500; break;
@@ -159,7 +159,7 @@ namespace Server.Items
                 m_CannonMetal = (ShipUpgrades.CannonMetalType)reader.ReadInt();
 
                 m_Outfitting = (ShipUpgrades.OutfittingType)reader.ReadInt();
-                m_Flag = (ShipUpgrades.FlagType)reader.ReadInt();
+                m_Flag = (ShipUpgrades.BannerType)reader.ReadInt();
                 m_Charm = (ShipUpgrades.CharmType)reader.ReadInt();
 
                 m_MinorAbility = (ShipUpgrades.MinorAbilityType)reader.ReadInt();

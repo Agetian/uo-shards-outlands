@@ -252,7 +252,35 @@ namespace Server.Gumps
 			Add( new GumpHtmlLocalized( x, y, width, height, number, args, color, background, scrollbar ) );
 		}
 
-		public void AddImage( int x, int y, int gumpID )
+        public void AddGumpCollection(GumpCollection gumpCollection, int startX, int startY)
+        {
+            if (gumpCollection == null)
+                return;
+
+            for (int a = 0; a < gumpCollection.m_GumpObjects.Count; a++)
+            {
+                GumpCollectionObject gumpCollectionObject = gumpCollection.m_GumpObjects[a];
+
+                if (gumpCollectionObject == null)
+                    continue;
+
+                //TEST
+                Console.Write(gumpCollectionObject.m_ItemID + "\n");
+
+                switch(gumpCollectionObject.m_ObjectType)
+                {
+                    case GumpCollectionObject.ObjectType.Item:
+                        AddItem(startX + gumpCollectionObject.m_OffsetX, startY + gumpCollectionObject.m_OffsetY, gumpCollectionObject.m_ItemID, gumpCollectionObject.m_Hue);
+                    break;
+
+                    case GumpCollectionObject.ObjectType.Image:
+                        AddImage(startX + gumpCollectionObject.m_OffsetX, startY + gumpCollectionObject.m_OffsetY, gumpCollectionObject.m_ItemID, gumpCollectionObject.m_Hue);
+                    break;
+                }
+            }
+        }
+
+        public void AddImage(int x, int y, int gumpID)
 		{
 			Add( new GumpImage( x, y, gumpID ) );
 		}
@@ -425,7 +453,8 @@ namespace Server.Gumps
 		{
 		}
 
-		public virtual void OnServerClose( NetState owner ) {
-		}
-	}
+		public virtual void OnServerClose( NetState owner ) 
+        {
+		} 
+	}    
 }

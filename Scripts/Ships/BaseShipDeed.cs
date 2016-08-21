@@ -50,7 +50,7 @@ namespace Server
         public ShipUpgrades.PaintType m_PaintUpgrade;
         public ShipUpgrades.CannonMetalType m_CannonMetalUpgrade;
         public ShipUpgrades.OutfittingType m_OutfittingUpgrade;
-        public ShipUpgrades.FlagType m_FlagUpgrade;
+        public ShipUpgrades.BannerType m_BannerUpgrade;
         public ShipUpgrades.CharmType m_CharmUpgrade;
         public ShipUpgrades.MinorAbilityType m_MinorAbility;
         public ShipUpgrades.MajorAbilityType m_MajorAbility;
@@ -330,7 +330,7 @@ namespace Server
             writer.Write((int)m_PaintUpgrade);
             writer.Write((int)m_CannonMetalUpgrade);
             writer.Write((int)m_OutfittingUpgrade);
-            writer.Write((int)m_FlagUpgrade);
+            writer.Write((int)m_BannerUpgrade);
             writer.Write((int)m_CharmUpgrade);
             writer.Write((int)m_MinorAbility);
             writer.Write((int)m_MajorAbility);
@@ -381,7 +381,7 @@ namespace Server
                 m_PaintUpgrade = (ShipUpgrades.PaintType)reader.ReadInt();
                 m_CannonMetalUpgrade = (ShipUpgrades.CannonMetalType)reader.ReadInt();
                 m_OutfittingUpgrade = (ShipUpgrades.OutfittingType)reader.ReadInt();
-                m_FlagUpgrade = (ShipUpgrades.FlagType)reader.ReadInt();
+                m_BannerUpgrade = (ShipUpgrades.BannerType)reader.ReadInt();
                 m_CharmUpgrade = (ShipUpgrades.CharmType)reader.ReadInt();
                 m_MinorAbility = (ShipUpgrades.MinorAbilityType)reader.ReadInt();
                 m_MajorAbility = (ShipUpgrades.MajorAbilityType)reader.ReadInt();
