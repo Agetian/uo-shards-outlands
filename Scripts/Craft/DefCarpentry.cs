@@ -349,8 +349,8 @@ namespace Server.Engines.Craft
             index = AddCraft(1, typeof(MediumDragonShipDeed), "Ship Items", "Medium Dragon Ship Deed", 80.0, 85.0, typeof(ShipParts), "Ship Parts", 13, "You do not have the neccessary number of ship parts to construct that ship.");
             index = AddCraft(1, typeof(LargeShipDeed), "Ship Items", "Large Ship Deed", 85, 90.0, typeof(ShipParts), "Ship Parts", 16, "You do not have the neccessary number of ship parts to construct that ship.");
             index = AddCraft(1, typeof(LargeDragonShipDeed), "Ship Items", "Large Dragon Ship Deed ", 85.0, 90.0, typeof(ShipParts), "Ship Parts", 17, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(CarrackShipDeed), "Ship Items", "Carrack Deed ", 90.0, 95.0, typeof(ShipParts), "Ship Parts", 20, "You do not have the neccessary number of ship parts to construct that ship.");
-            index = AddCraft(1, typeof(GalleonShipDeed), "Ship Items", "Galleon Deed", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 30, "You do not have the neccessary number of ship parts to construct that ship.");
+            index = AddCraft(1, typeof(CarrackDeed), "Ship Items", "Carrack Deed ", 90.0, 95.0, typeof(ShipParts), "Ship Parts", 20, "You do not have the neccessary number of ship parts to construct that ship.");
+            index = AddCraft(1, typeof(GalleonDeed), "Ship Items", "Galleon Deed", 95.0, 100.0, typeof(ShipParts), "Ship Parts", 30, "You do not have the neccessary number of ship parts to construct that ship.");
             
             AddCraft(1, typeof(CarpentryMouldTier2), "Tools", "Carpentry Mould: Tier 1-2", 100, 100, typeof(Board), 1044041, 200, 1044351);
             AddCraft(1, typeof(CarpentryMouldTier4), "Tools", "Carpentry Mould: Tier 3-4", 105, 105, typeof(Board), 1044041, 225, 1044351);

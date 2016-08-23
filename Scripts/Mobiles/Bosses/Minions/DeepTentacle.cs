@@ -82,8 +82,8 @@ namespace Server.Mobiles
                 if (ShipOccupied.Deleted || ShipOccupied.m_SinkTimer != null)
                     return;
 
-                ShipOccupied.TempSpeedModifier = 0;
-                ShipOccupied.TempSpeedModifierExpiration = DateTime.UtcNow + ShipEntangleDuration;                
+                ShipOccupied.TempSpeedScalar = 0;
+                ShipOccupied.TempSpeedScalarExpiration = DateTime.UtcNow + ShipEntangleDuration;                
 
                 PublicOverheadMessage(Network.MessageType.Regular, 0, false, "*entangles the ship*");
 

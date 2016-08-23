@@ -22,7 +22,7 @@ namespace Server.Multis
 
 		public override Point3D MarkOffset{ get{ return new Point3D( 0, -1, 3 ); } }
 
-        public override BaseShipDeed ShipDeed { get { return new CarrackShipDeed(); } }
+        public override Type ShipDeedType { get { return typeof(CarrackDeed); } }
 
         public override List<Point3D> m_EmbarkLocations()
         {
@@ -121,20 +121,17 @@ namespace Server.Multis
 		}
 	}
 
-	public class CarrackShipDeed : BaseShipDeed
+	public class CarrackDeed : BaseShipDeed
 	{
-		public override BaseShip Ship{ get{ return new Carrack(); } }
-
-        public override int DoubloonCost { get { return 2000; } }
-        public override double DoubloonMultiplier { get { return 4; } }
+        public override Type ShipType { get { return typeof(Carrack); } }
 
 		[Constructable]
-		public CarrackShipDeed() : base( 0x4052, new Point3D( 0, -1, 0 ) )
+		public CarrackDeed() : base( 0x4052, new Point3D( 0, -1, 0 ) )
 		{
-            Name = "a carrack ship deed";
+            Name = "a carrack";
 		}
 
-		public CarrackShipDeed( Serial serial ) : base( serial )
+		public CarrackDeed( Serial serial ) : base( serial )
 		{
 		}
 

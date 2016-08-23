@@ -31,7 +31,7 @@ namespace Server.Multis
 
 		public override Point3D MarkOffset{ get{ return new Point3D( 0, 1, 3 ); } }
 
-        public override BaseShipDeed ShipDeed { get { return new SmallShipDeed(); } }
+        public override Type ShipDeedType { get { return typeof(SmallShipDeed); } }
 
         public override List<Point3D> m_EmbarkLocations()
         {
@@ -101,18 +101,14 @@ namespace Server.Multis
 	}
 
 	public class SmallShipDeed : BaseShipDeed
-	{		
-		public override BaseShip Ship{ get{ return new SmallShip(); } }
+	{
+        public override Type ShipType { get { return typeof(SmallShip); } }
 		private static int m_ShipId = 0x4000;
-
-        public override int DoubloonCost { get { return 0; } }
-        public override double DoubloonMultiplier { get { return 1; } }
 
 		[Constructable]
 		public SmallShipDeed() : base( m_ShipId, Point3D.Zero )
 		{
-            Name = " a small ship deed";
-            
+            Name = "a small ship";            
 		}
 
 		public SmallShipDeed( Serial serial ) : base( serial )

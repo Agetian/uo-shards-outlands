@@ -159,7 +159,7 @@ namespace Server
                 epicAbilityTimeRemaining = "9m 59s"; //TEST: FIX
                 epicAbilityReady = false;
 
-                switch (m_Ship.TargetingMode)
+                switch (m_Ship.m_TargetingMode)
                 {
                     case TargetingMode.Random: targetingModeText = "Random"; break;
                     case TargetingMode.Hull: targetingModeText = "Hull"; break;
@@ -809,7 +809,7 @@ namespace Server
                     {
                         if (m_Ship.IsCoOwner(m_Player) || m_Ship.IsOwner(m_Player))
                         {
-                            switch (m_Ship.TargetingMode)
+                            switch (m_Ship.m_TargetingMode)
                             {
                                 case TargetingMode.Random: m_Ship.SetTargetingMode(TargetingMode.Guns); break;
                                 case TargetingMode.Hull: m_Ship.SetTargetingMode(TargetingMode.Random); break;
@@ -828,7 +828,7 @@ namespace Server
                     {
                         if (m_Ship.IsCoOwner(m_Player) || m_Ship.IsOwner(m_Player))
                         {
-                            switch (m_Ship.TargetingMode)
+                            switch (m_Ship.m_TargetingMode)
                             {
                                 case TargetingMode.Random: m_Ship.SetTargetingMode(TargetingMode.Hull); break;
                                 case TargetingMode.Hull: m_Ship.SetTargetingMode(TargetingMode.Sails); break;

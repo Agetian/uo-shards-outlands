@@ -8,7 +8,7 @@ using Server.Mobiles;
 using Server.Items;
 using Server.Multis;
 
-namespace Server.Items
+namespace Server
 {
     public static class ShipUniqueness
     {
@@ -17,243 +17,154 @@ namespace Server.Items
             if (ship == null) return;
             if (ship.Deleted) return;
 
-            string factionName = "";
+            ShipStatsProfile shipStatsProfile = GetShipStatsProfile(ship.GetType());
+            shipStatsProfile = ApplyUniqueness(shipStatsProfile);
+            shipStatsProfile = ApplyUpgrades(shipStatsProfile);
 
-            int shipLevel = 1;
+            ApplyShipStats(shipStatsProfile, ship);
+        }
 
-            int BaseMaxHitPoints = 1000;
-            int BaseMaxSailPoints = 500;
-            int BaseMaxGunPoints = 500;
+        public static ShipStatsProfile GetShipStatsProfile(Type type)
+        {
+            ShipStatsProfile shipStatsProfile = new ShipStatsProfile();
 
-            double BaseFastInterval = 0.2;
-            double BaseFastDriftInterval = 0.4;
-            double BaseSlowInterval = 0.4;
-            double BaseSlowDriftInterval = 0.8;
+            #region Small Ship
 
-            double CannonAccuracyModifer = -1;
-            double CannonRangeScalar = -1;
-            double CannonDamageScalar = -1;
-            double CannonReloadTimeScalar = -1;
-            double DamageFromPlayerShipScalar = -1;
-
-            if (ship is SmallShip || ship is SmallDragonShip)
+            if (type == typeof(SmallShip) || type == typeof(SmallDragonShip))
             {
-                shipLevel = 1;
-
-                ship.BaseDoubloonValue = 15;              
-
-                BaseMaxHitPoints = 1000;
-                BaseMaxSailPoints = 500;
-                BaseMaxGunPoints = 500;
-
-                BaseFastInterval = 0.2;
-                BaseFastDriftInterval = 0.4;
-                BaseSlowInterval = 0.4;
-                BaseSlowDriftInterval = 0.8;                             
             }
 
-            if (ship is MediumShip || ship is MediumDragonShip)
+            #endregion
+
+            #region Medium Ship
+
+            if (type == typeof(MediumShip) || type == typeof(MediumDragonShip))
             {
-                shipLevel = 2;
-
-                ship.BaseDoubloonValue = 25;
-
-                BaseMaxHitPoints = 1250;
-                BaseMaxSailPoints = 625;
-                BaseMaxGunPoints = 625;
-
-                BaseFastInterval = 0.225;
-                BaseFastDriftInterval = 0.45;
-                BaseSlowInterval = 0.45;
-                BaseSlowDriftInterval = 0.9;                               
             }
 
-            if (ship is LargeShip || ship is LargeDragonShip)
+            #endregion
+
+            #region Large Ship
+
+            if (type == typeof(LargeShip) || type == typeof(LargeDragonShip))
             {
-                shipLevel = 3;
-
-                ship.BaseDoubloonValue = 100;
-
-                BaseMaxHitPoints = 1500;
-                BaseMaxSailPoints = 750;
-                BaseMaxGunPoints = 750;
-
-                BaseFastInterval = 0.25;
-                BaseFastDriftInterval = 0.5;
-                BaseSlowInterval = 0.5;
-                BaseSlowDriftInterval = 1.0;
             }
 
-            if (ship is Carrack)
+            #endregion
+
+            #region Carrack
+
+            if (type == typeof(Carrack))
             {
-                shipLevel = 4;
-
-                ship.BaseDoubloonValue = 400;
-
-                BaseMaxHitPoints = 2000;
-                BaseMaxSailPoints = 1000;
-                BaseMaxGunPoints = 1000;
-
-                BaseFastInterval = 0.275;
-                BaseFastDriftInterval = 0.55;
-                BaseSlowInterval = 0.55;
-                BaseSlowDriftInterval = 1.1;
             }
 
-            if (ship is Galleon)
+            #endregion
+
+            #region Galleon
+
+            if (type == typeof(Galleon))
             {
-                shipLevel = 5;
-                
-                ship.BaseDoubloonValue = 1000;
-
-                BaseMaxHitPoints = 3000;
-                BaseMaxSailPoints = 1500;
-                BaseMaxGunPoints = 1500;
-
-                BaseFastInterval = 0.3;
-                BaseFastDriftInterval = 0.6;
-                BaseSlowInterval = 0.6;
-                BaseSlowDriftInterval = 1.2;
             }
 
-            /*
+            #endregion
 
-            //NPC Ship Modifications
-            if (ship is SmallFishingShip || ship is MediumFishingShip || ship is LargeFishingShip || ship is FishingCarrack || ship is GalleonFishingShip)
+            #region Ship of the Line
+
+            if (type == typeof(ShipOfTheLineShip))
             {
-                ship.MobileControlType = MobileControlType.Innocent;
-                ship.MobileFactionType = MobileFactionType.Fishing;
-                ship.Hue = 2076;
-
-                factionName = "a fishing";
-
-                DamageFromPlayerShipScalar = 2.0;                
-
-                ship.DoubloonValue = 25 + (Utility.RandomMinMax(20 * (shipLevel - 1), 30 * (shipLevel - 1)));    
             }
 
-            if (ship is SmallBritainNavyShip || ship is MediumBritainNavyShip || ship is LargeBritainNavyShip || ship is CarrackBritainNavyShip || ship is GalleonBritainNavyShip)
+            #endregion
+
+            return shipStatsProfile;
+        }
+
+        public static ShipStatsProfile ApplyUniqueness(ShipStatsProfile shipStatsProfile)
+        {
+            if (shipStatsProfile == null)
+                return null;
+
+            //TEST: APPLY NPC STATS
+
+            return shipStatsProfile;
+        }
+
+        public static ShipStatsProfile ApplyUpgrades(ShipStatsProfile shipStatsProfile)
+        {
+            if (shipStatsProfile == null) 
+                return null;
+
+            //TEST: APPLY UPGRADES TO PROFILE
+
+            return shipStatsProfile;
+        }
+
+        public static void ApplyShipStats(ShipStatsProfile shipStatsProfile, BaseShip ship)
+        {
+            if (shipStatsProfile == null) return;
+            if (ship == null) return;
+
+            //TEST: APPLY STATS TO SHIP
+        }
+
+        public static int GetShipUpgradeBaseDoubloonCost(ShipUpgrades.UpgradeType upgradeType)
+        {
+            int doubloonCost = 500;
+
+            switch (upgradeType)
             {
-                ship.MobileControlType = MobileControlType.Good;
-                ship.MobileFactionType = MobileFactionType.Britain;
-                ship.Hue = 1102;
+                case ShipUpgrades.UpgradeType.Theme: doubloonCost = 1000; break;
+                case ShipUpgrades.UpgradeType.Paint: doubloonCost = 1000; break;
+                case ShipUpgrades.UpgradeType.CannonMetal: doubloonCost = 1000; break;
 
-                factionName = "a britain navy";
+                case ShipUpgrades.UpgradeType.Outfitting: doubloonCost = 2000; break;
+                case ShipUpgrades.UpgradeType.Banner: doubloonCost = 1000; break;
+                case ShipUpgrades.UpgradeType.Charm: doubloonCost = 1000; break;
 
-                CannonAccuracyModifer = .9;
-                CannonRangeScalar = 1.5;
-                DamageFromPlayerShipScalar = 2.0;                
-
-                ship.DoubloonValue = 100 + (Utility.RandomMinMax(40 * (shipLevel - 1), 60 * (shipLevel - 1)));    
+                case ShipUpgrades.UpgradeType.MinorAbility: doubloonCost = 500; break;
+                case ShipUpgrades.UpgradeType.MajorAbility: doubloonCost = 1000; break;
+                case ShipUpgrades.UpgradeType.EpicAbility: doubloonCost = 2000; break;
             }
 
-            if (ship is SmallPirateShip || ship is MediumPirateShip || ship is LargePirateShip || ship is CarrackPirateShip || ship is GalleonPirateShip)
-            {
-                ship.MobileControlType = MobileControlType.Evil;
-                ship.MobileFactionType = MobileFactionType.Pirate;
-                ship.Hue = 1898;
+            return doubloonCost;
+        }  
+    }
 
-                factionName = "a pirate";
+    public class ShipStatsProfile
+    {
+        public string ShipName = "small ship";
 
-                CannonAccuracyModifer = .9;
-                CannonRangeScalar = 1.5;
-                DamageFromPlayerShipScalar = 2.0;
+        public int RegistrationDoubloonCost = 0;
+        public double UpgradeDoubloonMultiplier = 1.0;
 
-                ship.DoubloonValue = 100 + (Utility.RandomMinMax(40 * (shipLevel - 1), 60 * (shipLevel - 1)));    
-            }
+        public int DoubloonSinkValue = 0;
 
-            if (ship is SmallOrcShip || ship is MediumOrcShip || ship is LargeOrcShip || ship is CarrackOrcShip || ship is GalleonOrcShip)
-            {
-                ship.MobileControlType = MobileControlType.Evil;
-                ship.MobileFactionType = MobileFactionType.Orc;
-                ship.Hue = 1164;
+        public int HoldItemCount = 50;
 
-                factionName = "an orc";
+        public int MaxHitPoints = 1000;
+        public int MaxSailPoints = 500;
+        public int MaxGunPoints = 500;
 
-                CannonAccuracyModifer = .9;
-                CannonRangeScalar = 1.5;
-                DamageFromPlayerShipScalar = 2.0;
+        public double FastInterval = 0.2;
+        public double FastDriftInterval = 0.4;
 
-                ship.DoubloonValue = 100 + (Utility.RandomMinMax(40 * (shipLevel - 1), 60 * (shipLevel - 1)));    
-            }
+        public double SlowdownModePenalty = 0.5;
 
-            if (ship is SmallOrghereimShip || ship is MediumOrghereimShip || ship is LargeOrghereimShip || ship is CarrackOrghereimShip || ship is GalleonOrghereimShip)
-            {
-                ship.MobileControlType = MobileControlType.Evil;
-                ship.MobileFactionType = MobileFactionType.Orghereim;
-                ship.Hue = 1154;
+        public int CannonsPerSide = 3;
+        public double CannonAccuracyScalar = 1.0;
+        public double CannonDamageScalar = 1.0;
+        public double CannonRangeScalar = 1.0;
+        public double CannonReloadTimeScalar = 1.0;
+        
+        public double MinorAbilityCooldownScalar = 1.0;
+        public double MajorAbilityCooldownScalar = 1.0;
+        public double EpicAbilityCooldownScalar = 1.0;
 
-                factionName = "an orghereim";
+        public double BoardingChanceScalar = 1.0;
+        public double RepairCooldownScalar = 1.0;
 
-                CannonAccuracyModifer = .9;
-                CannonRangeScalar = 1.5;
-                DamageFromPlayerShipScalar = 2.0;
-
-                ship.DoubloonValue = 100 + (Utility.RandomMinMax(40 * (shipLevel - 1), 60 * (shipLevel - 1)));    
-            }
-
-            if (ship is SmallUndeadShip || ship is MediumUndeadShip || ship is LargeUndeadShip || ship is CarrackUndeadShip || ship is GalleonUndeadShip)
-            {
-                ship.MobileControlType = MobileControlType.Evil;
-                ship.MobileFactionType = MobileFactionType.Undead;
-                ship.Hue = 1072;
-                ship.CannonHue = 1072;
-
-                factionName = "an undead";
-
-                CannonAccuracyModifer = .9;
-                CannonRangeScalar = 1.5;
-                DamageFromPlayerShipScalar = 2.0;
-
-                ship.DoubloonValue = 125 + (Utility.RandomMinMax(50 * (shipLevel - 1), 75 * (shipLevel - 1)));             
-            }  
-            */
-
-            ship.BaseMaxHitPoints = BaseMaxHitPoints;
-            ship.BaseMaxSailPoints = BaseMaxSailPoints;
-            ship.BaseMaxGunPoints = BaseMaxGunPoints;
-
-            ship.BaseFastInterval = BaseFastInterval;
-            ship.BaseFastDriftInterval = BaseFastDriftInterval;
-            ship.BaseSlowInterval = BaseSlowInterval;
-            ship.BaseSlowDriftInterval = BaseSlowDriftInterval;
-
-            if (CannonAccuracyModifer != -1)
-                ship.CannonAccuracyModifer = CannonAccuracyModifer;
-
-            if (CannonRangeScalar != -1)
-                ship.CannonRangeScalar = CannonRangeScalar;
-
-            if (CannonDamageScalar != -1)
-                ship.CannonDamageScalar = CannonDamageScalar;
-
-            if (CannonReloadTimeScalar != -1)
-                ship.CannonReloadTimeScalar = CannonReloadTimeScalar;
-
-            if (DamageFromPlayerShipScalar != -1)
-                ship.DamageFromPlayerShipScalar = DamageFromPlayerShipScalar;
-            
-            if (ship.MobileControlType == MobileControlType.Player)
-                return;
-
-            ship.HitPoints = BaseMaxHitPoints;
-            ship.SailPoints = BaseMaxSailPoints;
-            ship.GunPoints = BaseMaxGunPoints;        
-
-            string shipType = "";
-
-            switch (shipLevel)
-            {
-                case 1: shipType = "small ship"; break;
-                case 2: shipType = "medium ship"; break;
-                case 3: shipType = "large ship"; break;
-                case 4: shipType = "carrack"; break;
-                case 5: shipType = "galleon"; break;
-            }            
-
-            ship.Name = factionName + " " + shipType;
-
-            ship.TargetingMode = TargetingMode.Random;            
+        public ShipStatsProfile()
+        {
         }
     }
 }

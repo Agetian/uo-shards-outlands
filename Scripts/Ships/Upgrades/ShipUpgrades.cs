@@ -6,6 +6,7 @@ using Server.Mobiles;
 using Server.Gumps;
 using System.Collections;
 using System.Collections.Generic;
+using Server.Multis;
 
 namespace Server
 {
@@ -87,13 +88,15 @@ namespace Server
             None,
 
             Hellfire
-        }
+        }        
+
+        #region Theme Upgrade
 
         public static ShipUpgradeDetail GetThemeDetail(ThemeType themeUpgrade)
         {
             ShipUpgradeDetail upgradeDetail = new ShipUpgradeDetail();
 
-            upgradeDetail.m_UpgradeType = UpgradeType.Theme;
+            upgradeDetail.m_UpgradeType = UpgradeType.Theme;          
 
             switch (themeUpgrade)
             {
@@ -110,6 +113,10 @@ namespace Server
             else
                 return upgradeDetail;
         }
+
+        #endregion
+
+        #region Paint Upgrade
 
         public static ShipUpgradeDetail GetPaintDetail(PaintType paintUpgrade)
         {
@@ -133,6 +140,10 @@ namespace Server
                 return upgradeDetail;
         }
 
+        #endregion
+
+        #region Cannon Metal Upgrade
+
         public static ShipUpgradeDetail GetCannonMetalDetail(CannonMetalType cannonMetalUpgrade)
         {
             ShipUpgradeDetail upgradeDetail = new ShipUpgradeDetail();
@@ -154,6 +165,10 @@ namespace Server
             else
                 return upgradeDetail;
         }
+
+        #endregion
+
+        #region Outfitting Upgrade
 
         public static ShipUpgradeDetail GetOutfittingDetail(OutfittingType outfittingUpgrade)
         {
@@ -181,6 +196,10 @@ namespace Server
                 return upgradeDetail;
         }
 
+        #endregion
+
+        #region Banner Upgrade
+
         public static ShipUpgradeDetail GetBannerDetail(BannerType bannerUpgrade)
         {
             ShipUpgradeDetail upgradeDetail = new ShipUpgradeDetail();
@@ -205,6 +224,10 @@ namespace Server
                 return upgradeDetail;
         }
 
+        #endregion
+
+        #region Charm Upgrade
+
         public static ShipUpgradeDetail GetCharmDetail(CharmType charmUpgrade)
         {
             ShipUpgradeDetail upgradeDetail = new ShipUpgradeDetail();
@@ -228,6 +251,10 @@ namespace Server
                 return upgradeDetail;
         }
 
+        #endregion
+
+        #region Minor Ability Upgrade
+
         public static ShipUpgradeDetail GetMinorAbilityDetail(MinorAbilityType minorAbilityUpgrade)
         {
             ShipUpgradeDetail upgradeDetail = new ShipUpgradeDetail();
@@ -249,6 +276,10 @@ namespace Server
             else
                 return upgradeDetail;
         }
+
+        #endregion
+
+        #region Major Ability Upgrade
 
         public static ShipUpgradeDetail GetMajorAbilityDetail(MajorAbilityType majorAbilityUpgrade)
         {
@@ -272,6 +303,10 @@ namespace Server
                 return upgradeDetail;
         }
 
+        #endregion
+
+        #region Epic Ability Upgrade
+
         public static ShipUpgradeDetail GetEpicAbilityDetail(EpicAbilityType epicAbilityUpgrade)
         {
             ShipUpgradeDetail upgradeDetail = new ShipUpgradeDetail();
@@ -294,6 +329,8 @@ namespace Server
             else
                 return upgradeDetail;
         }
+
+        #endregion
     }   
 
     public class ShipUpgradeDetail
@@ -315,6 +352,21 @@ namespace Server
 
         public ShipUpgradeDetail()
         {
+        }
+
+        public int GetHue(StatChangeHueType statType)
+        {
+            switch (statType)
+            {
+                case StatChangeHueType.Stats: return 149; break;
+                case StatChangeHueType.Speed: return 2599; break;
+                case StatChangeHueType.Cannon: return 2401; break;
+                case StatChangeHueType.Abilities: return 2603; break;
+                case StatChangeHueType.Special: return 2606; break;
+                case StatChangeHueType.Misc: return 53; break;
+            }
+
+            return 2499;
         }
     }
 }

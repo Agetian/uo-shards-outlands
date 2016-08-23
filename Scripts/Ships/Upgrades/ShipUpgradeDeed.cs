@@ -18,14 +18,14 @@ namespace Server.Items
         public ShipUpgrades.PaintType m_Paint = ShipUpgrades.PaintType.None;
         public ShipUpgrades.CannonMetalType m_CannonMetal = ShipUpgrades.CannonMetalType.None;
         public ShipUpgrades.OutfittingType m_Outfitting = ShipUpgrades.OutfittingType.None;
-        public ShipUpgrades.BannerType m_Flag = ShipUpgrades.BannerType.None;
+        public ShipUpgrades.BannerType m_Banner = ShipUpgrades.BannerType.None;
         public ShipUpgrades.CharmType m_Charm = ShipUpgrades.CharmType.None;
         public ShipUpgrades.MinorAbilityType m_MinorAbility = ShipUpgrades.MinorAbilityType.None;
         public ShipUpgrades.MajorAbilityType m_MajorAbility = ShipUpgrades.MajorAbilityType.None;
         public ShipUpgrades.EpicAbilityType m_EpicAbility = ShipUpgrades.EpicAbilityType.None;
 
         [Constructable]
-        public ShipUpgradeDeed(): base(5357)
+        public ShipUpgradeDeed(): base(5362)
         {
             Name = "ship upgrade deed";
         }
@@ -37,6 +37,21 @@ namespace Server.Items
         public override void OnSingleClick(Mobile from)
         {
             base.OnSingleClick(from);
+
+            switch (m_UpgradeType)
+            {
+                case ShipUpgrades.UpgradeType.Theme: LabelTo(from, "(ship theme upgrade)"); break;
+                case ShipUpgrades.UpgradeType.Paint: LabelTo(from, "(ship paint upgrade)"); break;
+                case ShipUpgrades.UpgradeType.CannonMetal: LabelTo(from, "(ship cannon metal upgrade)"); break;
+
+                case ShipUpgrades.UpgradeType.Outfitting: LabelTo(from, "(ship outfitting upgrade)"); break;
+                case ShipUpgrades.UpgradeType.Banner: LabelTo(from, "(ship banner upgrade)"); break;
+                case ShipUpgrades.UpgradeType.Charm: LabelTo(from, "(ship charm upgrade)"); break;
+
+                case ShipUpgrades.UpgradeType.MinorAbility: LabelTo(from, "(ship minor ability upgrade)"); break;
+                case ShipUpgrades.UpgradeType.MajorAbility: LabelTo(from, "(ship major ability upgrade)"); break;
+                case ShipUpgrades.UpgradeType.EpicAbility: LabelTo(from, "(ship epic ability upgrade)"); break;
+            }
         }
 
         public override void OnDoubleClick(Mobile from)
@@ -55,7 +70,7 @@ namespace Server.Items
             ShipUpgradeGumpObject shipUpgradeGumpObject = new ShipUpgradeGumpObject();
 
             shipUpgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.DeedUse;
-            shipUpgradeGumpObject.m_ShipUpgradeDeed = this;
+            shipUpgradeGumpObject.m_ShipUpgradeDeed = this;            
 
             shipUpgradeGumpObject.m_UpgradeType = m_UpgradeType;
 
@@ -66,7 +81,7 @@ namespace Server.Items
                 case ShipUpgrades.UpgradeType.CannonMetal: shipUpgradeGumpObject.m_CannonMetal = m_CannonMetal; break;
 
                 case ShipUpgrades.UpgradeType.Outfitting: shipUpgradeGumpObject.m_Outfitting = m_Outfitting; break;
-                case ShipUpgrades.UpgradeType.Banner: shipUpgradeGumpObject.m_Flag = m_Flag; break;
+                case ShipUpgrades.UpgradeType.Banner: shipUpgradeGumpObject.m_Banner = m_Banner; break;
                 case ShipUpgrades.UpgradeType.Charm: shipUpgradeGumpObject.m_Charm = m_Charm; break;
 
                 case ShipUpgrades.UpgradeType.MinorAbility: shipUpgradeGumpObject.m_MinorAbility = m_MinorAbility; break;
@@ -76,54 +91,7 @@ namespace Server.Items
 
             player.CloseGump(typeof(ShipUpgradeGump));
             player.SendGump(new ShipUpgradeGump(player, shipUpgradeGumpObject));
-        }
-
-        public static int GetDoubloonCost(ShipUpgrades.UpgradeType upgradeType)
-        {
-            int doubloonCost = 250;
-
-            switch (upgradeType)
-            {
-                case ShipUpgrades.UpgradeType.Theme: doubloonCost = 1000; break;
-                case ShipUpgrades.UpgradeType.Paint: doubloonCost = 1000; break;
-                case ShipUpgrades.UpgradeType.CannonMetal: doubloonCost = 1000; break;
-
-                case ShipUpgrades.UpgradeType.Outfitting: doubloonCost = 2000; break;
-                case ShipUpgrades.UpgradeType.Banner: doubloonCost = 1000; break;
-                case ShipUpgrades.UpgradeType.Charm: doubloonCost = 1000; break;
-
-                case ShipUpgrades.UpgradeType.MinorAbility: doubloonCost = 500; break;
-                case ShipUpgrades.UpgradeType.MajorAbility: doubloonCost = 1000; break;
-                case ShipUpgrades.UpgradeType.EpicAbility: doubloonCost = 2000; break;
-            }
-
-            return doubloonCost;
-        }
-
-        public static double GetDoubloonCostModifier(Type shipType)
-        {
-            double modifier = 1.0;
-
-            if (shipType == typeof(SmallShip) || shipType == typeof(SmallShipDeed) || shipType == typeof(SmallDragonShip) || shipType == typeof(SmallDragonShipDeed))
-                return 1.0;
-
-            if (shipType == typeof(MediumShip) || shipType == typeof(MediumShipDeed) || shipType == typeof(MediumDragonShip) || shipType == typeof(MediumDragonShipDeed))
-                return 1.5;
-
-            if (shipType == typeof(LargeShip) || shipType == typeof(LargeShipDeed) || shipType == typeof(LargeDragonShip) || shipType == typeof(LargeDragonShipDeed))
-                return 2.0;
-
-            if (shipType == typeof(Carrack) || shipType == typeof(CarrackShipDeed))
-                return 3.0;
-
-            if (shipType == typeof(Galleon) || shipType == typeof(GalleonShipDeed))
-                return 4.0;
-
-            if (shipType == typeof(ShipOfTheLineShip) || shipType == typeof(ShipOfTheLineShipDeed))
-                return 5.0;
-
-            return modifier;
-        }
+        }        
 
         public override void Serialize(GenericWriter writer)
         {
@@ -137,7 +105,7 @@ namespace Server.Items
             writer.Write((int)m_Paint);
             writer.Write((int)m_CannonMetal);
             writer.Write((int)m_Outfitting);
-            writer.Write((int)m_Flag);
+            writer.Write((int)m_Banner);
             writer.Write((int)m_Charm);
             writer.Write((int)m_MinorAbility);
             writer.Write((int)m_MajorAbility);
@@ -159,7 +127,7 @@ namespace Server.Items
                 m_CannonMetal = (ShipUpgrades.CannonMetalType)reader.ReadInt();
 
                 m_Outfitting = (ShipUpgrades.OutfittingType)reader.ReadInt();
-                m_Flag = (ShipUpgrades.BannerType)reader.ReadInt();
+                m_Banner = (ShipUpgrades.BannerType)reader.ReadInt();
                 m_Charm = (ShipUpgrades.CharmType)reader.ReadInt();
 
                 m_MinorAbility = (ShipUpgrades.MinorAbilityType)reader.ReadInt();

@@ -121,7 +121,7 @@ namespace Server.Mobiles
             return true;
         }
 
-        public static bool WithdrawUniqueCurrency(Mobile from, Type currencyType, int amount)
+        public static bool WithdrawUniqueCurrency(Mobile from, Type currencyType, int amount, bool playSound)
         {
             if (from == null || currencyType == null || amount == null)
                 return false;
@@ -167,6 +167,9 @@ namespace Server.Mobiles
 
             else
                 return false;
+
+            if (playSound)
+                from.SendSound(0x2E6);
 
             return true;
         }

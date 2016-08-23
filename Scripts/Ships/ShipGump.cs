@@ -49,25 +49,13 @@ namespace Server
             if (m_Player.Deleted) return;
             if (m_ShipGumpObject == null) return;
 
-            BaseShip ship = m_ShipGumpObject.m_Ship;
+            string shipName = "";
 
-            if (ship == null) return;
-            if (ship.Deleted) return;
-            
-            //TEST
-            ship.ShipName = "The Rebellion";
+            if (m_ShipGumpObject.m_Ship != null)
+                shipName = m_ShipGumpObject.m_Ship.ShipName;
 
-            ship.ThemeUpgrade = ShipUpgrades.ThemeType.Pirate;
-            ship.PaintUpgrade = ShipUpgrades.PaintType.DarkGrey;
-            ship.CannonMetalUpgrade = ShipUpgrades.CannonMetalType.Bloodstone;
-
-            ship.OutfittingUpgrade = ShipUpgrades.OutfittingType.Hunter;
-            ship.BannerUpgrade = ShipUpgrades.BannerType.Corsairs;
-            ship.CharmUpgrade = ShipUpgrades.CharmType.BarrelOfLimes;
-
-            ship.MinorAbilityUpgrade = ShipUpgrades.MinorAbilityType.ExpediteRepairs;
-            ship.MajorAbilityUpgrade = ShipUpgrades.MajorAbilityType.Smokescreen;
-            ship.EpicAbilityUpgrade = ShipUpgrades.EpicAbilityType.Hellfire;
+            if (m_ShipGumpObject.m_ShipDeed != null)
+                shipName = m_ShipGumpObject.m_ShipDeed.m_ShipName;            
 
             #region Background Images
 
@@ -108,7 +96,7 @@ namespace Server
 
             //Header
             AddImage(94, 3, 1141);
-            AddLabel(Utility.CenteredTextOffset(235, ship.ShipName), 5, 149, ship.ShipName);
+            AddLabel(Utility.CenteredTextOffset(235, shipName), 5, 149, shipName);
 
             #region Footers
 
@@ -145,33 +133,103 @@ namespace Server
 
             #endregion
 
+            int hullPoints = 100;
+            int maxHullPoints = 100;
+
+            int sailPoints = 100;
+            int maxSailPoints = 100;
+
+            int gunPoints = 100;
+            int maxGunPoints = 100;
+
+            Type shipType = null;
+
+            ShipUpgradeDetail themeDetail = null;
+            ShipUpgradeDetail paintDetail = null;
+            ShipUpgradeDetail cannonMetalDetail = null;
+
+            ShipUpgradeDetail outfittingDetail = null;
+            ShipUpgradeDetail bannerDetail = null;
+            ShipUpgradeDetail charmDetail = null;
+
+            ShipUpgradeDetail minorAbilityDetail = null;
+            ShipUpgradeDetail majorAbilityDetail = null;
+            ShipUpgradeDetail epicAbilityDetail = null;
+
+            if (m_ShipGumpObject.m_Ship != null)
+            {
+                hullPoints = m_ShipGumpObject.m_Ship.HitPoints;
+                maxHullPoints = m_ShipGumpObject.m_Ship.MaxHitPoints;
+
+                sailPoints = m_ShipGumpObject.m_Ship.SailPoints;
+                maxSailPoints = m_ShipGumpObject.m_Ship.MaxSailPoints;
+
+                gunPoints = m_ShipGumpObject.m_Ship.GunPoints;
+                maxGunPoints = m_ShipGumpObject.m_Ship.MaxGunPoints;
+
+                shipType = m_ShipGumpObject.m_Ship.GetType();
+
+                themeDetail = ShipUpgrades.GetThemeDetail(m_ShipGumpObject.m_Ship.m_ThemeUpgrade);
+                paintDetail = ShipUpgrades.GetPaintDetail(m_ShipGumpObject.m_Ship.m_PaintUpgrade);
+                cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(m_ShipGumpObject.m_Ship.m_CannonMetalUpgrade);
+
+                outfittingDetail = ShipUpgrades.GetOutfittingDetail(m_ShipGumpObject.m_Ship.m_OutfittingUpgrade);
+                bannerDetail = ShipUpgrades.GetBannerDetail(m_ShipGumpObject.m_Ship.m_BannerUpgrade);
+                charmDetail = ShipUpgrades.GetCharmDetail(m_ShipGumpObject.m_Ship.m_CharmUpgrade);
+
+                minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(m_ShipGumpObject.m_Ship.m_MinorAbilityUpgrade);
+                majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(m_ShipGumpObject.m_Ship.m_MajorAbilityUpgrade);
+                epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(m_ShipGumpObject.m_Ship.m_EpicAbilityUpgrade);
+            }
+
+            if (m_ShipGumpObject.m_ShipDeed != null)
+            {
+                /*
+                hullPoints = m_ShipGumpObject.m_ShipDeed.HitPoints;
+                maxHullPoints = m_ShipGumpObject.m_ShipDeed.MaxHitPoints;
+
+                sailPoints = m_ShipGumpObject.m_ShipDeed.SailPoints;
+                maxSailPoints = m_ShipGumpObject.m_ShipDeed.MaxSailPoints;
+
+                gunPoints = m_ShipGumpObject.m_ShipDeed.GunPoints;
+                maxGunPoints = m_ShipGumpObject.m_ShipDeed.MaxGunPoints;               
+
+                shipType = m_ShipGumpObject.m_ShipDeed.ShipType;
+
+                themeDetail = ShipUpgrades.GetThemeDetail(m_ShipGumpObject.m_ShipDeed.m_ThemeUpgrade);
+                paintDetail = ShipUpgrades.GetPaintDetail(m_ShipGumpObject.m_ShipDeed.m_PaintUpgrade);
+                cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(m_ShipGumpObject.m_ShipDeed.m_CannonMetalUpgrade);
+
+                outfittingDetail = ShipUpgrades.GetOutfittingDetail(m_ShipGumpObject.m_ShipDeed.m_OutfittingUpgrade);
+                bannerDetail = ShipUpgrades.GetBannerDetail(m_ShipGumpObject.m_ShipDeed.m_BannerUpgrade);
+                charmDetail = ShipUpgrades.GetCharmDetail(m_ShipGumpObject.m_ShipDeed.m_CharmUpgrade);
+
+                minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(m_ShipGumpObject.m_ShipDeed.m_MinorAbilityUpgrade);
+                majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(m_ShipGumpObject.m_ShipDeed.m_MajorAbilityUpgrade);
+                epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(m_ShipGumpObject.m_ShipDeed.m_EpicAbilityUpgrade);
+                
+               */
+            }
+
+            double hullPercent = (double)hullPoints / (double)maxHullPoints;
+            double sailPercent = (double)sailPoints / (double)maxSailPoints;
+            double gunPercent = (double)gunPoints / (double)maxGunPoints;
+
+            string shipTypeText = "Carrack"; //TEST: FIX
+
             switch (shipGumpObject.m_ShipPage)
             {
                 #region Overview
 
                 case ShipPageType.Overview:
 
-                    #region Stats
-
-                    int hullPoints = ship.HitPoints;
-                    int maxHullPoints = ship.MaxHitPoints;
-                    double hullPercent = (double)hullPoints / (double)maxHullPoints;
-
-                    int sailPoints = ship.SailPoints;
-                    int maxSailPoints = ship.MaxSailPoints;
-                    double sailPercent = (double)sailPoints / (double)maxSailPoints;
-
-                    int gunPoints = ship.GunPoints;
-                    int maxGunPoints = ship.MaxGunPoints;
-                    double gunPercent = (double)gunPoints / (double)maxGunPoints;
-
-                    string shipType = "Carrack"; //TEST: FIX
+                    #region Stats                    
 
                     AddImage(88, 41, 103);
 			        AddImage(225, 41, 103);
 			        AddImageTiled(102, 55, 257, 77, 2624);
 
-                    AddLabel(Utility.CenteredTextOffset(232, shipType), 37, WhiteTextHue, shipType);
+                    AddLabel(Utility.CenteredTextOffset(232, shipTypeText), 37, WhiteTextHue, shipTypeText);
 
                     AddLabel(111, 60, 149, "Hull");
                     AddImage(142, 64, 2057);
@@ -191,10 +249,6 @@ namespace Server
                     #endregion
 			        
                     #region Abilities
-
-                    ShipUpgradeDetail minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(ship.MinorAbilityUpgrade);
-                    ShipUpgradeDetail majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(ship.MajorAbilityUpgrade);
-                    ShipUpgradeDetail epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(ship.EpicAbilityUpgrade);
 
                     string minorAbilityCooldownText = "1m 59s"; //TEST
                     string majorAbilityCooldownText = "4m 59s"; //TEST
@@ -284,18 +338,6 @@ namespace Server
                 #region Upgrades                
 
                 case ShipPageType.Upgrades:
-                    ShipUpgradeDetail themeDetail = ShipUpgrades.GetThemeDetail(ship.ThemeUpgrade);
-                    ShipUpgradeDetail paintDetail = ShipUpgrades.GetPaintDetail(ship.PaintUpgrade);
-                    ShipUpgradeDetail cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(ship.CannonMetalUpgrade);
-
-                    ShipUpgradeDetail outfittingDetail = ShipUpgrades.GetOutfittingDetail(ship.OutfittingUpgrade);
-                    ShipUpgradeDetail bannerDetail = ShipUpgrades.GetBannerDetail(ship.BannerUpgrade);
-                    ShipUpgradeDetail charmDetail = ShipUpgrades.GetCharmDetail(ship.CharmUpgrade);
-
-                    minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(ship.MinorAbilityUpgrade);
-                    majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(ship.MajorAbilityUpgrade);
-                    epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(ship.EpicAbilityUpgrade);
-
                     offsetX = -32;
                     offsetY = -22;
 
@@ -1147,6 +1189,232 @@ namespace Server
         }
 
         #endregion
+    }
+
+    public class ShipRegistrationGump : Gump
+    {
+        public PlayerMobile m_Player;
+        public BaseShipDeed m_ShipDeed;
+
+        public int WhiteTextHue = 2499;
+
+        public static int OpenGumpSound = 0x055;
+        public static int ChangePageSound = 0x057;
+        public static int SelectionSound = 0x4D2;
+        public static int LargeSelectionSound = 0x4D3;
+        public static int CloseGumpSound = 0x058;
+
+        public ShipRegistrationGump(PlayerMobile player, BaseShipDeed shipDeed): base(10, 10)
+        {
+            m_Player = player;
+            m_ShipDeed = shipDeed;
+
+            if (m_Player == null) return;
+            if (m_Player.BankBox == null) return;
+            if (m_Player.Backpack == null) return;
+            if (m_ShipDeed == null) return;
+            if (m_ShipDeed.Deleted) return;
+
+            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(m_ShipDeed.ShipType);
+
+            if (shipStatsProfile == null)
+                return;
+
+            #region Images
+
+            AddImage(0, 345, 103);
+            AddImage(286, 371, 103);
+            AddImage(147, 405, 103);
+            AddImage(0, 0, 103);
+            AddImage(145, 0, 103);
+            AddImage(286, 0, 103);
+            AddImage(286, 88, 103);
+            AddImage(286, 181, 103);
+            AddImage(286, 276, 103);
+            AddImage(0, 86, 103);
+            AddImage(0, 180, 103);
+            AddImage(0, 277, 103);
+            AddImage(1, 406, 103);
+            AddImage(286, 405, 103);
+            AddBackground(14, 10, 403, 485, 3000);
+            AddItem(55, 25, 2473); 
+            AddItem(71, 140, 5367);
+            AddItem(97, 127, 7723);
+            AddItem(38, 136, 7839);
+            AddItem(49, 326, 7866);
+            AddItem(67, 328, 5742);
+            AddItem(90, 326, 6160);
+            AddItem(87, 44, 710);
+            AddItem(38, 70, 7860);
+            AddItem(74, 59, 3992);
+            AddItem(30, 209, 710);
+            AddItem(71, 246, 3700);
+            AddItem(85, 239, 7726);
+            AddItem(76, 239, 3700);
+            AddItem(81, 247, 3700);
+            AddItem(66, 397, 5362);
+
+            #endregion            
+
+            /*
+            double forwardSpeed = 1.0 / shipStatsProfile.FastInterval;
+            double driftSpeed = 1.0 / shipStatsProfile.FastDriftInterval;
+
+            double slowdownModePenalty = BaseShip.BaseSlowdownModeModifier * 
+
+            double cannonAccuracy = (double)BaseShip.CannonAccuracy * shipStatsProfile.CannonAccuracyScalar;
+            double minCannonDamage = (double)BaseShip.CannonDamageMin * shipStatsProfile.CannonDamageScalar;
+            double maxCannonDamage = (double)BaseShip.CannonDamageMax * shipStatsProfile.CannonDamageScalar;
+            double cannonRange = Math.Round((double)BaseShip.CannonMaxRange * shipStatsProfile.CannonRangeScalar);
+
+            double cannonReloadTime = (double)BaseShip.CannonReloadTime * (double)shipStatsProfile.CannonsPerSide * shipStatsProfile.CannonReloadTimeScalar;
+
+            double repairTime = (double)BaseShip.RepairCooldown * shipStatsProfile.RepairCooldownScalar;
+
+            double minorAbilityCooldown = (double)BaseShip.BaseMinorAbilityCooldown * shipStatsProfile.MinorAbilityCooldownScalar;
+            double majorAbilityCooldown = (double)BaseShip.BaseMajorAbilityCooldown * shipStatsProfile.MajorAbilityCooldownScalar;
+            double epicAbilityCooldown = (double)BaseShip.BaseEpicAbilityCooldown * shipStatsProfile.EpicAbilityCooldownScalar;
+
+            int doubloonRegistrationCost = shipStatsProfile.RegistrationDoubloonCost;
+            double shipUpgradeDoubloonScalar = shipStatsProfile.UpgradeDoubloonMultiplier;
+
+            //Header
+            AddImage(94, 3, 1141);
+            AddLabel(Utility.CenteredTextOffset(230, Utility.Capitalize(shipStatsProfile.ShipName)), 5, WhiteTextHue, Utility.Capitalize(shipStatsProfile.ShipName));
+
+            //Misc
+            AddLabel(145, 32, 2625, "Hold Capacity:");
+            AddLabel(319, 32, WhiteTextHue, shipStatsProfile.HoldItemCount.ToString() + " Items");
+           
+            //Stats
+            AddLabel(145, 62, 149, "Hull Max Points:");
+            AddLabel(319, 62, WhiteTextHue, shipStatsProfile.MaxHitPoints.ToString());
+
+            AddLabel(145, 82, 149, "Sail Max Points:");
+            AddLabel(319, 82, WhiteTextHue, shipStatsProfile.MaxSailPoints.ToString());
+
+            AddLabel(145, 102, 149, "Gun Max Points:");
+            AddLabel(319, 102, WhiteTextHue, shipStatsProfile.MaxGunPoints.ToString());
+           
+            //Speed
+            AddLabel(145, 132, 2599, "Forward Speed:");
+            AddLabel(319, 132, WhiteTextHue, Utility.CreateDecimalString(forwardSpeed, 1) + " tiles/sec");
+
+            AddLabel(145, 152, 2599, "Drifting Speed:");
+            AddLabel(319, 152, WhiteTextHue, Utility.CreateDecimalString(driftSpeed, 1) + " tiles/sec");
+
+            AddLabel(145, 172, 2599, "Slowdown Mode Penalty:");
+            AddLabel(319, 172, WhiteTextHue, "-" + Utility.CreateDecimalPercentageString(slowdownModePenalty, 1));
+           
+            //Cannons
+            AddLabel(145, 202, 2401, "Cannons Per Side:");
+            AddLabel(319, 202, WhiteTextHue, shipStatsProfile.CannonsPerSide.ToString());
+
+            AddLabel(145, 222, 2401, "Cannon Accuracy:");
+            AddLabel(319, 222, WhiteTextHue, Utility.CreateDecimalPercentageString(cannonAccuracy, 1));
+
+            AddLabel(145, 242, 2401, "Cannon Damage:");
+            AddLabel(319, 242, WhiteTextHue, Utility.CreateDecimalString(minCannonDamage, 1) + " - " + Utility.CreateDecimalString(maxCannonDamage, 1));
+
+            AddLabel(145, 262, 2401, "Cannon Range:");
+            AddLabel(319, 262, WhiteTextHue, Utility.CreateDecimalString(cannonRange, 1));
+
+            AddLabel(145, 282, 2401, "Cannon Reload Time:");
+            AddLabel(319, 282, WhiteTextHue, Utility.CreateDecimalString(cannonReloadTime, 1) + " sec");
+
+            //Abilities
+            AddLabel(145, 312, 2603, "Repair Cooldown:");
+            AddLabel(319, 312, WhiteTextHue, Utility.CreateDecimalString(repairTime, 1) + " sec");
+
+            AddLabel(145, 332, 2603, "Minor Ability Cooldown:");
+            AddLabel(319, 332, WhiteTextHue, Utility.CreateDecimalString(minorAbilityCooldown, 1) + " sec");
+
+            AddLabel(145, 352, 2603, "Major Ability Cooldown:");
+            AddLabel(319, 352, WhiteTextHue, Utility.CreateDecimalString(majorAbilityCooldown, 1) + " sec");
+
+            AddLabel(145, 372, 2603, "Epic Ability Cooldown:");
+            AddLabel(319, 372, WhiteTextHue, Utility.CreateDecimalString(epicAbilityCooldown, 1) + " sec");
+
+            //Doubloons
+            AddLabel(145, 402, 53, "Upgrade Cost Multiplier:");
+            AddLabel(319, 402, WhiteTextHue, Utility.CreateDecimalString(shipUpgradeDoubloonScalar, 1) + "x");
+
+            //Cost
+            AddLabel(145, 450, 149, "Ship Registration Fee");
+            AddItem(133, 472, 2539);
+            AddLabel(168, 470, WhiteTextHue, doubloonRegistrationCost.ToString() + " Doubloons");
+                                    
+            //Register
+            AddButton(300, 455, 2151, 2154, 2, GumpButtonType.Reply, 0);
+            AddLabel(333, 450, 63, "Register");
+            AddLabel(345, 470, 63, "Ship");               
+
+            //Guide
+            AddButton(14, 11, 2094, 2095, 1, GumpButtonType.Reply, 0);
+            AddLabel(10, WhiteTextHue, 149, "Guide");    
+            */
+        }
+
+        public override void OnResponse(NetState sender, RelayInfo info)
+        {
+            if (m_Player == null) return;
+            if (m_ShipDeed == null) return;
+            if (m_ShipDeed.Deleted) return;
+
+            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(m_ShipDeed.ShipType);
+
+            if (shipStatsProfile == null)
+                return;
+            
+            bool closeGump = true;
+
+            switch (info.ButtonID)
+            {
+                //Guide
+                case 1:
+                break;
+
+                //Registration
+                case 2:
+                    if (m_ShipDeed.IsChildOf(m_Player.Backpack))
+                    {
+                        int doubloonCost = shipStatsProfile.RegistrationDoubloonCost;
+                        int doubloonBankBalance = Banker.GetUniqueCurrencyBalance(m_Player, typeof(Doubloon));
+
+                        if (doubloonCost <= doubloonBankBalance)
+                        {
+                            Banker.WithdrawUniqueCurrency(m_Player, typeof(Doubloon), doubloonCost, true);
+
+                            m_ShipDeed.m_Registered = true;
+                            m_Player.Say("You register the ship and it is now ready to make sail!");
+
+                            return;
+                        }
+
+                        else                        
+                            m_Player.SendMessage("You must have " + doubloonCost.ToString() + " doubloons in your bank in order to register this ship.");
+                        
+                        closeGump = false;
+                    }
+
+                    else
+                    {
+                        m_Player.SendMessage("That must be in your backpack if you wish to register that ship.");
+
+                        closeGump = false;
+                    }
+                break;
+            }
+
+            if (!closeGump)
+            {
+                m_Player.CloseGump(typeof(ShipRegistrationGump));
+                m_Player.SendGump(new ShipRegistrationGump(m_Player, m_ShipDeed));
+            }
+
+            else
+                m_Player.SendSound(CloseGumpSound);
+        }
     }
 
     public class ShipGumpObject

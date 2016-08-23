@@ -84,9 +84,7 @@ namespace Server
             shipCannon.MoveToWorld(new Point3D(ship.Location.X + cannonLocation.X, ship.Location.Y + cannonLocation.Y, ship.Location.Z + cannonLocation.Z), ship.Map);
             shipCannon.ShipFacingChange(ship.Facing);
             shipCannon.Z = ship.Location.Z + cannonLocation.Z + shipCannon.GetAdjustedCannonZOffset();
-
-            shipCannon.Hue = ship.CannonHue;
-
+            
             if (ship.MobileControlType != MobileControlType.Player)
                 shipCannon.Ammunition = shipCannon.GetMaxAmmunition();
 
@@ -516,6 +514,8 @@ namespace Server
             double cannonDelayTotal = 0;
             int cannonsFiring = 0;
 
+            double adjustedRange = m_Ship.CannonRange;
+
             //Need At Least One Cannon With LOS to Target and In Range of Target For Volley To Be Valid
             foreach (ShipCannon shipCannon in m_Ship.m_Cannons)
             {
@@ -523,9 +523,7 @@ namespace Server
                 if (shipCannon.Ammunition > 0 && shipCannon.Facing == Facing)
                 {
                     cannonDelayTotal += BaseShip.CannonCooldownTime;
-                    cannonsFiring++;
-
-                    double modifiedRange = (double)BaseShip.CannonMaxRange * m_Ship.CannonRangeScalar;
+                    cannonsFiring++;                    
 
                     //Already Deterined to Be Valid Shot: NPC AI Ship
                     if (IsNPCShip)
@@ -535,7 +533,7 @@ namespace Server
                     }
 
                     //Cannon is in LOS and Within Range
-                    if (shipCannon.InAngle(point) && Utility.GetDistanceToSqrt(shipCannon.Location, point) <= modifiedRange)
+                    if (shipCannon.InAngle(point) && Utility.GetDistanceToSqrt(shipCannon.Location, point) <= adjustedRange)
                         volleyValid = true;
 
                     //Cannon is too close
@@ -597,8 +595,6 @@ namespace Server
                         }
 
                         //Check Accuracy
-                        double cannonAccuracy = BaseShip.CannonAccuracy * m_Ship.CannonAccuracyModifer;
-
                         double opponentMovementPenalty = 0;
                         double movementAccuracyPenalty = 0;
 
@@ -620,13 +616,13 @@ namespace Server
                             opponentMovementPenalty = 1 - (BaseShip.CannonTargetMovementMaxAccuracyPenalty * (1 - (secondsOpponentStationary / BaseShip.CannonMovementAccuracyCooldown)));
 
                             //No Movement Penalty to Shoot a Ship That is in Reduced Speed Mode
-                            if (targetShip.ReducedSpeedMode)
+                            if (targetShip.SlowdownModeExpiration >= DateTime.UtcNow)
                                 opponentMovementPenalty = 1;
                         }
 
                         movementAccuracyPenalty = 1 - (BaseShip.CannonMovementMaxAccuracyPenalty * (1 - (secondsStationary / BaseShip.CannonMovementAccuracyCooldown)));
 
-                        double finalAccuracy = cannonAccuracy * movementAccuracyPenalty * opponentMovementPenalty;
+                        double finalAccuracy = m_Ship.CannonAccuracy * movementAccuracyPenalty * opponentMovementPenalty;
 
                         double chance = Utility.RandomDouble();
 
@@ -756,7 +752,7 @@ namespace Server
 
                     Timer.DelayCall(TimeSpan.FromSeconds(effectDelay), delegate
                     {
-                        ResolveCannon(shipCannon, from, targetLocation, map, hit);
+                        ResolveCannon(from, targetLocation, map, hit);
                     });
                 }
 
@@ -798,13 +794,13 @@ namespace Server
 
                     Timer.DelayCall(TimeSpan.FromSeconds(effectDelay), delegate
                     {
-                        ResolveCannon(shipCannon, from, splashLocation, map, hit);
+                        ResolveCannon(from, splashLocation, map, hit);
                     });
                 }
             }
         }
 
-        public void ResolveCannon(ShipCannon shipCannon, Mobile from, Point3D targetLocation, Map map, bool hit)
+        public void ResolveCannon(Mobile from, Point3D targetLocation, Map map, bool hit)
         {
             if (hit)
                 ResolveCannonHit(from, targetLocation);
@@ -818,8 +814,7 @@ namespace Server
             ArrayList validTargets = new ArrayList();
 
             Map map = Map;
-
-            BaseShip shipFrom = BaseShip.FindShipAt(from.Location, map);
+            
             BaseShip targetShip = BaseShip.FindShipAt(targetLocation, map);
 
             bool hitObject = false;
@@ -839,15 +834,15 @@ namespace Server
             List<Mobile> m_MobilesOnSourceShip = new List<Mobile>();
             List<Mobile> m_Targets = new List<Mobile>();
 
-            double baseCannonDamage = (double)(Utility.RandomMinMax(BaseShip.CannonDamageMin, BaseShip.CannonDamageMax));
-            
+            double baseCannonDamage = (double)(Utility.RandomMinMax(BaseShip.BaseCannonDamageMin, BaseShip.BaseCannonDamageMax));
+
             if (m_Ship == null)
                 m_MobilesOnSourceShip.Add(from);
 
             else
             {
-                baseCannonDamage = m_Ship.CannonDamageScalar * baseCannonDamage;
-
+                baseCannonDamage = m_Ship.CannonMinDamage + (Utility.RandomDouble() * (m_Ship.CannonMaxDamage - m_Ship.CannonMinDamage));
+                
                 m_MobilesOnSourceShip = m_Ship.GetMobilesOnShip(false, false);
             }
 
@@ -989,7 +984,7 @@ namespace Server
 
                         if (dealDamage)
                         {
-                            DamageType damageType = shipTarget.GetDamageTypeByTargetingMode(m_Ship.TargetingMode);
+                            DamageType damageType = shipTarget.GetDamageTypeByTargetingMode(m_Ship.m_TargetingMode);
 
                             int finalDamage = (int)(Math.Round(damageDealt));
 

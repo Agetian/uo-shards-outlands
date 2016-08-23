@@ -860,15 +860,9 @@ namespace Server
         private static Rectangle2D[] m_IlshWrap = new Rectangle2D[] { new Rectangle2D(16, 16, 2304 - 32, 1600 - 32) };
         private static Rectangle2D[] m_TokunoWrap = new Rectangle2D[] { new Rectangle2D(16, 16, 1448 - 32, 1448 - 32) };
 
-        public const int MaxFriends = 500;
-        public const int MaxCoOwners = 500;
-
-        public static double shipBasedDamageToPlayerScalar = 0.5;
-        public static double shipBasedDamageToCreatureScalar = 0.5;
-
-        public static double shipBasedAoESpellDamageToPlayerScalar = 0.5;
-        public static double shipBasedAoESpellDamageToCreatureScalar = 0.5;
-
+        public MobileControlType BaseMobileControlType = MobileControlType.Player;
+        public MobileFactionType BaseMobileFactionType = MobileFactionType.None;
+        
         public TimeSpan TimeNeededToBeOutOfCombat = TimeSpan.FromSeconds(60); //Time Needed to Be Out of Combat For Fast Ship Repair and Dry Docking
         public TimeSpan DryDockMinimumLastMovement = TimeSpan.FromSeconds(10); //Minimum Time Needed Since Last Movement for Ship Docking
 
@@ -879,28 +873,11 @@ namespace Server
         private double m_AcquireTargetDelayAmount = Utility.RandomMinMax(3, 5);
         private double m_AcquireNewTargetDelayAmount = Utility.RandomMinMax(8, 10);
 
-        public int BaseMaxHitPoints = 1000;
-        public int BaseMaxSailPoints = 500;
-        public int BaseMaxGunPoints = 500;
+        public static double shipBasedDamageToPlayerScalar = 0.5;
+        public static double shipBasedDamageToCreatureScalar = 0.5;
 
-        public MobileControlType BaseMobileControlType = MobileControlType.Player;
-        public MobileFactionType BaseMobileFactionType = MobileFactionType.None;
-
-        public int BasePerceptionRange = 24;
-
-        public double BaseCannonAccuracyModifer = 1.0;
-        public double BaseCannonRangeScalar = 1.0;
-        public double BaseCannonDamageScalar = 1.0;
-        public double BaseCannonReloadTimeScalar = 1.0;
-        public double BaseDamageFromPlayerShipScalar = 1.0;
-
-        public static int CannonMaxAmmunition = 10;
-        public static int CannonMaxRange = 12;
-
-        public static int CannonFiringLoops = 3;
-        public static double CannonLoopDelay = .5;
-
-        public static int CannonExplosionRange = 1; //How large is the cannon blast radius
+        public static double shipBasedAoESpellDamageToPlayerScalar = 0.5;
+        public static double shipBasedAoESpellDamageToCreatureScalar = 0.5;        
 
         public static double CannonOceanCreatureDamageMultiplier = .75; //Damage scalar for creatures (on Water)
         public static double CannonMobileDamageMultiplier = .5; //Damage scalar for creatures & NPCs (on Land or Ships)
@@ -912,21 +889,34 @@ namespace Server
         public static double CannonTargetMovementMaxAccuracyPenalty = 0.2; //Maximum Accuracy Penalty for Opponent's Moving or Having Recently Moved
         public static double CannonMovementAccuracyCooldown = 10.0; //Seconds after stopping ship movement before no penalty to accuracy exists: scales from 0 to this number of seconds
 
+        public static int CannonFiringLoops = 3;
+        public static double CannonLoopDelay = .5;
+        public static int CannonExplosionRange = 1;
+        public static int CannonMaxAmmunition = 10;    
+
         public static double CannonMaxMisfireChance = 0.40;
 
-        public static double CannonAccuracy = 0.8;
-        public static int CannonDamageMin = 20;
-        public static int CannonDamageMax = 30;
         public static double CannonCooldownTime = 10.0;
         public static double CannonReloadTime = 2.0;
 
-        public double BaseFastInterval = 0.20;
-        public double BaseFastDriftInterval = 0.40;
+        public static double BaseSlowdownModeModifier = 0.5;      
 
-        public double BaseSlowInterval = 0.40;
-        public double BaseSlowDriftInterval = 1.0;
+        public static double BaseCannonAccuracy = 0.8;
+        public static int BaseCannonDamageMin = 20;
+        public static int BaseCannonDamageMax = 30;        
+        public static int BaseCannonRange = 12;       
 
-        public int BaseDoubloonValue = 0;
+        public static double BaseRepairCooldown = 120.0;
+
+        public static double BaseMinorAbilityCooldown = 120.0;
+        public static double BaseMajorAbilityCooldown = 300.0;
+        public static double BaseEpicAbilityCooldown = 600.0;
+                
+        private static int SlowSpeed = 1; //Movement Tiles
+        private static int FastSpeed = 1; //Movement Tiles
+
+        private static int SlowDriftSpeed = 1; //Movement Tiles
+        private static int FastDriftSpeed = 1; //Movement Tiles  
 
         public virtual int ReducedSpeedModeMinDuration { get { return 10; } }
         public virtual int ReducedSpeedModeMaxDuration { get { return 20; } }
@@ -935,6 +925,8 @@ namespace Server
         public static TimeSpan ScuttleInterval = TimeSpan.FromSeconds(10);
         public static TimeSpan PlayerShipDecayDamageDelay = TimeSpan.FromSeconds(10);
         public static TimeSpan NPCShipUncrewedDamageDelay = TimeSpan.FromSeconds(10);
+
+        public int DoubloonValue = 0;
         
         public List<ShipCannon> m_Cannons = new List<ShipCannon>();
         public List<ShipCannon> m_LeftCannons = new List<ShipCannon>();
@@ -947,6 +939,448 @@ namespace Server
         public abstract List<Point3D> m_ShipFireLocations();
 
         private static readonly TimeSpan m_TillermanHoldTime = TimeSpan.FromSeconds(15);
+        
+        private int m_PerceptionRange = 24;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int PerceptionRange
+        {
+            get
+            {
+                return m_PerceptionRange;
+            }
+
+            set
+            {
+                m_PerceptionRange = value;
+
+                if (m_PerceptionRange < 0)
+                    m_PerceptionRange = 0;
+            }
+        }
+
+        private double m_DamageFromPlayerShipScalar = 1.0;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double DamageFromPlayerShipScalar
+        {
+            get
+            {
+                return m_DamageFromPlayerShipScalar;
+            }
+
+            set
+            {
+                m_DamageFromPlayerShipScalar = value;
+
+                if (m_DamageFromPlayerShipScalar < 0)
+                    m_DamageFromPlayerShipScalar = 0;
+            }
+        }  
+
+        private int m_HitPoints;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int HitPoints
+        {
+            get { return m_HitPoints; }
+            set
+            {
+                m_HitPoints = value;
+
+                if (m_HitPoints > MaxHitPoints)
+                    m_HitPoints = MaxHitPoints;
+
+                if (m_HitPoints < 0)
+                    m_HitPoints = 0;
+
+                CheckShipFires();
+            }
+        }
+
+        private int m_MaxHitPoints;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int MaxHitPoints
+        {
+            get
+            {
+                return m_MaxHitPoints;
+            }
+
+            set
+            {
+                m_MaxHitPoints = value;
+
+                if (HitPoints > m_MaxHitPoints)
+                    HitPoints = m_MaxHitPoints;
+
+                if (m_MaxHitPoints < 0)
+                    m_MaxHitPoints = 0;
+            }
+        }
+
+        private int m_SailPoints;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int SailPoints
+        {
+            get { return m_SailPoints; }
+            set
+            {
+                m_SailPoints = value;
+
+                if (m_SailPoints > MaxSailPoints)
+                    m_SailPoints = MaxSailPoints;
+
+                if (m_SailPoints < 0)
+                    m_SailPoints = 0;
+            }
+        }
+
+        private int m_MaxSailPoints;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int MaxSailPoints
+        {
+            get
+            {
+                return m_MaxSailPoints;
+            }
+
+            set
+            {
+                m_MaxSailPoints = value;
+
+                if (SailPoints > m_MaxSailPoints)
+                    SailPoints = m_MaxSailPoints;
+
+                if (m_MaxSailPoints < 0)
+                    m_MaxSailPoints = 0;
+            }
+        }
+
+        private int m_GunPoints;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int GunPoints
+        {
+            get { return m_GunPoints; }
+            set
+            {
+                m_GunPoints = value;
+
+                if (m_GunPoints > MaxGunPoints)
+                    m_GunPoints = MaxGunPoints;
+
+                if (m_GunPoints < 0)
+                    m_GunPoints = 0;
+            }
+        }
+
+        private int m_MaxGunPoints;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int MaxGunPoints
+        {
+            get
+            {
+                return m_MaxGunPoints;
+            }
+
+            set
+            {
+                m_MaxGunPoints = value;
+
+                if (GunPoints > m_MaxGunPoints)
+                    GunPoints = m_MaxGunPoints;
+
+                if (m_MaxGunPoints < 0)
+                    m_MaxGunPoints = 0;
+            }
+        }
+
+        private double m_ForwardSpeed;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double ForwardSpeed
+        {
+            get
+            {
+                return m_ForwardSpeed;
+            }
+
+            set
+            {
+                m_ForwardSpeed = value;
+
+                if (m_ForwardSpeed < 0)
+                    m_ForwardSpeed = 0;
+            }
+        }
+
+        private double m_DriftSpeed;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double DriftSpeed
+        {
+            get
+            {
+                return m_DriftSpeed;
+            }
+
+            set
+            {
+                m_DriftSpeed = value;
+
+                if (m_DriftSpeed < 0)
+                    m_DriftSpeed = 0;
+            }
+        }
+
+        private double m_SlowdownModePenalty;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double SlowdownModePenalty
+        {
+            get
+            {
+                return m_SlowdownModePenalty;
+            }
+
+            set
+            {
+                m_SlowdownModePenalty = value;
+
+                if (m_SlowdownModePenalty < 0)
+                    m_SlowdownModePenalty = 0;
+            }
+        }
+
+        private double m_CannonAccuracy;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double CannonAccuracy
+        {
+            get
+            {
+                return m_CannonAccuracy;
+            }
+
+            set
+            {
+                m_CannonAccuracy = value;
+
+                if (m_CannonAccuracy < 0)
+                    m_CannonAccuracy = 0;
+            }
+        }
+
+        private double m_CannonMinDamage;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double CannonMinDamage
+        {
+            get
+            {
+                return m_CannonMinDamage;
+            }
+
+            set
+            {
+                m_CannonMinDamage = value;
+
+                if (m_CannonMinDamage < 0)
+                    m_CannonMinDamage = 0;
+            }
+        }
+
+        private double m_CannonMaxDamage;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double CannonMaxDamage
+        {
+            get
+            {
+                return m_CannonMaxDamage;
+            }
+
+            set
+            {
+                m_CannonMaxDamage = value;
+
+                if (m_CannonMaxDamage < 0)
+                    m_CannonMaxDamage = 0;
+            }
+        }
+
+        private double m_CannonRange;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double CannonRange
+        {
+            get
+            {
+                return m_CannonRange;
+            }
+
+            set
+            {
+                m_CannonRange = value;
+
+                if (m_CannonRange < 0)
+                    m_CannonRange = 0;
+            }
+        }
+
+        private double m_CannonReloadDuration;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double CannonReloadDuration
+        {
+            get
+            {
+                return m_CannonReloadDuration;
+            }
+
+            set
+            {
+                m_CannonReloadDuration = value;
+
+                if (m_CannonReloadDuration < 0)
+                    m_CannonReloadDuration = 0;
+            }
+        }        
+
+        private double m_MinorAbilityCooldownDuration;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double MinorAbilityCooldownDuration
+        {
+            get
+            {
+                return m_MinorAbilityCooldownDuration;
+            }
+
+            set
+            {
+                m_MinorAbilityCooldownDuration = value;
+
+                if (m_MinorAbilityCooldownDuration < 0)
+                    m_MinorAbilityCooldownDuration = 0;
+            }
+        }
+
+        private double m_MajorAbilityCooldownDuration;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double MajorAbilityCooldownDuration
+        {
+            get
+            {
+                return m_MajorAbilityCooldownDuration;
+            }
+
+            set
+            {
+                m_MajorAbilityCooldownDuration = value;
+
+                if (m_MajorAbilityCooldownDuration < 0)
+                    m_MajorAbilityCooldownDuration = 0;
+            }
+        }
+
+        private double m_EpicAbilityCooldownDuration;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double EpicAbilityCooldownDuration
+        {
+            get
+            {
+                return m_EpicAbilityCooldownDuration;
+            }
+
+            set
+            {
+                m_EpicAbilityCooldownDuration = value;
+
+                if (m_EpicAbilityCooldownDuration < 0)
+                    m_EpicAbilityCooldownDuration = 0;
+            }
+        }
+
+        private double m_RepairCooldownDuration;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double RepairCooldownDuration
+        {
+            get
+            {
+                return m_RepairCooldownDuration;
+            }
+
+            set
+            {
+                m_RepairCooldownDuration = value;
+
+                if (m_RepairCooldownDuration < 0)
+                    m_RepairCooldownDuration = 0;
+            }
+        }
+
+        private double m_BoardingChance;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public double BoardingChance
+        {
+            get
+            {
+                return m_BoardingChance;
+            }
+
+            set
+            {
+                m_BoardingChance = value;
+
+                if (m_BoardingChance < 0)
+                    m_BoardingChance = 0;
+            }
+        }
+        
+        public double HitPointsCreationScalar = 1.0;
+        public double SailPointsCreationScalar = 1.0;
+        public double GunPointsCreationScalar = 1.0;
+
+        public double ForwardSpeedCreationScalar = 1.0;
+        public double DriftSpeedCreationScalar = 1.0;
+        public double SlowdownModePenaltyCreationScalar = 1.0;
+
+        public double CannonAccuracyCreationScalar = 1.0;
+        public double CannonDamageCreationScalar = 1.0;
+        public double CannonRangeCreationScalar = 1.0;
+        public double CannonReloadDurationCreationScalar = 1.0;        
+
+        public double MinorAbilityCooldownDurationCreationScalar = 1.0;
+        public double MajorAbilityCooldownDurationCreationScalar = 1.0;
+        public double EpicAbilityCooldownDurationCreationScalar = 1.0;
+
+        public double RepairCooldownDurationCreationScalar = 1.0;
+        public double BoardingChanceCreationScalar = 1.0;
+
+        private MobileControlType m_MobileControlType = MobileControlType.Null;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public MobileControlType MobileControlType
+        {
+            get
+            {
+                if (m_MobileControlType == MobileControlType.Null)
+                    return BaseMobileControlType;
+
+                return m_MobileControlType;
+            }
+
+            set
+            {
+                m_MobileControlType = value;
+            }
+        }
+
+        private MobileFactionType m_MobileFactionType = MobileFactionType.Null;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public MobileFactionType MobileFactionType
+        {
+            get
+            {
+                if (m_MobileFactionType == MobileFactionType.Null)
+                    return BaseMobileFactionType;
+
+                return m_MobileFactionType;
+            }
+
+            set
+            {
+                m_MobileFactionType = value;
+            }
+        }  
 
         private DateTime m_LastActivated;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -954,15 +1388,9 @@ namespace Server
         {
             get { return m_LastActivated; } 
             set { m_LastActivated = value; }
-        }        
+        }
 
-        private DateTime m_NextSinkDamageAllowed;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public DateTime NextSinkDamageAllowed 
-        {
-            get { return m_NextSinkDamageAllowed; }
-            set { m_NextSinkDamageAllowed = value; } 
-        }    
+        public DateTime NextSinkDamageAllowed;  
 
         public List<Mobile> m_CoOwners = new List<Mobile>();
         public List<Mobile> CoOwners
@@ -1022,23 +1450,7 @@ namespace Server
         {
             get { return m_Crew; }
             set { m_Crew = value; } 
-        }   
-
-        private double m_TempSpeedModifier = 1.0;
-        [CommandProperty(AccessLevel.Counselor)]
-        public double TempSpeedModifier
-        {
-            get { return m_TempSpeedModifier; }
-            set { m_TempSpeedModifier = value; }
-        }
-
-        private DateTime m_TempSpeedModifierExpiration = DateTime.MinValue;
-        [CommandProperty(AccessLevel.Counselor)]
-        public DateTime TempSpeedModifierExpiration
-        {
-            get { return m_TempSpeedModifierExpiration; }
-            set { m_TempSpeedModifierExpiration = value; }
-        }        
+        }                  
 
         private bool m_AdminControlled = false;
         [CommandProperty(AccessLevel.Counselor)]
@@ -1081,482 +1493,7 @@ namespace Server
         public List<Item> m_ItemsToSink = new List<Item>();
         public List<Mobile> m_MobilesToSink = new List<Mobile>();
 
-        private bool m_Destroyed = false;
-
-        private int m_HitPoints;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int HitPoints
-        {
-            get { return m_HitPoints; }
-            set
-            {
-                m_HitPoints = value;
-
-                if (m_HitPoints > MaxHitPoints)
-                    m_HitPoints = MaxHitPoints;
-
-                if (m_HitPoints < 0)
-                    m_HitPoints = 0;
-
-                //Determine Ship Fires
-                int maxShipFires = (int)((double)m_EmbarkLocations().Count / 3);
-                int currentShipFires = m_ShipFires.Count;
-
-                double missingHitPointsPercent = (double)(1 - (float)HitPoints / (float)MaxHitPoints);
-                double percentBufferBeforeFires = .05;
-                double fireInterval = (1 - percentBufferBeforeFires) / (double)maxShipFires;
-
-                double adjustedMissingHitPointsPercent = missingHitPointsPercent - percentBufferBeforeFires;
-
-                int desiredShipFires = 0;
-
-                if (adjustedMissingHitPointsPercent > 0)
-                    desiredShipFires = (int)(Math.Ceiling(adjustedMissingHitPointsPercent / fireInterval));
-
-                if (desiredShipFires > maxShipFires)
-                    desiredShipFires = maxShipFires;
-
-                int newShipFires = desiredShipFires - currentShipFires;
-                int shipFiresToRemove = 0;
-
-                if (newShipFires < 0)
-                    shipFiresToRemove = Math.Abs(newShipFires);
-
-                //Add New Fires
-                if (newShipFires > 0)
-                {
-                    int startingShipFires = m_ShipFires.Count;
-
-                    for (int a = 0; a < newShipFires; a++)
-                    {
-                        List<Point3D> m_PotentialShipFireLocations = new List<Point3D>();
-
-                        foreach (Point3D embarkLocation in m_EmbarkLocations())
-                        {
-                            bool foundActiveShipFire = false;
-
-                            foreach (ShipFireItem activeShipFire in m_ShipFires)
-                            {
-                                Point3D activeShipFireLocation = new Point3D(activeShipFire.xOffset, activeShipFire.yOffset, activeShipFire.zOffset);
-
-                                if (embarkLocation == activeShipFireLocation)
-                                {
-                                    foundActiveShipFire = true;
-                                    break;
-                                }
-                            }
-
-                            if (foundActiveShipFire == false)
-                                m_PotentialShipFireLocations.Add(embarkLocation);
-                        }
-
-                        Point3D shipFireLocation = m_PotentialShipFireLocations[Utility.RandomMinMax(0, m_PotentialShipFireLocations.Count - 1)];
-                        Point3D rotatedShipFireLocation = GetRotatedLocation(shipFireLocation.X, shipFireLocation.Y, shipFireLocation.Z);
-
-                        if (!(rotatedShipFireLocation is Point3D))
-                            continue;
-
-                        Point3D point = new Point3D(rotatedShipFireLocation.X + this.X, rotatedShipFireLocation.Y + this.Y, rotatedShipFireLocation.Z + this.Z);
-
-                        if (Facing == Direction.West || Facing == Direction.East)
-                        {
-                            ShipFireItem b = new ShipFireItem(0x398C, point, this.Map, TimeSpan.FromMinutes(60), shipFireLocation.X, shipFireLocation.Y, shipFireLocation.Z);
-                            m_ShipFires.Add(b);
-                        }
-
-                        else
-                        {
-                            ShipFireItem b = new ShipFireItem(0x3996, point, this.Map, TimeSpan.FromMinutes(60), shipFireLocation.X, shipFireLocation.Y, shipFireLocation.Z);
-                            m_ShipFires.Add(b);
-                        }
-                    }
-                }
-
-                //Remove Some Existing Fires
-                else if (shipFiresToRemove > 0)
-                {
-                    for (int a = 0; a < shipFiresToRemove; a++)
-                    {
-                        ShipFireItem shipFire = m_ShipFires[m_ShipFires.Count - 1];
-                        m_ShipFires.RemoveAt(m_ShipFires.Count - 1);
-                        shipFire.Delete();
-                    }
-                }
-            }
-        }
-
-        private int m_MaxHitPoints = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int MaxHitPoints
-        {
-            get
-            {
-                if (m_MaxHitPoints == -1)
-                    return BaseMaxHitPoints;
-
-                return m_MaxHitPoints;
-            }
-
-            set
-            {
-                m_MaxHitPoints = value;
-
-                if (HitPoints > m_MaxHitPoints)
-                    HitPoints = m_MaxHitPoints;
-
-                if (m_MaxHitPoints < 0)
-                    m_MaxHitPoints = 0;
-            }
-        }
-
-        private int m_SailPoints;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int SailPoints
-        {
-            get { return m_SailPoints; }
-            set
-            {
-                m_SailPoints = value;
-
-                if (m_SailPoints > MaxSailPoints)
-                    m_SailPoints = MaxSailPoints;
-
-                else if (m_SailPoints < 0)
-                    m_SailPoints = 0;
-            }
-        }
-
-        private int m_MaxSailPoints = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int MaxSailPoints
-        {
-            get
-            {
-                if (m_MaxSailPoints == -1)
-                    return BaseMaxSailPoints;
-
-                return m_MaxSailPoints;
-            }
-
-            set
-            {
-                m_MaxSailPoints = value;
-
-                if (SailPoints > m_MaxSailPoints)
-                    SailPoints = m_MaxSailPoints;
-
-                if (m_MaxSailPoints < 0)
-                    m_MaxSailPoints = 0;
-            }
-        }
-
-        private int m_GunPoints;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int GunPoints
-        {
-            get { return m_GunPoints; }
-            set
-            {
-                m_GunPoints = value;
-
-                if (m_GunPoints > MaxGunPoints)
-                    m_GunPoints = MaxGunPoints;
-
-                else if (m_GunPoints < 0)
-                    m_GunPoints = 0;
-            }
-        }
-
-        private int m_MaxGunPoints = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int MaxGunPoints
-        {
-            get
-            {
-                if (m_MaxGunPoints == -1)
-                    return BaseMaxGunPoints;
-
-                return m_MaxGunPoints;
-            }
-
-            set
-            {
-                m_MaxGunPoints = value;
-
-                if (GunPoints > m_MaxGunPoints)
-                    GunPoints = m_MaxGunPoints;
-
-                if (m_MaxGunPoints < 0)
-                    m_MaxGunPoints = 0;
-            }
-        }
-
-        private MobileControlType m_MobileControlType = MobileControlType.Null;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public MobileControlType MobileControlType
-        {
-            get
-            {
-                if (m_MobileControlType == MobileControlType.Null)
-                    return BaseMobileControlType;
-
-                return m_MobileControlType;
-            }
-
-            set
-            {
-                m_MobileControlType = value;
-            }
-        }
-
-        private MobileFactionType m_MobileFactionType = MobileFactionType.Null;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public MobileFactionType MobileFactionType
-        {
-            get
-            {
-                if (m_MobileFactionType == MobileFactionType.Null)
-                    return BaseMobileFactionType;
-
-                return m_MobileFactionType;
-            }
-
-            set
-            {
-                m_MobileFactionType = value;
-            }
-        }
-
-        private int m_DoubloonValue = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int DoubloonValue
-        {
-            get
-            {
-                if (m_DoubloonValue == -1)
-                    return BaseDoubloonValue;
-
-                return m_DoubloonValue;
-            }
-
-            set
-            {
-                m_DoubloonValue = value;
-
-                if (m_DoubloonValue < 0)
-                    m_DoubloonValue = 0;
-            }
-        }
-
-        private int m_PerceptionRange = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int PerceptionRange
-        {
-            get
-            {
-                if (m_PerceptionRange == -1)
-                    return BasePerceptionRange;
-
-                return m_PerceptionRange;
-            }
-
-            set
-            {
-                m_PerceptionRange = value;
-
-                if (m_PerceptionRange < 0)
-                    m_PerceptionRange = 0;
-            }
-        }
-
-        private double m_CannonAccuracyModifer = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double CannonAccuracyModifer
-        {
-            get
-            {
-                if (m_CannonAccuracyModifer == -1)
-                    return BaseCannonAccuracyModifer;
-
-                return m_CannonAccuracyModifer;
-            }
-
-            set
-            {
-                m_CannonAccuracyModifer = value;
-
-                if (m_CannonAccuracyModifer < 0)
-                    m_CannonAccuracyModifer = 0;
-            }
-        }
-
-        private double m_CannonRangeScalar = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double CannonRangeScalar
-        {
-            get
-            {
-                if (m_CannonRangeScalar == -1)
-                    return BaseCannonRangeScalar;
-
-                return m_CannonRangeScalar;
-            }
-
-            set
-            {
-                m_CannonRangeScalar = value;
-
-                if (m_CannonRangeScalar < 0)
-                    m_CannonRangeScalar = 0;
-            }
-        }
-
-        private double m_CannonDamageScalar = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double CannonDamageScalar
-        {
-            get
-            {
-                if (m_CannonDamageScalar == -1)
-                    return BaseCannonDamageScalar;
-
-                return m_CannonDamageScalar;
-            }
-
-            set
-            {
-                m_CannonDamageScalar = value;
-
-                if (m_CannonDamageScalar < 0)
-                    m_CannonDamageScalar = 0;
-            }
-        }
-
-        private double m_CannonReloadTimeScalar = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double CannonReloadTimeScalar
-        {
-            get
-            {
-                if (m_CannonReloadTimeScalar == -1)
-                    return BaseCannonReloadTimeScalar;
-
-                return m_CannonReloadTimeScalar;
-            }
-
-            set
-            {
-                m_CannonReloadTimeScalar = value;
-
-                if (m_CannonReloadTimeScalar < 0)
-                    m_CannonReloadTimeScalar = 0;
-            }
-        }
-
-        private double m_DamageFromPlayerShipScalar = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double DamageFromPlayerShipScalar
-        {
-            get
-            {
-                if (m_DamageFromPlayerShipScalar == -1)
-                    return BaseDamageFromPlayerShipScalar;
-
-                return m_DamageFromPlayerShipScalar;
-            }
-
-            set
-            {
-                m_DamageFromPlayerShipScalar = value;
-
-                if (m_DamageFromPlayerShipScalar < 0)
-                    m_DamageFromPlayerShipScalar = 0;
-            }
-        }
-
-        private double m_FastInterval = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double FastInterval
-        {
-            get
-            {
-                if (m_FastInterval == -1)
-                    return BaseFastInterval;
-
-                return m_FastInterval;
-            }
-
-            set
-            {
-                m_FastInterval = value;
-
-                if (m_FastInterval < 0)
-                    m_FastInterval = 0;
-            }
-        }
-
-        private double m_FastDriftInterval = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double FastDriftInterval
-        {
-            get
-            {
-                if (m_FastDriftInterval == -1)
-                    return BaseFastDriftInterval;
-
-                return m_FastDriftInterval;
-            }
-
-            set
-            {
-                m_FastDriftInterval = value;
-
-                if (m_FastDriftInterval < 0)
-                    m_FastDriftInterval = 0;
-            }
-        }
-
-        private double m_SlowInterval = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double SlowInterval
-        {
-            get
-            {
-                if (m_SlowInterval == -1)
-                    return BaseSlowInterval;
-
-                return m_SlowInterval;
-            }
-
-            set
-            {
-                m_SlowInterval = value;
-
-                if (m_SlowInterval < 0)
-                    m_SlowInterval = 0;
-            }
-        }
-
-        private double m_SlowDriftInterval = -1;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double SlowDriftInterval
-        {
-            get
-            {
-                if (m_SlowDriftInterval == -1)
-                    return BaseSlowDriftInterval;
-
-                return m_SlowDriftInterval;
-            }
-
-            set
-            {
-                m_SlowDriftInterval = value;
-
-                if (m_SlowDriftInterval < 0)
-                    m_SlowDriftInterval = 0;
-            }
-        }
+        private bool m_Destroyed = false;                        
 
         private DateTime m_CannonCooldown = DateTime.UtcNow;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -1566,14 +1503,7 @@ namespace Server
             set { m_CannonCooldown = value; }
         }
 
-        private TargetingMode m_TargetingMode = TargetingMode.Hull;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public TargetingMode TargetingMode
-        {
-            get { return m_TargetingMode; }
-            set { m_TargetingMode = value; }
-        }
-               
+        public TargetingMode m_TargetingMode = TargetingMode.Random;      
 
         private List<ShipFireItem> m_ShipFires = new List<ShipFireItem>();
         public List<ShipFireItem> ShipFires
@@ -1628,21 +1558,6 @@ namespace Server
             set { m_DecayTime = value; }
         }
         
-        private Boolean m_ReducedSpeedMode;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public Boolean ReducedSpeedMode
-        {
-            get { return m_ReducedSpeedMode; }
-            set { m_ReducedSpeedMode = value; }
-        }
-
-        private DateTime m_ReducedSpeedModeTime;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public DateTime ReducedSpeedModeTime
-        {
-            get { return m_ReducedSpeedModeTime; }
-            set { m_ReducedSpeedModeTime = value; }
-        }
 
         [CommandProperty(AccessLevel.GameMaster)]
         public override int Hue
@@ -1671,14 +1586,6 @@ namespace Server
 
                 base.Hue = value;
             }
-        }
-
-        private int m_CannonHue = 0;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int CannonHue
-        {
-            get { return m_CannonHue; }
-            set { m_CannonHue = value; }
         }
 
         private Hold m_Hold;
@@ -1755,9 +1662,9 @@ namespace Server
         private int m_Speed;
         [CommandProperty(AccessLevel.GameMaster)]
         public int Speed
-        { 
+        {
             get { return m_Speed; }
-            set { m_Speed = value; } 
+            set { m_Speed = value; }
         }
 
         private bool m_Anchored;
@@ -1782,92 +1689,26 @@ namespace Server
             } 
         }
 
-        private ShipUpgrades.ThemeType m_ThemeUpgrade;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public ShipUpgrades.ThemeType ThemeUpgrade
-        {
-            get { return m_ThemeUpgrade; }
-            set { m_ThemeUpgrade = value; }
-        }
+        public ShipUpgrades.ThemeType m_ThemeUpgrade;
+        public ShipUpgrades.PaintType m_PaintUpgrade;
+        public ShipUpgrades.CannonMetalType m_CannonMetalUpgrade;
 
-        private ShipUpgrades.PaintType m_PaintUpgrade;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public ShipUpgrades.PaintType PaintUpgrade
-        {
-            get { return m_PaintUpgrade; }
-            set { m_PaintUpgrade = value; }
-        }
+        public ShipUpgrades.OutfittingType m_OutfittingUpgrade;
+        public ShipUpgrades.BannerType m_BannerUpgrade;
+        public ShipUpgrades.CharmType m_CharmUpgrade;
 
-        private ShipUpgrades.CannonMetalType m_CannonMetalUpgrade;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public ShipUpgrades.CannonMetalType CannonMetalUpgrade
-        {
-            get { return m_CannonMetalUpgrade; }
-            set { m_CannonMetalUpgrade = value; }
-        }
+        public ShipUpgrades.MinorAbilityType m_MinorAbilityUpgrade;
+        public ShipUpgrades.MajorAbilityType m_MajorAbilityUpgrade;
+        public ShipUpgrades.EpicAbilityType m_EpicAbilityUpgrade;
 
-        private ShipUpgrades.OutfittingType m_OutfittingUpgrade;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public ShipUpgrades.OutfittingType OutfittingUpgrade
-        {
-            get { return m_OutfittingUpgrade; }
-            set { m_OutfittingUpgrade = value; }
-        }
+        public virtual Type ShipDeedType { get { return typeof(SmallShipDeed); } }
 
-        private ShipUpgrades.BannerType m_BannerUpgrade;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public ShipUpgrades.BannerType BannerUpgrade
-        {
-            get { return m_BannerUpgrade; }
-            set { m_BannerUpgrade = value; }
-        }
-
-        private ShipUpgrades.CharmType m_CharmUpgrade;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public ShipUpgrades.CharmType CharmUpgrade
-        {
-            get { return m_CharmUpgrade; }
-            set { m_CharmUpgrade = value; }
-        }
-
-        private ShipUpgrades.MinorAbilityType m_MinorAbilityUpgrade;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public ShipUpgrades.MinorAbilityType MinorAbilityUpgrade
-        {
-            get { return m_MinorAbilityUpgrade; }
-            set { m_MinorAbilityUpgrade = value; }
-        }
-
-        private ShipUpgrades.MajorAbilityType m_MajorAbilityUpgrade;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public ShipUpgrades.MajorAbilityType MajorAbilityUpgrade
-        {
-            get { return m_MajorAbilityUpgrade; }
-            set { m_MajorAbilityUpgrade = value; }
-        }
-
-        private ShipUpgrades.EpicAbilityType m_EpicAbilityUpgrade;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public ShipUpgrades.EpicAbilityType EpicAbilityUpgrade
-        {
-            get { return m_EpicAbilityUpgrade; }
-            set { m_EpicAbilityUpgrade = value; }
-        }
-
-        public virtual BaseShipDeed ShipDeed { get { return null; } }
-
-        public ShipRune ShipRune = null;
-        public ShipRune ShipBankRune = null;
+        public ShipRune m_ShipRune = null;
+        public ShipRune m_ShipBankRune = null;
 
         public static List<BaseShip> m_Instances = new List<BaseShip>();
 
-        private static bool NewShipMovement { get { return true; } }
-
-        private static int SlowSpeed = 1;
-        private static int FastSpeed = 1;
-
-        private static int SlowDriftSpeed = 1;
-        private static int FastDriftSpeed = 1;
+        private static bool NewShipMovement { get { return true; } }        
 
         private static Direction Forward = Direction.North;
         private static Direction ForwardLeft = Direction.Up;
@@ -1895,7 +1736,15 @@ namespace Server
 
         public override bool HandlesOnSpeech { get { return true; } }
 
-        private DateTime m_TillermanRelease;       
+        private DateTime m_TillermanRelease;
+
+        public bool SlowdownMode = false;
+        public DateTime SlowdownModeExpiration;
+
+        public double TempSpeedScalar = 1.0;
+        public DateTime TempSpeedScalarExpiration = DateTime.UtcNow;
+     
+        //--------------------------
         
         #endregion       
 
@@ -2444,9 +2293,6 @@ namespace Server
             else if (!targ.Player)
                 from.SendMessage("That can't be a co-owner of the ship.");
 
-            else if (m_CoOwners.Count >= MaxCoOwners)
-                from.SendLocalizedMessage(501368); // Your co-owner list is full!            
-
             else if (m_CoOwners.Contains(targ))
                 from.SendLocalizedMessage(501369); // This person is already on your co-owner list!            
 
@@ -2492,10 +2338,7 @@ namespace Server
                 from.SendMessage("This person is already a co-owner of the ship.");
 
             else if (!targ.Player)
-                from.SendMessage("That can't be a friend of the ship.");
-
-            else if (m_Friends.Count >= MaxFriends)
-                from.SendLocalizedMessage(501375); // Your friends list is full!            
+                from.SendMessage("That can't be a friend of the ship.");         
 
             else if (m_Friends.Contains(targ))
                 from.SendLocalizedMessage(501376); // This person is already on your friends list!            
@@ -3022,13 +2865,13 @@ namespace Server
                 else
                     return -2;
             }
-        }  
+        }
 
         public bool StartMove(Direction dir, bool fast, bool message)
         {
             if (m_ScuttleInProgress)
                 return false;
-            
+
             if (HitPoints <= 0)
             {
                 if (m_TillerMan != null)
@@ -3037,24 +2880,18 @@ namespace Server
                     return false;
                 }
             }
-            
-            if (ReducedSpeedMode)
-            {
-                if (DateTime.UtcNow < ReducedSpeedModeTime)
-                    fast = false;
 
-                else
-                    ReducedSpeedMode = false;
-            }
-            
+            if (SlowdownMode)
+                fast = false;
+
             bool drift = (dir != Forward && dir != ForwardLeft && dir != ForwardRight);
-            TimeSpan interval = (fast ? (drift ? TimeSpan.FromSeconds(FastDriftInterval) : TimeSpan.FromSeconds(FastInterval)) : (drift ? TimeSpan.FromSeconds(SlowDriftInterval) : TimeSpan.FromSeconds(SlowInterval)));
+            TimeSpan interval = (fast ? (drift ? TimeSpan.FromSeconds(DriftSpeed) : TimeSpan.FromSeconds(ForwardSpeed)) : (drift ? TimeSpan.FromSeconds(DriftSpeed * SlowdownModePenalty) : TimeSpan.FromSeconds(ForwardSpeed * SlowdownModePenalty)));
             int speed = (fast ? (drift ? FastDriftSpeed : FastSpeed) : (drift ? SlowDriftSpeed : SlowSpeed));
             int clientSpeed = fast ? 0x4 : 0x3;
             double intervalSeconds = interval.TotalSeconds;
 
-            if (m_TempSpeedModifierExpiration >= DateTime.UtcNow)
-                intervalSeconds *= m_TempSpeedModifier;
+            if (TempSpeedScalarExpiration >= DateTime.UtcNow)
+                intervalSeconds *= TempSpeedScalar;
 
             if (intervalSeconds <= 0)
             {
@@ -3066,8 +2903,8 @@ namespace Server
 
             interval = TimeSpan.FromSeconds(intervalSeconds);
 
-            if (StartMove(dir, speed, clientSpeed, interval, false, message))            
-                return true;            
+            if (StartMove(dir, speed, clientSpeed, interval, false, message))
+                return true;
 
             return false;
         }
@@ -3085,9 +2922,9 @@ namespace Server
                 return false;
             }
 
-            if (m_TempSpeedModifierExpiration > DateTime.UtcNow)
+            if (TempSpeedScalarExpiration > DateTime.UtcNow)
             {
-                if (m_TempSpeedModifier <= 0)
+                if (TempSpeedScalar <= 0)
                 {
                     if (m_TillerMan != null)
                         m_TillerMan.Say("Yar, we be held in place by something!");
@@ -3116,7 +2953,7 @@ namespace Server
 
             bool drift = (dir != Forward);
 
-            TimeSpan interval = drift ? TimeSpan.FromSeconds(FastDriftInterval) : TimeSpan.FromSeconds(FastInterval);
+            TimeSpan interval = drift ? TimeSpan.FromSeconds(DriftSpeed) : TimeSpan.FromSeconds(ForwardSpeed);
             int speed = drift ? FastDriftSpeed : FastSpeed;
 
             if (StartMove(dir, speed, 0x1, interval, true, true))            
@@ -3138,21 +2975,21 @@ namespace Server
             protected override void OnTick()
             {
                 bool drift = (m_Ship.Moving != Forward && m_Ship.Moving != ForwardLeft && m_Ship.Moving != ForwardRight);
-                bool fast = !m_Ship.ReducedSpeedMode;
+                bool fast = !m_Ship.SlowdownMode;
 
-                TimeSpan interval = (fast ? (drift ? TimeSpan.FromSeconds(m_Ship.FastDriftInterval) : TimeSpan.FromSeconds(m_Ship.FastInterval)) : (drift ? TimeSpan.FromSeconds(m_Ship.SlowDriftInterval) : TimeSpan.FromSeconds(m_Ship.SlowInterval)));
+                TimeSpan interval = (fast ? (drift ? TimeSpan.FromSeconds(m_Ship.DriftSpeed) : TimeSpan.FromSeconds(m_Ship.ForwardSpeed)) : (drift ? TimeSpan.FromSeconds(m_Ship.DriftSpeed * m_Ship.SlowdownModePenalty) : TimeSpan.FromSeconds(m_Ship.ForwardSpeed * m_Ship.SlowdownModePenalty)));
                 double intervalSeconds = interval.TotalSeconds;               
                
-                if (m_Ship.m_TempSpeedModifierExpiration > DateTime.UtcNow)
+                if (m_Ship.TempSpeedScalarExpiration > DateTime.UtcNow)
                 {
-                    if (m_Ship.m_TempSpeedModifier <= 0)
+                    if (m_Ship.TempSpeedScalar <= 0)
                     {
                         m_Ship.m_TillerMan.Say("Yar, something be holding us in place!");
                         m_Ship.StopMove(false);
                     }
 
                     else
-                        intervalSeconds *= m_Ship.m_TempSpeedModifier;
+                        intervalSeconds *= m_Ship.TempSpeedScalar;
                 }
 
                 if (intervalSeconds <= .05)
@@ -3185,7 +3022,7 @@ namespace Server
 
                     PlayerMobile pm_ShipOwner = m_Ship.Owner as PlayerMobile;
 
-                    if (!m_Ship.ReducedSpeedMode && pm_ShipOwner != null)
+                    if (!m_Ship.SlowdownMode && pm_ShipOwner != null)
                     {
                         if (pm_ShipOwner.ShipOccupied == m_Ship)
                         {
@@ -3196,19 +3033,19 @@ namespace Server
                         }
                     }
 
-                    if (m_Ship.ReducedSpeedMode)
+                    if (m_Ship.SlowdownMode)
                     {
-                        if (DateTime.UtcNow > m_Ship.ReducedSpeedModeTime)
+                        if (DateTime.UtcNow >= m_Ship.SlowdownModeExpiration)
                         {
                             m_Ship.StopMove(false);
-                            m_Ship.ReducedSpeedMode = false;
+                            m_Ship.SlowdownMode = false;
                             m_Ship.StartMove(m_Ship.Moving, true, false);
 
                             m_Ship.m_TillerMan.Say("Yar, back to full speed!");
                         }
                     }
 
-                    else if (DateTime.UtcNow > m_Ship.ReducedSpeedModeTime + TimeSpan.FromSeconds((double)m_Ship.ReducedSpeedModeCooldown))
+                    else if (DateTime.UtcNow >= m_Ship.SlowdownModeExpiration + TimeSpan.FromSeconds((double)m_Ship.ReducedSpeedModeCooldown))
                     {
                         double sailsPercent = (double)((float)m_Ship.SailPoints / (float)m_Ship.MaxSailPoints);
 
@@ -3219,10 +3056,10 @@ namespace Server
                         {
                             m_Ship.m_TillerMan.Say("Arr, we've slowed down!");
 
-                            m_Ship.ReducedSpeedModeTime = DateTime.UtcNow + TimeSpan.FromSeconds((double)(Utility.RandomMinMax(m_Ship.ReducedSpeedModeMinDuration, m_Ship.ReducedSpeedModeMaxDuration)));
+                            m_Ship.SlowdownModeExpiration = DateTime.UtcNow + TimeSpan.FromSeconds((double)(Utility.RandomMinMax(m_Ship.ReducedSpeedModeMinDuration, m_Ship.ReducedSpeedModeMaxDuration)));
 
                             m_Ship.StopMove(false);
-                            m_Ship.ReducedSpeedMode = true;
+                            m_Ship.SlowdownMode = true;
                             m_Ship.StartMove(m_Ship.Moving, false, false);
                         }
                     }
@@ -4420,22 +4257,22 @@ namespace Server
                 {
                     case TargetingMode.Random:
                         m_TillerMan.Say("Aye, aye! We'll target anywhere on their ship!");
-                        TargetingMode = TargetingMode.Random;
+                        m_TargetingMode = TargetingMode.Random;
                     break;
 
                     case TargetingMode.Hull:
                         m_TillerMan.Say("Aye, aye! We'll target their hull!");
-                        TargetingMode = TargetingMode.Hull;
+                        m_TargetingMode = TargetingMode.Hull;
                     break;
 
                     case TargetingMode.Sails:
                         m_TillerMan.Say("Aye, aye! We'll target their sails!");
-                        TargetingMode = TargetingMode.Sails;
+                        m_TargetingMode = TargetingMode.Sails;
                     break;
 
                     case TargetingMode.Guns:
                         m_TillerMan.Say("Aye, aye! We'll target their guns!");
-                        TargetingMode = TargetingMode.Guns;
+                        m_TargetingMode = TargetingMode.Guns;
                     break;
                 }
             }
@@ -5010,16 +4847,16 @@ namespace Server
             if (m_ShipSpawner != null)
                 m_ShipSpawner.ShipSunk(this);
 
-            if (ShipRune != null)
+            if (m_ShipRune != null)
             {
-                if (!ShipRune.Deleted)
-                    ShipRune.Delete();
+                if (!m_ShipRune.Deleted)
+                    m_ShipRune.Delete();
             }
 
-            if (ShipBankRune != null)
+            if (m_ShipBankRune != null)
             {
-                if (!ShipBankRune.Deleted)
-                    ShipBankRune.Delete();
+                if (!m_ShipBankRune.Deleted)
+                    m_ShipBankRune.Delete();
             }
             
             m_Instances.Remove(this);
@@ -5177,7 +5014,7 @@ namespace Server
             if (result != DryDockResult.Valid)
                 return;
 
-            BaseShipDeed shipDeed = ShipDeed;
+            BaseShipDeed shipDeed = (BaseShipDeed)Activator.CreateInstance(ShipDeedType);
 
             if (shipDeed == null)
                 return;
@@ -5188,16 +5025,16 @@ namespace Server
 
             from.AddToBackpack(shipDeed);
 
-            if (ShipRune != null)
+            if (m_ShipRune != null)
             {
-                if (!ShipRune.Deleted)
-                    ShipRune.Delete();
+                if (!m_ShipRune.Deleted)
+                    m_ShipRune.Delete();
             }
 
-            if (ShipBankRune != null)
+            if (m_ShipBankRune != null)
             {
-                if (!ShipBankRune.Deleted)
-                    ShipBankRune.Delete();
+                if (!m_ShipBankRune.Deleted)
+                    m_ShipBankRune.Delete();
             }
 
             Delete();
@@ -5253,11 +5090,66 @@ namespace Server
             ship.ShipName = shipDeed.m_ShipName;
             ship.Owner = shipDeed.m_Owner;
 
-            ship.HitPoints = shipDeed.m_HitPoints;
-            ship.SailPoints = shipDeed.m_SailPoints;
-            ship.GunPoints = shipDeed.m_GunPoints;
+            ship.HitPoints = shipDeed.HitPoints;
+            ship.MaxHitPoints = shipDeed.MaxHitPoints;
+            ship.SailPoints = shipDeed.SailPoints;
+            ship.MaxSailPoints = shipDeed.MaxSailPoints;
+            ship.GunPoints = shipDeed.GunPoints;
+            ship.MaxGunPoints = shipDeed.MaxGunPoints;
 
-            ship.TargetingMode = shipDeed.m_TargetingMode;
+            ship.ForwardSpeed = shipDeed.ForwardSpeed;
+            ship.DriftSpeed = shipDeed.DriftSpeed;
+            ship.SlowdownModePenalty = shipDeed.SlowdownModePenalty;
+
+            ship.CannonAccuracy = shipDeed.CannonAccuracy;
+            ship.CannonMinDamage = shipDeed.CannonMinDamage;
+            ship.CannonMaxDamage = shipDeed.CannonMaxDamage;
+            ship.CannonRange = shipDeed.CannonRange;
+            ship.CannonReloadDuration = shipDeed.CannonReloadDuration;
+
+            ship.MinorAbilityCooldownDuration = shipDeed.MinorAbilityCooldownDuration;
+            ship.MajorAbilityCooldownDuration = shipDeed.MajorAbilityCooldownDuration;
+            ship.EpicAbilityCooldownDuration = shipDeed.EpicAbilityCooldownDuration;
+
+            ship.RepairCooldownDuration = shipDeed.RepairCooldownDuration;
+            ship.BoardingChance = shipDeed.BoardingChance;
+            
+            ship.HitPointsCreationScalar = shipDeed.HitPointsCreationScalar;
+            ship.SailPointsCreationScalar = shipDeed.SailPointsCreationScalar;
+            ship.GunPointsCreationScalar = shipDeed.GunPointsCreationScalar;
+
+            ship.ForwardSpeedCreationScalar = shipDeed.ForwardSpeedCreationScalar;
+            ship.DriftSpeedCreationScalar = shipDeed.DriftSpeedCreationScalar;
+            ship.SlowdownModePenaltyCreationScalar = shipDeed.SlowdownModePenaltyCreationScalar;
+
+            ship.CannonAccuracyCreationScalar = shipDeed.CannonAccuracyCreationScalar;
+            ship.CannonDamageCreationScalar = shipDeed.CannonDamageCreationScalar;
+            ship.CannonRangeCreationScalar = shipDeed.CannonRangeCreationScalar;
+            ship.CannonReloadDurationCreationScalar = shipDeed.CannonReloadDurationCreationScalar;
+
+            ship.MinorAbilityCooldownDurationCreationScalar = shipDeed.MinorAbilityCooldownDurationCreationScalar;
+            ship.MajorAbilityCooldownDurationCreationScalar = shipDeed.MajorAbilityCooldownDurationCreationScalar;
+            ship.EpicAbilityCooldownDurationCreationScalar = shipDeed.EpicAbilityCooldownDurationCreationScalar;
+
+            ship.RepairCooldownDurationCreationScalar = shipDeed.RepairCooldownDurationCreationScalar;
+            ship.BoardingChanceCreationScalar = shipDeed.BoardingChanceCreationScalar;
+            
+            ship.m_TargetingMode = shipDeed.m_TargetingMode;                        
+
+            ship.m_IPAsCoOwners = shipDeed.m_IPAsCoOwners;
+            ship.m_GuildAsCoOwners = shipDeed.m_GuildAsCoOwners;
+            ship.m_IPAsFriends = shipDeed.m_IPAsFriends;
+            ship.m_GuildAsFriends = shipDeed.m_GuildAsFriends;
+            
+            ship.m_ThemeUpgrade = shipDeed.m_ThemeUpgrade;
+            ship.m_PaintUpgrade = shipDeed.m_PaintUpgrade;
+            ship.m_CannonMetalUpgrade = shipDeed.m_CannonMetalUpgrade;
+            ship.m_OutfittingUpgrade = shipDeed.m_OutfittingUpgrade;
+            ship.m_BannerUpgrade = shipDeed.m_BannerUpgrade;
+            ship.m_CharmUpgrade = shipDeed.m_CharmUpgrade;
+            ship.m_MinorAbilityUpgrade = shipDeed.m_MinorAbilityUpgrade;
+            ship.m_MajorAbilityUpgrade = shipDeed.m_MajorAbilityUpgrade;
+            ship.m_EpicAbilityUpgrade = shipDeed.m_EpicAbilityUpgrade;
 
             foreach (Mobile mobile in shipDeed.m_CoOwners)
             {
@@ -5269,21 +5161,6 @@ namespace Server
                 ship.Friends.Add(mobile);
             }
 
-            ship.IPAsCoOwners = shipDeed.m_IPAsCoOwners;
-            ship.GuildAsCoOwners = shipDeed.m_GuildAsCoOwners;
-            ship.IPAsFriends = shipDeed.m_IPAsFriends;
-            ship.GuildAsFriends = shipDeed.m_GuildAsFriends;
-
-            ship.ThemeUpgrade = shipDeed.m_ThemeUpgrade;
-            ship.PaintUpgrade = shipDeed.m_PaintUpgrade;
-            ship.CannonMetalUpgrade = shipDeed.m_CannonMetalUpgrade;
-            ship.OutfittingUpgrade = shipDeed.m_OutfittingUpgrade;
-            ship.BannerUpgrade = shipDeed.m_BannerUpgrade;
-            ship.CharmUpgrade = shipDeed.m_CharmUpgrade;
-            ship.MinorAbilityUpgrade = shipDeed.m_MinorAbility;
-            ship.MajorAbilityUpgrade = shipDeed.m_MajorAbility;
-            ship.EpicAbilityUpgrade = shipDeed.m_EpicAbility;
-
             //TEST: Set Ship Repair Timers + Ability Cooldowns to Maximum Amount
         }
 
@@ -5292,39 +5169,81 @@ namespace Server
             if (ship == null) return;
             if (shipDeed == null) return;
 
-            shipDeed.m_ShipName = ship.ShipName;
-            shipDeed.m_Owner = ship.Owner;
+            shipDeed.m_Registered = true;
 
-            shipDeed.m_HitPoints = ship.HitPoints;
-            shipDeed.m_SailPoints = ship.SailPoints;
-            shipDeed.m_GunPoints = ship.GunPoints;
+            shipDeed.m_ShipName = ship.m_ShipName;
+            shipDeed.m_Owner = ship.m_Owner;
 
-            shipDeed.m_TargetingMode = ship.TargetingMode;            
+            shipDeed.HitPoints = ship.HitPoints;
+            shipDeed.MaxHitPoints = ship.MaxHitPoints;
+            shipDeed.SailPoints = ship.SailPoints;
+            shipDeed.MaxSailPoints = ship.MaxSailPoints;
+            shipDeed.GunPoints = ship.GunPoints;
+            shipDeed.MaxGunPoints = ship.MaxGunPoints;
+
+            shipDeed.ForwardSpeed = ship.ForwardSpeed;
+            shipDeed.DriftSpeed = ship.DriftSpeed;
+            shipDeed.SlowdownModePenalty = ship.SlowdownModePenalty;
+
+            shipDeed.CannonAccuracy = ship.CannonAccuracy;
+            shipDeed.CannonMinDamage = ship.CannonMinDamage;
+            shipDeed.CannonMaxDamage = ship.CannonMaxDamage;
+            shipDeed.CannonRange = ship.CannonRange;
+            shipDeed.CannonReloadDuration = ship.CannonReloadDuration;
+
+            shipDeed.MinorAbilityCooldownDuration = ship.MinorAbilityCooldownDuration;
+            shipDeed.MajorAbilityCooldownDuration = ship.MajorAbilityCooldownDuration;
+            shipDeed.EpicAbilityCooldownDuration = ship.EpicAbilityCooldownDuration;
+
+            shipDeed.RepairCooldownDuration = ship.RepairCooldownDuration;
+            shipDeed.BoardingChance = ship.BoardingChance;
+
+            shipDeed.HitPointsCreationScalar = ship.HitPointsCreationScalar;
+            shipDeed.SailPointsCreationScalar = ship.SailPointsCreationScalar;
+            shipDeed.GunPointsCreationScalar = ship.GunPointsCreationScalar;
+
+            shipDeed.ForwardSpeedCreationScalar = ship.ForwardSpeedCreationScalar;
+            shipDeed.DriftSpeedCreationScalar = ship.DriftSpeedCreationScalar;
+            shipDeed.SlowdownModePenaltyCreationScalar = ship.SlowdownModePenaltyCreationScalar;
+
+            shipDeed.CannonAccuracyCreationScalar = ship.CannonAccuracyCreationScalar;
+            shipDeed.CannonDamageCreationScalar = ship.CannonDamageCreationScalar;
+            shipDeed.CannonRangeCreationScalar = ship.CannonRangeCreationScalar;
+            shipDeed.CannonReloadDurationCreationScalar = ship.CannonReloadDurationCreationScalar;
+
+            shipDeed.MinorAbilityCooldownDurationCreationScalar = ship.MinorAbilityCooldownDurationCreationScalar;
+            shipDeed.MajorAbilityCooldownDurationCreationScalar = ship.MajorAbilityCooldownDurationCreationScalar;
+            shipDeed.EpicAbilityCooldownDurationCreationScalar = ship.EpicAbilityCooldownDurationCreationScalar;
+
+            shipDeed.RepairCooldownDurationCreationScalar = ship.RepairCooldownDurationCreationScalar;
+            shipDeed.BoardingChanceCreationScalar = ship.BoardingChanceCreationScalar;
+
+            shipDeed.m_TargetingMode = ship.m_TargetingMode;
+
+            shipDeed.m_IPAsCoOwners = ship.m_IPAsCoOwners;
+            shipDeed.m_GuildAsCoOwners = ship.m_GuildAsCoOwners;
+            shipDeed.m_IPAsFriends = ship.m_IPAsFriends;
+            shipDeed.m_GuildAsFriends = ship.m_GuildAsFriends;
+
+            shipDeed.m_ThemeUpgrade = ship.m_ThemeUpgrade;
+            shipDeed.m_PaintUpgrade = ship.m_PaintUpgrade;
+            shipDeed.m_CannonMetalUpgrade = ship.m_CannonMetalUpgrade;
+            shipDeed.m_OutfittingUpgrade = ship.m_OutfittingUpgrade;
+            shipDeed.m_BannerUpgrade = ship.m_BannerUpgrade;
+            shipDeed.m_CharmUpgrade = ship.m_CharmUpgrade;
+            shipDeed.m_MinorAbilityUpgrade = ship.m_MinorAbilityUpgrade;
+            shipDeed.m_MajorAbilityUpgrade = ship.m_MajorAbilityUpgrade;
+            shipDeed.m_EpicAbilityUpgrade = ship.m_EpicAbilityUpgrade;
 
             foreach (Mobile mobile in ship.m_CoOwners)
             {
                 shipDeed.m_CoOwners.Add(mobile);
             }
 
-            foreach (Mobile mobile in shipDeed.m_Friends)
+            foreach (Mobile mobile in ship.m_Friends)
             {
                 shipDeed.m_Friends.Add(mobile);
             }
-
-            shipDeed.m_IPAsCoOwners = ship.IPAsCoOwners;
-            shipDeed.m_GuildAsCoOwners = ship.GuildAsCoOwners;
-            shipDeed.m_IPAsFriends = ship.IPAsFriends;
-            shipDeed.m_GuildAsFriends = ship.GuildAsFriends;
-
-            shipDeed.m_ThemeUpgrade = ship.ThemeUpgrade;
-            shipDeed.m_PaintUpgrade = ship.PaintUpgrade;
-            shipDeed.m_CannonMetalUpgrade = ship.CannonMetalUpgrade;
-            shipDeed.m_OutfittingUpgrade = ship.OutfittingUpgrade;
-            shipDeed.m_BannerUpgrade = ship.BannerUpgrade;
-            shipDeed.m_CharmUpgrade = ship.CharmUpgrade;
-            shipDeed.m_MinorAbility = ship.MinorAbilityUpgrade;
-            shipDeed.m_MajorAbility = ship.MajorAbilityUpgrade;
-            shipDeed.m_EpicAbility = ship.EpicAbilityUpgrade;
         }
 
         #endregion
@@ -6264,6 +6183,95 @@ namespace Server
             return false;
         }
 
+        public void CheckShipFires()
+        {
+
+            //Determine Ship Fires
+            int maxShipFires = (int)((double)m_EmbarkLocations().Count / 3);
+            int currentShipFires = m_ShipFires.Count;
+
+            double missingHitPointsPercent = (double)(1 - (float)HitPoints / (float)MaxHitPoints);
+            double percentBufferBeforeFires = .05;
+            double fireInterval = (1 - percentBufferBeforeFires) / (double)maxShipFires;
+
+            double adjustedMissingHitPointsPercent = missingHitPointsPercent - percentBufferBeforeFires;
+
+            int desiredShipFires = 0;
+
+            if (adjustedMissingHitPointsPercent > 0)
+                desiredShipFires = (int)(Math.Ceiling(adjustedMissingHitPointsPercent / fireInterval));
+
+            if (desiredShipFires > maxShipFires)
+                desiredShipFires = maxShipFires;
+
+            int newShipFires = desiredShipFires - currentShipFires;
+            int shipFiresToRemove = 0;
+
+            if (newShipFires < 0)
+                shipFiresToRemove = Math.Abs(newShipFires);
+
+            //Add New Fires
+            if (newShipFires > 0)
+            {
+                int startingShipFires = m_ShipFires.Count;
+
+                for (int a = 0; a < newShipFires; a++)
+                {
+                    List<Point3D> m_PotentialShipFireLocations = new List<Point3D>();
+
+                    foreach (Point3D embarkLocation in m_EmbarkLocations())
+                    {
+                        bool foundActiveShipFire = false;
+
+                        foreach (ShipFireItem activeShipFire in m_ShipFires)
+                        {
+                            Point3D activeShipFireLocation = new Point3D(activeShipFire.xOffset, activeShipFire.yOffset, activeShipFire.zOffset);
+
+                            if (embarkLocation == activeShipFireLocation)
+                            {
+                                foundActiveShipFire = true;
+                                break;
+                            }
+                        }
+
+                        if (foundActiveShipFire == false)
+                            m_PotentialShipFireLocations.Add(embarkLocation);
+                    }
+
+                    Point3D shipFireLocation = m_PotentialShipFireLocations[Utility.RandomMinMax(0, m_PotentialShipFireLocations.Count - 1)];
+                    Point3D rotatedShipFireLocation = GetRotatedLocation(shipFireLocation.X, shipFireLocation.Y, shipFireLocation.Z);
+
+                    if (!(rotatedShipFireLocation is Point3D))
+                        continue;
+
+                    Point3D point = new Point3D(rotatedShipFireLocation.X + this.X, rotatedShipFireLocation.Y + this.Y, rotatedShipFireLocation.Z + this.Z);
+
+                    if (Facing == Direction.West || Facing == Direction.East)
+                    {
+                        ShipFireItem b = new ShipFireItem(0x398C, point, this.Map, TimeSpan.FromMinutes(60), shipFireLocation.X, shipFireLocation.Y, shipFireLocation.Z);
+                        m_ShipFires.Add(b);
+                    }
+
+                    else
+                    {
+                        ShipFireItem b = new ShipFireItem(0x3996, point, this.Map, TimeSpan.FromMinutes(60), shipFireLocation.X, shipFireLocation.Y, shipFireLocation.Z);
+                        m_ShipFires.Add(b);
+                    }
+                }
+            }
+
+            //Remove Some Existing Fires
+            else if (shipFiresToRemove > 0)
+            {
+                for (int a = 0; a < shipFiresToRemove; a++)
+                {
+                    ShipFireItem shipFire = m_ShipFires[m_ShipFires.Count - 1];
+                    m_ShipFires.RemoveAt(m_ShipFires.Count - 1);
+                    shipFire.Delete();
+                }
+            }
+        }
+
         public int GetDistanceWeight(int distance)
         {
             int value = 0;
@@ -6345,11 +6353,11 @@ namespace Server
             if (targetShip == null) return false;
             if (targetShip.Deleted) return false;
 
-            int modifiedRange = (int)(Math.Round((double)CannonMaxRange * CannonRangeScalar));
+            int adjustedCannonRange = (int)(Math.Round(CannonRange));
 
             foreach (ShipCannon shipCannon in m_Cannons)
             {
-                if (considerRange && targetShip.GetShipToLocationDistance(targetShip, shipCannon.Location) > modifiedRange)
+                if (considerRange && targetShip.GetShipToLocationDistance(targetShip, shipCannon.Location) > adjustedCannonRange)
                     continue;
 
                 if (shipCannon.InAngle(targetShip.Location))
@@ -6515,6 +6523,8 @@ namespace Server
 
             ShipCannon cannonToFire = null;
 
+            int adjustedCannonRange = (int)(Math.Round(CannonRange));
+
             //Fire Cannons
             if (DateTime.UtcNow >= CannonCooldown && m_ShipCombatant != null)
             {
@@ -6528,16 +6538,14 @@ namespace Server
                 bool canHitCenter = false;
                 bool canHitTillerman = false;
 
-                ShipCannon bestCannon = null;
-
-                int modifiedRange = (int)(Math.Round((double)CannonMaxRange * CannonRangeScalar));
+                ShipCannon bestCannon = null;               
 
                 foreach (ShipCannon shipCannon in m_Cannons)
                 {
                     if (m_ShipCombatant == null) break;
                     if (m_ShipCombatant.Deleted) break;
 
-                    if (GetShipToLocationDistance(m_ShipCombatant, Location) <= modifiedRange)
+                    if (GetShipToLocationDistance(m_ShipCombatant, Location) <= adjustedCannonRange)
                         inRange = true;
 
                     if (shipCannon.Ammunition > 0)
@@ -6592,8 +6600,6 @@ namespace Server
                     readyToFire = false;
             }
 
-            int baseCannonRange = (int)(Math.Round((double)CannonMaxRange * CannonRangeScalar));
-
             //Ship Was Ready to Fire At Target But Couldn't: Make Maneuvers To Adjust            
             if (readyToFire && !firedAnyCannon && m_ShipCombatant != null)
             {
@@ -6608,7 +6614,7 @@ namespace Server
                 }
 
                 //Within Cannon Range but Not in LOS
-                else if (distance <= baseCannonRange)
+                else if (distance <= adjustedCannonRange)
                 {
                     needMovement = true;
 
@@ -6649,7 +6655,7 @@ namespace Server
             {
                 writer.Write(m_EmbarkedMobiles[a]);
             }
-            
+
             writer.Write(m_ShipItems.Count);
             foreach (Item item in m_ShipItems)
             {
@@ -6664,71 +6670,83 @@ namespace Server
                 writer.Write(entry.m_TotalAmount);
                 writer.Write((DateTime)entry.m_lastDamage);
             }
-
-            writer.Write((int)MobileControlType);
-            writer.Write((int)MobileFactionType);            
-            writer.Write((int)m_Facing);           
+           
+            writer.Write((int)m_Facing);
             writer.Write(m_DecayTime);
-            writer.Write(m_CannonCooldown);              
+            writer.Write(m_CannonCooldown);
             writer.Write(m_PPlank);
             writer.Write(m_SPlank);
             writer.Write(m_TillerMan);
             writer.Write(m_Hold);
             writer.Write(m_ShipTrashBarrel);
-            writer.Write(m_Anchored);            
-            writer.Write(m_ScuttleInProgress);           
+            writer.Write(m_Anchored);
+            writer.Write(m_ScuttleInProgress);
             writer.Write(m_LastCombatTime);
             writer.Write(m_TimeLastMoved);
             writer.Write(m_TimeLastRepaired);
             writer.Write(m_NextTimeRepairable);
-            writer.Write(m_ReducedSpeedMode);
-            writer.Write(m_ReducedSpeedModeTime);
             writer.Write(m_ShipSpawner);
             writer.Write(m_ShipCombatant);
-            writer.Write(ShipRune);
-            writer.Write(ShipBankRune);
+            writer.Write(m_ShipRune);
+            writer.Write(m_ShipBankRune);
             writer.Write(m_LastActivated);
-            writer.Write(AdminControlled);
-            writer.Write(MaxHitPoints);
-            writer.Write(MaxSailPoints);
-            writer.Write(MaxGunPoints);
+            writer.Write(AdminControlled);         
+            writer.Write((int)MobileControlType);
+            writer.Write((int)MobileFactionType);
             writer.Write(PerceptionRange);
-            writer.Write(CannonAccuracyModifer);
-            writer.Write(CannonRangeScalar);
-            writer.Write(CannonDamageScalar);
             writer.Write(DamageFromPlayerShipScalar);
-            writer.Write(FastInterval);
-            writer.Write(FastDriftInterval);
-            writer.Write(SlowInterval);
-            writer.Write(SlowDriftInterval);
             writer.Write(DoubloonValue);
-            writer.Write(m_CannonHue);
-            writer.Write(CannonReloadTimeScalar);
-            writer.Write(m_TempSpeedModifier);
-            writer.Write(m_TempSpeedModifierExpiration);
 
-            //-----Player Persistant Properties: Must Also Be Stored to Ship Deed
-
+            //----Deed Storable Properties
+            
             writer.Write(m_ShipName);
             writer.Write(m_Owner);
 
             writer.Write(HitPoints);
+            writer.Write(MaxHitPoints);
             writer.Write(SailPoints);
+            writer.Write(MaxSailPoints);
             writer.Write(GunPoints);
+            writer.Write(MaxGunPoints);
 
-            writer.Write((int)m_TargetingMode);
+            writer.Write(ForwardSpeed);
+            writer.Write(DriftSpeed);
+            writer.Write(SlowdownModePenalty);
 
-            writer.Write(m_CoOwners.Count);
-            for (int a = 0; a < m_CoOwners.Count; a++)
-            {
-                writer.Write(m_CoOwners[a]);
-            }
+            writer.Write(CannonAccuracy);
+            writer.Write(CannonMinDamage);
+            writer.Write(CannonMaxDamage);
+            writer.Write(CannonRange);
+            writer.Write(CannonReloadDuration);
 
-            writer.Write(m_Friends.Count);
-            for (int a = 0; a < m_Friends.Count; a++)
-            {
-                writer.Write(m_Friends[a]);
-            }   
+            writer.Write(MinorAbilityCooldownDuration);
+            writer.Write(MajorAbilityCooldownDuration);
+            writer.Write(EpicAbilityCooldownDuration);
+
+            writer.Write(RepairCooldownDuration);
+            writer.Write(BoardingChance);
+            
+            writer.Write(HitPointsCreationScalar);
+            writer.Write(SailPointsCreationScalar);
+            writer.Write(GunPointsCreationScalar);
+
+            writer.Write(ForwardSpeedCreationScalar);
+            writer.Write(DriftSpeedCreationScalar);
+            writer.Write(SlowdownModePenaltyCreationScalar);
+
+            writer.Write(CannonAccuracyCreationScalar);
+            writer.Write(CannonDamageCreationScalar);
+            writer.Write(CannonRangeCreationScalar);
+            writer.Write(CannonReloadDurationCreationScalar);
+
+            writer.Write(MinorAbilityCooldownDurationCreationScalar);
+            writer.Write(MajorAbilityCooldownDurationCreationScalar);
+            writer.Write(EpicAbilityCooldownDurationCreationScalar);
+
+            writer.Write(RepairCooldownDurationCreationScalar);
+            writer.Write(BoardingChanceCreationScalar);
+            
+            writer.Write((int)m_TargetingMode); 
 
             writer.Write(m_IPAsCoOwners);
             writer.Write(m_GuildAsCoOwners);
@@ -6744,6 +6762,18 @@ namespace Server
             writer.Write((int)m_MinorAbilityUpgrade);
             writer.Write((int)m_MajorAbilityUpgrade);
             writer.Write((int)m_EpicAbilityUpgrade);
+
+            writer.Write(m_CoOwners.Count);
+            for (int a = 0; a < m_CoOwners.Count; a++)
+            {
+                writer.Write(m_CoOwners[a]);
+            }
+
+            writer.Write(m_Friends.Count);
+            for (int a = 0; a < m_Friends.Count; a++)
+            {
+                writer.Write(m_Friends[a]);
+            } 
         }
 
         #endregion
@@ -6758,7 +6788,6 @@ namespace Server
             //Version 0
             if (version >= 0)
             {
-
                 int crewCount = reader.ReadInt();
                 for (int a = 0; a < crewCount; a++)
                 {
@@ -6790,61 +6819,97 @@ namespace Server
                     m_ShipDamageEntries.Add(entry);
                 }
 
-                MobileControlType = (MobileControlType)reader.ReadInt();
-                MobileFactionType = (MobileFactionType)reader.ReadInt();                
                 Facing = (Direction)reader.ReadInt();
-
                 DecayTime = reader.ReadDateTime();
-                m_CannonCooldown = reader.ReadDateTime();  
-                
+                CannonCooldown = reader.ReadDateTime(); 
                 PPlank = (Plank)reader.ReadItem();
                 SPlank = (Plank)reader.ReadItem();
                 TillerMan = (TillerMan)reader.ReadItem();
                 Hold = reader.ReadItem() as Hold;
                 ShipTrashBarrel = (ShipTrashBarrel)reader.ReadItem();
                 Anchored = reader.ReadBool();
-                
                 m_ScuttleInProgress = reader.ReadBool();
                 LastCombatTime = reader.ReadDateTime();
                 TimeLastMoved = reader.ReadDateTime();
                 TimeLastRepaired = reader.ReadDateTime();
                 NextTimeRepairable = reader.ReadDateTime();
-                ReducedSpeedMode = reader.ReadBool();
-                ReducedSpeedModeTime = reader.ReadDateTime();
                 m_ShipSpawner = (ShipSpawner)reader.ReadItem();
                 ShipCombatant = (BaseShip)reader.ReadItem();
-                ShipRune = (ShipRune)reader.ReadItem();
-                ShipBankRune = (ShipRune)reader.ReadItem();
+                m_ShipRune = (ShipRune)reader.ReadItem();
+                m_ShipBankRune = (ShipRune)reader.ReadItem();
                 m_LastActivated = reader.ReadDateTime();
                 AdminControlled = reader.ReadBool();
-                MaxHitPoints = reader.ReadInt();
-                MaxSailPoints = reader.ReadInt();
-                MaxGunPoints = reader.ReadInt();
+                MobileControlType = (MobileControlType)reader.ReadInt();
+                MobileFactionType = (MobileFactionType)reader.ReadInt();     
                 PerceptionRange = reader.ReadInt();
-                CannonAccuracyModifer = reader.ReadDouble();
-                CannonRangeScalar = reader.ReadDouble();
-                CannonDamageScalar = reader.ReadDouble();
                 DamageFromPlayerShipScalar = reader.ReadDouble();
-                FastInterval = reader.ReadDouble();
-                FastDriftInterval = reader.ReadDouble();
-                SlowInterval = reader.ReadDouble();
-                SlowDriftInterval = reader.ReadDouble();
                 DoubloonValue = reader.ReadInt();
-                CannonHue = reader.ReadInt();
-                CannonReloadTimeScalar = reader.ReadDouble();
-                TempSpeedModifier = reader.ReadDouble();
-                TempSpeedModifierExpiration = reader.ReadDateTime();  
-                                                
-                //-----Player Persistant Properties: Must Also Be Stored to Ship Deed
 
-                ShipName = reader.ReadString();
-                Owner = (PlayerMobile)reader.ReadMobile();
+                //----- Deed Storable Properties
+                
+                m_ShipName = reader.ReadString();
+                m_Owner = (PlayerMobile)reader.ReadMobile();
 
                 HitPoints = reader.ReadInt();
+                MaxHitPoints = reader.ReadInt();
                 SailPoints = reader.ReadInt();
+                MaxSailPoints = reader.ReadInt();
                 GunPoints = reader.ReadInt();
+                MaxGunPoints = reader.ReadInt();
 
-                TargetingMode = (TargetingMode)reader.ReadInt();
+                ForwardSpeed = reader.ReadDouble();
+                DriftSpeed = reader.ReadDouble();
+                SlowdownModePenalty = reader.ReadDouble();
+
+                CannonAccuracy = reader.ReadDouble();
+                CannonMinDamage = reader.ReadDouble();
+                CannonMaxDamage = reader.ReadDouble();
+                CannonRange = reader.ReadDouble();
+                CannonReloadDuration = reader.ReadDouble();
+
+                MinorAbilityCooldownDuration = reader.ReadDouble();
+                MajorAbilityCooldownDuration = reader.ReadDouble();
+                EpicAbilityCooldownDuration = reader.ReadDouble();
+
+                RepairCooldownDuration = reader.ReadDouble();
+                BoardingChance = reader.ReadDouble();
+                
+                HitPointsCreationScalar = reader.ReadDouble();
+                SailPointsCreationScalar = reader.ReadDouble();
+                GunPointsCreationScalar = reader.ReadDouble();
+
+                ForwardSpeedCreationScalar = reader.ReadDouble();
+                DriftSpeedCreationScalar = reader.ReadDouble();
+                SlowdownModePenaltyCreationScalar = reader.ReadDouble();
+
+                CannonAccuracyCreationScalar = reader.ReadDouble();
+                CannonDamageCreationScalar = reader.ReadDouble();
+                CannonRangeCreationScalar = reader.ReadDouble();
+                CannonReloadDurationCreationScalar = reader.ReadDouble();
+
+                MinorAbilityCooldownDurationCreationScalar = reader.ReadDouble();
+                MajorAbilityCooldownDurationCreationScalar = reader.ReadDouble();
+                EpicAbilityCooldownDurationCreationScalar = reader.ReadDouble();
+
+                RepairCooldownDurationCreationScalar = reader.ReadDouble();
+                BoardingChanceCreationScalar = reader.ReadDouble();
+                
+                m_TargetingMode = (TargetingMode)reader.ReadInt();               
+
+                m_IPAsCoOwners = reader.ReadBool();
+                m_GuildAsCoOwners = reader.ReadBool();
+                m_IPAsFriends = reader.ReadBool();
+                m_GuildAsFriends = reader.ReadBool();
+
+                m_ThemeUpgrade = (ShipUpgrades.ThemeType)reader.ReadInt();
+                m_PaintUpgrade = (ShipUpgrades.PaintType)reader.ReadInt();
+                m_CannonMetalUpgrade = (ShipUpgrades.CannonMetalType)reader.ReadInt();
+                m_OutfittingUpgrade = (ShipUpgrades.OutfittingType)reader.ReadInt();
+                m_BannerUpgrade = (ShipUpgrades.BannerType)reader.ReadInt();
+                m_CharmUpgrade = (ShipUpgrades.CharmType)reader.ReadInt();
+                m_MinorAbilityUpgrade = (ShipUpgrades.MinorAbilityType)reader.ReadInt();
+                m_MajorAbilityUpgrade = (ShipUpgrades.MajorAbilityType)reader.ReadInt();
+                m_EpicAbilityUpgrade = (ShipUpgrades.EpicAbilityType)reader.ReadInt();
 
                 int coOwnerCount = reader.ReadInt();
                 for (int a = 0; a < coOwnerCount; a++)
@@ -6856,23 +6921,8 @@ namespace Server
                 for (int a = 0; a < friendCount; a++)
                 {
                     Friends.Add(reader.ReadMobile());
-                }
-
-                m_IPAsCoOwners = reader.ReadBool();
-                m_GuildAsCoOwners = reader.ReadBool();
-                m_IPAsFriends = reader.ReadBool();
-                m_GuildAsFriends = reader.ReadBool();
-
-                ThemeUpgrade = (ShipUpgrades.ThemeType)reader.ReadInt();
-                PaintUpgrade = (ShipUpgrades.PaintType)reader.ReadInt();
-                CannonMetalUpgrade = (ShipUpgrades.CannonMetalType)reader.ReadInt();
-                OutfittingUpgrade = (ShipUpgrades.OutfittingType)reader.ReadInt();
-                BannerUpgrade = (ShipUpgrades.BannerType)reader.ReadInt();
-                CharmUpgrade = (ShipUpgrades.CharmType)reader.ReadInt();
-                MinorAbilityUpgrade = (ShipUpgrades.MinorAbilityType)reader.ReadInt();
-                MajorAbilityUpgrade = (ShipUpgrades.MajorAbilityType)reader.ReadInt();
-                EpicAbilityUpgrade = (ShipUpgrades.EpicAbilityType)reader.ReadInt();
-
+                }   
+                
                 //-----
 
                 Movable = false;

@@ -8,38 +8,73 @@ using Server.Network;
 using Server.Mobiles;
 using Server.Items;
 using Server.Gumps;
+using Server.Multis;
+using Server.Engines.Craft;
 
 namespace Server
 {
-    public abstract class BaseShipDeed : Item
+    public abstract class BaseShipDeed : Item, ICraftable
     {
-        private int m_MultiID;
-        private Point3D m_Offset;
+        public virtual Type ShipType { get { return typeof(SmallShip); } }
 
+        private int m_MultiID;
         [CommandProperty(AccessLevel.GameMaster)]
         public int MultiID { get { return m_MultiID; } set { m_MultiID = value; } }
 
+        private Point3D m_Offset;
         [CommandProperty(AccessLevel.GameMaster)]
         public Point3D Offset { get { return m_Offset; } set { m_Offset = value; } }
-
-        public abstract BaseShip Ship { get; }
-
-        public virtual int DoubloonCost { get { return 0; } }
-        public virtual double DoubloonMultiplier { get { return 1.0; } }
-
-        //-----Player Persistant Properties (Pushed to Ship)
+        
+        public bool m_Registered = false;
 
         public string m_ShipName;
         public PlayerMobile m_Owner;
 
-        public int m_HitPoints = 1000;
-        public int m_SailPoints = 500;
-        public int m_GunPoints = 500;
+        public int HitPoints = 0;
+        public int MaxHitPoints = 0;
+        public int SailPoints = 0;
+        public int MaxSailPoints = 0;
+        public int GunPoints = 0;
+        public int MaxGunPoints = 0;
 
-        public TargetingMode m_TargetingMode = TargetingMode.Hull;
+        public double ForwardSpeed = 1.0;
+        public double DriftSpeed = 1.0;
+        public double SlowdownModePenalty = 1.0;
 
-        public List<Mobile> m_CoOwners = new List<Mobile>();
-        public List<Mobile> m_Friends = new List<Mobile>();
+        public double CannonAccuracy = 1.0;
+        public double CannonMinDamage = 1.0;
+        public double CannonMaxDamage = 1.0;
+        public double CannonRange = 1.0;
+        public double CannonReloadDuration = 1.0;
+
+        public double MinorAbilityCooldownDuration = 1.0;
+        public double MajorAbilityCooldownDuration = 1.0;
+        public double EpicAbilityCooldownDuration = 1.0;
+
+        public double RepairCooldownDuration = 1.0;
+        public double BoardingChance = 1.0;
+
+        public double HitPointsCreationScalar = 1.0;
+        public double SailPointsCreationScalar = 1.0;
+        public double GunPointsCreationScalar = 1.0;
+
+        public double ForwardSpeedCreationScalar = 1.0;
+        public double DriftSpeedCreationScalar = 1.0;
+        public double SlowdownModePenaltyCreationScalar = 1.0;
+
+        public double CannonAccuracyCreationScalar = 1.0;
+        public double CannonDamageCreationScalar = 1.0;
+        public double CannonRangeCreationScalar = 1.0;
+        public double CannonReloadDurationCreationScalar = 1.0;
+
+        public double MinorAbilityCooldownDurationCreationScalar = 1.0;
+        public double MajorAbilityCooldownDurationCreationScalar = 1.0;
+        public double EpicAbilityCooldownDurationCreationScalar = 1.0;
+
+        public double RepairCooldownDurationCreationScalar = 1.0;
+        public double BoardingChanceCreationScalar = 1.0;
+
+        public TargetingMode m_TargetingMode = TargetingMode.Hull;        
 
         public bool m_IPAsCoOwners = false;
         public bool m_GuildAsCoOwners = false;
@@ -52,22 +87,21 @@ namespace Server
         public ShipUpgrades.OutfittingType m_OutfittingUpgrade;
         public ShipUpgrades.BannerType m_BannerUpgrade;
         public ShipUpgrades.CharmType m_CharmUpgrade;
-        public ShipUpgrades.MinorAbilityType m_MinorAbility;
-        public ShipUpgrades.MajorAbilityType m_MajorAbility;
-        public ShipUpgrades.EpicAbilityType m_EpicAbility;
+        public ShipUpgrades.MinorAbilityType m_MinorAbilityUpgrade;
+        public ShipUpgrades.MajorAbilityType m_MajorAbilityUpgrade;
+        public ShipUpgrades.EpicAbilityType m_EpicAbilityUpgrade;
+
+        public List<Mobile> m_CoOwners = new List<Mobile>();
+        public List<Mobile> m_Friends = new List<Mobile>();
 
         //-----
 
         [Constructable]
-        public BaseShipDeed(int id, Point3D offset): base(0x14F2)
+        public BaseShipDeed(int id, Point3D offset): base(5363)
         {
             Weight = 1.0;
 
             //-----
-
-            m_HitPoints = Ship.MaxHitPoints;
-            m_SailPoints = Ship.MaxSailPoints;
-            m_GunPoints = Ship.MaxGunPoints;
 
             m_MultiID = id;
             m_Offset = offset;
@@ -77,17 +111,30 @@ namespace Server
         {
         }
 
+        public int OnCraft(int quality, bool makersMark, Mobile from, CraftSystem craftSystem, Type typeRes, BaseTool tool, CraftItem craftItem, int resHue)
+        {
+            Quality = (Quality)quality;
+            
+            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(ShipType); 
+
+            return quality;
+        }
+
         public override void OnSingleClick(Mobile from)
         {
-            NetState ns = from.NetState;
+            base.OnSingleClick(from);
 
-            if (ns != null)
+            if (!m_Registered)
             {
-                ns.Send(new UnicodeMessage(Serial, ItemID, MessageType.Label, 0, 3, "ENU", "", Name));
-                
-                if (DoubloonCost > 0)
-                    ns.Send(new UnicodeMessage(Serial, ItemID, MessageType.Label, 0, 3, "ENU", "", "[Requires " + DoubloonCost.ToString() + " doubloons]"));                  
+                ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(ShipType);
+
+                int doubloonsRequired = shipStatsProfile.RegistrationDoubloonCost;
+
+                LabelTo(from, "(must be registered before usable)");
             }
+
+            else            
+                LabelTo(from, "(double click to view ship details)");            
         }
 
         public override void OnDoubleClick(Mobile from)
@@ -95,21 +142,21 @@ namespace Server
             PlayerMobile player = from as PlayerMobile;
 
             if (player == null)
-                return;
+                return;            
 
-            if (!IsChildOf(player.Backpack))
+            if (!m_Registered)
             {
-                player.SendLocalizedMessage(1042001); // That must be in your pack for you to use it.	
-                return;
+                player.CloseGump(typeof(ShipRegistrationGump));
+                player.SendGump(new ShipRegistrationGump(player, this));
             }
 
-            ShipGumpObject shipGumpObject = new ShipGumpObject(player, null, this);
+            else
+            {
+                ShipGumpObject shipGumpObject = new ShipGumpObject(player, null, this);
 
-            player.CloseGump(typeof(ShipGump));
-            player.SendGump(new ShipGump(player, shipGumpObject));
-
-            //from.LocalOverheadMessage(MessageType.Regular, 0x3B2, 502482); // Where do you wish to place the ship?
-            //from.Target = new InternalTarget(this);
+                player.CloseGump(typeof(ShipGump));
+                player.SendGump(new ShipGump(player, shipGumpObject));
+            }           
         }        
 
         public void OnPlacement(PlayerMobile player, Point3D location)
@@ -169,7 +216,7 @@ namespace Server
                     }
                 }
 
-                BaseShip ship = Ship;
+                BaseShip ship = (BaseShip)Activator.CreateInstance(ShipType);
 
                 if (ship == null)
                     return;
@@ -244,10 +291,10 @@ namespace Server
                     Delete();
 
                     ShipRune shipRune = new ShipRune(ship, player);
-                    ship.ShipRune = shipRune;
+                    ship.m_ShipRune = shipRune;
 
                     ShipRune shipBankRune = new ShipRune(ship, player);
-                    ship.ShipBankRune = shipBankRune;                        
+                    ship.m_ShipBankRune = shipBankRune;                        
 
                     bool addedToPack = false;
                     bool addedToBank = false;
@@ -300,26 +347,56 @@ namespace Server
 
             //-----Player Persistant Properties (Pushed to Ship)
 
+            writer.Write(m_Registered);
+
             writer.Write(m_ShipName);
             writer.Write(m_Owner);
 
-            writer.Write(m_HitPoints);
-            writer.Write(m_SailPoints);
-            writer.Write(m_GunPoints);
+            writer.Write(HitPoints);
+            writer.Write(MaxHitPoints);
+            writer.Write(SailPoints);
+            writer.Write(MaxSailPoints);
+            writer.Write(GunPoints);
+            writer.Write(MaxGunPoints);
+
+            writer.Write(ForwardSpeed);
+            writer.Write(DriftSpeed);
+            writer.Write(SlowdownModePenalty);
+
+            writer.Write(CannonAccuracy);
+            writer.Write(CannonMinDamage);
+            writer.Write(CannonMaxDamage);
+            writer.Write(CannonRange);
+            writer.Write(CannonReloadDuration);
+
+            writer.Write(MinorAbilityCooldownDuration);
+            writer.Write(MajorAbilityCooldownDuration);
+            writer.Write(EpicAbilityCooldownDuration);
+
+            writer.Write(RepairCooldownDuration);
+            writer.Write(BoardingChance);
+
+            writer.Write(HitPointsCreationScalar);
+            writer.Write(SailPointsCreationScalar);
+            writer.Write(GunPointsCreationScalar);
+
+            writer.Write(ForwardSpeedCreationScalar);
+            writer.Write(DriftSpeedCreationScalar);
+            writer.Write(SlowdownModePenaltyCreationScalar);
+
+            writer.Write(CannonAccuracyCreationScalar);
+            writer.Write(CannonDamageCreationScalar);
+            writer.Write(CannonRangeCreationScalar);
+            writer.Write(CannonReloadDurationCreationScalar);
+
+            writer.Write(MinorAbilityCooldownDurationCreationScalar);
+            writer.Write(MajorAbilityCooldownDurationCreationScalar);
+            writer.Write(EpicAbilityCooldownDurationCreationScalar);
+
+            writer.Write(RepairCooldownDurationCreationScalar);
+            writer.Write(BoardingChanceCreationScalar);
 
             writer.Write((int)m_TargetingMode);
-
-            writer.Write(m_CoOwners.Count);
-            for (int a = 0; a < m_CoOwners.Count; a++)
-            {
-                writer.Write(m_CoOwners[a]);
-            }
-
-            writer.Write(m_Friends.Count);
-            for (int a = 0; a < m_Friends.Count; a++)
-            {
-                writer.Write(m_Friends[a]);
-            }
 
             writer.Write(m_IPAsCoOwners);
             writer.Write(m_GuildAsCoOwners);
@@ -332,9 +409,21 @@ namespace Server
             writer.Write((int)m_OutfittingUpgrade);
             writer.Write((int)m_BannerUpgrade);
             writer.Write((int)m_CharmUpgrade);
-            writer.Write((int)m_MinorAbility);
-            writer.Write((int)m_MajorAbility);
-            writer.Write((int)m_EpicAbility);            
+            writer.Write((int)m_MinorAbilityUpgrade);
+            writer.Write((int)m_MajorAbilityUpgrade);
+            writer.Write((int)m_EpicAbilityUpgrade);
+
+            writer.Write(m_CoOwners.Count);
+            for (int a = 0; a < m_CoOwners.Count; a++)
+            {
+                writer.Write(m_CoOwners[a]);
+            }
+
+            writer.Write(m_Friends.Count);
+            for (int a = 0; a < m_Friends.Count; a++)
+            {
+                writer.Write(m_Friends[a]);
+            }
         }
 
         public override void Deserialize(GenericReader reader)
@@ -351,26 +440,56 @@ namespace Server
 
                 //-----
 
+                m_Registered = reader.ReadBool();
+
                 m_ShipName = reader.ReadString();
                 m_Owner = (PlayerMobile)reader.ReadMobile();
 
-                m_HitPoints = reader.ReadInt();
-                m_SailPoints = reader.ReadInt();
-                m_GunPoints = reader.ReadInt();
+                HitPoints = reader.ReadInt();
+                MaxHitPoints = reader.ReadInt();
+                SailPoints = reader.ReadInt();
+                MaxSailPoints = reader.ReadInt();
+                GunPoints = reader.ReadInt();
+                MaxGunPoints = reader.ReadInt();
+
+                ForwardSpeed = reader.ReadDouble();
+                DriftSpeed = reader.ReadDouble();
+                SlowdownModePenalty = reader.ReadDouble();
+
+                CannonAccuracy = reader.ReadDouble();
+                CannonMinDamage = reader.ReadDouble();
+                CannonMaxDamage = reader.ReadDouble();
+                CannonRange = reader.ReadDouble();
+                CannonReloadDuration = reader.ReadDouble();
+
+                MinorAbilityCooldownDuration = reader.ReadDouble();
+                MajorAbilityCooldownDuration = reader.ReadDouble();
+                EpicAbilityCooldownDuration = reader.ReadDouble();
+
+                RepairCooldownDuration = reader.ReadDouble();
+                BoardingChance = reader.ReadDouble();
+
+                HitPointsCreationScalar = reader.ReadDouble();
+                SailPointsCreationScalar = reader.ReadDouble();
+                GunPointsCreationScalar = reader.ReadDouble();
+
+                ForwardSpeedCreationScalar = reader.ReadDouble();
+                DriftSpeedCreationScalar = reader.ReadDouble();
+                SlowdownModePenaltyCreationScalar = reader.ReadDouble();
+
+                CannonAccuracyCreationScalar = reader.ReadDouble();
+                CannonDamageCreationScalar = reader.ReadDouble();
+                CannonRangeCreationScalar = reader.ReadDouble();
+                CannonReloadDurationCreationScalar = reader.ReadDouble();
+
+                MinorAbilityCooldownDurationCreationScalar = reader.ReadDouble();
+                MajorAbilityCooldownDurationCreationScalar = reader.ReadDouble();
+                EpicAbilityCooldownDurationCreationScalar = reader.ReadDouble();
+
+                RepairCooldownDurationCreationScalar = reader.ReadDouble();
+                BoardingChanceCreationScalar = reader.ReadDouble();
 
                 m_TargetingMode = (TargetingMode)reader.ReadInt();
-
-                int coOwnerCount = reader.ReadInt();
-                for (int a = 0; a < coOwnerCount; a++)
-                {
-                    m_CoOwners.Add(reader.ReadMobile());
-                }
-
-                int friendCount = reader.ReadInt();
-                for (int a = 0; a < friendCount; a++)
-                {
-                    m_Friends.Add(reader.ReadMobile());
-                }
 
                 m_IPAsCoOwners = reader.ReadBool();
                 m_GuildAsCoOwners = reader.ReadBool();
@@ -383,69 +502,21 @@ namespace Server
                 m_OutfittingUpgrade = (ShipUpgrades.OutfittingType)reader.ReadInt();
                 m_BannerUpgrade = (ShipUpgrades.BannerType)reader.ReadInt();
                 m_CharmUpgrade = (ShipUpgrades.CharmType)reader.ReadInt();
-                m_MinorAbility = (ShipUpgrades.MinorAbilityType)reader.ReadInt();
-                m_MajorAbility = (ShipUpgrades.MajorAbilityType)reader.ReadInt();
-                m_EpicAbility = (ShipUpgrades.EpicAbilityType)reader.ReadInt();
-            }
-        }
-    }
+                m_MinorAbilityUpgrade = (ShipUpgrades.MinorAbilityType)reader.ReadInt();
+                m_MajorAbilityUpgrade = (ShipUpgrades.MajorAbilityType)reader.ReadInt();
+                m_EpicAbilityUpgrade = (ShipUpgrades.EpicAbilityType)reader.ReadInt();
 
-    public class BindBaseShipDeedGump : Gump
-    {
-        BaseShipDeed m_BaseShipDeed;
-        PlayerMobile m_Player;
+                int coOwnerCount = reader.ReadInt();
+                for (int a = 0; a < coOwnerCount; a++)
+                {
+                    m_CoOwners.Add(reader.ReadMobile());
+                }
 
-        public BindBaseShipDeedGump(BaseShipDeed baseShipDeed, PlayerMobile player): base(50, 50)
-        {
-            m_BaseShipDeed = baseShipDeed;
-            m_Player = player;
-
-            Closable = true;
-            Disposable = true;
-            Dragable = true;
-            Resizable = false;
-
-            AddPage(0);
-
-            AddBackground(90, 150, 380, 185, 5054);
-            AddBackground(100, 160, 360, 165, 3000);
-
-            AddLabel(110, 175, 0, @"The following number of doubloons will be removed");
-            AddLabel(110, 197, 0, @"from your bank box and the ship will be bound to you");
-            AddHtml(118, 230, 320, 17, @"<center>" + m_BaseShipDeed.DoubloonCost.ToString() + "</center>", (bool)false, (bool)false);
-            AddItem(255, 255, 2539);
-
-            AddButton(170, 285, 247, 248, 1, GumpButtonType.Reply, 0); //Okay
-            AddButton(310, 285, 243, 248, 2, GumpButtonType.Reply, 0); //Cancel
-        }
-
-        public override void OnResponse(NetState sender, RelayInfo info)
-        {
-            Mobile from = sender.Mobile;
-
-            switch (info.ButtonID)
-            {
-                case 1:
-                    int doubloonsInBank = Banker.GetUniqueCurrencyBalance(from, typeof(Doubloon));
-
-                    if (doubloonsInBank >= m_BaseShipDeed.DoubloonCost)
-                    {
-                        if (Banker.WithdrawUniqueCurrency(m_Player, typeof(Doubloon), m_BaseShipDeed.DoubloonCost))
-                        {
-                            Doubloon doubloonPile = new Doubloon(m_BaseShipDeed.DoubloonCost);
-                            from.SendSound(doubloonPile.GetDropSound());
-                            doubloonPile.Delete();                            
-                           
-                            m_Player.SendMessage("You claim the ship as your own.");
-                        }
-
-                        else
-                            m_Player.SendMessage("You no longer have the required doubloons in your bank box to claim this ship.");
-                    }
-
-                    else
-                        m_Player.SendMessage("You no longer have the required doubloons in your bank box to claim this ship.");
-                    break;
+                int friendCount = reader.ReadInt();
+                for (int a = 0; a < friendCount; a++)
+                {
+                    m_Friends.Add(reader.ReadMobile());
+                }
             }
         }
     }
