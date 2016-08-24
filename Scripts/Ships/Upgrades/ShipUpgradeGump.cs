@@ -94,9 +94,9 @@ namespace Server
             AddLabel(21, 165, 149, "Base Cost:");
             AddLabel(109, 165, 0, doubloonBaseCost.ToString());
 
-            if (m_ShipUpgradeGumpObject.m_ShipDeed != null && m_ShipUpgradeGumpObject.m_UpgradeDisplayMode != UpgradeDisplayMode.DeedUse)
+            if (m_ShipUpgradeGumpObject.m_ShipDeed != null && (m_ShipUpgradeGumpObject.m_UpgradeDisplayMode == UpgradeDisplayMode.DeedAttemptInstall || m_ShipUpgradeGumpObject.m_UpgradeDisplayMode == UpgradeDisplayMode.InstalledOnShip))
             {
-                ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(m_ShipUpgradeGumpObject.m_ShipDeed.ShipType);
+                ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(m_ShipUpgradeGumpObject.m_ShipDeed, null, true, true);
 
                 if (shipStatsProfile == null)
                     return;
@@ -224,7 +224,7 @@ namespace Server
                             {
                                 int doubloonBaseCost = ShipUniqueness.GetShipUpgradeBaseDoubloonCost(upgradeDetail.m_UpgradeType);
 
-                                ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(m_ShipUpgradeGumpObject.m_ShipDeed.ShipType);
+                                ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(m_ShipUpgradeGumpObject.m_ShipDeed, null, true, true);
 
                                 double doubloonMultiplier = shipStatsProfile.UpgradeDoubloonMultiplier;
                                 int doubloonAdjustedCost = (int)(Math.Round((double)doubloonBaseCost * (double)doubloonMultiplier));

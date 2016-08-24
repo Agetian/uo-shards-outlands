@@ -29,50 +29,32 @@ namespace Server
 
         public string m_ShipName;
         public PlayerMobile m_Owner;
-
+        
         public int HitPoints = 0;
-        public int MaxHitPoints = 0;
         public int SailPoints = 0;
-        public int MaxSailPoints = 0;
         public int GunPoints = 0;
-        public int MaxGunPoints = 0;
 
-        public double ForwardSpeed = 1.0;
-        public double DriftSpeed = 1.0;
-        public double SlowdownModePenalty = 1.0;
+        public double HoldSizeCreationModifier = 0;
 
-        public double CannonAccuracy = 1.0;
-        public double CannonMinDamage = 1.0;
-        public double CannonMaxDamage = 1.0;
-        public double CannonRange = 1.0;
-        public double CannonReloadDuration = 1.0;
+        public double MaxHitPointsCreationModifier = 0;
+        public double MaxSailPointsCreationModifier = 0;
+        public double MaxGunPointsCreationModifier = 0;
 
-        public double MinorAbilityCooldownDuration = 1.0;
-        public double MajorAbilityCooldownDuration = 1.0;
-        public double EpicAbilityCooldownDuration = 1.0;
+        public double ForwardSpeedCreationModifier = 0;
+        public double DriftSpeedCreationModifier = 0;
+        public double SlowdownModePenaltyCreationModifier = 0;
 
-        public double RepairCooldownDuration = 1.0;
-        public double BoardingChance = 1.0;
+        public double CannonAccuracyCreationModifier = 0;
+        public double CannonDamageCreationModifier = 0;
+        public double CannonRangeCreationModifier = 0;
+        public double CannonReloadDurationCreationModifier = 0;
 
-        public double HitPointsCreationScalar = 1.0;
-        public double SailPointsCreationScalar = 1.0;
-        public double GunPointsCreationScalar = 1.0;
+        public double MinorAbilityCooldownDurationCreationModifier = 0;
+        public double MajorAbilityCooldownDurationCreationModifier = 0;
+        public double EpicAbilityCooldownDurationCreationModifier = 0;
 
-        public double ForwardSpeedCreationScalar = 1.0;
-        public double DriftSpeedCreationScalar = 1.0;
-        public double SlowdownModePenaltyCreationScalar = 1.0;
-
-        public double CannonAccuracyCreationScalar = 1.0;
-        public double CannonDamageCreationScalar = 1.0;
-        public double CannonRangeCreationScalar = 1.0;
-        public double CannonReloadDurationCreationScalar = 1.0;
-
-        public double MinorAbilityCooldownDurationCreationScalar = 1.0;
-        public double MajorAbilityCooldownDurationCreationScalar = 1.0;
-        public double EpicAbilityCooldownDurationCreationScalar = 1.0;
-
-        public double RepairCooldownDurationCreationScalar = 1.0;
-        public double BoardingChanceCreationScalar = 1.0;
+        public double RepairCooldownDurationCreationModifier = 0;
+        public double BoardingChanceCreationModifier = 0;
 
         public TargetingMode m_TargetingMode = TargetingMode.Hull;        
 
@@ -105,6 +87,12 @@ namespace Server
 
             m_MultiID = id;
             m_Offset = offset;
+
+            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(this, null, true, true);
+
+            HitPoints = shipStatsProfile.MaxHitPointsAdjusted;
+            SailPoints = shipStatsProfile.MaxSailPointsAdjusted;
+            GunPoints = shipStatsProfile.MaxGunPointsAdjusted;
         }
 
         public BaseShipDeed(Serial serial): base(serial)
@@ -114,10 +102,146 @@ namespace Server
         public int OnCraft(int quality, bool makersMark, Mobile from, CraftSystem craftSystem, Type typeRes, BaseTool tool, CraftItem craftItem, int resHue)
         {
             Quality = (Quality)quality;
-            
-            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(ShipType); 
+
+            double lowRange = 0.0;
+            double highRange = 0.2;
+
+            if (from.Skills.Carpentry.Value > 100.0)
+                lowRange += .1 * (120.0 - from.Skills.Carpentry.Value);
+
+            double statMutationChance = .33;
+                        
+            if (Utility.RandomDouble() <= statMutationChance)
+                HoldSizeCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                MaxHitPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                MaxSailPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                MaxGunPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                ForwardSpeedCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                DriftSpeedCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                SlowdownModePenaltyCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                CannonAccuracyCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                CannonDamageCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                CannonRangeCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                CannonReloadDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                MinorAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                MajorAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                EpicAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                RepairCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            if (Utility.RandomDouble() <= statMutationChance)
+                BoardingChanceCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(this, null, true, true);
+
+            HitPoints = shipStatsProfile.MaxHitPointsAdjusted;
+            SailPoints = shipStatsProfile.MaxSailPointsAdjusted;
+            GunPoints = shipStatsProfile.MaxGunPointsAdjusted;
 
             return quality;
+        }
+
+        public bool IsOwner(Mobile mobile)
+        {
+            if (mobile == null)
+                return false;
+
+            if (mobile.AccessLevel > AccessLevel.Player)
+                return true;
+
+            if (mobile == m_Owner)
+                return true;
+
+            return false;
+        }
+
+        public bool IsCoOwner(Mobile mobile)
+        {
+            if (mobile.AccessLevel > AccessLevel.Player)
+                return true;
+
+            if (mobile == null) return false;
+            if (m_Owner == null) return false;
+
+            PlayerMobile player = mobile as PlayerMobile;
+
+            if (m_GuildAsCoOwners)
+            {
+                if (player != null)
+                {
+                    if (m_Owner.Guild == player.Guild && player.Guild != null)
+                        return true;
+                }
+            }
+
+            if (m_IPAsCoOwners)
+            {
+                if (player != null)
+                {
+                    if (PlayerMobile.IPMatch(m_Owner, player))
+                        return true;
+                }
+            }
+
+            return (m_CoOwners.Contains(player));
+        }
+
+        public bool IsFriend(Mobile mobile)
+        {
+            if (mobile.AccessLevel > AccessLevel.Player)
+                return true;
+
+            if (mobile == null) return false;
+            if (m_Owner == null) return false;
+
+            PlayerMobile player = mobile as PlayerMobile;
+
+            if (m_GuildAsFriends)
+            {
+                if (player != null)
+                {
+                    if (m_Owner.Guild == player.Guild && player.Guild != null)
+                        return true;
+                }
+            }
+
+            if (m_IPAsFriends)
+            {
+                if (player != null)
+                {
+                    if (PlayerMobile.IPMatch(m_Owner, player))
+                        return true;
+                }
+            }
+
+            return (m_Friends.Contains(mobile));
         }
 
         public override void OnSingleClick(Mobile from)
@@ -126,11 +250,11 @@ namespace Server
 
             if (!m_Registered)
             {
-                ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(ShipType);
+                ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(this, null, false, false);
 
                 int doubloonsRequired = shipStatsProfile.RegistrationDoubloonCost;
 
-                LabelTo(from, "(must be registered before usable)");
+                LabelTo(from, "(requires registration)");
             }
 
             else            
@@ -157,7 +281,18 @@ namespace Server
                 player.CloseGump(typeof(ShipGump));
                 player.SendGump(new ShipGump(player, shipGumpObject));
             }           
-        }        
+        }
+
+        public void LaunchGump(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            ShipGumpObject shipGumpObject = new ShipGumpObject(player, null, this);
+
+            player.CloseGump(typeof(ShipGump));
+            player.SendGump(new ShipGump(player, shipGumpObject));
+        }
 
         public void OnPlacement(PlayerMobile player, Point3D location)
         {
@@ -166,7 +301,11 @@ namespace Server
             if (Deleted) return;
 
             else if (!IsChildOf(player.Backpack))
-                player.SendLocalizedMessage(1042001); // That must be in your pack for you to use it.			
+            {
+                player.SendLocalizedMessage(1042001); // That must be in your pack for you to use it.	
+
+                LaunchGump(player);
+            }
 
             else
             {
@@ -178,12 +317,16 @@ namespace Server
                 if (player.AccessLevel < AccessLevel.GameMaster && map != Map.Felucca)
                 {
                     player.SendLocalizedMessage(1043284); // A ship can not be created here.
+
+                    LaunchGump(player);
                     return;
                 }
 
                 if (player.Region.IsPartOf(typeof(HouseRegion)) || BaseShip.FindShipAt(player, player.Map) != null)
                 {
                     player.SendLocalizedMessage(1010568, null, 0x25); // You may not place a ship while on another ship or inside a house.
+
+                    LaunchGump(player);
                     return;
                 }
 
@@ -192,26 +335,34 @@ namespace Server
                 if (region.IsPartOf(typeof(DungeonRegion)))
                 {
                     player.SendLocalizedMessage(502488); // You can not place a ship inside a dungeon.
+
+                    LaunchGump(player);
                     return;
                 }
 
                 if (region.IsPartOf(typeof(HouseRegion)))
                 {
                     player.SendLocalizedMessage(1042549); // A ship may not be placed in this area.
+
+                    LaunchGump(player);
                     return;
                 }
 
                 if (player.GetDistanceToSqrt(location) > 10)
                 {
                     player.SendMessage("You cannot place a ship that far away from land.");
+
+                    LaunchGump(player);
                     return;
                 }
 
-                foreach(BaseShip shipInstance in BaseShip.m_Instances)
+                foreach (BaseShip shipInstance in BaseShip.m_Instances)
                 {
                     if (shipInstance.Owner == player)
                     {
                         player.SendMessage("You already have a ship at sea.");
+
+                        LaunchGump(player);
                         return;
                     }
                 }
@@ -219,7 +370,10 @@ namespace Server
                 BaseShip ship = (BaseShip)Activator.CreateInstance(ShipType);
 
                 if (ship == null)
+                {
+                    LaunchGump(player);
                     return;
+                }
 
                 location = new Point3D(location.X - m_Offset.X, location.Y - m_Offset.Y, location.Z - m_Offset.Z);
 
@@ -271,7 +425,7 @@ namespace Server
                     default:
                         newDirection = Direction.North;
                         shipFacingItemID = ship.NorthID;
-                    break; 
+                    break;
                 }
 
                 if (BaseShip.IsValidLocation(location, map) && ship.CanFit(location, map, shipFacingItemID))
@@ -280,13 +434,13 @@ namespace Server
 
                     ShipUniqueness.GenerateShipUniqueness(ship);
 
-                    BaseShip.PushDeedStoredPropertiesToShip(this, ship);                                
+                    BaseShip.PushDeedStoredPropertiesToShip(this, ship);
 
-                    ship.DecayTime = DateTime.UtcNow + ship.ShipDecayDelay;    
+                    ship.DecayTime = DateTime.UtcNow + ship.ShipDecayDelay;
                     ship.Anchored = true;
                     ship.SetFacing(newDirection);
 
-                    ship.MoveToWorld(location, map);                       
+                    ship.MoveToWorld(location, map);
 
                     Delete();
 
@@ -294,7 +448,7 @@ namespace Server
                     ship.m_ShipRune = shipRune;
 
                     ShipRune shipBankRune = new ShipRune(ship, player);
-                    ship.m_ShipBankRune = shipBankRune;                        
+                    ship.m_ShipBankRune = shipBankRune;
 
                     bool addedToPack = false;
                     bool addedToBank = false;
@@ -325,12 +479,19 @@ namespace Server
                         message = "You place the ship at sea. A ship rune was placed in your backpack, however, there was no room in your bankbox to place a ship rune.";
 
                     player.SendMessage(message);
+
+                    ShipGumpObject shipGumpObject = new ShipGumpObject(player, ship, null);
+
+                    player.CloseGump(typeof(ShipGump));
+                    player.SendGump(new ShipGump(player, shipGumpObject));
                 }
 
                 else
                 {
                     ship.Delete();
                     player.SendMessage("A ship cannot be placed there. You may change your facing to change the direction of the ship placement.");
+
+                    LaunchGump(player);
                 }
             }
         }        
@@ -353,48 +514,28 @@ namespace Server
             writer.Write(m_Owner);
 
             writer.Write(HitPoints);
-            writer.Write(MaxHitPoints);
             writer.Write(SailPoints);
-            writer.Write(MaxSailPoints);
             writer.Write(GunPoints);
-            writer.Write(MaxGunPoints);
 
-            writer.Write(ForwardSpeed);
-            writer.Write(DriftSpeed);
-            writer.Write(SlowdownModePenalty);
+            writer.Write(MaxHitPointsCreationModifier);
+            writer.Write(MaxSailPointsCreationModifier);
+            writer.Write(MaxGunPointsCreationModifier);
 
-            writer.Write(CannonAccuracy);
-            writer.Write(CannonMinDamage);
-            writer.Write(CannonMaxDamage);
-            writer.Write(CannonRange);
-            writer.Write(CannonReloadDuration);
+            writer.Write(ForwardSpeedCreationModifier);
+            writer.Write(DriftSpeedCreationModifier);
+            writer.Write(SlowdownModePenaltyCreationModifier);
 
-            writer.Write(MinorAbilityCooldownDuration);
-            writer.Write(MajorAbilityCooldownDuration);
-            writer.Write(EpicAbilityCooldownDuration);
+            writer.Write(CannonAccuracyCreationModifier);
+            writer.Write(CannonDamageCreationModifier);
+            writer.Write(CannonRangeCreationModifier);
+            writer.Write(CannonReloadDurationCreationModifier);
 
-            writer.Write(RepairCooldownDuration);
-            writer.Write(BoardingChance);
+            writer.Write(MinorAbilityCooldownDurationCreationModifier);
+            writer.Write(MajorAbilityCooldownDurationCreationModifier);
+            writer.Write(EpicAbilityCooldownDurationCreationModifier);
 
-            writer.Write(HitPointsCreationScalar);
-            writer.Write(SailPointsCreationScalar);
-            writer.Write(GunPointsCreationScalar);
-
-            writer.Write(ForwardSpeedCreationScalar);
-            writer.Write(DriftSpeedCreationScalar);
-            writer.Write(SlowdownModePenaltyCreationScalar);
-
-            writer.Write(CannonAccuracyCreationScalar);
-            writer.Write(CannonDamageCreationScalar);
-            writer.Write(CannonRangeCreationScalar);
-            writer.Write(CannonReloadDurationCreationScalar);
-
-            writer.Write(MinorAbilityCooldownDurationCreationScalar);
-            writer.Write(MajorAbilityCooldownDurationCreationScalar);
-            writer.Write(EpicAbilityCooldownDurationCreationScalar);
-
-            writer.Write(RepairCooldownDurationCreationScalar);
-            writer.Write(BoardingChanceCreationScalar);
+            writer.Write(RepairCooldownDurationCreationModifier);
+            writer.Write(BoardingChanceCreationModifier);
 
             writer.Write((int)m_TargetingMode);
 
@@ -445,49 +586,29 @@ namespace Server
                 m_ShipName = reader.ReadString();
                 m_Owner = (PlayerMobile)reader.ReadMobile();
 
-                HitPoints = reader.ReadInt();
-                MaxHitPoints = reader.ReadInt();
-                SailPoints = reader.ReadInt();
-                MaxSailPoints = reader.ReadInt();
+                HitPoints = reader.ReadInt();               
+                SailPoints = reader.ReadInt();               
                 GunPoints = reader.ReadInt();
-                MaxGunPoints = reader.ReadInt();
 
-                ForwardSpeed = reader.ReadDouble();
-                DriftSpeed = reader.ReadDouble();
-                SlowdownModePenalty = reader.ReadDouble();
+                MaxHitPointsCreationModifier = reader.ReadDouble();
+                MaxSailPointsCreationModifier = reader.ReadDouble();
+                MaxGunPointsCreationModifier = reader.ReadDouble();
 
-                CannonAccuracy = reader.ReadDouble();
-                CannonMinDamage = reader.ReadDouble();
-                CannonMaxDamage = reader.ReadDouble();
-                CannonRange = reader.ReadDouble();
-                CannonReloadDuration = reader.ReadDouble();
+                ForwardSpeedCreationModifier = reader.ReadDouble();
+                DriftSpeedCreationModifier = reader.ReadDouble();
+                SlowdownModePenaltyCreationModifier = reader.ReadDouble();
 
-                MinorAbilityCooldownDuration = reader.ReadDouble();
-                MajorAbilityCooldownDuration = reader.ReadDouble();
-                EpicAbilityCooldownDuration = reader.ReadDouble();
+                CannonAccuracyCreationModifier = reader.ReadDouble();
+                CannonDamageCreationModifier = reader.ReadDouble();
+                CannonRangeCreationModifier = reader.ReadDouble();
+                CannonReloadDurationCreationModifier = reader.ReadDouble();
 
-                RepairCooldownDuration = reader.ReadDouble();
-                BoardingChance = reader.ReadDouble();
+                MinorAbilityCooldownDurationCreationModifier = reader.ReadDouble();
+                MajorAbilityCooldownDurationCreationModifier = reader.ReadDouble();
+                EpicAbilityCooldownDurationCreationModifier = reader.ReadDouble();
 
-                HitPointsCreationScalar = reader.ReadDouble();
-                SailPointsCreationScalar = reader.ReadDouble();
-                GunPointsCreationScalar = reader.ReadDouble();
-
-                ForwardSpeedCreationScalar = reader.ReadDouble();
-                DriftSpeedCreationScalar = reader.ReadDouble();
-                SlowdownModePenaltyCreationScalar = reader.ReadDouble();
-
-                CannonAccuracyCreationScalar = reader.ReadDouble();
-                CannonDamageCreationScalar = reader.ReadDouble();
-                CannonRangeCreationScalar = reader.ReadDouble();
-                CannonReloadDurationCreationScalar = reader.ReadDouble();
-
-                MinorAbilityCooldownDurationCreationScalar = reader.ReadDouble();
-                MajorAbilityCooldownDurationCreationScalar = reader.ReadDouble();
-                EpicAbilityCooldownDurationCreationScalar = reader.ReadDouble();
-
-                RepairCooldownDurationCreationScalar = reader.ReadDouble();
-                BoardingChanceCreationScalar = reader.ReadDouble();
+                RepairCooldownDurationCreationModifier = reader.ReadDouble();
+                BoardingChanceCreationModifier = reader.ReadDouble();
 
                 m_TargetingMode = (TargetingMode)reader.ReadInt();
 

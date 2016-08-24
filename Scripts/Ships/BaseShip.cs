@@ -889,34 +889,47 @@ namespace Server
         public static double CannonTargetMovementMaxAccuracyPenalty = 0.2; //Maximum Accuracy Penalty for Opponent's Moving or Having Recently Moved
         public static double CannonMovementAccuracyCooldown = 10.0; //Seconds after stopping ship movement before no penalty to accuracy exists: scales from 0 to this number of seconds
 
+        public static double CannonCooldownTime = 10.0;
+
         public static int CannonFiringLoops = 3;
         public static double CannonLoopDelay = .5;
         public static int CannonExplosionRange = 1;
-        public static int CannonMaxAmmunition = 10;    
-
+        public static int CannonMaxAmmunition = 10;  
         public static double CannonMaxMisfireChance = 0.40;
 
-        public static double CannonCooldownTime = 10.0;
-        public static double CannonReloadTime = 2.0;
+        public int DoubloonValue = 0;
 
-        public static double BaseSlowdownModeModifier = 0.5;      
+        public static double BaseUpgradeDoubloonMultiplier = 1.0;
 
+        public static int BaseHoldSize = 50;
+
+        public static int BaseHitPoints = 1000;
+        public static int BaseSailPoints = 500;
+        public static int BaseGunPoints = 500;
+
+        public static double BaseForwardSpeed = 0.2;
+        public static double BaseDriftSpeed = 0.4;
+        public static double BaseSlowdownPenalty = 0.5;
+
+        public static int BaseCannonsPerSide = 3;
         public static double BaseCannonAccuracy = 0.8;
         public static int BaseCannonDamageMin = 20;
         public static int BaseCannonDamageMax = 30;        
-        public static int BaseCannonRange = 12;       
+        public static int BaseCannonRange = 12;
+        public static double BaseCannonReloadDuration = 6;
 
         public static double BaseRepairCooldown = 120.0;
+        public static double BaseBoardingChance = .25;
 
         public static double BaseMinorAbilityCooldown = 120.0;
         public static double BaseMajorAbilityCooldown = 300.0;
         public static double BaseEpicAbilityCooldown = 600.0;
                 
-        private static int SlowSpeed = 1; //Movement Tiles
-        private static int FastSpeed = 1; //Movement Tiles
+        private static int SlowSpeed = 1; //Movement Tiles (Do Not Edit)
+        private static int FastSpeed = 1; //Movement Tiles (Do Not Edit) 
 
-        private static int SlowDriftSpeed = 1; //Movement Tiles
-        private static int FastDriftSpeed = 1; //Movement Tiles  
+        private static int SlowDriftSpeed = 1; //Movement Tiles (Do Not Edit)
+        private static int FastDriftSpeed = 1; //Movement Tiles  (Do Not Edit)
 
         public virtual int ReducedSpeedModeMinDuration { get { return 10; } }
         public virtual int ReducedSpeedModeMaxDuration { get { return 20; } }
@@ -924,9 +937,7 @@ namespace Server
 
         public static TimeSpan ScuttleInterval = TimeSpan.FromSeconds(10);
         public static TimeSpan PlayerShipDecayDamageDelay = TimeSpan.FromSeconds(10);
-        public static TimeSpan NPCShipUncrewedDamageDelay = TimeSpan.FromSeconds(10);
-
-        public int DoubloonValue = 0;
+        public static TimeSpan NPCShipUncrewedDamageDelay = TimeSpan.FromSeconds(10);        
         
         public List<ShipCannon> m_Cannons = new List<ShipCannon>();
         public List<ShipCannon> m_LeftCannons = new List<ShipCannon>();
@@ -1325,26 +1336,28 @@ namespace Server
                     m_BoardingChance = 0;
             }
         }
-        
-        public double HitPointsCreationScalar = 1.0;
-        public double SailPointsCreationScalar = 1.0;
-        public double GunPointsCreationScalar = 1.0;
 
-        public double ForwardSpeedCreationScalar = 1.0;
-        public double DriftSpeedCreationScalar = 1.0;
-        public double SlowdownModePenaltyCreationScalar = 1.0;
+        public double HoldSizeCreationModifier = 1.0;
 
-        public double CannonAccuracyCreationScalar = 1.0;
-        public double CannonDamageCreationScalar = 1.0;
-        public double CannonRangeCreationScalar = 1.0;
-        public double CannonReloadDurationCreationScalar = 1.0;        
+        public double MaxHitPointsCreationModifier = 1.0;
+        public double MaxSailPointsCreationModifier = 1.0;
+        public double MaxGunPointsCreationModifier = 1.0;
 
-        public double MinorAbilityCooldownDurationCreationScalar = 1.0;
-        public double MajorAbilityCooldownDurationCreationScalar = 1.0;
-        public double EpicAbilityCooldownDurationCreationScalar = 1.0;
+        public double ForwardSpeedCreationModifier = 1.0;
+        public double DriftSpeedCreationModifier = 1.0;
+        public double SlowdownModePenaltyCreationModifier = 1.0;
 
-        public double RepairCooldownDurationCreationScalar = 1.0;
-        public double BoardingChanceCreationScalar = 1.0;
+        public double CannonAccuracyCreationModifier = 1.0;
+        public double CannonDamageCreationModifier = 1.0;
+        public double CannonRangeCreationModifier = 1.0;
+        public double CannonReloadDurationCreationModifier = 1.0;        
+
+        public double MinorAbilityCooldownDurationCreationModifier = 1.0;
+        public double MajorAbilityCooldownDurationCreationModifier = 1.0;
+        public double EpicAbilityCooldownDurationCreationModifier = 1.0;
+
+        public double RepairCooldownDurationCreationModifier = 1.0;
+        public double BoardingChanceCreationModifier = 1.0;
 
         private MobileControlType m_MobileControlType = MobileControlType.Null;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -5082,57 +5095,43 @@ namespace Server
 
         #region Push Properties Between Ship and Ship Deed
 
-        public static void PushDeedStoredPropertiesToShip(BaseShipDeed shipDeed,  BaseShip ship)
+        public static void PushDeedStoredPropertiesToShip(BaseShipDeed shipDeed, BaseShip ship)
         {
             if (shipDeed == null) return;
             if (ship == null) return;
+
+            int HitPointsStored = shipDeed.HitPoints;
+            int SailPointsStored = shipDeed.SailPoints;
+            int GunPointsStored = shipDeed.GunPoints;
 
             ship.ShipName = shipDeed.m_ShipName;
             ship.Owner = shipDeed.m_Owner;
 
             ship.HitPoints = shipDeed.HitPoints;
-            ship.MaxHitPoints = shipDeed.MaxHitPoints;
             ship.SailPoints = shipDeed.SailPoints;
-            ship.MaxSailPoints = shipDeed.MaxSailPoints;
             ship.GunPoints = shipDeed.GunPoints;
-            ship.MaxGunPoints = shipDeed.MaxGunPoints;
 
-            ship.ForwardSpeed = shipDeed.ForwardSpeed;
-            ship.DriftSpeed = shipDeed.DriftSpeed;
-            ship.SlowdownModePenalty = shipDeed.SlowdownModePenalty;
+            ship.HoldSizeCreationModifier = shipDeed.HoldSizeCreationModifier;
 
-            ship.CannonAccuracy = shipDeed.CannonAccuracy;
-            ship.CannonMinDamage = shipDeed.CannonMinDamage;
-            ship.CannonMaxDamage = shipDeed.CannonMaxDamage;
-            ship.CannonRange = shipDeed.CannonRange;
-            ship.CannonReloadDuration = shipDeed.CannonReloadDuration;
+            ship.MaxHitPointsCreationModifier = shipDeed.MaxHitPointsCreationModifier;
+            ship.MaxSailPointsCreationModifier = shipDeed.MaxSailPointsCreationModifier;
+            ship.MaxGunPointsCreationModifier = shipDeed.MaxGunPointsCreationModifier;
 
-            ship.MinorAbilityCooldownDuration = shipDeed.MinorAbilityCooldownDuration;
-            ship.MajorAbilityCooldownDuration = shipDeed.MajorAbilityCooldownDuration;
-            ship.EpicAbilityCooldownDuration = shipDeed.EpicAbilityCooldownDuration;
+            ship.ForwardSpeedCreationModifier = shipDeed.ForwardSpeedCreationModifier;
+            ship.DriftSpeedCreationModifier = shipDeed.DriftSpeedCreationModifier;
+            ship.SlowdownModePenaltyCreationModifier = shipDeed.SlowdownModePenaltyCreationModifier;
 
-            ship.RepairCooldownDuration = shipDeed.RepairCooldownDuration;
-            ship.BoardingChance = shipDeed.BoardingChance;
-            
-            ship.HitPointsCreationScalar = shipDeed.HitPointsCreationScalar;
-            ship.SailPointsCreationScalar = shipDeed.SailPointsCreationScalar;
-            ship.GunPointsCreationScalar = shipDeed.GunPointsCreationScalar;
+            ship.CannonAccuracyCreationModifier = shipDeed.CannonAccuracyCreationModifier;
+            ship.CannonDamageCreationModifier = shipDeed.CannonDamageCreationModifier;
+            ship.CannonRangeCreationModifier = shipDeed.CannonRangeCreationModifier;
+            ship.CannonReloadDurationCreationModifier = shipDeed.CannonReloadDurationCreationModifier;
 
-            ship.ForwardSpeedCreationScalar = shipDeed.ForwardSpeedCreationScalar;
-            ship.DriftSpeedCreationScalar = shipDeed.DriftSpeedCreationScalar;
-            ship.SlowdownModePenaltyCreationScalar = shipDeed.SlowdownModePenaltyCreationScalar;
+            ship.MinorAbilityCooldownDurationCreationModifier = shipDeed.MinorAbilityCooldownDurationCreationModifier;
+            ship.MajorAbilityCooldownDurationCreationModifier = shipDeed.MajorAbilityCooldownDurationCreationModifier;
+            ship.EpicAbilityCooldownDurationCreationModifier = shipDeed.EpicAbilityCooldownDurationCreationModifier;
 
-            ship.CannonAccuracyCreationScalar = shipDeed.CannonAccuracyCreationScalar;
-            ship.CannonDamageCreationScalar = shipDeed.CannonDamageCreationScalar;
-            ship.CannonRangeCreationScalar = shipDeed.CannonRangeCreationScalar;
-            ship.CannonReloadDurationCreationScalar = shipDeed.CannonReloadDurationCreationScalar;
-
-            ship.MinorAbilityCooldownDurationCreationScalar = shipDeed.MinorAbilityCooldownDurationCreationScalar;
-            ship.MajorAbilityCooldownDurationCreationScalar = shipDeed.MajorAbilityCooldownDurationCreationScalar;
-            ship.EpicAbilityCooldownDurationCreationScalar = shipDeed.EpicAbilityCooldownDurationCreationScalar;
-
-            ship.RepairCooldownDurationCreationScalar = shipDeed.RepairCooldownDurationCreationScalar;
-            ship.BoardingChanceCreationScalar = shipDeed.BoardingChanceCreationScalar;
+            ship.RepairCooldownDurationCreationModifier = shipDeed.RepairCooldownDurationCreationModifier;
+            ship.BoardingChanceCreationModifier = shipDeed.BoardingChanceCreationModifier;
             
             ship.m_TargetingMode = shipDeed.m_TargetingMode;                        
 
@@ -5160,6 +5159,13 @@ namespace Server
             {
                 ship.Friends.Add(mobile);
             }
+            
+            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(null, ship, true, true);
+            ShipUniqueness.ApplyShipStatsProfile(ship, shipStatsProfile);
+
+            ship.HitPoints = HitPointsStored;
+            ship.SailPoints = SailPointsStored;
+            ship.GunPoints = GunPointsStored;
 
             //TEST: Set Ship Repair Timers + Ability Cooldowns to Maximum Amount
         }
@@ -5175,48 +5181,30 @@ namespace Server
             shipDeed.m_Owner = ship.m_Owner;
 
             shipDeed.HitPoints = ship.HitPoints;
-            shipDeed.MaxHitPoints = ship.MaxHitPoints;
             shipDeed.SailPoints = ship.SailPoints;
-            shipDeed.MaxSailPoints = ship.MaxSailPoints;
             shipDeed.GunPoints = ship.GunPoints;
-            shipDeed.MaxGunPoints = ship.MaxGunPoints;
 
-            shipDeed.ForwardSpeed = ship.ForwardSpeed;
-            shipDeed.DriftSpeed = ship.DriftSpeed;
-            shipDeed.SlowdownModePenalty = ship.SlowdownModePenalty;
+            shipDeed.HoldSizeCreationModifier = ship.HoldSizeCreationModifier;
 
-            shipDeed.CannonAccuracy = ship.CannonAccuracy;
-            shipDeed.CannonMinDamage = ship.CannonMinDamage;
-            shipDeed.CannonMaxDamage = ship.CannonMaxDamage;
-            shipDeed.CannonRange = ship.CannonRange;
-            shipDeed.CannonReloadDuration = ship.CannonReloadDuration;
+            shipDeed.MaxHitPointsCreationModifier = ship.MaxHitPointsCreationModifier;
+            shipDeed.MaxSailPointsCreationModifier = ship.MaxSailPointsCreationModifier;
+            shipDeed.MaxGunPointsCreationModifier = ship.MaxGunPointsCreationModifier;
 
-            shipDeed.MinorAbilityCooldownDuration = ship.MinorAbilityCooldownDuration;
-            shipDeed.MajorAbilityCooldownDuration = ship.MajorAbilityCooldownDuration;
-            shipDeed.EpicAbilityCooldownDuration = ship.EpicAbilityCooldownDuration;
+            shipDeed.ForwardSpeedCreationModifier = ship.ForwardSpeedCreationModifier;
+            shipDeed.DriftSpeedCreationModifier = ship.DriftSpeedCreationModifier;
+            shipDeed.SlowdownModePenaltyCreationModifier = ship.SlowdownModePenaltyCreationModifier;
 
-            shipDeed.RepairCooldownDuration = ship.RepairCooldownDuration;
-            shipDeed.BoardingChance = ship.BoardingChance;
+            shipDeed.CannonAccuracyCreationModifier = ship.CannonAccuracyCreationModifier;
+            shipDeed.CannonDamageCreationModifier = ship.CannonDamageCreationModifier;
+            shipDeed.CannonRangeCreationModifier = ship.CannonRangeCreationModifier;
+            shipDeed.CannonReloadDurationCreationModifier = ship.CannonReloadDurationCreationModifier;
 
-            shipDeed.HitPointsCreationScalar = ship.HitPointsCreationScalar;
-            shipDeed.SailPointsCreationScalar = ship.SailPointsCreationScalar;
-            shipDeed.GunPointsCreationScalar = ship.GunPointsCreationScalar;
+            shipDeed.MinorAbilityCooldownDurationCreationModifier = ship.MinorAbilityCooldownDurationCreationModifier;
+            shipDeed.MajorAbilityCooldownDurationCreationModifier = ship.MajorAbilityCooldownDurationCreationModifier;
+            shipDeed.EpicAbilityCooldownDurationCreationModifier = ship.EpicAbilityCooldownDurationCreationModifier;
 
-            shipDeed.ForwardSpeedCreationScalar = ship.ForwardSpeedCreationScalar;
-            shipDeed.DriftSpeedCreationScalar = ship.DriftSpeedCreationScalar;
-            shipDeed.SlowdownModePenaltyCreationScalar = ship.SlowdownModePenaltyCreationScalar;
-
-            shipDeed.CannonAccuracyCreationScalar = ship.CannonAccuracyCreationScalar;
-            shipDeed.CannonDamageCreationScalar = ship.CannonDamageCreationScalar;
-            shipDeed.CannonRangeCreationScalar = ship.CannonRangeCreationScalar;
-            shipDeed.CannonReloadDurationCreationScalar = ship.CannonReloadDurationCreationScalar;
-
-            shipDeed.MinorAbilityCooldownDurationCreationScalar = ship.MinorAbilityCooldownDurationCreationScalar;
-            shipDeed.MajorAbilityCooldownDurationCreationScalar = ship.MajorAbilityCooldownDurationCreationScalar;
-            shipDeed.EpicAbilityCooldownDurationCreationScalar = ship.EpicAbilityCooldownDurationCreationScalar;
-
-            shipDeed.RepairCooldownDurationCreationScalar = ship.RepairCooldownDurationCreationScalar;
-            shipDeed.BoardingChanceCreationScalar = ship.BoardingChanceCreationScalar;
+            shipDeed.RepairCooldownDurationCreationModifier = ship.RepairCooldownDurationCreationModifier;
+            shipDeed.BoardingChanceCreationModifier = ship.BoardingChanceCreationModifier;
 
             shipDeed.m_TargetingMode = ship.m_TargetingMode;
 
@@ -5259,8 +5247,13 @@ namespace Server
 
             List<IEntity> ents = GetMovingEntities(true);
 
-            foreach (Item item in ents)
+            foreach (IEntity entity in ents)
             {
+                Item item = entity as Item;
+
+                if (item == null)
+                    continue;
+
                 if (item.Movable)
                     m_Queue.Enqueue(item);
             }
@@ -5607,7 +5600,7 @@ namespace Server
 
         #endregion
 
-        #region Pull Ghosts to PLayer
+        #region Pull Ghosts to Player
 
         public void PullGhostsToPlayer(Mobile from)
         {
@@ -6502,7 +6495,7 @@ namespace Server
                     if (shipCannon.Ammunition < shipCannon.GetMaxAmmunition())
                     {
                         shipCannon.Ammunition = shipCannon.GetMaxAmmunition();
-                        totalReloadTime += CannonReloadTime;
+                        totalReloadTime += CannonReloadDuration;
                     }
                 }
 
@@ -6708,43 +6701,36 @@ namespace Server
             writer.Write(MaxSailPoints);
             writer.Write(GunPoints);
             writer.Write(MaxGunPoints);
-
             writer.Write(ForwardSpeed);
             writer.Write(DriftSpeed);
             writer.Write(SlowdownModePenalty);
-
             writer.Write(CannonAccuracy);
             writer.Write(CannonMinDamage);
             writer.Write(CannonMaxDamage);
             writer.Write(CannonRange);
             writer.Write(CannonReloadDuration);
-
             writer.Write(MinorAbilityCooldownDuration);
             writer.Write(MajorAbilityCooldownDuration);
             writer.Write(EpicAbilityCooldownDuration);
-
             writer.Write(RepairCooldownDuration);
             writer.Write(BoardingChance);
-            
-            writer.Write(HitPointsCreationScalar);
-            writer.Write(SailPointsCreationScalar);
-            writer.Write(GunPointsCreationScalar);
 
-            writer.Write(ForwardSpeedCreationScalar);
-            writer.Write(DriftSpeedCreationScalar);
-            writer.Write(SlowdownModePenaltyCreationScalar);
-
-            writer.Write(CannonAccuracyCreationScalar);
-            writer.Write(CannonDamageCreationScalar);
-            writer.Write(CannonRangeCreationScalar);
-            writer.Write(CannonReloadDurationCreationScalar);
-
-            writer.Write(MinorAbilityCooldownDurationCreationScalar);
-            writer.Write(MajorAbilityCooldownDurationCreationScalar);
-            writer.Write(EpicAbilityCooldownDurationCreationScalar);
-
-            writer.Write(RepairCooldownDurationCreationScalar);
-            writer.Write(BoardingChanceCreationScalar);
+            writer.Write(HoldSizeCreationModifier);
+            writer.Write(MaxHitPointsCreationModifier);
+            writer.Write(MaxSailPointsCreationModifier);
+            writer.Write(MaxGunPointsCreationModifier);
+            writer.Write(ForwardSpeedCreationModifier);
+            writer.Write(DriftSpeedCreationModifier);
+            writer.Write(SlowdownModePenaltyCreationModifier);
+            writer.Write(CannonAccuracyCreationModifier);
+            writer.Write(CannonDamageCreationModifier);
+            writer.Write(CannonRangeCreationModifier);
+            writer.Write(CannonReloadDurationCreationModifier);
+            writer.Write(MinorAbilityCooldownDurationCreationModifier);
+            writer.Write(MajorAbilityCooldownDurationCreationModifier);
+            writer.Write(EpicAbilityCooldownDurationCreationModifier);
+            writer.Write(RepairCooldownDurationCreationModifier);
+            writer.Write(BoardingChanceCreationModifier);
             
             writer.Write((int)m_TargetingMode); 
 
@@ -6856,43 +6842,36 @@ namespace Server
                 MaxSailPoints = reader.ReadInt();
                 GunPoints = reader.ReadInt();
                 MaxGunPoints = reader.ReadInt();
-
                 ForwardSpeed = reader.ReadDouble();
                 DriftSpeed = reader.ReadDouble();
                 SlowdownModePenalty = reader.ReadDouble();
-
                 CannonAccuracy = reader.ReadDouble();
                 CannonMinDamage = reader.ReadDouble();
                 CannonMaxDamage = reader.ReadDouble();
                 CannonRange = reader.ReadDouble();
                 CannonReloadDuration = reader.ReadDouble();
-
                 MinorAbilityCooldownDuration = reader.ReadDouble();
                 MajorAbilityCooldownDuration = reader.ReadDouble();
                 EpicAbilityCooldownDuration = reader.ReadDouble();
-
                 RepairCooldownDuration = reader.ReadDouble();
                 BoardingChance = reader.ReadDouble();
-                
-                HitPointsCreationScalar = reader.ReadDouble();
-                SailPointsCreationScalar = reader.ReadDouble();
-                GunPointsCreationScalar = reader.ReadDouble();
 
-                ForwardSpeedCreationScalar = reader.ReadDouble();
-                DriftSpeedCreationScalar = reader.ReadDouble();
-                SlowdownModePenaltyCreationScalar = reader.ReadDouble();
-
-                CannonAccuracyCreationScalar = reader.ReadDouble();
-                CannonDamageCreationScalar = reader.ReadDouble();
-                CannonRangeCreationScalar = reader.ReadDouble();
-                CannonReloadDurationCreationScalar = reader.ReadDouble();
-
-                MinorAbilityCooldownDurationCreationScalar = reader.ReadDouble();
-                MajorAbilityCooldownDurationCreationScalar = reader.ReadDouble();
-                EpicAbilityCooldownDurationCreationScalar = reader.ReadDouble();
-
-                RepairCooldownDurationCreationScalar = reader.ReadDouble();
-                BoardingChanceCreationScalar = reader.ReadDouble();
+                HoldSizeCreationModifier = reader.ReadDouble();
+                MaxHitPointsCreationModifier = reader.ReadDouble();
+                MaxSailPointsCreationModifier = reader.ReadDouble();
+                MaxGunPointsCreationModifier = reader.ReadDouble();
+                ForwardSpeedCreationModifier = reader.ReadDouble();
+                DriftSpeedCreationModifier = reader.ReadDouble();
+                SlowdownModePenaltyCreationModifier = reader.ReadDouble();
+                CannonAccuracyCreationModifier = reader.ReadDouble();
+                CannonDamageCreationModifier = reader.ReadDouble();
+                CannonRangeCreationModifier = reader.ReadDouble();
+                CannonReloadDurationCreationModifier = reader.ReadDouble();
+                MinorAbilityCooldownDurationCreationModifier = reader.ReadDouble();
+                MajorAbilityCooldownDurationCreationModifier = reader.ReadDouble();
+                EpicAbilityCooldownDurationCreationModifier = reader.ReadDouble();
+                RepairCooldownDurationCreationModifier = reader.ReadDouble();
+                BoardingChanceCreationModifier = reader.ReadDouble();
                 
                 m_TargetingMode = (TargetingMode)reader.ReadInt();               
 
