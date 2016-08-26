@@ -121,6 +121,9 @@ namespace Server
             AddButton(14, 11, 2094, 2095, 1, GumpButtonType.Reply, 0);
             AddLabel(10, 0, 149, "Guide");
 
+            //TEST
+            shipName = "The Rebellion";
+
             //Header
             AddImage(94, 3, 1141);
             AddLabel(Utility.CenteredTextOffset(235, shipName), 5, 149, shipName);
@@ -182,57 +185,85 @@ namespace Server
             ShipUpgradeDetail minorAbilityDetail = null;
             ShipUpgradeDetail majorAbilityDetail = null;
             ShipUpgradeDetail epicAbilityDetail = null;
-
-            if (m_ShipGumpObject.m_Ship != null)
+            
+            if (ship != null)
             {
-                shipType = m_ShipGumpObject.m_Ship.GetType();
+                //TEST
+                ship.m_ThemeUpgrade = ShipUpgrades.ThemeType.Pirate;
+                ship.m_PaintUpgrade = ShipUpgrades.PaintType.DarkGrey;
+                ship.m_CannonMetalUpgrade = ShipUpgrades.CannonMetalType.Bloodstone;
 
-                hitPoints = m_ShipGumpObject.m_Ship.HitPoints;
-                maxHullPoints = m_ShipGumpObject.m_Ship.MaxHitPoints;
+                ship.m_OutfittingUpgrade = ShipUpgrades.OutfittingType.Hunter;
+                ship.m_BannerUpgrade = ShipUpgrades.BannerType.Corsairs;
+                ship.m_CharmUpgrade = ShipUpgrades.CharmType.BarrelOfLimes;
 
-                sailPoints = m_ShipGumpObject.m_Ship.SailPoints;
-                maxSailPoints = m_ShipGumpObject.m_Ship.MaxSailPoints;
+                ship.m_MinorAbilityUpgrade = ShipUpgrades.MinorAbilityType.ExpediteRepairs;
+                ship.m_MajorAbilityUpgrade = ShipUpgrades.MajorAbilityType.Smokescreen;
+                ship.m_EpicAbilityUpgrade = ShipUpgrades.EpicAbilityType.Hellfire;
+                //-----
 
-                gunPoints = m_ShipGumpObject.m_Ship.GunPoints;
-                maxGunPoints = m_ShipGumpObject.m_Ship.MaxGunPoints;                
+                shipType = ship.GetType();
 
-                themeDetail = ShipUpgrades.GetThemeDetail(m_ShipGumpObject.m_Ship.m_ThemeUpgrade);
-                paintDetail = ShipUpgrades.GetPaintDetail(m_ShipGumpObject.m_Ship.m_PaintUpgrade);
-                cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(m_ShipGumpObject.m_Ship.m_CannonMetalUpgrade);
+                hitPoints = ship.HitPoints;
+                maxHullPoints = ship.MaxHitPoints;
 
-                outfittingDetail = ShipUpgrades.GetOutfittingDetail(m_ShipGumpObject.m_Ship.m_OutfittingUpgrade);
-                bannerDetail = ShipUpgrades.GetBannerDetail(m_ShipGumpObject.m_Ship.m_BannerUpgrade);
-                charmDetail = ShipUpgrades.GetCharmDetail(m_ShipGumpObject.m_Ship.m_CharmUpgrade);
+                sailPoints = ship.SailPoints;
+                maxSailPoints = ship.MaxSailPoints;
 
-                minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(m_ShipGumpObject.m_Ship.m_MinorAbilityUpgrade);
-                majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(m_ShipGumpObject.m_Ship.m_MajorAbilityUpgrade);
-                epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(m_ShipGumpObject.m_Ship.m_EpicAbilityUpgrade);
+                gunPoints = ship.GunPoints;
+                maxGunPoints = ship.MaxGunPoints;                
+
+                themeDetail = ShipUpgrades.GetThemeDetail(ship.m_ThemeUpgrade);
+                paintDetail = ShipUpgrades.GetPaintDetail(ship.m_PaintUpgrade);
+                cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(ship.m_CannonMetalUpgrade);
+
+                outfittingDetail = ShipUpgrades.GetOutfittingDetail(ship.m_OutfittingUpgrade);
+                bannerDetail = ShipUpgrades.GetBannerDetail(ship.m_BannerUpgrade);
+                charmDetail = ShipUpgrades.GetCharmDetail(ship.m_CharmUpgrade);
+
+                minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(ship.m_MinorAbilityUpgrade);
+                majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(ship.m_MajorAbilityUpgrade);
+                epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(ship.m_EpicAbilityUpgrade);
             }
 
-            if (m_ShipGumpObject.m_ShipDeed != null)
+            if (shipDeed != null)
             {
-                shipType = m_ShipGumpObject.m_ShipDeed.ShipType;
+                //TEST
+                shipDeed.m_ThemeUpgrade = ShipUpgrades.ThemeType.Pirate;
+                shipDeed.m_PaintUpgrade = ShipUpgrades.PaintType.DarkGrey;
+                shipDeed.m_CannonMetalUpgrade = ShipUpgrades.CannonMetalType.Bloodstone;
 
-                hitPoints = m_ShipGumpObject.m_ShipDeed.HitPoints;
+                shipDeed.m_OutfittingUpgrade = ShipUpgrades.OutfittingType.Hunter;
+                shipDeed.m_BannerUpgrade = ShipUpgrades.BannerType.Corsairs;
+                shipDeed.m_CharmUpgrade = ShipUpgrades.CharmType.BarrelOfLimes;
+
+                shipDeed.m_MinorAbilityUpgrade = ShipUpgrades.MinorAbilityType.ExpediteRepairs;
+                shipDeed.m_MajorAbilityUpgrade = ShipUpgrades.MajorAbilityType.Smokescreen;
+                shipDeed.m_EpicAbilityUpgrade = ShipUpgrades.EpicAbilityType.Hellfire;
+                //-----
+
+                shipType = shipDeed.ShipType;
+
+                hitPoints = shipDeed.HitPoints;
                 maxHullPoints = shipStatsProfile.MaxHitPointsAdjusted;
 
-                sailPoints = m_ShipGumpObject.m_ShipDeed.SailPoints;
+                sailPoints = shipDeed.SailPoints;
                 maxSailPoints = shipStatsProfile.MaxSailPointsAdjusted;
 
-                gunPoints = m_ShipGumpObject.m_ShipDeed.GunPoints;
+                gunPoints = shipDeed.GunPoints;
                 maxGunPoints = shipStatsProfile.MaxGunPointsAdjusted;
 
-                themeDetail = ShipUpgrades.GetThemeDetail(m_ShipGumpObject.m_ShipDeed.m_ThemeUpgrade);
-                paintDetail = ShipUpgrades.GetPaintDetail(m_ShipGumpObject.m_ShipDeed.m_PaintUpgrade);
-                cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(m_ShipGumpObject.m_ShipDeed.m_CannonMetalUpgrade);
+                themeDetail = ShipUpgrades.GetThemeDetail(shipDeed.m_ThemeUpgrade);
+                paintDetail = ShipUpgrades.GetPaintDetail(shipDeed.m_PaintUpgrade);
+                cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(shipDeed.m_CannonMetalUpgrade);
 
-                outfittingDetail = ShipUpgrades.GetOutfittingDetail(m_ShipGumpObject.m_ShipDeed.m_OutfittingUpgrade);
-                bannerDetail = ShipUpgrades.GetBannerDetail(m_ShipGumpObject.m_ShipDeed.m_BannerUpgrade);
-                charmDetail = ShipUpgrades.GetCharmDetail(m_ShipGumpObject.m_ShipDeed.m_CharmUpgrade);
+                outfittingDetail = ShipUpgrades.GetOutfittingDetail(shipDeed.m_OutfittingUpgrade);
+                bannerDetail = ShipUpgrades.GetBannerDetail(shipDeed.m_BannerUpgrade);
+                charmDetail = ShipUpgrades.GetCharmDetail(shipDeed.m_CharmUpgrade);
 
-                minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(m_ShipGumpObject.m_ShipDeed.m_MinorAbilityUpgrade);
-                majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(m_ShipGumpObject.m_ShipDeed.m_MajorAbilityUpgrade);
-                epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(m_ShipGumpObject.m_ShipDeed.m_EpicAbilityUpgrade);
+                minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(shipDeed.m_MinorAbilityUpgrade);
+                majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(shipDeed.m_MajorAbilityUpgrade);
+                epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(shipDeed.m_EpicAbilityUpgrade);
             }
 
             double hullPercent = (double)hitPoints / (double)maxHullPoints;
@@ -282,7 +313,7 @@ namespace Server
                     int offsetY = -22;
 
                     //Minor Ability
-                    AddLabel(60, 153, 2599, "Minor Ability");
+                    AddLabel(63, 153, 2599, "Minor Ability");
                     AddImage(62, 197, 2328);
                     if (minorAbilityDetail != null)
                     {
@@ -296,11 +327,11 @@ namespace Server
                         AddLabel(Utility.CenteredTextOffset(110, "Not Installed"), 173, 2401, "Not Installed");
 
                     //Major Ability
-                    AddLabel(190, 153, 2603, "Major Ability");
+                    AddLabel(194, 153, 2603, "Major Ability");
                     AddImage(192, 197, 2328);
                     if (majorAbilityDetail != null)
                     {
-                        AddLabel(Utility.CenteredTextOffset(240, majorAbilityDetail.m_UpgradeName), 173, WhiteTextHue, majorAbilityDetail.m_UpgradeName);
+                        AddLabel(Utility.CenteredTextOffset(239, majorAbilityDetail.m_UpgradeName), 173, WhiteTextHue, majorAbilityDetail.m_UpgradeName);
                         AddButton(187, 263, 2151, 2151, 17, GumpButtonType.Reply, 0);
                         AddLabel(220, 267, WhiteTextHue, majorAbilityCooldownText);
                         AddGumpCollection(GumpCollections.GetGumpCollection(majorAbilityDetail.GumpCollectionId, -1), offsetX + 192, offsetY + 197);
@@ -310,7 +341,7 @@ namespace Server
                         AddLabel(Utility.CenteredTextOffset(240, "Not Installed"), 173, 2401, "Not Installed");
 
                     //Epic Ability
-                    AddLabel(324, 153, 2606, "Epic Ability");
+                    AddLabel(327, 153, 2606, "Epic Ability");
                     AddImage(320, 197, 2328);
                     if (epicAbilityDetail != null)
                     {
@@ -325,13 +356,27 @@ namespace Server
 
                     #endregion
 
-                    #region Middle
+                    #region Middle                   
 
-                    string doubloonCount = "10,000"; //TEST
+                    if (ship != null)
+                    {
+                          string doubloonCount = "0"; //TEST
 
-                    AddLabel(179, 304, 149, "Doubloons in Hold");
-                    AddItem(182, 325, 2539);
-                    AddLabel(220, 322, WhiteTextHue, doubloonCount);
+                        AddLabel(102, 298, 149, "Doubloons in Hold");
+                        AddItem(104, 321, 2539);
+                        AddLabel(142, 318, WhiteTextHue, doubloonCount);
+                    }
+
+                    if (ship != null)
+                    {
+                        if (ship.Hold != null)
+                        {
+                            string itemCount = ship.Hold.TotalItems.ToString() + "/" + ship.Hold.MaxItems.ToString();
+
+                            AddLabel(259, 298, 149, "Items in Hold");
+                            AddLabel(Utility.CenteredTextOffset(297, itemCount) , 318, WhiteTextHue, itemCount);
+                        }
+                    }
 
                     #endregion
                     
@@ -435,7 +480,7 @@ namespace Server
                     offsetX = -32;
                     offsetY = -22;
 
-                    AddLabel(78, 38, 145, "Theme");
+                    AddLabel(82, 38, 145, "Theme");
                     AddImage(58, 80, 2328);
                     if (themeDetail != null)
                     {
@@ -448,33 +493,33 @@ namespace Server
                     else
                         AddLabel(Utility.CenteredTextOffset(105, "Not Installed"), 58, 2401, "Not Installed");
 
-                    AddLabel(212, 38, 2578, "Paint");
+                    AddLabel(215, 38, 2578, "Paint");
                     AddImage(190, 80, 2328);
                     if (paintDetail != null)
                     {
                         AddButton(206, 143, 2117, 2118, 0, GumpButtonType.Reply, 0);
                         AddLabel(226, 140, 2550, "Info");
-                        AddLabel(Utility.CenteredTextOffset(240, paintDetail.m_UpgradeName), 58, WhiteTextHue, paintDetail.m_UpgradeName);
+                        AddLabel(Utility.CenteredTextOffset(237, paintDetail.m_UpgradeName), 58, WhiteTextHue, paintDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(paintDetail.GumpCollectionId, -1), offsetX + 190, offsetY + 80);
                     }
 
                     else
                         AddLabel(Utility.CenteredTextOffset(240, "Not Installed"), 58, 2401, "Not Installed");
 
-                    AddLabel(316, 38, 2301, "Cannon Metal");
+                    AddLabel(319, 38, 2301, "Cannon Metal");
                     AddImage(318, 80, 2328);
                     if (cannonMetalDetail != null)
                     {
                         AddButton(334, 143, 2117, 2118, 0, GumpButtonType.Reply, 0);
                         AddLabel(354, 140, 2550, "Info");                    
-                        AddLabel(Utility.CenteredTextOffset(370, cannonMetalDetail.m_UpgradeName), 58, WhiteTextHue, cannonMetalDetail.m_UpgradeName);
+                        AddLabel(Utility.CenteredTextOffset(368, cannonMetalDetail.m_UpgradeName), 58, WhiteTextHue, cannonMetalDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(cannonMetalDetail.GumpCollectionId, -1), offsetX + 318, offsetY + 80);
                     }
 
                     else
                         AddLabel(Utility.CenteredTextOffset(370, "Not Installed"), 58, 2401, "Not Installed");
 
-                    AddLabel(64, 176, 2550, "Outfitting");
+                    AddLabel(70, 176, 2550, "Outfitting");
                     AddImage(58, 218, 2328);
                     if (outfittingDetail != null)
                     {
@@ -487,33 +532,33 @@ namespace Server
                     else
                         AddLabel(Utility.CenteredTextOffset(105, "Not Installed"), 196, 2401, "Not Installed");
 
-                    AddLabel(208, 176, 2114, "Banner");
+                    AddLabel(211, 176, 2114, "Banner");
                     AddImage(190, 218, 2328);
                     if (bannerDetail != null)
                     {
                         AddButton(206, 281, 2117, 2117, 0, GumpButtonType.Reply, 0);
                         AddLabel(226, 278, 2550, "Info");
-                        AddLabel(Utility.CenteredTextOffset(240, bannerDetail.m_UpgradeName), 196, WhiteTextHue, bannerDetail.m_UpgradeName);
+                        AddLabel(Utility.CenteredTextOffset(237, bannerDetail.m_UpgradeName), 196, WhiteTextHue, bannerDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(bannerDetail.GumpCollectionId, -1), offsetX + 190, offsetY + 218);
                     }
 
                     else
                         AddLabel(Utility.CenteredTextOffset(240, "Not Installed"), 196, 2401, "Not Installed");
 
-                    AddLabel(336, 176, 2650, "Charm");
+                    AddLabel(339, 176, 2617, "Charm");
                     AddImage(318, 218, 2328);
                     if (charmDetail != null)
                     {
                         AddButton(334, 281, 2117, 2117, 0, GumpButtonType.Reply, 0);
                         AddLabel(354, 278, 2550, "Info");
-                        AddLabel(Utility.CenteredTextOffset(370, charmDetail.m_UpgradeName), 196, WhiteTextHue, charmDetail.m_UpgradeName);
+                        AddLabel(Utility.CenteredTextOffset(368, charmDetail.m_UpgradeName), 196, WhiteTextHue, charmDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(charmDetail.GumpCollectionId, -1), offsetX + 318, offsetY + 218);
                     }
 
                     else
                         AddLabel(Utility.CenteredTextOffset(370, "Not Installed"), 196, 2401, "Not Installed");
 
-                    AddLabel(58, 316, 2599, "Minor Ability");
+                    AddLabel(59, 316, 2599, "Minor Ability");
                     AddImage(58, 358, 2328);
                     if (minorAbilityDetail != null)
                     {
@@ -526,26 +571,26 @@ namespace Server
                     else
                         AddLabel(Utility.CenteredTextOffset(105, "Not Installed"), 336, 2401, "Not Installed");
 
-                    AddLabel(189, 316, 2603, "Major Ability");
+                    AddLabel(191, 316, 2603, "Major Ability");
                     AddImage(190, 358, 2328);
                     if (majorAbilityDetail != null)
                     {
                         AddButton(206, 421, 2117, 2117, 0, GumpButtonType.Reply, 0);
                         AddLabel(226, 418, 2550, "Info");
-                        AddLabel(Utility.CenteredTextOffset(240, majorAbilityDetail.m_UpgradeName), 336, WhiteTextHue, majorAbilityDetail.m_UpgradeName);
+                        AddLabel(Utility.CenteredTextOffset(237, majorAbilityDetail.m_UpgradeName), 336, WhiteTextHue, majorAbilityDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(majorAbilityDetail.GumpCollectionId, -1), offsetX + 190, offsetY + 358);
                     }
 
                     else
                         AddLabel(Utility.CenteredTextOffset(240, "Not Installed"), 336, 2401, "Not Installed");
 
-                    AddLabel(321, 316, 2606, "Epic Ability");
+                    AddLabel(326, 316, 2606, "Epic Ability");
 			        AddImage(318, 358, 2328);
                     if (epicAbilityDetail != null)
                     {
                         AddButton(334, 421, 2117, 2117, 0, GumpButtonType.Reply, 0);
                         AddLabel(354, 418, 2550, "Info");
-                        AddLabel(Utility.CenteredTextOffset(370, epicAbilityDetail.m_UpgradeName), 336, WhiteTextHue, epicAbilityDetail.m_UpgradeName);
+                        AddLabel(Utility.CenteredTextOffset(368, epicAbilityDetail.m_UpgradeName), 336, WhiteTextHue, epicAbilityDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(epicAbilityDetail.GumpCollectionId, -1), offsetX + 318, offsetY + 358);
                     }
 
@@ -829,11 +874,11 @@ namespace Server
                             AddButton(41, 83, 2472, 2474, 10, GumpButtonType.Reply, 0);
                             AddLabel(74, 87, 1256, "Clear Entire Friends List");
 
-                            AddButton(40, 113, 2151, 2154, 11, GumpButtonType.Reply, 0);
+                            AddButton(40, 113, 2154, 2154, 11, GumpButtonType.Reply, 0);
 			                AddLabel(75, 116, 149, "Set all on owner IP as");
                             AddLabel(221, 116, 2599, "Friends");
 
-                            AddButton(40, 146, 2151, 2154, 12, GumpButtonType.Reply, 0);
+                            AddButton(40, 146, 2154, 2154, 12, GumpButtonType.Reply, 0);
 			                AddLabel(75, 151, 149, "Set all in owner Guild as");
                             AddLabel(234, 151, 2599, "Friends"); 
 
@@ -854,11 +899,11 @@ namespace Server
                             AddButton(41, 83, 2472, 2474, 10, GumpButtonType.Reply, 0);
                             AddLabel(74, 87, 1256, "Clear Entire Co-Owners List");
 
-                            AddButton(40, 113, 2151, 2154, 11, GumpButtonType.Reply, 0);
+                            AddButton(40, 113, 2154, 2154, 11, GumpButtonType.Reply, 0);
 			                AddLabel(75, 116, 149, "Set all on owner IP as");
                             AddLabel(221, 116, 2603, "Co-Owner");
 
-                            AddButton(40, 146, 2151, 2154, 12, GumpButtonType.Reply, 0);
+                            AddButton(40, 146, 2154, 2154, 12, GumpButtonType.Reply, 0);
 			                AddLabel(75, 151, 149, "Set all in owner Guild as");
                             AddLabel(234, 151, 2603, "Co-Owner");
 
@@ -881,7 +926,7 @@ namespace Server
 
                     //Right Row
                     AddButton(280, 244, 9721, 9721, 0, GumpButtonType.Reply, 0);
-                    AddLabel(315, 248, WhiteTextHue, "Merrill Calder");
+                    AddLabel(315, 248, WhiteTextHue, "Fendrake");
 
                     AddButton(136, 416, 4014, 4016, 0, GumpButtonType.Reply, 0);			       
 			        AddLabel(201, 416, 2599, "Page");
@@ -1543,7 +1588,7 @@ namespace Server
             int modifierX = 377;
 
             //Misc
-            AddLabel(145, 30, 2625, "Hold Capacity:");
+            AddLabel(145, 30, 2625, "Hold Capacity");
             AddLabel(startX, 30, textHue, HoldSize.ToString() + " Items");
             modifierValue = shipStatsProfile.HoldSizeCreationModifier + shipStatsProfile.HoldSizeUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 30, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
@@ -1551,21 +1596,21 @@ namespace Server
             if (modifierValue < 0) AddLabel(modifierX, 30, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
                       
             //Stats
-            AddLabel(145, 60, 149, "Hull Max Points:");
+            AddLabel(145, 60, 149, "Hull Max Points");
             AddLabel(startX, 60, textHue, MaxHitPoints.ToString());
             modifierValue = shipStatsProfile.MaxHitPointsCreationModifier + shipStatsProfile.MaxHitPointsUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 60, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 60, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
-            AddLabel(145, 80, 149, "Sail Max Points:");
+            AddLabel(145, 80, 149, "Sail Max Points");
             AddLabel(startX, 80, textHue, MaxSailPoints.ToString());
             modifierValue = shipStatsProfile.MaxSailPointsCreationModifier + shipStatsProfile.MaxSailPointsUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 80, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 80, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
-            AddLabel(145, 100, 149, "Gun Max Points:");
+            AddLabel(145, 100, 149, "Gun Max Points");
             AddLabel(startX, 100, textHue, MaxGunPoints.ToString());
             modifierValue = shipStatsProfile.MaxGunPointsCreationModifier + shipStatsProfile.MaxGunPointsUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 100, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
@@ -1573,21 +1618,21 @@ namespace Server
             if (modifierValue < 0) AddLabel(modifierX, 100, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
            
             //Speed
-            AddLabel(145, 130, 2599, "Forward Speed:");
+            AddLabel(145, 130, 2599, "Forward Speed");
             AddLabel(startX, 130, textHue, Utility.CreateDecimalString(ForwardSpeed, 1));
             modifierValue = shipStatsProfile.ForwardSpeedCreationModifier + shipStatsProfile.ForwardSpeedUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 130, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 130, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
-            AddLabel(145, 150, 2599, "Drift Speed:");
+            AddLabel(145, 150, 2599, "Drift Speed");
             AddLabel(startX, 150, textHue, Utility.CreateDecimalString(DriftSpeed, 1));
             modifierValue = shipStatsProfile.DriftSpeedCreationModifier + shipStatsProfile.DriftSpeedUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 150, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 150, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
  
-            AddLabel(145, 170, 2599, "Slowdown Mode Penalty:");
+            AddLabel(145, 170, 2599, "Slowdown Mode Penalty");
             AddLabel(startX, 170, textHue, "-" + Utility.CreateDecimalPercentageString(SlowdownModePenalty, 1));
             modifierValue = shipStatsProfile.SlowdownModePenaltyCreationModifier + shipStatsProfile.SlowdownModePenaltyUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 170, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
@@ -1595,31 +1640,31 @@ namespace Server
             if (modifierValue < 0) AddLabel(modifierX, 170, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
            
             //Cannons
-            AddLabel(145, 200, 2401, "Cannons Per Side:");
+            AddLabel(145, 200, 2401, "Cannons Per Side");
             AddLabel(startX, 200, WhiteTextHue, shipStatsProfile.CannonsPerSide.ToString());
 
-            AddLabel(145, 220, 2401, "Cannon Accuracy:");
+            AddLabel(145, 220, 2401, "Cannon Accuracy");
             AddLabel(startX, 220, textHue, Utility.CreateDecimalPercentageString(CannonAccuracy, 1));
             modifierValue = shipStatsProfile.CannonAccuracyCreationModifier + shipStatsProfile.CannonAccuracyUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 220, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 220, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
-            AddLabel(145, 240, 2401, "Cannon Damage:");
+            AddLabel(145, 240, 2401, "Cannon Damage");
             AddLabel(startX, 240, textHue, Utility.CreateDecimalString(CannonMinDamage, 1) + " - " + Utility.CreateDecimalString(CannonMaxDamage, 1));
             modifierValue = shipStatsProfile.CannonDamageCreationModifier + shipStatsProfile.CannonDamageUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 240, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 240, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
-            AddLabel(145, 260, 2401, "Cannon Range:");
+            AddLabel(145, 260, 2401, "Cannon Range");
             AddLabel(startX, 260, textHue, Utility.CreateDecimalString(CannonRange, 1));
             modifierValue = shipStatsProfile.CannonRangeCreationModifier + shipStatsProfile.CannonRangeUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 260, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 260, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
-            AddLabel(145, 280, 2401, "Cannon Reload Time:");
+            AddLabel(145, 280, 2401, "Cannon Reload Time");
             AddLabel(startX, 280, textHue, Utility.CreateDecimalString(CannonReloadTime, 1) + " sec");
             modifierValue = shipStatsProfile.CannonReloadDurationCreationModifier + shipStatsProfile.CannonReloadDurationUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 280, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
@@ -1627,35 +1672,35 @@ namespace Server
             if (modifierValue < 0) AddLabel(modifierX, 280, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
             //Abilities            
-            AddLabel(145, 310, 2606, "Minor Ability Cooldown:");
+            AddLabel(145, 310, 2606, "Minor Ability Cooldown");
             AddLabel(startX, 310, textHue, Utility.CreateDecimalString(MinorAbilityCooldown, 0) + " sec");
             modifierValue = shipStatsProfile.MinorAbilityCooldownDurationCreationModifier + shipStatsProfile.MinorAbilityCooldownDurationUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 310, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 310, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
-            AddLabel(145, 330, 2606, "Major Ability Cooldown:");
+            AddLabel(145, 330, 2606, "Major Ability Cooldown");
             AddLabel(startX, 330, textHue, Utility.CreateDecimalString(MajorAbilityCooldown, 0) + " sec");
             modifierValue = shipStatsProfile.MajorAbilityCooldownDurationCreationModifier + shipStatsProfile.MajorAbilityCooldownDurationUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 330, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 330, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
-            AddLabel(145, 350, 2606, "Epic Ability Cooldown:");
+            AddLabel(145, 350, 2606, "Epic Ability Cooldown");
             AddLabel(startX, 350, textHue, Utility.CreateDecimalString(EpicAbilityCooldown, 0) + " sec");
             modifierValue = shipStatsProfile.EpicAbilityCooldownDurationCreationModifier + shipStatsProfile.EpicAbilityCooldownDurationUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 350, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 350, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
  
-            AddLabel(145, 380, 2603, "Repair Cooldown:");
+            AddLabel(145, 380, 2603, "Repair Cooldown");
             AddLabel(startX, 380, textHue, Utility.CreateDecimalString(RepairCooldownDuration, 0) + " sec");
             modifierValue = shipStatsProfile.RepairCooldownDurationCreationModifier + shipStatsProfile.RepairCooldownDurationUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 380, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
             if (modifierValue == 0) modifierHue = WhiteTextHue;
             if (modifierValue < 0) AddLabel(modifierX, 380, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
-            AddLabel(145, 400, 2603, "Boarding Chance:");
+            AddLabel(145, 400, 2603, "Boarding Chance");
             AddLabel(startX, 400, textHue, Utility.CreateDecimalPercentageString(BoardingChance, 1));
             modifierValue = shipStatsProfile.BoardingChanceCreationModifier + shipStatsProfile.BoardingChanceUpgradeModifier;
             if (modifierValue > 0) AddLabel(modifierX, 400, positiveHue, "(+" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
@@ -1663,7 +1708,7 @@ namespace Server
             if (modifierValue < 0) AddLabel(modifierX, 400, negativeHue, "(" + Utility.CreateDecimalPercentageString(modifierValue, 1) + ")");
 
             //Doubloons
-            AddLabel(145, 430, 53, "Upgrade Cost Multiplier:");
+            AddLabel(145, 430, 53, "Upgrade Cost Multiplier");
             AddLabel(startX, 430, WhiteTextHue, Utility.CreateDecimalString(UpgradeDoubloonMultiplier, 1) + "x");
 
             //Cost
@@ -1677,7 +1722,7 @@ namespace Server
 
             //Guide
             AddButton(14, 11, 2094, 2095, 1, GumpButtonType.Reply, 0);
-            AddLabel(10, WhiteTextHue, 149, "Guide"); 
+            AddLabel(10, 0, 149, "Guide"); 
         }
 
         public override void OnResponse(NetState sender, RelayInfo info)
