@@ -17,7 +17,9 @@ namespace Server.Items
         {
             Name = "smokescreen";
 
-            m_MajorAbility = ShipUpgrades.MajorAbilityType.Smokescreen;
+            m_MajorAbilityUpgrade = ShipUpgrades.MajorAbilityType.Smokescreen;
+
+            m_UpgradeType = ShipUpgrades.UpgradeType.MajorAbility;
         }
 
         public SmokescreenMajorAbilityShipUpgrade(Serial serial): base(serial)

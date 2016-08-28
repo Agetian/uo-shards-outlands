@@ -17,7 +17,9 @@ namespace Server.Items
         {
             Name = "dark grey";
 
-            m_Paint = ShipUpgrades.PaintType.DarkGrey;
+            m_PaintUpgrade = ShipUpgrades.PaintType.DarkGrey;
+
+            m_UpgradeType = ShipUpgrades.UpgradeType.Paint;
         }
 
         public DarkGreyPaintShipUpgrade(Serial serial): base(serial)

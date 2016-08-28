@@ -15,9 +15,11 @@ namespace Server.Items
         [Constructable]
         public CorsairsBannerShipUpgrade(): base()
         {
-            Name = "corsairs";
+            Name = "corsairs";            
 
-            m_Banner = ShipUpgrades.BannerType.Corsairs;
+            m_BannerUpgrade = ShipUpgrades.BannerType.Corsairs;
+
+            m_UpgradeType = ShipUpgrades.UpgradeType.Banner;
         }
 
         public CorsairsBannerShipUpgrade(Serial serial): base(serial)

@@ -32,111 +32,271 @@ namespace Server
         public static int LargeSelectionSound = 0x4D3;
         public static int CloseGumpSound = 0x058;
 
-        public ShipUpgradeGump(PlayerMobile player, ShipUpgradeGumpObject shipUpgradeGumpObject): base(10, 10)
+        public ShipUpgradeGump(PlayerMobile player, ShipUpgradeGumpObject shipUpgradeGumpObject): base(325, 150)
         {
             m_Player = player;
             m_ShipUpgradeGumpObject = shipUpgradeGumpObject;            
 
             if (m_Player == null) return;
             if (m_Player.Deleted) return;
-            if (m_ShipUpgradeGumpObject == null) return;
+            if (m_ShipUpgradeGumpObject == null) return;           
+
+            BaseShip ship = m_ShipUpgradeGumpObject.m_Ship;
+            BaseShipDeed shipDeed = m_ShipUpgradeGumpObject.m_ShipDeed;
+
+            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(shipDeed, ship, true, true);                       
 
             int startX = 0;
             int startY = 0;
-            
-            //Background
-            AddImage(270, 4, 103);
-            AddImage(270, 101, 103);
-            AddImage(270, 144, 103);
-            AddImage(140, 4, 103);
-            AddImage(140, 101, 103);
-            AddImage(141, 144, 103);
-            AddImage(5, 143, 103);
-            AddImage(5, 4, 103);
-            AddImage(5, 101, 103);
 
-            AddImage(15, 103, 3604, 2052);
-            AddImage(140, 104, 3604, 2052);
-            AddImage(15, 14, 3604, 2052);
-            AddImage(135, 14, 3604, 2052);            
-            AddImage(231, 13, 3604, 2052);
-            AddImage(275, 13, 3604, 2052);
-            AddImage(231, 104, 3604, 2052);
-            AddImage(275, 104, 3604, 2052);
+            #region Background
 
-            AddImage(28, 63, 2328);
-            AddItem(77, 168, 2539);
-            AddItem(107, 208, 2539);
+            AddImage(275, 9, 103);
+            AddImage(275, 106, 103);
+            AddImage(275, 149, 103);
+            AddImage(145, 9, 103);
+            AddImage(145, 106, 103);
+            AddImage(146, 149, 103);
+            AddImage(10, 148, 103);
+            AddImage(10, 9, 103);
+            AddImage(10, 106, 103);
+
+            AddImage(20, 108, 3604, 2052);
+            AddImage(145, 109, 3604, 2052);
+            AddImage(20, 19, 3604, 2052);
+            AddImage(140, 19, 3604, 2052);            
+            AddImage(236, 18, 3604, 2052);
+            AddImage(280, 18, 3604, 2052);
+            AddImage(236, 109, 3604, 2052);
+            AddImage(280, 109, 3604, 2052);
+
+            AddImage(33, 68, 2328);
+            AddItem(82, 173, 2539);            
+
+            #endregion
 
             ShipUpgradeDetail upgradeDetail = null;
 
-            //Upgrade
+            bool replaceExistingUpgrade = false;
+
+            #region Upgrade Type
+
             switch (m_ShipUpgradeGumpObject.m_UpgradeType)
             {
-                case ShipUpgrades.UpgradeType.Theme: upgradeDetail = ShipUpgrades.GetThemeDetail(m_ShipUpgradeGumpObject.m_Theme); break;
-                case ShipUpgrades.UpgradeType.Paint: upgradeDetail = ShipUpgrades.GetPaintDetail(m_ShipUpgradeGumpObject.m_Paint); break;
-                case ShipUpgrades.UpgradeType.CannonMetal: upgradeDetail = ShipUpgrades.GetCannonMetalDetail(m_ShipUpgradeGumpObject.m_CannonMetal); break;
+                case ShipUpgrades.UpgradeType.Theme:
+                    if (ship != null)
+                    {
+                        if (ship.m_ThemeUpgrade != ShipUpgrades.ThemeType.None)
+                            replaceExistingUpgrade = true;
+                    }
 
-                case ShipUpgrades.UpgradeType.Outfitting: upgradeDetail = ShipUpgrades.GetOutfittingDetail(m_ShipUpgradeGumpObject.m_Outfitting); break;
-                case ShipUpgrades.UpgradeType.Banner: upgradeDetail = ShipUpgrades.GetBannerDetail(m_ShipUpgradeGumpObject.m_Banner); break;
-                case ShipUpgrades.UpgradeType.Charm: upgradeDetail = ShipUpgrades.GetCharmDetail(m_ShipUpgradeGumpObject.m_Charm); break;
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_ThemeUpgrade != ShipUpgrades.ThemeType.None)
+                            replaceExistingUpgrade = true;
+                    }                       
 
-                case ShipUpgrades.UpgradeType.MinorAbility: upgradeDetail = ShipUpgrades.GetMinorAbilityDetail(m_ShipUpgradeGumpObject.m_MinorAbility); break;
-                case ShipUpgrades.UpgradeType.MajorAbility: upgradeDetail = ShipUpgrades.GetMajorAbilityDetail(m_ShipUpgradeGumpObject.m_MajorAbility); break;
-                case ShipUpgrades.UpgradeType.EpicAbility: upgradeDetail = ShipUpgrades.GetEpicAbilityDetail(m_ShipUpgradeGumpObject.m_EpicAbility); break;                
-            }            
+                    upgradeDetail = ShipUpgrades.GetThemeDetail(m_ShipUpgradeGumpObject.m_Theme); 
+                break;
+
+                case ShipUpgrades.UpgradeType.Paint: 
+                    if (ship != null)
+                    {
+                        if (ship.m_PaintUpgrade != ShipUpgrades.PaintType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_PaintUpgrade != ShipUpgrades.PaintType.None)
+                            replaceExistingUpgrade = true;
+                    } 
+
+                    upgradeDetail = ShipUpgrades.GetPaintDetail(m_ShipUpgradeGumpObject.m_Paint);
+                break;
+                
+                case ShipUpgrades.UpgradeType.CannonMetal:
+                    if (ship != null)
+                    {
+                        if (ship.m_CannonMetalUpgrade != ShipUpgrades.CannonMetalType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_CannonMetalUpgrade != ShipUpgrades.CannonMetalType.None)
+                            replaceExistingUpgrade = true;
+                    } 
+
+                    upgradeDetail = ShipUpgrades.GetCannonMetalDetail(m_ShipUpgradeGumpObject.m_CannonMetal); 
+                break;
+
+                case ShipUpgrades.UpgradeType.Outfitting:
+                    if (ship != null)
+                    {
+                        if (ship.m_OutfittingUpgrade != ShipUpgrades.OutfittingType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_OutfittingUpgrade != ShipUpgrades.OutfittingType.None)
+                            replaceExistingUpgrade = true;
+                    } 
+
+                    upgradeDetail = ShipUpgrades.GetOutfittingDetail(m_ShipUpgradeGumpObject.m_Outfitting); 
+                break;
+
+                case ShipUpgrades.UpgradeType.Banner: 
+                    if (ship != null)
+                    {
+                        if (ship.m_BannerUpgrade != ShipUpgrades.BannerType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_BannerUpgrade != ShipUpgrades.BannerType.None)
+                            replaceExistingUpgrade = true;
+                    } 
+
+                    upgradeDetail = ShipUpgrades.GetBannerDetail(m_ShipUpgradeGumpObject.m_Banner);
+                break;
+
+                case ShipUpgrades.UpgradeType.Charm: 
+                    if (ship != null)
+                    {
+                        if (ship.m_CharmUpgrade != ShipUpgrades.CharmType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_CharmUpgrade != ShipUpgrades.CharmType.None)
+                            replaceExistingUpgrade = true;
+                    } 
+
+                    upgradeDetail = ShipUpgrades.GetCharmDetail(m_ShipUpgradeGumpObject.m_Charm); 
+                break;
+
+                case ShipUpgrades.UpgradeType.MinorAbility: 
+                    if (ship != null)
+                    {
+                        if (ship.m_MinorAbilityUpgrade != ShipUpgrades.MinorAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_MinorAbilityUpgrade != ShipUpgrades.MinorAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    } 
+
+                    upgradeDetail = ShipUpgrades.GetMinorAbilityDetail(m_ShipUpgradeGumpObject.m_MinorAbility); 
+                break;
+
+                case ShipUpgrades.UpgradeType.MajorAbility:
+                    if (ship != null)
+                    {
+                        if (ship.m_MajorAbilityUpgrade != ShipUpgrades.MajorAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_MajorAbilityUpgrade != ShipUpgrades.MajorAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    } 
+
+                    upgradeDetail = ShipUpgrades.GetMajorAbilityDetail(m_ShipUpgradeGumpObject.m_MajorAbility);
+                break;
+
+                case ShipUpgrades.UpgradeType.EpicAbility: 
+                    if (ship != null)
+                    {
+                        if (ship.m_EpicAbilityUpgrade != ShipUpgrades.EpicAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_EpicAbilityUpgrade != ShipUpgrades.EpicAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    } 
+
+                    upgradeDetail = ShipUpgrades.GetEpicAbilityDetail(m_ShipUpgradeGumpObject.m_EpicAbility);
+                break;
+            }
+
+            #endregion
+
+            if (upgradeDetail == null)
+                return;
 
             int doubloonBaseCost = ShipUniqueness.GetShipUpgradeBaseDoubloonCost(upgradeDetail.m_UpgradeType);
            
-            AddLabel(138, 15, 149, "Ship Outfitting Upgrade");
-            AddLabel(Utility.CenteredTextOffset(192, upgradeDetail.m_UpgradeName), 35, 0, upgradeDetail.m_UpgradeName);
+            AddLabel(143, 20, 149, "Ship Outfitting Upgrade");
+            AddLabel(Utility.CenteredTextOffset(210, upgradeDetail.m_UpgradeName), 40, WhiteTextHue, upgradeDetail.m_UpgradeName);
                         
-            AddLabel(21, 165, 149, "Base Cost:");
-            AddLabel(109, 165, 0, doubloonBaseCost.ToString());
+            AddLabel(26, 170, 149, "Base Cost:");
+            AddLabel(114, 170, WhiteTextHue, doubloonBaseCost.ToString());
+            
+            double doubloonMultiplier = shipStatsProfile.UpgradeDoubloonMultiplier;
 
-            if (m_ShipUpgradeGumpObject.m_ShipDeed != null && (m_ShipUpgradeGumpObject.m_UpgradeDisplayMode == UpgradeDisplayMode.DeedAttemptInstall || m_ShipUpgradeGumpObject.m_UpgradeDisplayMode == UpgradeDisplayMode.InstalledOnShip))
+            if (m_ShipUpgradeGumpObject.m_UpgradeDisplayMode == UpgradeDisplayMode.DeedAttemptInstall || m_ShipUpgradeGumpObject.m_UpgradeDisplayMode == UpgradeDisplayMode.InstalledOnShip)
             {
-                ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(m_ShipUpgradeGumpObject.m_ShipDeed, null, true, true);
+                if (replaceExistingUpgrade && m_ShipUpgradeGumpObject.m_UpgradeDisplayMode == UpgradeDisplayMode.DeedAttemptInstall)
+                {
+                    AddLabel(26, 190, 149, "Will Replace Existing Upgrade");
+                    AddLabel(213, 190, 2550, "(at no cost)");   
+                }
 
-                if (shipStatsProfile == null)
-                    return;
-
-                double doubloonMultiplier = shipStatsProfile.UpgradeDoubloonMultiplier;
-
-                AddLabel(21, 185, 149, "Ship Type Multiplier:");
-                AddLabel(154, 186, 0, Utility.CreateDecimalString(doubloonMultiplier, 1) + "x");
+                else
+                {
+                    AddLabel(26, 190, 149, "Ship Type Multiplier:");
+                    AddLabel(151, 190, WhiteTextHue, Utility.CreateDecimalString(doubloonMultiplier, 1) + "x");
+                }
 
                 int doubloonAdjustedCost = (int)(Math.Round((double)doubloonBaseCost * (double)doubloonMultiplier));
 
-                AddLabel(21, 205, 149, "Adjusted Cost:");
-                AddLabel(138, 205, 63, doubloonAdjustedCost.ToString());
+                if (replaceExistingUpgrade && m_ShipUpgradeGumpObject.m_UpgradeDisplayMode == UpgradeDisplayMode.DeedAttemptInstall)
+                    doubloonAdjustedCost = 0;
+
+                AddLabel(26, 210, 149, "Adjusted Cost:");
+                AddItem(112, 213, 2539);
+                AddLabel(143, 210, 63, doubloonAdjustedCost.ToString());
             }
 
-            startY = 60;
+            startY = 65;
             int rowSpacing = 20;
 
             for (int a = 0; a < upgradeDetail.m_Effects.Count; a++)
             {
                 KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType> descriptionLine = upgradeDetail.m_Effects[a];
 
-                AddLabel(120, startY, upgradeDetail.GetHue(descriptionLine.Value), descriptionLine.Key);
+                AddLabel(125, startY, upgradeDetail.GetHue(descriptionLine.Value), descriptionLine.Key);
                 startY += rowSpacing;
             }
+
+            int offsetX = -32;
+            int offsetY = -22;
+
+            AddGumpCollection(GumpCollections.GetGumpCollection(upgradeDetail.GumpCollectionId, -1), offsetX + 33, offsetY + 68);
             
             //Guide
-            AddButton(1, 4, 2094, 2095, 0, GumpButtonType.Reply, 0);
-            AddLabel(18, -3, 149, "Guide");
+            AddButton(6, 7, 2094, 2095, 0, GumpButtonType.Reply, 0);
+            AddLabel(1, -2, 149, "Guide");
 
             switch (m_ShipUpgradeGumpObject.m_UpgradeDisplayMode)
             {
-                case UpgradeDisplayMode.DeedUse: 
-                    AddLabel(267, 204, 63, "Install Upgrade");
-                    AddButton(367, 201, 2151, 2151, 2, GumpButtonType.Reply, 0);     
+                case UpgradeDisplayMode.DeedUse:
+                    AddLabel(250, 209, 63, "Select Target Ship");
+                    AddButton(372, 206, 2151, 2151, 2, GumpButtonType.Reply, 0);     
                 break;
 
                 case UpgradeDisplayMode.DeedAttemptInstall:
-                    AddLabel(267, 204, 63, "Confirm Install");
-                    AddButton(367, 201, 2151, 2151, 2, GumpButtonType.Reply, 0);     
+                    AddLabel(211, 209, 63, "Confirm Ship Installation");
+                    AddButton(372, 206, 2151, 2151, 2, GumpButtonType.Reply, 0);     
                 break;
 
                 case UpgradeDisplayMode.InstalledOnShip:
@@ -153,23 +313,169 @@ namespace Server
 
             bool closeGump = true;
 
+            BaseShip ship = m_ShipUpgradeGumpObject.m_Ship;
+            BaseShipDeed shipDeed = m_ShipUpgradeGumpObject.m_ShipDeed;
+            ShipUpgradeDeed shipUpgradeDeed = m_ShipUpgradeGumpObject.m_ShipUpgradeDeed;
+
+            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(shipDeed, ship, true, true);
+
             ShipUpgradeDetail upgradeDetail = null;
 
-            //Upgrade
+            bool replaceExistingUpgrade = false;
+
+            #region Upgrade Type
+
             switch (m_ShipUpgradeGumpObject.m_UpgradeType)
             {
-                case ShipUpgrades.UpgradeType.Theme: upgradeDetail = ShipUpgrades.GetThemeDetail(m_ShipUpgradeGumpObject.m_Theme); break;
-                case ShipUpgrades.UpgradeType.Paint: upgradeDetail = ShipUpgrades.GetPaintDetail(m_ShipUpgradeGumpObject.m_Paint); break;
-                case ShipUpgrades.UpgradeType.CannonMetal: upgradeDetail = ShipUpgrades.GetCannonMetalDetail(m_ShipUpgradeGumpObject.m_CannonMetal); break;
+                case ShipUpgrades.UpgradeType.Theme:
+                    if (ship != null)
+                    {
+                        if (ship.m_ThemeUpgrade != ShipUpgrades.ThemeType.None)
+                            replaceExistingUpgrade = true;
+                    }
 
-                case ShipUpgrades.UpgradeType.Outfitting: upgradeDetail = ShipUpgrades.GetOutfittingDetail(m_ShipUpgradeGumpObject.m_Outfitting); break;
-                case ShipUpgrades.UpgradeType.Banner: upgradeDetail = ShipUpgrades.GetBannerDetail(m_ShipUpgradeGumpObject.m_Banner); break;
-                case ShipUpgrades.UpgradeType.Charm: upgradeDetail = ShipUpgrades.GetCharmDetail(m_ShipUpgradeGumpObject.m_Charm); break;
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_ThemeUpgrade != ShipUpgrades.ThemeType.None)
+                            replaceExistingUpgrade = true;
+                    }
 
-                case ShipUpgrades.UpgradeType.MinorAbility: upgradeDetail = ShipUpgrades.GetMinorAbilityDetail(m_ShipUpgradeGumpObject.m_MinorAbility); break;
-                case ShipUpgrades.UpgradeType.MajorAbility: upgradeDetail = ShipUpgrades.GetMajorAbilityDetail(m_ShipUpgradeGumpObject.m_MajorAbility); break;
-                case ShipUpgrades.UpgradeType.EpicAbility: upgradeDetail = ShipUpgrades.GetEpicAbilityDetail(m_ShipUpgradeGumpObject.m_EpicAbility); break;
+                    upgradeDetail = ShipUpgrades.GetThemeDetail(m_ShipUpgradeGumpObject.m_Theme);
+                break;
+
+                case ShipUpgrades.UpgradeType.Paint:
+                    if (ship != null)
+                    {
+                        if (ship.m_PaintUpgrade != ShipUpgrades.PaintType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_PaintUpgrade != ShipUpgrades.PaintType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    upgradeDetail = ShipUpgrades.GetPaintDetail(m_ShipUpgradeGumpObject.m_Paint);
+                break;
+
+                case ShipUpgrades.UpgradeType.CannonMetal:
+                    if (ship != null)
+                    {
+                        if (ship.m_CannonMetalUpgrade != ShipUpgrades.CannonMetalType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_CannonMetalUpgrade != ShipUpgrades.CannonMetalType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    upgradeDetail = ShipUpgrades.GetCannonMetalDetail(m_ShipUpgradeGumpObject.m_CannonMetal);
+                break;
+
+                case ShipUpgrades.UpgradeType.Outfitting:
+                    if (ship != null)
+                    {
+                        if (ship.m_OutfittingUpgrade != ShipUpgrades.OutfittingType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_OutfittingUpgrade != ShipUpgrades.OutfittingType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    upgradeDetail = ShipUpgrades.GetOutfittingDetail(m_ShipUpgradeGumpObject.m_Outfitting);
+                break;
+
+                case ShipUpgrades.UpgradeType.Banner:
+                    if (ship != null)
+                    {
+                        if (ship.m_BannerUpgrade != ShipUpgrades.BannerType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_BannerUpgrade != ShipUpgrades.BannerType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    upgradeDetail = ShipUpgrades.GetBannerDetail(m_ShipUpgradeGumpObject.m_Banner);
+                break;
+
+                case ShipUpgrades.UpgradeType.Charm:
+                    if (ship != null)
+                    {
+                        if (ship.m_CharmUpgrade != ShipUpgrades.CharmType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_CharmUpgrade != ShipUpgrades.CharmType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    upgradeDetail = ShipUpgrades.GetCharmDetail(m_ShipUpgradeGumpObject.m_Charm);
+                break;
+
+                case ShipUpgrades.UpgradeType.MinorAbility:
+                    if (ship != null)
+                    {
+                        if (ship.m_MinorAbilityUpgrade != ShipUpgrades.MinorAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_MinorAbilityUpgrade != ShipUpgrades.MinorAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    upgradeDetail = ShipUpgrades.GetMinorAbilityDetail(m_ShipUpgradeGumpObject.m_MinorAbility);
+                break;
+
+                case ShipUpgrades.UpgradeType.MajorAbility:
+                    if (ship != null)
+                    {
+                        if (ship.m_MajorAbilityUpgrade != ShipUpgrades.MajorAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_MajorAbilityUpgrade != ShipUpgrades.MajorAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    upgradeDetail = ShipUpgrades.GetMajorAbilityDetail(m_ShipUpgradeGumpObject.m_MajorAbility);
+                break;
+
+                case ShipUpgrades.UpgradeType.EpicAbility:
+                    if (ship != null)
+                    {
+                        if (ship.m_EpicAbilityUpgrade != ShipUpgrades.EpicAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_EpicAbilityUpgrade != ShipUpgrades.EpicAbilityType.None)
+                            replaceExistingUpgrade = true;
+                    }
+
+                    upgradeDetail = ShipUpgrades.GetEpicAbilityDetail(m_ShipUpgradeGumpObject.m_EpicAbility);
+                break;
             }
+
+            #endregion
+
+            if (upgradeDetail == null)
+                return;
 
             switch (info.ButtonID)
             {
@@ -182,14 +488,14 @@ namespace Server
                 case 2:
                     switch(m_ShipUpgradeGumpObject.m_UpgradeDisplayMode)
                     {
-                        case UpgradeDisplayMode.DeedUse:
-                            if (m_ShipUpgradeGumpObject.m_ShipUpgradeDeed == null)
+                        case UpgradeDisplayMode.DeedUse:                            
+                            if (shipUpgradeDeed == null)
                                 m_Player.SendMessage("That deed is no longer accessible.");
 
-                            else if (m_ShipUpgradeGumpObject.m_ShipUpgradeDeed.Deleted)
+                            else if (shipUpgradeDeed.Deleted)
                                 m_Player.SendMessage("That deed is no longer accessible.");
 
-                            else if (!m_ShipUpgradeGumpObject.m_ShipUpgradeDeed.IsChildOf(m_Player.Backpack))
+                            else if (!shipUpgradeDeed.IsChildOf(m_Player.Backpack))
                                 m_Player.SendMessage("That deed is no longer accessible.");
 
                             else
@@ -197,51 +503,85 @@ namespace Server
                                 m_Player.SendMessage("Which ship do you wish to install this upgrade into?");
                                 m_Player.Target = new ShipUpgradeTarget(m_Player, m_ShipUpgradeGumpObject);
 
-                                return;
-                            }
+                                return;                             
+                            }                            
                         break;
 
-                        case UpgradeDisplayMode.DeedAttemptInstall:
-                            if (m_ShipUpgradeGumpObject.m_ShipUpgradeDeed == null)
+                        case UpgradeDisplayMode.DeedAttemptInstall:                            
+                            if (shipUpgradeDeed == null)
                                 m_Player.SendMessage("That upgrade deed is no longer accessible.");
 
-                            else if (m_ShipUpgradeGumpObject.m_ShipUpgradeDeed.Deleted)
+                            else if (shipUpgradeDeed.Deleted)
                                 m_Player.SendMessage("That upgrade deed is no longer accessible.");
 
-                            else if (!m_ShipUpgradeGumpObject.m_ShipUpgradeDeed.IsChildOf(m_Player.Backpack))
+                            else if (!shipUpgradeDeed.IsChildOf(m_Player.Backpack))
                                 m_Player.SendMessage("That upgrade deed is no longer accessible.");
 
-                            else if (m_ShipUpgradeGumpObject.m_ShipDeed == null)
+                            else if (shipDeed == null)
                                 m_Player.SendMessage("That ship token is no longer accessible.");
 
-                            else if (m_ShipUpgradeGumpObject.m_ShipDeed.Deleted)
+                            else if (shipDeed.Deleted)
                                 m_Player.SendMessage("That ship token is no longer accessible.");
 
-                            else if (!m_ShipUpgradeGumpObject.m_ShipDeed.IsChildOf(m_Player.Backpack))
+                            else if (!shipDeed.IsChildOf(m_Player.Backpack))
                                 m_Player.SendMessage("That ship token is no longer accessible.");
 
                             else
                             {
                                 int doubloonBaseCost = ShipUniqueness.GetShipUpgradeBaseDoubloonCost(upgradeDetail.m_UpgradeType);
-
-                                ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(m_ShipUpgradeGumpObject.m_ShipDeed, null, true, true);
-
+                                
                                 double doubloonMultiplier = shipStatsProfile.UpgradeDoubloonMultiplier;
                                 int doubloonAdjustedCost = (int)(Math.Round((double)doubloonBaseCost * (double)doubloonMultiplier));
+
+                                if (replaceExistingUpgrade)
+                                    doubloonAdjustedCost = 0;
 
                                 int doubloonBalance = Banker.GetUniqueCurrencyBalance(m_Player, typeof(Doubloon));
 
                                 if (doubloonBalance >= doubloonAdjustedCost)
                                 {
-                                    //TEST: FINISH
-                                }
+                                    if (doubloonAdjustedCost > 0)
+                                        Banker.WithdrawUniqueCurrency(m_Player, typeof(Doubloon), doubloonAdjustedCost, true);
 
-                                else
-                                {
-                                    m_Player.SendMessage("You do not have the neccessary " + doubloonBalance.ToString() + " doubloons in your bank box to install this upgrade.");
+                                    switch (upgradeDetail.m_UpgradeType)
+                                    {
+                                        case ShipUpgrades.UpgradeType.Theme: shipDeed.m_ThemeUpgrade = shipUpgradeDeed.m_ThemeUpgrade; break;
+                                        case ShipUpgrades.UpgradeType.Paint: shipDeed.m_PaintUpgrade = shipUpgradeDeed.m_PaintUpgrade; break;
+                                        case ShipUpgrades.UpgradeType.CannonMetal: shipDeed.m_CannonMetalUpgrade = shipUpgradeDeed.m_CannonMetalUpgrade; break;
+
+                                        case ShipUpgrades.UpgradeType.Outfitting: shipDeed.m_OutfittingUpgrade = shipUpgradeDeed.m_OutfittingUpgrade; break;
+                                        case ShipUpgrades.UpgradeType.Banner: shipDeed.m_BannerUpgrade = shipUpgradeDeed.m_BannerUpgrade; break;
+                                        case ShipUpgrades.UpgradeType.Charm: shipDeed.m_CharmUpgrade = shipUpgradeDeed.m_CharmUpgrade; break;
+
+                                        case ShipUpgrades.UpgradeType.MinorAbility: shipDeed.m_MinorAbilityUpgrade = shipUpgradeDeed.m_MinorAbilityUpgrade; break;
+                                        case ShipUpgrades.UpgradeType.MajorAbility: shipDeed.m_MajorAbilityUpgrade = shipUpgradeDeed.m_MajorAbilityUpgrade; break;
+                                        case ShipUpgrades.UpgradeType.EpicAbility: shipDeed.m_EpicAbilityUpgrade = shipUpgradeDeed.m_EpicAbilityUpgrade; break;
+                                    }                                    
+                                    
+                                    if (m_Player.HasGump(typeof(ShipGump)))
+                                        m_Player.CloseGump(typeof(ShipGump));
+
+                                    ShipGumpObject shipGumpObject = new ShipGumpObject(m_Player, null, shipDeed);
+
+                                    shipGumpObject.m_ShipPage = ShipGump.ShipPageType.Upgrades;
+
+                                    m_Player.SendGump(new ShipGump(m_Player, shipGumpObject));
+
+                                    if (replaceExistingUpgrade)
+                                        m_Player.SendMessage("You place an upgrade onto your ship, overriding the existing one.");
+                                    else
+                                        m_Player.SendMessage("You place an upgrade onto your ship.");
+
+                                    m_Player.SendSound(0x23D);
+
+                                    m_ShipUpgradeGumpObject.m_ShipUpgradeDeed.Delete();
+
                                     return;
                                 }
-                            }                            
+
+                                else                                
+                                   m_Player.SendMessage("You do not have the neccessary " + doubloonAdjustedCost.ToString() + " doubloons in your bank box to install this upgrade.");
+                            }  
                         break;
 
                         case UpgradeDisplayMode.InstalledOnShip:
@@ -267,6 +607,7 @@ namespace Server
         public ShipUpgradeGump.UpgradeDisplayMode m_UpgradeDisplayMode;
 
         public Type m_ShipType = null;
+        public BaseShip m_Ship;
         public BaseShipDeed m_ShipDeed;
         public ShipUpgradeDeed m_ShipUpgradeDeed;
 
@@ -283,7 +624,7 @@ namespace Server
         public ShipUpgrades.EpicAbilityType m_EpicAbility = ShipUpgrades.EpicAbilityType.None;
 
         public ShipUpgradeGumpObject()
-        {
+        {            
         }
     }
 

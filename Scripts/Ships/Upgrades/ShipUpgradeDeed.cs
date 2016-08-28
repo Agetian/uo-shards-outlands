@@ -14,15 +14,15 @@ namespace Server.Items
     {
         public ShipUpgrades.UpgradeType m_UpgradeType = ShipUpgrades.UpgradeType.Theme;
 
-        public ShipUpgrades.ThemeType m_Theme = ShipUpgrades.ThemeType.None;
-        public ShipUpgrades.PaintType m_Paint = ShipUpgrades.PaintType.None;
-        public ShipUpgrades.CannonMetalType m_CannonMetal = ShipUpgrades.CannonMetalType.None;
-        public ShipUpgrades.OutfittingType m_Outfitting = ShipUpgrades.OutfittingType.None;
-        public ShipUpgrades.BannerType m_Banner = ShipUpgrades.BannerType.None;
-        public ShipUpgrades.CharmType m_Charm = ShipUpgrades.CharmType.None;
-        public ShipUpgrades.MinorAbilityType m_MinorAbility = ShipUpgrades.MinorAbilityType.None;
-        public ShipUpgrades.MajorAbilityType m_MajorAbility = ShipUpgrades.MajorAbilityType.None;
-        public ShipUpgrades.EpicAbilityType m_EpicAbility = ShipUpgrades.EpicAbilityType.None;
+        public ShipUpgrades.ThemeType m_ThemeUpgrade = ShipUpgrades.ThemeType.None;
+        public ShipUpgrades.PaintType m_PaintUpgrade = ShipUpgrades.PaintType.None;
+        public ShipUpgrades.CannonMetalType m_CannonMetalUpgrade = ShipUpgrades.CannonMetalType.None;
+        public ShipUpgrades.OutfittingType m_OutfittingUpgrade = ShipUpgrades.OutfittingType.None;
+        public ShipUpgrades.BannerType m_BannerUpgrade = ShipUpgrades.BannerType.None;
+        public ShipUpgrades.CharmType m_CharmUpgrade = ShipUpgrades.CharmType.None;
+        public ShipUpgrades.MinorAbilityType m_MinorAbilityUpgrade = ShipUpgrades.MinorAbilityType.None;
+        public ShipUpgrades.MajorAbilityType m_MajorAbilityUpgrade = ShipUpgrades.MajorAbilityType.None;
+        public ShipUpgrades.EpicAbilityType m_EpicAbilityUpgrade = ShipUpgrades.EpicAbilityType.None;
 
         [Constructable]
         public ShipUpgradeDeed(): base(5362)
@@ -69,24 +69,23 @@ namespace Server.Items
 
             ShipUpgradeGumpObject shipUpgradeGumpObject = new ShipUpgradeGumpObject();
 
-            shipUpgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.DeedUse;
-            shipUpgradeGumpObject.m_ShipUpgradeDeed = this;            
-
+            shipUpgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.DeedUse; 
             shipUpgradeGumpObject.m_UpgradeType = m_UpgradeType;
+            shipUpgradeGumpObject.m_ShipUpgradeDeed = this;
 
             switch(m_UpgradeType)
             {
-                case ShipUpgrades.UpgradeType.Theme: shipUpgradeGumpObject.m_Theme = m_Theme; break;
-                case ShipUpgrades.UpgradeType.Paint: shipUpgradeGumpObject.m_Paint = m_Paint; break;
-                case ShipUpgrades.UpgradeType.CannonMetal: shipUpgradeGumpObject.m_CannonMetal = m_CannonMetal; break;
+                case ShipUpgrades.UpgradeType.Theme: shipUpgradeGumpObject.m_Theme = m_ThemeUpgrade; break;
+                case ShipUpgrades.UpgradeType.Paint: shipUpgradeGumpObject.m_Paint = m_PaintUpgrade; break;
+                case ShipUpgrades.UpgradeType.CannonMetal: shipUpgradeGumpObject.m_CannonMetal = m_CannonMetalUpgrade; break;
 
-                case ShipUpgrades.UpgradeType.Outfitting: shipUpgradeGumpObject.m_Outfitting = m_Outfitting; break;
-                case ShipUpgrades.UpgradeType.Banner: shipUpgradeGumpObject.m_Banner = m_Banner; break;
-                case ShipUpgrades.UpgradeType.Charm: shipUpgradeGumpObject.m_Charm = m_Charm; break;
+                case ShipUpgrades.UpgradeType.Outfitting: shipUpgradeGumpObject.m_Outfitting = m_OutfittingUpgrade; break;
+                case ShipUpgrades.UpgradeType.Banner: shipUpgradeGumpObject.m_Banner = m_BannerUpgrade; break;
+                case ShipUpgrades.UpgradeType.Charm: shipUpgradeGumpObject.m_Charm = m_CharmUpgrade; break;
 
-                case ShipUpgrades.UpgradeType.MinorAbility: shipUpgradeGumpObject.m_MinorAbility = m_MinorAbility; break;
-                case ShipUpgrades.UpgradeType.MajorAbility: shipUpgradeGumpObject.m_MajorAbility = m_MajorAbility; break;
-                case ShipUpgrades.UpgradeType.EpicAbility: shipUpgradeGumpObject.m_EpicAbility = m_EpicAbility; break;
+                case ShipUpgrades.UpgradeType.MinorAbility: shipUpgradeGumpObject.m_MinorAbility = m_MinorAbilityUpgrade; break;
+                case ShipUpgrades.UpgradeType.MajorAbility: shipUpgradeGumpObject.m_MajorAbility = m_MajorAbilityUpgrade; break;
+                case ShipUpgrades.UpgradeType.EpicAbility: shipUpgradeGumpObject.m_EpicAbility = m_EpicAbilityUpgrade; break;
             }            
 
             player.CloseGump(typeof(ShipUpgradeGump));
@@ -101,15 +100,15 @@ namespace Server.Items
             //Version 0
             writer.Write((int)m_UpgradeType);
 
-            writer.Write((int)m_Theme);
-            writer.Write((int)m_Paint);
-            writer.Write((int)m_CannonMetal);
-            writer.Write((int)m_Outfitting);
-            writer.Write((int)m_Banner);
-            writer.Write((int)m_Charm);
-            writer.Write((int)m_MinorAbility);
-            writer.Write((int)m_MajorAbility);
-            writer.Write((int)m_EpicAbility);
+            writer.Write((int)m_ThemeUpgrade);
+            writer.Write((int)m_PaintUpgrade);
+            writer.Write((int)m_CannonMetalUpgrade);
+            writer.Write((int)m_OutfittingUpgrade);
+            writer.Write((int)m_BannerUpgrade);
+            writer.Write((int)m_CharmUpgrade);
+            writer.Write((int)m_MinorAbilityUpgrade);
+            writer.Write((int)m_MajorAbilityUpgrade);
+            writer.Write((int)m_EpicAbilityUpgrade);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -122,17 +121,17 @@ namespace Server.Items
             {
                 m_UpgradeType = (ShipUpgrades.UpgradeType)reader.ReadInt();
 
-                m_Theme = (ShipUpgrades.ThemeType)reader.ReadInt();
-                m_Paint = (ShipUpgrades.PaintType)reader.ReadInt();
-                m_CannonMetal = (ShipUpgrades.CannonMetalType)reader.ReadInt();
+                m_ThemeUpgrade = (ShipUpgrades.ThemeType)reader.ReadInt();
+                m_PaintUpgrade = (ShipUpgrades.PaintType)reader.ReadInt();
+                m_CannonMetalUpgrade = (ShipUpgrades.CannonMetalType)reader.ReadInt();
 
-                m_Outfitting = (ShipUpgrades.OutfittingType)reader.ReadInt();
-                m_Banner = (ShipUpgrades.BannerType)reader.ReadInt();
-                m_Charm = (ShipUpgrades.CharmType)reader.ReadInt();
+                m_OutfittingUpgrade = (ShipUpgrades.OutfittingType)reader.ReadInt();
+                m_BannerUpgrade = (ShipUpgrades.BannerType)reader.ReadInt();
+                m_CharmUpgrade = (ShipUpgrades.CharmType)reader.ReadInt();
 
-                m_MinorAbility = (ShipUpgrades.MinorAbilityType)reader.ReadInt();
-                m_MajorAbility = (ShipUpgrades.MajorAbilityType)reader.ReadInt();
-                m_EpicAbility = (ShipUpgrades.EpicAbilityType)reader.ReadInt();
+                m_MinorAbilityUpgrade = (ShipUpgrades.MinorAbilityType)reader.ReadInt();
+                m_MajorAbilityUpgrade = (ShipUpgrades.MajorAbilityType)reader.ReadInt();
+                m_EpicAbilityUpgrade = (ShipUpgrades.EpicAbilityType)reader.ReadInt();
             }
         }
     }

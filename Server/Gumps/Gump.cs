@@ -263,10 +263,7 @@ namespace Server.Gumps
 
                 if (gumpCollectionObject == null)
                     continue;
-
-                //TEST
-                Console.Write(gumpCollectionObject.m_ItemID + "\n");
-
+                
                 switch(gumpCollectionObject.m_ObjectType)
                 {
                     case GumpCollectionObject.ObjectType.Item:

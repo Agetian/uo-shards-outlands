@@ -17,7 +17,9 @@ namespace Server.Items
         {
             Name = "barrel of limes";
 
-            m_Charm = ShipUpgrades.CharmType.BarrelOfLimes;
+            m_CharmUpgrade = ShipUpgrades.CharmType.BarrelOfLimes;
+
+            m_UpgradeType = ShipUpgrades.UpgradeType.Charm;
         }
 
         public BarrelOfLimesCharmShipUpgrade(Serial serial): base(serial)

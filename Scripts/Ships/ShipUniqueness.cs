@@ -41,6 +41,8 @@ namespace Server
             if (type == null)
                 return shipStatsProfile;
 
+            shipStatsProfile.shipType = type;
+
             #region Small Ship
 
             if (type == typeof(SmallShip) || type == typeof(SmallDragonShip))
@@ -369,6 +371,8 @@ namespace Server
                 return;
 
             ShipStatsProfile shipStatsProfile = new ShipStatsProfile();
+
+            shipStatsProfile.shipType = type;
             
             #region Small Ship
 
@@ -444,6 +448,7 @@ namespace Server
 
     public class ShipStatsProfile
     {
+        public Type shipType = null;
         public string ShipTypeName = "small ship";
 
         public int DoubloonSinkValue = 0;

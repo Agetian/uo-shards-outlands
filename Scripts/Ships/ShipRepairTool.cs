@@ -12,53 +12,44 @@ using Server.Custom;
 
 namespace Server.Items
 {
-	[FlipableAttribute( 0x1EBA, 0x1EBB )]
-	public class ShipRepairTool : Item
-	{
+    [FlipableAttribute(0x1EBA, 0x1EBB)]
+    public class ShipRepairTool : Item
+    {
         public enum DamageType
         {
             Hull,
             Sails,
             Guns
         }
-        
-        public int m_CurrentCharges;        
 
-        public static double hullRepairPercent = .10;
-        public static double sailRepairPercent = .20;
-        public static double gunRepairPercent = .20;
-
-        public static double skillBonusPercent = .05; //Related Skill Bonus at GM Skill to Repair Perecent (scaled from 0-100)
-        public static double repairMaterialFactor = .05; //Material Cost of Repair (percent of Amount Repaired)
-
-        public TimeSpan InCombatRepairCooldown = TimeSpan.FromSeconds(120);
+        public int m_CurrentCharges;
 
         private Timer shipRepairTimer;
-        public TimeSpan RepairDuration = TimeSpan.FromSeconds(15);
-        public TimeSpan RepairInterval = TimeSpan.FromSeconds(3);              
-        
-        [Constructable]
-		public ShipRepairTool() : base( 0x1EBA )
-		{
-			Weight = 5.0;
-            m_CurrentCharges = 25;
-		}
 
-        public ShipRepairTool(Serial serial): base(serial)
-		{
-		}
+        [Constructable]
+        public ShipRepairTool()
+            : base(0x1EBA)
+        {
+            Weight = 5.0;
+            m_CurrentCharges = 25;
+        }
+
+        public ShipRepairTool(Serial serial)
+            : base(serial)
+        {
+        }
 
         [CommandProperty(AccessLevel.GameMaster)]
-        public virtual int CurrentCharges 
+        public virtual int CurrentCharges
         {
-            get{ return m_CurrentCharges; }
-            set 
+            get { return m_CurrentCharges; }
+            set
             {
                 m_CurrentCharges = value;
 
-                if (m_CurrentCharges == 0)                
-                    Delete();                
-            } 
+                if (m_CurrentCharges == 0)
+                    Delete();
+            }
         }
 
         public override void OnSingleClick(Mobile from)
@@ -66,7 +57,7 @@ namespace Server.Items
             LabelTo(from, "Durability: " + m_CurrentCharges.ToString());
             LabelTo(from, "a ship repair tool");
         }
-        
+
         public override void OnDoubleClick(Mobile from)
         {
             if (RootParent != from)
@@ -92,13 +83,14 @@ namespace Server.Items
             from.RevealingAction();
 
             base.OnDoubleClick(from);
-        }               
+        }
 
         private class ShipRepairTarget : Target
         {
             private ShipRepairTool m_ShipRepairTools;
 
-            public ShipRepairTarget(ShipRepairTool b): base(25, true, TargetFlags.None, false)
+            public ShipRepairTarget(ShipRepairTool b)
+                : base(25, true, TargetFlags.None, false)
             {
                 m_ShipRepairTools = b;
             }
@@ -121,12 +113,12 @@ namespace Server.Items
         }
 
         public void OnTarget(Mobile from, Point3D point)
-        {         
+        {
             BaseShip ship = BaseShip.FindShipAt(point, this.Map);
 
             if (ship != null)
-            {   
-                
+            {
+
                 if (ship.m_ScuttleInProgress)
                 {
                     from.SendMessage("You cannot repair a ship that is being scuttled.");
@@ -139,16 +131,16 @@ namespace Server.Items
                     return;
                 }
 
-                //Last Repair Action Was Made During Combat, But Ship is Now Out of Combat (Reduce Repair Timer)
-                if (ship.LastCombatTime + ship.TimeNeededToBeOutOfCombat <= DateTime.UtcNow && ship.NextTimeRepairable > DateTime.UtcNow + RepairDuration)
-                    ship.NextTimeRepairable = DateTime.UtcNow;
-                
-                if (ship.NextTimeRepairable > DateTime.UtcNow)
+                TimeSpan repairCooldownRequired = TimeSpan.FromSeconds(ship.RepairCooldownDuration);
+
+                if (ship.LastCombatTime + ship.TimeNeededToBeOutOfCombat <= DateTime.UtcNow)
+                    repairCooldownRequired = BaseShip.RepairDuration;
+
+                if (ship.m_TimeLastRepaired + repairCooldownRequired > DateTime.UtcNow)
                 {
-                    string repairString = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.NextTimeRepairable, false, false, false, true, true);
+                    string repairString = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.m_TimeLastRepaired + repairCooldownRequired, false, false, false, true, true);
 
                     from.SendMessage("This ship cannot be repaired for another " + repairString + ".");
-
                     return;
                 }
 
@@ -158,7 +150,7 @@ namespace Server.Items
 
                     return;
                 }
-                
+
                 if (ship.IsOwner(from) || ship.IsCoOwner(from))
                 {
                     from.CloseGump(typeof(ShipRepairGump));
@@ -166,62 +158,63 @@ namespace Server.Items
                     from.SendMessage("What do you wish to repair on the ship?");
                 }
 
-                else                
-                    from.SendMessage("You must be the owner or co-owner of the ship in order to repair it.");                
+                else
+                    from.SendMessage("You must be the owner or co-owner of the ship in order to repair it.");
             }
         }
 
-       public class ShipRepairGump : Gump
-       {
-           ShipRepairTool m_ShipRepairTools;
-           BaseShip m_Ship;
-           Mobile m_From;
+        public class ShipRepairGump : Gump
+        {
+            ShipRepairTool m_ShipRepairTools;
+            BaseShip m_Ship;
+            Mobile m_From;
 
-           public ShipRepairGump(BaseShip ship, Mobile from, ShipRepairTool shipRepairTools): base(50, 50)
-           {
-               m_ShipRepairTools = shipRepairTools;
-               m_Ship = ship;
-               m_From = from;          
-               
-               this.Closable = true;
-               this.Disposable = true;
-               this.Dragable = true;
-               this.Resizable = false;
+            public ShipRepairGump(BaseShip ship, Mobile from, ShipRepairTool shipRepairTools)
+                : base(50, 50)
+            {
+                m_ShipRepairTools = shipRepairTools;
+                m_Ship = ship;
+                m_From = from;
 
-               this.AddPage(0);
+                this.Closable = true;
+                this.Disposable = true;
+                this.Dragable = true;
+                this.Resizable = false;
 
-               AddBackground(0, 0, 210, 210, 5054);
-               AddBackground(10, 10, 190, 190, 3000);
+                this.AddPage(0);
 
-               int hullPercent = (int)(Math.Floor(100 * (float)m_Ship.HitPoints / (float)m_Ship.MaxHitPoints));
-               int sailsPercent = (int)(Math.Floor(100 * (float)m_Ship.SailPoints / (float)m_Ship.MaxSailPoints));
-               int gunsPercent = (int)(Math.Floor(100 * (float)m_Ship.GunPoints / (float)m_Ship.MaxGunPoints));
+                AddBackground(0, 0, 210, 210, 5054);
+                AddBackground(10, 10, 190, 190, 3000);
 
-               //Hull
-               AddItem(16, 22, 7132);
-               AddButton(16, 22, 82, 82, 1, GumpButtonType.Reply, 0);
-               AddHtml(60, 20, 140, 20, "Repair Hull", false, false);
-               AddHtml(60, 40, 140, 20, m_Ship.HitPoints.ToString() + "/" + m_Ship.MaxHitPoints.ToString() + " (" + hullPercent.ToString() + "%)", false, false);
-               
-               //Sails
-               AddItem(20, 82, 5984);
-               AddButton(20, 82, 82, 82, 2, GumpButtonType.Reply, 0);
-               AddHtml(60, 80, 140, 20, "Repair Sails", false, false);
-               AddHtml(60, 100, 140, 20, m_Ship.SailPoints.ToString() + "/" + m_Ship.MaxSailPoints.ToString() + " (" + sailsPercent.ToString() + "%)", false, false);
-               
-               //Guns
-               AddItem(18, 143, 7153);
-               AddButton(18, 143, 82, 82, 3, GumpButtonType.Reply, 0);
-               AddHtml(60, 140, 140, 20, "Repair Guns", false, false);
-               AddHtml(60, 160, 140, 20, m_Ship.GunPoints.ToString() + "/" + m_Ship.MaxGunPoints.ToString() + " (" + gunsPercent.ToString() + "%)", false, false);
-           }
+                int hullPercent = (int)(Math.Floor(100 * (float)m_Ship.HitPoints / (float)m_Ship.MaxHitPoints));
+                int sailsPercent = (int)(Math.Floor(100 * (float)m_Ship.SailPoints / (float)m_Ship.MaxSailPoints));
+                int gunsPercent = (int)(Math.Floor(100 * (float)m_Ship.GunPoints / (float)m_Ship.MaxGunPoints));
 
-           public override void OnResponse(NetState sender, RelayInfo info)
-           {
-               if ( m_Ship.Deleted )
-				return;
+                //Hull
+                AddItem(16, 22, 7132);
+                AddButton(16, 22, 82, 82, 1, GumpButtonType.Reply, 0);
+                AddHtml(60, 20, 140, 20, "Repair Hull", false, false);
+                AddHtml(60, 40, 140, 20, m_Ship.HitPoints.ToString() + "/" + m_Ship.MaxHitPoints.ToString() + " (" + hullPercent.ToString() + "%)", false, false);
 
-			    Mobile from = sender.Mobile;
+                //Sails
+                AddItem(20, 82, 5984);
+                AddButton(20, 82, 82, 82, 2, GumpButtonType.Reply, 0);
+                AddHtml(60, 80, 140, 20, "Repair Sails", false, false);
+                AddHtml(60, 100, 140, 20, m_Ship.SailPoints.ToString() + "/" + m_Ship.MaxSailPoints.ToString() + " (" + sailsPercent.ToString() + "%)", false, false);
+
+                //Guns
+                AddItem(18, 143, 7153);
+                AddButton(18, 143, 82, 82, 3, GumpButtonType.Reply, 0);
+                AddHtml(60, 140, 140, 20, "Repair Guns", false, false);
+                AddHtml(60, 160, 140, 20, m_Ship.GunPoints.ToString() + "/" + m_Ship.MaxGunPoints.ToString() + " (" + gunsPercent.ToString() + "%)", false, false);
+            }
+
+            public override void OnResponse(NetState sender, RelayInfo info)
+            {
+                if (m_Ship.Deleted)
+                    return;
+
+                Mobile from = sender.Mobile;
 
                 if (!from.CanBeginAction(typeof(ShipRepairTool)) && info.ButtonID >= 1 && info.ButtonID <= 3)
                 {
@@ -230,396 +223,396 @@ namespace Server.Items
                 }
 
                 switch (info.ButtonID)
-                { 
+                {
                     case 1: //Repair Hull
-                    {
-                        if (m_ShipRepairTools.IsDamaged(m_Ship, m_From, DamageType.Hull) == false)
                         {
-                            from.SendMessage("The ship's hull is not damaged.");
-                            return;
-                        }
+                            if (m_ShipRepairTools.IsDamaged(m_Ship, m_From, DamageType.Hull) == false)
+                            {
+                                from.SendMessage("The ship's hull is not damaged.");
+                                return;
+                            }
 
-                        else if (m_ShipRepairTools.CheckRepairMaterials(m_Ship, m_From, DamageType.Hull))
-                        {
-                            from.SendMessage("You begin repairing the ship's hull.");
-                            m_ShipRepairTools.RepairStart(m_Ship, from, DamageType.Hull);
-                            return;
-                        }
+                            else if (m_ShipRepairTools.CheckRepairMaterials(m_Ship, m_From, DamageType.Hull))
+                            {
+                                from.SendMessage("You begin repairing the ship's hull.");
+                                m_ShipRepairTools.RepairStart(m_Ship, from, DamageType.Hull);
+                                return;
+                            }
 
-                        else
-                        {
-                            from.SendMessage("You lack the materials needed for repairs.");
-                            return;
-                        }
+                            else
+                            {
+                                from.SendMessage("You lack the materials needed for repairs.");
+                                return;
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case 2: //Repair Sails
-                    {
-                        if (m_ShipRepairTools.IsDamaged(m_Ship, m_From, DamageType.Sails) == false)
                         {
-                            from.SendMessage("The ship's sails are not damaged.");
-                            return;
-                        }
-                        
-                        else if (m_ShipRepairTools.CheckRepairMaterials(m_Ship, m_From, DamageType.Sails))
-                        {
-                            from.SendMessage("You begin repairing the ship's sails.");
-                            m_ShipRepairTools.RepairStart(m_Ship, from, DamageType.Sails);
-                            return;
-                        }
+                            if (m_ShipRepairTools.IsDamaged(m_Ship, m_From, DamageType.Sails) == false)
+                            {
+                                from.SendMessage("The ship's sails are not damaged.");
+                                return;
+                            }
 
-                        else
-                        {
-                            from.SendMessage("You lack the materials needed for repairs.");
-                            return;
-                        }
+                            else if (m_ShipRepairTools.CheckRepairMaterials(m_Ship, m_From, DamageType.Sails))
+                            {
+                                from.SendMessage("You begin repairing the ship's sails.");
+                                m_ShipRepairTools.RepairStart(m_Ship, from, DamageType.Sails);
+                                return;
+                            }
 
-                        break;
-                    }
+                            else
+                            {
+                                from.SendMessage("You lack the materials needed for repairs.");
+                                return;
+                            }
+
+                            break;
+                        }
 
                     case 3: //Repair Guns
+                        {
+                            if (m_ShipRepairTools.IsDamaged(m_Ship, m_From, DamageType.Guns) == false)
+                            {
+                                from.SendMessage("The ship's guns are not damaged.");
+                                return;
+                            }
+
+                            else if (m_ShipRepairTools.CheckRepairMaterials(m_Ship, m_From, DamageType.Guns))
+                            {
+                                from.SendMessage("You begin repairing the ship's guns.");
+                                m_ShipRepairTools.RepairStart(m_Ship, from, DamageType.Guns);
+
+                                return;
+                            }
+
+                            else
+                            {
+                                from.SendMessage("You lack the materials needed for repairs.");
+                                return;
+                            }
+
+                            break;
+                        }
+                }
+            }
+        }
+
+        public bool IsDamaged(BaseShip ship, Mobile from, DamageType damageType)
+        {
+            switch (damageType)
+            {
+                case DamageType.Hull:
                     {
-                        if (m_ShipRepairTools.IsDamaged(m_Ship, m_From, DamageType.Guns) == false)
-                        {
-                            from.SendMessage("The ship's guns are not damaged.");
-                            return;
-                        }
-                        
-                        else if (m_ShipRepairTools.CheckRepairMaterials(m_Ship, m_From, DamageType.Guns))
-                        {
-                            from.SendMessage("You begin repairing the ship's guns.");
-                            m_ShipRepairTools.RepairStart(m_Ship, from, DamageType.Guns);
+                        if (ship.HitPoints < ship.MaxHitPoints)
+                            return true;
+                        break;
+                    }
 
-                            return;
+                case DamageType.Sails:
+                    {
+                        if (ship.SailPoints < ship.MaxSailPoints)
+                            return true;
+                        break;
+                    }
+
+                case DamageType.Guns:
+                    {
+                        if (ship.GunPoints < ship.MaxGunPoints)
+                            return true;
+                        break;
+                    }
+            }
+
+            return false;
+        }
+
+        public bool CheckRepairMaterials(BaseShip ship, Mobile from, DamageType damageType)
+        {
+            if (ship == null)
+                return false;
+
+            if (from == null)
+                return false;
+
+            if (damageType == null)
+                return false;
+
+            switch (damageType)
+            {
+                case DamageType.Hull:
+                    {
+                        int totalBoards = 0;
+                        int boardsNeeded = (int)((double)ship.MaxHitPoints * BaseShip.HullRepairPercent * BaseShip.RepairMaterialFactor);
+
+                        Item[] playerBoards = from.Backpack.FindItemsByType(typeof(BaseResourceBoard));
+                        Item[] holdBoards = ship.Hold.FindItemsByType(typeof(BaseResourceBoard));
+
+                        foreach (Item item in playerBoards)
+                        {
+                            BaseResourceBoard board = item as BaseResourceBoard;
+                            totalBoards += board.Amount;
                         }
 
-                        else
+                        foreach (Item item in holdBoards)
                         {
-                            from.SendMessage("You lack the materials needed for repairs.");
-                            return;
+                            BaseResourceBoard board = item as BaseResourceBoard;
+                            totalBoards += board.Amount;
+                        }
+
+                        if (totalBoards > boardsNeeded)
+                            return true;
+
+                        break;
+                    }
+
+                case DamageType.Sails:
+                    {
+                        int totalCloth = 0;
+                        int clothNeeded = (int)((double)ship.MaxHitPoints * BaseShip.SailRepairPercent * BaseShip.RepairMaterialFactor);
+
+                        Item[] playerCloth = from.Backpack.FindItemsByType(typeof(Cloth));
+                        Item[] holdCloth = ship.Hold.FindItemsByType(typeof(Cloth));
+
+                        foreach (Item item in playerCloth)
+                        {
+                            Cloth cloth = item as Cloth;
+                            totalCloth += cloth.Amount;
+                        }
+
+                        foreach (Item item in holdCloth)
+                        {
+                            Cloth cloth = item as Cloth;
+                            totalCloth += cloth.Amount;
+                        }
+
+                        if (totalCloth > clothNeeded)
+                            return true;
+
+                        break;
+                    }
+
+                case DamageType.Guns:
+                    {
+                        int totalIronIngots = 0;
+                        int ironIngotsNeeded = (int)((double)ship.MaxHitPoints * BaseShip.GunRepairPercent * BaseShip.RepairMaterialFactor);
+
+                        Item[] playerIronIngots = from.Backpack.FindItemsByType(typeof(IronIngot));
+                        Item[] holdIronIngots = ship.Hold.FindItemsByType(typeof(IronIngot));
+
+                        foreach (Item item in playerIronIngots)
+                        {
+                            IronIngot ironIngot = item as IronIngot;
+                            totalIronIngots += ironIngot.Amount;
+                        }
+
+                        foreach (Item item in holdIronIngots)
+                        {
+                            IronIngot ironIngot = item as IronIngot;
+                            totalIronIngots += ironIngot.Amount;
+                        }
+
+                        if (totalIronIngots > ironIngotsNeeded)
+                            return true;
+
+                        break;
+                    }
+            }
+
+            return false;
+        }
+
+        public void UseRepairMaterials(BaseShip ship, Mobile from, DamageType damageType)
+        {
+            switch (damageType)
+            {
+                case DamageType.Hull:
+                    {
+                        int boardsUsed = 0;
+                        int boardsNeeded = 0;
+                        int repairAmount = ship.MaxHitPoints - ship.HitPoints;
+                        int maximumRepairAmount = (int)((double)ship.MaxHitPoints * BaseShip.HullRepairPercent);
+
+                        if (repairAmount > maximumRepairAmount)
+                            repairAmount = maximumRepairAmount;
+
+                        boardsNeeded = (int)((double)repairAmount * BaseShip.RepairMaterialFactor);
+
+                        if (boardsNeeded < 0)
+                            boardsNeeded = 1;
+
+                        Item[] playerBoards = from.Backpack.FindItemsByType(typeof(BaseResourceBoard));
+                        Item[] holdBoards = ship.Hold.FindItemsByType(typeof(BaseResourceBoard));
+
+                        foreach (Item item in playerBoards)
+                        {
+                            if (boardsNeeded <= 0)
+                                return;
+
+                            BaseResourceBoard board = item as BaseResourceBoard;
+
+                            if (board.Amount > boardsNeeded)
+                            {
+                                board.Amount -= boardsNeeded;
+                                boardsNeeded = 0;
+                            }
+
+                            else
+                            {
+                                boardsNeeded -= board.Amount;
+                                board.Delete();
+                            }
+                        }
+
+                        foreach (Item item in holdBoards)
+                        {
+                            if (boardsNeeded <= 0)
+                                return;
+
+                            BaseResourceBoard board = item as BaseResourceBoard;
+
+                            if (board.Amount > boardsNeeded)
+                            {
+                                board.Amount -= boardsNeeded;
+                                boardsNeeded = 0;
+                            }
+
+                            else
+                            {
+                                boardsNeeded -= board.Amount;
+                                board.Delete();
+                            }
                         }
 
                         break;
                     }
-                }
-           }
+
+                case DamageType.Sails:
+                    {
+                        int clothUsed = 0;
+                        int clothNeeded = 0;
+                        int repairAmount = ship.MaxSailPoints - ship.SailPoints;
+                        int maximumRepairAmount = (int)((double)ship.MaxSailPoints * BaseShip.HullRepairPercent);
+
+                        if (repairAmount > maximumRepairAmount)
+                            repairAmount = maximumRepairAmount;
+
+                        clothNeeded = (int)((double)repairAmount * BaseShip.RepairMaterialFactor);
+
+                        if (clothNeeded < 0)
+                            clothNeeded = 1;
+
+                        Item[] playerCloth = from.Backpack.FindItemsByType(typeof(Cloth));
+                        Item[] holdCloth = ship.Hold.FindItemsByType(typeof(Cloth));
+
+                        foreach (Item item in playerCloth)
+                        {
+                            if (clothNeeded <= 0)
+                                return;
+
+                            Cloth cloth = item as Cloth;
+
+                            if (cloth.Amount > clothNeeded)
+                            {
+                                cloth.Amount -= clothNeeded;
+                                clothNeeded = 0;
+                            }
+
+                            else
+                            {
+                                clothNeeded -= cloth.Amount;
+                                cloth.Delete();
+                            }
+                        }
+
+                        foreach (Item item in holdCloth)
+                        {
+                            if (clothNeeded <= 0)
+                                return;
+
+                            Cloth cloth = item as Cloth;
+
+                            if (cloth.Amount > clothNeeded)
+                            {
+                                cloth.Amount -= clothNeeded;
+                                clothNeeded = 0;
+                            }
+
+                            else
+                            {
+                                clothNeeded -= cloth.Amount;
+                                cloth.Delete();
+                            }
+                        }
+
+                        break;
+                    }
+
+
+                case DamageType.Guns:
+                    {
+                        int ironIngotsUsed = 0;
+                        int ironIngotsNeeded = 0;
+                        int repairAmount = ship.MaxGunPoints - ship.GunPoints;
+                        int maximumRepairAmount = (int)((double)ship.MaxGunPoints * BaseShip.HullRepairPercent);
+
+                        if (repairAmount > maximumRepairAmount)
+                            repairAmount = maximumRepairAmount;
+
+                        ironIngotsNeeded = (int)((double)repairAmount * BaseShip.RepairMaterialFactor);
+
+                        if (ironIngotsNeeded < 0)
+                            ironIngotsNeeded = 1;
+
+                        Item[] playerIronIngots = from.Backpack.FindItemsByType(typeof(IronIngot));
+                        Item[] holdIronIngots = ship.Hold.FindItemsByType(typeof(IronIngot));
+
+                        foreach (Item item in playerIronIngots)
+                        {
+                            if (ironIngotsNeeded <= 0)
+                                return;
+
+                            IronIngot ironIngot = item as IronIngot;
+
+                            if (ironIngot.Amount > ironIngotsNeeded)
+                            {
+                                ironIngot.Amount -= ironIngotsNeeded;
+                                ironIngotsNeeded = 0;
+                            }
+
+                            else
+                            {
+                                ironIngotsNeeded -= ironIngot.Amount;
+                                ironIngot.Delete();
+                            }
+                        }
+
+                        foreach (Item item in holdIronIngots)
+                        {
+                            if (ironIngotsNeeded <= 0)
+                                return;
+
+                            IronIngot ironIngot = item as IronIngot;
+
+                            if (ironIngot.Amount > ironIngotsNeeded)
+                            {
+                                ironIngot.Amount -= ironIngotsNeeded;
+                                ironIngotsNeeded = 0;
+                            }
+
+                            else
+                            {
+                                ironIngotsNeeded -= ironIngot.Amount;
+                                ironIngot.Delete();
+                            }
+                        }
+
+                        break;
+                    }
+            }
         }
-
-       public bool IsDamaged(BaseShip ship, Mobile from, DamageType damageType)
-       {
-           switch (damageType)
-           {
-               case DamageType.Hull:
-                {
-                    if (ship.HitPoints < ship.MaxHitPoints)
-                        return true;
-                    break;
-                }
-
-               case DamageType.Sails:
-                {
-                    if (ship.SailPoints < ship.MaxSailPoints)
-                        return true;
-                    break;
-                }
-
-               case DamageType.Guns:
-                {
-                    if (ship.GunPoints < ship.MaxGunPoints)
-                        return true;
-                    break;
-                }
-           }
-
-           return false;
-       }
-
-       public bool CheckRepairMaterials(BaseShip ship, Mobile from, DamageType damageType)
-       {
-           if (ship == null)
-               return false;
-
-           if (from == null)
-               return false;
-
-           if (damageType == null)
-               return false;
-           
-           switch (damageType)
-           {
-               case DamageType.Hull:
-                {
-                    int totalBoards = 0;
-                    int boardsNeeded = (int)((double)ship.MaxHitPoints * hullRepairPercent * repairMaterialFactor);
-                    
-                    Item[] playerBoards = from.Backpack.FindItemsByType(typeof(BaseResourceBoard));
-                    Item[] holdBoards = ship.Hold.FindItemsByType(typeof(BaseResourceBoard));
-
-                    foreach (Item item in playerBoards)
-                    {
-                        BaseResourceBoard board = item as BaseResourceBoard;
-                        totalBoards += board.Amount;
-                    }
-
-                    foreach (Item item in holdBoards)
-                    {
-                        BaseResourceBoard board = item as BaseResourceBoard;
-                        totalBoards += board.Amount;
-                    }
-
-                    if (totalBoards > boardsNeeded)
-                        return true;
-
-                    break;
-                }
-
-               case DamageType.Sails:
-                {
-                    int totalCloth = 0;
-                    int clothNeeded = (int)((double)ship.MaxHitPoints * sailRepairPercent * repairMaterialFactor);
-
-                    Item[] playerCloth = from.Backpack.FindItemsByType(typeof(Cloth));
-                    Item[] holdCloth = ship.Hold.FindItemsByType(typeof(Cloth));
-
-                    foreach (Item item in playerCloth)
-                    {
-                        Cloth cloth = item as Cloth;
-                        totalCloth += cloth.Amount;
-                    }
-
-                    foreach (Item item in holdCloth)
-                    {
-                        Cloth cloth = item as Cloth;
-                        totalCloth += cloth.Amount;
-                    }
-
-                    if (totalCloth > clothNeeded)
-                        return true;
-                    
-                    break;
-                }
-
-               case DamageType.Guns:
-                {
-                    int totalIronIngots = 0;
-                    int ironIngotsNeeded = (int)((double)ship.MaxHitPoints * gunRepairPercent * repairMaterialFactor);
-
-                    Item[] playerIronIngots = from.Backpack.FindItemsByType(typeof(IronIngot));
-                    Item[] holdIronIngots = ship.Hold.FindItemsByType(typeof(IronIngot));
-
-                    foreach (Item item in playerIronIngots)
-                    {
-                        IronIngot ironIngot = item as IronIngot;
-                        totalIronIngots += ironIngot.Amount;
-                    }
-
-                    foreach (Item item in holdIronIngots)
-                    {
-                        IronIngot ironIngot = item as IronIngot;
-                        totalIronIngots += ironIngot.Amount;
-                    }
-
-                    if (totalIronIngots > ironIngotsNeeded)
-                        return true;
-                    
-                    break;
-                }
-           }
-           
-           return false;
-       }
-
-       public void UseRepairMaterials(BaseShip ship, Mobile from, DamageType damageType)
-       {
-           switch (damageType)
-           {
-               case DamageType.Hull:
-                {
-                    int boardsUsed = 0;
-                    int boardsNeeded = 0;
-                    int repairAmount = ship.MaxHitPoints - ship.HitPoints;
-                    int maximumRepairAmount = (int)((double)ship.MaxHitPoints * hullRepairPercent);
-
-                    if (repairAmount > maximumRepairAmount)
-                        repairAmount = maximumRepairAmount;
-
-                    boardsNeeded = (int)((double)repairAmount * repairMaterialFactor);
-
-                    if (boardsNeeded < 0)
-                        boardsNeeded = 1;     
-
-                    Item[] playerBoards = from.Backpack.FindItemsByType(typeof(BaseResourceBoard));
-                    Item[] holdBoards = ship.Hold.FindItemsByType(typeof(BaseResourceBoard));
-
-                    foreach (Item item in playerBoards)
-                    {
-                        if (boardsNeeded <= 0)
-                            return;
-                        
-                        BaseResourceBoard board = item as BaseResourceBoard;
-
-                        if (board.Amount > boardsNeeded)
-                        {
-                            board.Amount -= boardsNeeded;
-                            boardsNeeded = 0;
-                        }
-
-                        else
-                        {
-                            boardsNeeded -= board.Amount;
-                            board.Delete();
-                        }
-                    }
-
-                    foreach (Item item in holdBoards)
-                    {
-                        if (boardsNeeded <= 0)
-                            return;
-                        
-                        BaseResourceBoard board = item as BaseResourceBoard;
-
-                        if (board.Amount > boardsNeeded)
-                        {
-                            board.Amount -= boardsNeeded;
-                            boardsNeeded = 0;
-                        }
-
-                        else
-                        {
-                            boardsNeeded -= board.Amount;
-                            board.Delete();
-                        }                           
-                    }
-
-                    break;
-                }
-
-               case DamageType.Sails:
-                {
-                    int clothUsed = 0;
-                    int clothNeeded = 0;
-                    int repairAmount = ship.MaxSailPoints - ship.SailPoints;
-                    int maximumRepairAmount = (int)((double)ship.MaxSailPoints * hullRepairPercent);
-
-                    if (repairAmount > maximumRepairAmount)
-                        repairAmount = maximumRepairAmount;
-
-                    clothNeeded = (int)((double)repairAmount * repairMaterialFactor);
-
-                    if (clothNeeded < 0)
-                        clothNeeded = 1;
-
-                    Item[] playerCloth = from.Backpack.FindItemsByType(typeof(Cloth));
-                    Item[] holdCloth = ship.Hold.FindItemsByType(typeof(Cloth));
-
-                    foreach (Item item in playerCloth)
-                    {
-                        if (clothNeeded <= 0)
-                            return;
-                        
-                        Cloth cloth = item as Cloth;
-
-                        if (cloth.Amount > clothNeeded)
-                        {
-                            cloth.Amount -= clothNeeded;
-                            clothNeeded = 0;
-                        }
-
-                        else
-                        {
-                            clothNeeded -= cloth.Amount;
-                            cloth.Delete();
-                        }
-                    }
-
-                    foreach (Item item in holdCloth)
-                    {
-                        if (clothNeeded <= 0)
-                            return;
-                        
-                        Cloth cloth = item as Cloth;
-
-                        if (cloth.Amount > clothNeeded)
-                        {
-                            cloth.Amount -= clothNeeded;
-                            clothNeeded = 0;
-                        }
-
-                        else
-                        {
-                            clothNeeded -= cloth.Amount;
-                            cloth.Delete();
-                        }
-                    }
-
-                    break;
-                }
-
-
-               case DamageType.Guns:
-                {
-                    int ironIngotsUsed = 0;
-                    int ironIngotsNeeded = 0;
-                    int repairAmount = ship.MaxGunPoints - ship.GunPoints;
-                    int maximumRepairAmount = (int)((double)ship.MaxGunPoints * hullRepairPercent);
-
-                    if (repairAmount > maximumRepairAmount)
-                        repairAmount = maximumRepairAmount;
-
-                    ironIngotsNeeded = (int)((double)repairAmount * repairMaterialFactor);
-
-                    if (ironIngotsNeeded < 0)
-                        ironIngotsNeeded = 1;
-
-                    Item[] playerIronIngots = from.Backpack.FindItemsByType(typeof(IronIngot));
-                    Item[] holdIronIngots = ship.Hold.FindItemsByType(typeof(IronIngot));
-
-                    foreach (Item item in playerIronIngots)
-                    {
-                        if (ironIngotsNeeded <= 0)
-                            return;
-                        
-                        IronIngot ironIngot = item as IronIngot;
-
-                        if (ironIngot.Amount > ironIngotsNeeded)
-                        {
-                            ironIngot.Amount -= ironIngotsNeeded;
-                            ironIngotsNeeded = 0;
-                        }
-
-                        else
-                        {
-                            ironIngotsNeeded -= ironIngot.Amount;
-                            ironIngot.Delete();
-                        }
-                    }
-
-                    foreach (Item item in holdIronIngots)
-                    {
-                        if (ironIngotsNeeded <= 0)
-                            return;
-                        
-                        IronIngot ironIngot = item as IronIngot;                        
-
-                        if (ironIngot.Amount > ironIngotsNeeded)
-                        {
-                            ironIngot.Amount -= ironIngotsNeeded;
-                            ironIngotsNeeded = 0;
-                        }
-
-                        else
-                        {
-                            ironIngotsNeeded -= ironIngot.Amount;
-                            ironIngot.Delete();
-                        }
-                    }
-
-                    break;
-                }
-           }
-       }
 
         private void RepairStart(BaseShip ship, Mobile from, DamageType damageType)
         {
@@ -627,14 +620,14 @@ namespace Server.Items
                 return;
 
             from.BeginAction(typeof(ShipRepairTool));
-            Timer.DelayCall(RepairDuration, delegate { from.EndAction(typeof(ShipRepairTool)); });
+            Timer.DelayCall(BaseShip.RepairDuration, delegate { from.EndAction(typeof(ShipRepairTool)); });
 
             Effects.PlaySound(from.Location, from.Map, 0x23D);
 
             if (!from.Mounted && from.Body.IsHuman)
                 from.Animate(11, 5, 1, true, false, 0);
-            
-            shipRepairTimer = new ShipRepairTimer(ship, from, this, damageType, RepairInterval);
+
+            shipRepairTimer = new ShipRepairTimer(ship, from, this, damageType, BaseShip.RepairInterval);
             shipRepairTimer.Start();
 
             //Henchman Repair Assistance
@@ -663,7 +656,7 @@ namespace Server.Items
         }
 
         private class ShipRepairTimer : Timer
-        {            
+        {
             private BaseShip m_Ship;
             private Mobile m_From;
             private ShipRepairTool m_ShipRepairTools;
@@ -671,7 +664,8 @@ namespace Server.Items
 
             private DateTime m_Start;
 
-            public ShipRepairTimer(BaseShip ship, Mobile from, ShipRepairTool shipRepairTools, DamageType damageType, TimeSpan interval): base(interval, interval)
+            public ShipRepairTimer(BaseShip ship, Mobile from, ShipRepairTool shipRepairTools, DamageType damageType, TimeSpan interval)
+                : base(interval, interval)
             {
                 m_Ship = ship;
                 m_From = from;
@@ -687,7 +681,7 @@ namespace Server.Items
             {
                 //No Longer Alive
                 if (!m_From.Alive)
-                {   
+                {
                     this.Stop();
 
                     return;
@@ -697,20 +691,20 @@ namespace Server.Items
                 if (!(m_Ship.Contains(m_From) || m_Ship.GetShipToLocationDistance(m_Ship, m_From.Location) <= 6))
                 {
                     m_From.SendMessage("You are not close enough to the ship to finish your repairs.");
- 
+
                     this.Stop();
                     return;
                 }
 
                 m_From.RevealingAction();
-                
+
                 //Repair Time Remains
-                if ((m_Start + m_ShipRepairTools.RepairDuration) > DateTime.UtcNow)
+                if ((m_Start + BaseShip.RepairDuration) > DateTime.UtcNow)
                 {
                     Effects.PlaySound(m_From.Location, m_From.Map, 0x23D);
 
                     if (!m_From.Mounted)
-                        m_From.Animate(11, 5, 1, true, false, 0);  
+                        m_From.Animate(11, 5, 1, true, false, 0);
                 }
 
                 //Repairs Complete
@@ -723,7 +717,7 @@ namespace Server.Items
 
                     Stop();
 
-                    m_ShipRepairTools.FinishRepairs(m_Ship, m_From, m_DamageType, true);                       
+                    m_ShipRepairTools.FinishRepairs(m_Ship, m_From, m_DamageType, true);
                 }
 
                 //Henchman Repair Assistance
@@ -747,17 +741,22 @@ namespace Server.Items
         }
 
         private void FinishRepairs(BaseShip ship, Mobile from, DamageType damageType, bool needMaterials)
-        {            
+        {
             if (ship == null || from == null)
                 return;
 
+            TimeSpan repairCooldownRequired = TimeSpan.FromSeconds(ship.RepairCooldownDuration);
+
+            if (ship.LastCombatTime + ship.TimeNeededToBeOutOfCombat <= DateTime.UtcNow)
+                repairCooldownRequired = BaseShip.RepairDuration;
+
             //Repair Timer Refreshed (Other player repaired before this player finished)
-            if (ship.NextTimeRepairable > DateTime.UtcNow)
+            if (ship.m_TimeLastRepaired + repairCooldownRequired > DateTime.UtcNow)
             {
                 from.SendMessage("You finish your repairs, however someone has more recently completed repairs on the ship.");
                 return;
             }
-            
+
             if (needMaterials == true)
             {
                 switch (damageType)
@@ -773,7 +772,7 @@ namespace Server.Items
                             else if (!CheckRepairMaterials(ship, from, DamageType.Hull))
                             {
                                 from.SendMessage("You lack the materials needed for repairs.");
-                                return;                           
+                                return;
                             }
 
                             break;
@@ -797,32 +796,32 @@ namespace Server.Items
                         }
 
                     case DamageType.Guns:
-                    {
-                        if (IsDamaged(ship, from, DamageType.Guns) == false)
                         {
-                            from.SendMessage("The ship's guns are no longer damaged.");
-                            return;
-                        }
+                            if (IsDamaged(ship, from, DamageType.Guns) == false)
+                            {
+                                from.SendMessage("The ship's guns are no longer damaged.");
+                                return;
+                            }
 
-                        else if (!CheckRepairMaterials(ship, from, DamageType.Guns))
-                        {
-                            from.SendMessage("You lack the materials needed for repairs.");
-                            return;
-                        }
+                            else if (!CheckRepairMaterials(ship, from, DamageType.Guns))
+                            {
+                                from.SendMessage("You lack the materials needed for repairs.");
+                                return;
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                 }
-            }            
-            
+            }
+
             int repairAmount = 0;
             double skillPercentBonus = 0;
 
             bool doubleTimeActive = false;
             double doubleTimeBonus = 0;
-            
+
             int repairAssistants = 0;
-            double bonusPerRepairAssistant = .25;           
+            double bonusPerRepairAssistant = .25;
 
             //Henchman Repair Assistance           
             List<Mobile> m_MobilesOnShip = ship.GetMobilesOnShip(false, false);
@@ -836,49 +835,49 @@ namespace Server.Items
                     repairAssistants++;
             }
 
-            double repairBonusScalar = 1.0;            
-                
-            switch(damageType)
+            double repairBonusScalar = 1.0;
+
+            switch (damageType)
             {
                 case DamageType.Hull:
-                {
-                    skillPercentBonus = ((from.Skills[SkillName.Carpentry].Value / 100) * skillBonusPercent / 2);
+                    {
+                        skillPercentBonus = ((from.Skills[SkillName.Carpentry].Value / 100) * BaseShip.SkillBonusPercent / 2);
 
-                    repairAmount = (int)((double)ship.MaxHitPoints * (hullRepairPercent + skillPercentBonus) * (1 + doubleTimeBonus + ((double)repairAssistants * bonusPerRepairAssistant)));
-                    ship.HitPoints += repairAmount;
+                        repairAmount = (int)((double)ship.MaxHitPoints * (BaseShip.HullRepairPercent + skillPercentBonus) * (1 + doubleTimeBonus + ((double)repairAssistants * bonusPerRepairAssistant)));
+                        ship.HitPoints += repairAmount;
 
-                    if (needMaterials)
-                        UseRepairMaterials(ship, from, DamageType.Hull);
+                        if (needMaterials)
+                            UseRepairMaterials(ship, from, DamageType.Hull);
 
-                    if (ship.TillerMan != null)
-                        ship.TillerMan.Say("Ship's hull repaired!!");
+                        if (ship.TillerMan != null)
+                            ship.TillerMan.Say("Ship's hull repaired!!");
 
-                    from.SendMessage("You repair the ship's hull.");
-                }
-                break;
+                        from.SendMessage("You repair the ship's hull.");
+                    }
+                    break;
 
                 case DamageType.Sails:
-                {
-                    skillPercentBonus += ((from.Skills[SkillName.Tailoring].Value / 100) * skillBonusPercent);
+                    {
+                        skillPercentBonus += ((from.Skills[SkillName.Tailoring].Value / 100) * BaseShip.SkillBonusPercent);
 
-                    repairAmount = (int)((double)ship.MaxSailPoints * (sailRepairPercent + skillPercentBonus) * (1 + ((double)repairAssistants * bonusPerRepairAssistant)));
-                    ship.SailPoints += repairAmount;
+                        repairAmount = (int)((double)ship.MaxSailPoints * (BaseShip.SailRepairPercent + skillPercentBonus) * (1 + ((double)repairAssistants * bonusPerRepairAssistant)));
+                        ship.SailPoints += repairAmount;
 
-                    if (needMaterials)
-                        UseRepairMaterials(ship, from, DamageType.Sails);
+                        if (needMaterials)
+                            UseRepairMaterials(ship, from, DamageType.Sails);
 
-                    if (ship.TillerMan != null)
-                        ship.TillerMan.Say("Ship's sails repaired!");
+                        if (ship.TillerMan != null)
+                            ship.TillerMan.Say("Ship's sails repaired!");
 
-                    from.SendMessage("You repair the ship's sails.");
-                }
-                break;
+                        from.SendMessage("You repair the ship's sails.");
+                    }
+                    break;
 
                 case DamageType.Guns:
                     {
-                        skillPercentBonus += ((from.Skills[SkillName.Blacksmith].Value / 100) * skillBonusPercent);
+                        skillPercentBonus += ((from.Skills[SkillName.Blacksmith].Value / 100) * BaseShip.SkillBonusPercent);
 
-                        repairAmount = (int)((double)ship.MaxGunPoints * (gunRepairPercent + skillPercentBonus) * (1 + ((double)repairAssistants * bonusPerRepairAssistant)));
+                        repairAmount = (int)((double)ship.MaxGunPoints * (BaseShip.GunRepairPercent + skillPercentBonus) * (1 + ((double)repairAssistants * bonusPerRepairAssistant)));
                         ship.GunPoints += repairAmount;
 
                         if (needMaterials)
@@ -886,32 +885,21 @@ namespace Server.Items
 
                         if (ship.TillerMan != null)
                             ship.TillerMan.Say("Ship's guns repaired!");
-                            
+
                         from.SendMessage("You repair the ship's guns.");
                     }
-                break;
+                    break;
             }
-            
-            ship.TimeLastRepaired = DateTime.UtcNow;
 
             if (from.AccessLevel == AccessLevel.Player)
-            {
-                //Out of Ship Combat
-                if (ship.LastCombatTime + ship.TimeNeededToBeOutOfCombat <= DateTime.UtcNow)
-                    ship.NextTimeRepairable = DateTime.UtcNow; // + RepairDuration;
+                ship.m_TimeLastRepaired = DateTime.UtcNow;
 
-                //Still in Ship Combat
-                else
-                    ship.NextTimeRepairable = DateTime.UtcNow + InCombatRepairCooldown;
-            }
-
-            CurrentCharges--;                     
+            CurrentCharges--;
         }
 
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
-
             writer.Write((int)0); //version
 
             //Version 0
@@ -921,17 +909,13 @@ namespace Server.Items
         public override void Deserialize(GenericReader reader)
         {
             base.Deserialize(reader);
-
             int version = reader.ReadInt();
 
-            switch (version)
+            //Version
+            if (version >= 0)
             {
-                case 0:
-                {
-                    m_CurrentCharges = reader.ReadInt();
-                }
-                break;
+                m_CurrentCharges = reader.ReadInt();
             }
-        }        
-	}
+        }
+    }
 }

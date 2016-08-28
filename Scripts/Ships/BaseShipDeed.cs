@@ -24,12 +24,12 @@ namespace Server
         private Point3D m_Offset;
         [CommandProperty(AccessLevel.GameMaster)]
         public Point3D Offset { get { return m_Offset; } set { m_Offset = value; } }
-        
+
         public bool m_Registered = false;
 
         public string m_ShipName;
         public PlayerMobile m_Owner;
-        
+
         public int HitPoints = 0;
         public int SailPoints = 0;
         public int GunPoints = 0;
@@ -56,7 +56,7 @@ namespace Server
         public double RepairCooldownDurationCreationModifier = 0;
         public double BoardingChanceCreationModifier = 0;
 
-        public TargetingMode m_TargetingMode = TargetingMode.Hull;        
+        public TargetingMode m_TargetingMode = TargetingMode.Hull;
 
         public bool m_IPAsCoOwners = false;
         public bool m_GuildAsCoOwners = false;
@@ -76,6 +76,12 @@ namespace Server
         public List<Mobile> m_CoOwners = new List<Mobile>();
         public List<Mobile> m_Friends = new List<Mobile>();
 
+        public DateTime m_MinorAbilityLastActivated = DateTime.UtcNow;
+        public DateTime m_MajorAbilityLastActivated = DateTime.UtcNow;
+        public DateTime m_EpicAbilityLastActivated = DateTime.UtcNow;
+
+        public DateTime m_TimeLastRepaired = DateTime.UtcNow;
+
         //-----
 
         [Constructable]
@@ -87,6 +93,8 @@ namespace Server
 
             m_MultiID = id;
             m_Offset = offset;
+
+            m_ShipName = "an unnamed ship";
 
             ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(this, null, true, true);
 
@@ -107,7 +115,7 @@ namespace Server
             double highRange = 0.2;
 
             if (from.Skills.Carpentry.Value > 100.0)
-                lowRange += .1 * (120.0 - from.Skills.Carpentry.Value);
+                lowRange += .1 * ((from.Skills.Carpentry.Value - 100) / 20);
 
             double statMutationChance = .33;
                         
@@ -164,6 +172,9 @@ namespace Server
             HitPoints = shipStatsProfile.MaxHitPointsAdjusted;
             SailPoints = shipStatsProfile.MaxSailPointsAdjusted;
             GunPoints = shipStatsProfile.MaxGunPointsAdjusted;
+
+            m_ShipName = "an unnamed ship";
+            m_Owner = from as PlayerMobile;
 
             return quality;
         }
@@ -246,19 +257,20 @@ namespace Server
 
         public override void OnSingleClick(Mobile from)
         {
-            base.OnSingleClick(from);
-
+            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(this, null, false, false);
+            
             if (!m_Registered)
             {
-                ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(this, null, false, false);
-
-                int doubloonsRequired = shipStatsProfile.RegistrationDoubloonCost;
-
-                LabelTo(from, "(requires registration)");
+                LabelTo(from, "an unregistered " + shipStatsProfile.ShipTypeName);
+                LabelTo(from, "[double click to view]");
             }
 
-            else            
-                LabelTo(from, "(double click to view ship details)");            
+            else
+            {                 
+                LabelTo(from, m_ShipName);
+                LabelTo(from, "(" + shipStatsProfile.ShipTypeName + ")");
+                LabelTo(from, "[double click to view]");
+            }
         }
 
         public override void OnDoubleClick(Mobile from)
@@ -270,6 +282,8 @@ namespace Server
 
             if (!m_Registered)
             {
+                player.SendSound(0x055);
+
                 player.CloseGump(typeof(ShipRegistrationGump));
                 player.SendGump(new ShipRegistrationGump(player, this));
             }
@@ -277,6 +291,8 @@ namespace Server
             else
             {
                 ShipGumpObject shipGumpObject = new ShipGumpObject(player, null, this);
+
+                player.SendSound(0x055);
 
                 player.CloseGump(typeof(ShipGump));
                 player.SendGump(new ShipGump(player, shipGumpObject));
@@ -494,7 +510,7 @@ namespace Server
                     LaunchGump(player);
                 }
             }
-        }        
+        }
 
         public override void Serialize(GenericWriter writer)
         {
@@ -554,6 +570,11 @@ namespace Server
             writer.Write((int)m_MajorAbilityUpgrade);
             writer.Write((int)m_EpicAbilityUpgrade);
 
+            writer.Write(m_MinorAbilityLastActivated);
+            writer.Write(m_MajorAbilityLastActivated);
+            writer.Write(m_EpicAbilityLastActivated);
+            writer.Write(m_TimeLastRepaired);
+
             writer.Write(m_CoOwners.Count);
             for (int a = 0; a < m_CoOwners.Count; a++)
             {
@@ -572,7 +593,7 @@ namespace Server
             base.Deserialize(reader);
 
             int version = reader.ReadInt();
-            
+
             //Version 0
             if (version >= 0)
             {
@@ -586,8 +607,8 @@ namespace Server
                 m_ShipName = reader.ReadString();
                 m_Owner = (PlayerMobile)reader.ReadMobile();
 
-                HitPoints = reader.ReadInt();               
-                SailPoints = reader.ReadInt();               
+                HitPoints = reader.ReadInt();
+                SailPoints = reader.ReadInt();
                 GunPoints = reader.ReadInt();
 
                 MaxHitPointsCreationModifier = reader.ReadDouble();
@@ -626,6 +647,12 @@ namespace Server
                 m_MinorAbilityUpgrade = (ShipUpgrades.MinorAbilityType)reader.ReadInt();
                 m_MajorAbilityUpgrade = (ShipUpgrades.MajorAbilityType)reader.ReadInt();
                 m_EpicAbilityUpgrade = (ShipUpgrades.EpicAbilityType)reader.ReadInt();
+
+                m_MinorAbilityLastActivated = reader.ReadDateTime();
+                m_MajorAbilityLastActivated = reader.ReadDateTime();
+                m_EpicAbilityLastActivated = reader.ReadDateTime();
+
+                m_TimeLastRepaired = reader.ReadDateTime();
 
                 int coOwnerCount = reader.ReadInt();
                 for (int a = 0; a < coOwnerCount; a++)

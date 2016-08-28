@@ -1144,8 +1144,8 @@
     <Compile Include="Ships\SpyglassMapViewItem.cs" />
     <Compile Include="Ships\Strandedness.cs" />
     <Compile Include="Ships\TillerMan.cs" />
-    <Compile Include="Ships\Upgrades\CannonMetalShipUpgradeDeed.cs" />
     <Compile Include="Ships\Upgrades\BannerShipUpgradeDeed.cs" />
+    <Compile Include="Ships\Upgrades\CannonMetalShipUpgradeDeed.cs" />
     <Compile Include="Ships\Upgrades\CharmShipUpgradeDeed.cs" />
     <Compile Include="Ships\Upgrades\EpicAbilityShipUpgradeDeed.cs" />
     <Compile Include="Ships\Upgrades\MajorAbilityShipUpgradeDeed.cs" />

@@ -897,6 +897,18 @@ namespace Server
         public static int CannonMaxAmmunition = 10;  
         public static double CannonMaxMisfireChance = 0.40;
 
+        public static double HullRepairPercent = .10;
+        public static double SailRepairPercent = .20;
+        public static double GunRepairPercent = .20;
+
+        public static double SkillBonusPercent = .05; //Related Skill Bonus at GM Skill to Repair Perecent (scaled from 0-100)
+        public static double RepairMaterialFactor = .05; //Material Cost of Repair (percent of Amount Repaired)
+
+        public static TimeSpan InCombatRepairCooldown = TimeSpan.FromSeconds(120);
+
+        public static TimeSpan RepairDuration = TimeSpan.FromSeconds(15);
+        public static TimeSpan RepairInterval = TimeSpan.FromSeconds(3); 
+
         public int DoubloonValue = 0;
 
         public static double BaseUpgradeDoubloonMultiplier = 1.0;
@@ -1546,15 +1558,7 @@ namespace Server
         {
             get { return m_LastCombatTime; }
             set { m_LastCombatTime = value; }
-        }
-
-        private DateTime m_TimeLastRepaired;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public DateTime TimeLastRepaired
-        {
-            get { return m_TimeLastRepaired; }
-            set { m_TimeLastRepaired = value; }
-        }
+        }       
 
         private DateTime m_NextTimeRepairable;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -1713,6 +1717,16 @@ namespace Server
         public ShipUpgrades.MinorAbilityType m_MinorAbilityUpgrade;
         public ShipUpgrades.MajorAbilityType m_MajorAbilityUpgrade;
         public ShipUpgrades.EpicAbilityType m_EpicAbilityUpgrade;
+
+        public DateTime m_MinorAbilityLastActivated = DateTime.UtcNow;
+        public DateTime m_MajorAbilityLastActivated = DateTime.UtcNow;
+        public DateTime m_EpicAbilityLastActivated = DateTime.UtcNow;
+
+        public bool m_MinorAbilityActive = false;
+        public bool m_MajorAbilityActive = false;
+        public bool m_EpicAbilityActive = false;
+
+        public DateTime m_TimeLastRepaired;
 
         public virtual Type ShipDeedType { get { return typeof(SmallShipDeed); } }
 
@@ -2339,45 +2353,45 @@ namespace Server
             }
         }
 
-        public void AddFriend(Mobile from, Mobile targ)
+        public void AddFriend(Mobile from, Mobile target)
         {
             if (!(IsOwner(from) || IsCoOwner(from)) || m_Friends == null)
                 return;
 
-            if (IsOwner(targ))
+            if (IsOwner(target))
                 from.SendMessage("This person is an owner of the ship.");
 
-            else if (m_CoOwners.Contains(targ))
+            else if (m_CoOwners.Contains(target))
                 from.SendMessage("This person is already a co-owner of the ship.");
 
-            else if (!targ.Player)
+            else if (!target.Player)
                 from.SendMessage("That can't be a friend of the ship.");         
 
-            else if (m_Friends.Contains(targ))
+            else if (m_Friends.Contains(target))
                 from.SendLocalizedMessage(501376); // This person is already on your friends list!            
 
             else
             {
-                m_Friends.Add(targ);
+                m_Friends.Add(target);
 
-                targ.Delta(MobileDelta.Noto);
-                targ.SendMessage("You have been made a friend of the ship.");
+                target.Delta(MobileDelta.Noto);
+                target.SendMessage("You have been made a friend of the ship.");
             }
         }
 
-        public void RemoveFriend(Mobile from, Mobile targ)
+        public void RemoveFriend(Mobile from, Mobile target)
         {
             if (!(IsCoOwner(from) || IsCoOwner(from)) || m_Friends == null)
                 return;
 
-            if (m_Friends.Contains(targ))
+            if (m_Friends.Contains(target))
             {
-                m_Friends.Remove(targ);
+                m_Friends.Remove(target);
 
-                targ.Delta(MobileDelta.Noto);
+                target.Delta(MobileDelta.Noto);
 
                 from.SendLocalizedMessage(501298); // Friend removed from list.
-                targ.SendMessage("You are no longer a friend of the ship.");
+                target.SendMessage("You are no longer a friend of the ship.");
             }
         }
 
@@ -5132,14 +5146,14 @@ namespace Server
 
             ship.RepairCooldownDurationCreationModifier = shipDeed.RepairCooldownDurationCreationModifier;
             ship.BoardingChanceCreationModifier = shipDeed.BoardingChanceCreationModifier;
-            
-            ship.m_TargetingMode = shipDeed.m_TargetingMode;                        
+
+            ship.m_TargetingMode = shipDeed.m_TargetingMode;
 
             ship.m_IPAsCoOwners = shipDeed.m_IPAsCoOwners;
             ship.m_GuildAsCoOwners = shipDeed.m_GuildAsCoOwners;
             ship.m_IPAsFriends = shipDeed.m_IPAsFriends;
             ship.m_GuildAsFriends = shipDeed.m_GuildAsFriends;
-            
+
             ship.m_ThemeUpgrade = shipDeed.m_ThemeUpgrade;
             ship.m_PaintUpgrade = shipDeed.m_PaintUpgrade;
             ship.m_CannonMetalUpgrade = shipDeed.m_CannonMetalUpgrade;
@@ -5150,6 +5164,12 @@ namespace Server
             ship.m_MajorAbilityUpgrade = shipDeed.m_MajorAbilityUpgrade;
             ship.m_EpicAbilityUpgrade = shipDeed.m_EpicAbilityUpgrade;
 
+            ship.m_MinorAbilityLastActivated = shipDeed.m_MinorAbilityLastActivated;
+            ship.m_MajorAbilityLastActivated = shipDeed.m_MajorAbilityLastActivated;
+            ship.m_EpicAbilityLastActivated = shipDeed.m_EpicAbilityLastActivated;
+
+            ship.m_TimeLastRepaired = shipDeed.m_TimeLastRepaired;
+
             foreach (Mobile mobile in shipDeed.m_CoOwners)
             {
                 ship.CoOwners.Add(mobile);
@@ -5159,15 +5179,13 @@ namespace Server
             {
                 ship.Friends.Add(mobile);
             }
-            
+
             ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(null, ship, true, true);
             ShipUniqueness.ApplyShipStatsProfile(ship, shipStatsProfile);
 
             ship.HitPoints = HitPointsStored;
             ship.SailPoints = SailPointsStored;
             ship.GunPoints = GunPointsStored;
-
-            //TEST: Set Ship Repair Timers + Ability Cooldowns to Maximum Amount
         }
 
         public static void PushShipStoredPropertiesToDeed(BaseShip ship, BaseShipDeed shipDeed)
@@ -5222,6 +5240,12 @@ namespace Server
             shipDeed.m_MinorAbilityUpgrade = ship.m_MinorAbilityUpgrade;
             shipDeed.m_MajorAbilityUpgrade = ship.m_MajorAbilityUpgrade;
             shipDeed.m_EpicAbilityUpgrade = ship.m_EpicAbilityUpgrade;
+
+            shipDeed.m_MinorAbilityLastActivated = ship.m_MinorAbilityLastActivated;
+            shipDeed.m_MajorAbilityLastActivated = ship.m_MajorAbilityLastActivated;
+            shipDeed.m_EpicAbilityLastActivated = ship.m_EpicAbilityLastActivated;
+
+            shipDeed.m_TimeLastRepaired = ship.m_TimeLastRepaired;
 
             foreach (Mobile mobile in ship.m_CoOwners)
             {
@@ -6663,7 +6687,7 @@ namespace Server
                 writer.Write(entry.m_TotalAmount);
                 writer.Write((DateTime)entry.m_lastDamage);
             }
-           
+
             writer.Write((int)m_Facing);
             writer.Write(m_DecayTime);
             writer.Write(m_CannonCooldown);
@@ -6676,14 +6700,12 @@ namespace Server
             writer.Write(m_ScuttleInProgress);
             writer.Write(m_LastCombatTime);
             writer.Write(m_TimeLastMoved);
-            writer.Write(m_TimeLastRepaired);
-            writer.Write(m_NextTimeRepairable);
             writer.Write(m_ShipSpawner);
             writer.Write(m_ShipCombatant);
             writer.Write(m_ShipRune);
             writer.Write(m_ShipBankRune);
             writer.Write(m_LastActivated);
-            writer.Write(AdminControlled);         
+            writer.Write(AdminControlled);
             writer.Write((int)MobileControlType);
             writer.Write((int)MobileFactionType);
             writer.Write(PerceptionRange);
@@ -6691,7 +6713,7 @@ namespace Server
             writer.Write(DoubloonValue);
 
             //----Deed Storable Properties
-            
+
             writer.Write(m_ShipName);
             writer.Write(m_Owner);
 
@@ -6731,8 +6753,8 @@ namespace Server
             writer.Write(EpicAbilityCooldownDurationCreationModifier);
             writer.Write(RepairCooldownDurationCreationModifier);
             writer.Write(BoardingChanceCreationModifier);
-            
-            writer.Write((int)m_TargetingMode); 
+
+            writer.Write((int)m_TargetingMode);
 
             writer.Write(m_IPAsCoOwners);
             writer.Write(m_GuildAsCoOwners);
@@ -6749,6 +6771,12 @@ namespace Server
             writer.Write((int)m_MajorAbilityUpgrade);
             writer.Write((int)m_EpicAbilityUpgrade);
 
+            writer.Write(m_MinorAbilityLastActivated);
+            writer.Write(m_MajorAbilityLastActivated);
+            writer.Write(m_EpicAbilityLastActivated);
+
+            writer.Write(m_TimeLastRepaired);
+
             writer.Write(m_CoOwners.Count);
             for (int a = 0; a < m_CoOwners.Count; a++)
             {
@@ -6759,7 +6787,7 @@ namespace Server
             for (int a = 0; a < m_Friends.Count; a++)
             {
                 writer.Write(m_Friends[a]);
-            } 
+            }
         }
 
         #endregion
@@ -6807,7 +6835,7 @@ namespace Server
 
                 Facing = (Direction)reader.ReadInt();
                 DecayTime = reader.ReadDateTime();
-                CannonCooldown = reader.ReadDateTime(); 
+                CannonCooldown = reader.ReadDateTime();
                 PPlank = (Plank)reader.ReadItem();
                 SPlank = (Plank)reader.ReadItem();
                 TillerMan = (TillerMan)reader.ReadItem();
@@ -6817,8 +6845,6 @@ namespace Server
                 m_ScuttleInProgress = reader.ReadBool();
                 LastCombatTime = reader.ReadDateTime();
                 TimeLastMoved = reader.ReadDateTime();
-                TimeLastRepaired = reader.ReadDateTime();
-                NextTimeRepairable = reader.ReadDateTime();
                 m_ShipSpawner = (ShipSpawner)reader.ReadItem();
                 ShipCombatant = (BaseShip)reader.ReadItem();
                 m_ShipRune = (ShipRune)reader.ReadItem();
@@ -6826,13 +6852,13 @@ namespace Server
                 m_LastActivated = reader.ReadDateTime();
                 AdminControlled = reader.ReadBool();
                 MobileControlType = (MobileControlType)reader.ReadInt();
-                MobileFactionType = (MobileFactionType)reader.ReadInt();     
+                MobileFactionType = (MobileFactionType)reader.ReadInt();
                 PerceptionRange = reader.ReadInt();
                 DamageFromPlayerShipScalar = reader.ReadDouble();
                 DoubloonValue = reader.ReadInt();
 
                 //----- Deed Storable Properties
-                
+
                 m_ShipName = reader.ReadString();
                 m_Owner = (PlayerMobile)reader.ReadMobile();
 
@@ -6872,8 +6898,8 @@ namespace Server
                 EpicAbilityCooldownDurationCreationModifier = reader.ReadDouble();
                 RepairCooldownDurationCreationModifier = reader.ReadDouble();
                 BoardingChanceCreationModifier = reader.ReadDouble();
-                
-                m_TargetingMode = (TargetingMode)reader.ReadInt();               
+
+                m_TargetingMode = (TargetingMode)reader.ReadInt();
 
                 m_IPAsCoOwners = reader.ReadBool();
                 m_GuildAsCoOwners = reader.ReadBool();
@@ -6890,6 +6916,12 @@ namespace Server
                 m_MajorAbilityUpgrade = (ShipUpgrades.MajorAbilityType)reader.ReadInt();
                 m_EpicAbilityUpgrade = (ShipUpgrades.EpicAbilityType)reader.ReadInt();
 
+                m_MinorAbilityLastActivated = reader.ReadDateTime();
+                m_MajorAbilityLastActivated = reader.ReadDateTime();
+                m_EpicAbilityLastActivated = reader.ReadDateTime();
+
+                m_TimeLastRepaired = reader.ReadDateTime();
+
                 int coOwnerCount = reader.ReadInt();
                 for (int a = 0; a < coOwnerCount; a++)
                 {
@@ -6900,8 +6932,8 @@ namespace Server
                 for (int a = 0; a < friendCount; a++)
                 {
                     Friends.Add(reader.ReadMobile());
-                }   
-                
+                }
+
                 //-----
 
                 Movable = false;
@@ -6962,10 +6994,10 @@ namespace Server
                         }
                     }
                 });
-            }  
+            }
         }
 
-        #endregion        
+        #endregion         
 
         #region Packets
 

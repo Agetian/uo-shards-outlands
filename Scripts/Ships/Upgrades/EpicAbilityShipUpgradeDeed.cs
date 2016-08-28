@@ -17,7 +17,9 @@ namespace Server.Items
         {
             Name = "hellfire";
 
-            m_EpicAbility = ShipUpgrades.EpicAbilityType.Hellfire;
+            m_EpicAbilityUpgrade = ShipUpgrades.EpicAbilityType.Hellfire;
+
+            m_UpgradeType = ShipUpgrades.UpgradeType.EpicAbility;
         }
 
         public HellfireEpicAbilityShipUpgrade(Serial serial): base(serial)

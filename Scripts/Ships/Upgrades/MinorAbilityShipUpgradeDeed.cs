@@ -17,7 +17,9 @@ namespace Server.Items
         {
             Name = "expedite repairs";
 
-            m_MinorAbility = ShipUpgrades.MinorAbilityType.ExpediteRepairs;
+            m_MinorAbilityUpgrade = ShipUpgrades.MinorAbilityType.ExpediteRepairs;
+
+            m_UpgradeType = ShipUpgrades.UpgradeType.MinorAbility;
         }
 
         public ExpediteRepairsMinorAbilityShipUpgrade(Serial serial): base(serial)

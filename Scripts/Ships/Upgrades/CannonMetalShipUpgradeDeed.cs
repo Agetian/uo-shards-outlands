@@ -17,7 +17,9 @@ namespace Server.Items
         {
             Name = "bloodstone";
 
-            m_CannonMetal = ShipUpgrades.CannonMetalType.Bloodstone;
+            m_CannonMetalUpgrade = ShipUpgrades.CannonMetalType.Bloodstone;
+
+            m_UpgradeType = ShipUpgrades.UpgradeType.CannonMetal;
         }
 
         public BloodstoneCannonMetalShipUpgrade(Serial serial): base(serial)

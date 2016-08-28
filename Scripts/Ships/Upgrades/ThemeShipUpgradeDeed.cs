@@ -17,7 +17,9 @@ namespace Server.Items
         {
             Name = "pirate";
 
-            m_Theme = ShipUpgrades.ThemeType.Pirate;
+            m_ThemeUpgrade = ShipUpgrades.ThemeType.Pirate;
+
+            m_UpgradeType = ShipUpgrades.UpgradeType.Theme;
         }
 
         public PirateThemeShipUpgrade(Serial serial): base(serial)

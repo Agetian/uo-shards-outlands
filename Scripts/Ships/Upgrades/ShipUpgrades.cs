@@ -102,7 +102,8 @@ namespace Server
             {
                 case ThemeType.Pirate:
                     upgradeDetail.m_UpgradeName = "Pirate";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("Adds a variety of pirate-themed decoration to your ship", ShipUpgradeDetail.StatChangeHueType.Misc));
+                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("Adds a variety of pirate-themed decorations", ShipUpgradeDetail.StatChangeHueType.Misc));
+                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("to your ship.", ShipUpgradeDetail.StatChangeHueType.Misc));
                     upgradeDetail.GumpCollectionId = "PirateShipThemeUpgrade";
                 break;
             }
@@ -128,7 +129,7 @@ namespace Server
             {
                 case PaintType.DarkGrey:
                     upgradeDetail.m_UpgradeName = "Dark Grey";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("Changes the color of the ship (Hue 1105)", ShipUpgradeDetail.StatChangeHueType.Special));
+                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("Changes the color of the ship (hue 1105)", ShipUpgradeDetail.StatChangeHueType.Special));
                     upgradeDetail.GumpCollectionId = "DarkGreyShipPaintUpgrade";
                 break;
             }

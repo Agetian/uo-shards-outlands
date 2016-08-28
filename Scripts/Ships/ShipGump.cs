@@ -7,6 +7,9 @@ using Server.Items;
 using Server.Targeting;
 using Server.Multis;
 using Server.Regions;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Server
 {
@@ -37,8 +40,9 @@ namespace Server
         public static int SelectionSound = 0x4D2;
         public static int LargeSelectionSound = 0x4D3;
         public static int CloseGumpSound = 0x058;
-
+        
         public static int PlayersPerPage = 10;
+        public static int PlayersPerSide = 5;
 
         public ShipGump(PlayerMobile player, ShipGumpObject shipGumpObject): base(10, 10)
         {
@@ -59,22 +63,20 @@ namespace Server
             bool IsFriend = false;
             bool IsCoOwner = false;
             bool IsOwner = false;
-            bool IsOnBoard = false;
             bool IsInBackpack = false;
 
             if (ship != null)
             {
-                shipName = m_ShipGumpObject.m_Ship.ShipName;
+                shipName = ship.ShipName;
 
                 IsFriend = ship.IsFriend(m_Player);
                 IsCoOwner = ship.IsCoOwner(m_Player);
                 IsOwner = ship.IsOwner(m_Player);
-                IsOnBoard = ship.Contains(m_Player);
             }
 
             if (shipDeed != null)
             {
-                shipName = m_ShipGumpObject.m_ShipDeed.m_ShipName;
+                shipName = shipDeed.m_ShipName;
 
                 IsFriend = shipDeed.IsFriend(m_Player);
                 IsCoOwner = shipDeed.IsCoOwner(m_Player);
@@ -108,8 +110,7 @@ namespace Server
             AddImage(187, 445, 96, 2308);
             AddImage(254, 445, 96, 2308);
             AddItem(29, 471, 5363);
-            AddItem(194, 474, 4030);
-            AddItem(350, 469, 2462);           
+            AddItem(194, 474, 4030);          
             AddItem(109, 467, 5362);           
             AddItem(277, 468, 7715);
             AddItem(273, 464, 4031);
@@ -120,10 +121,7 @@ namespace Server
             //Guide
             AddButton(14, 11, 2094, 2095, 1, GumpButtonType.Reply, 0);
             AddLabel(10, 0, 149, "Guide");
-
-            //TEST
-            shipName = "The Rebellion";
-
+            
             //Header
             AddImage(94, 3, 1141);
             AddLabel(Utility.CenteredTextOffset(235, shipName), 5, 149, shipName);
@@ -155,11 +153,16 @@ namespace Server
             else
                 AddButton(307, 472, 9721, 9724, 5, GumpButtonType.Reply, 0);
 
-            AddLabel(377, 449, 2599, "Players");
-            if (m_ShipGumpObject.m_ShipPage == ShipPageType.Players)
-                AddButton(387, 472, 9724, 9721, 6, GumpButtonType.Reply, 0);
-            else
-                AddButton(387, 472, 9721, 9724, 6, GumpButtonType.Reply, 0);
+            if (IsFriend || IsCoOwner || IsOwner || IsInBackpack)
+            {
+                AddLabel(377, 449, 2599, "Players");
+                AddItem(350, 469, 2462);           
+
+                if (m_ShipGumpObject.m_ShipPage == ShipPageType.Players)
+                    AddButton(387, 472, 9724, 9721, 6, GumpButtonType.Reply, 0);
+                else
+                    AddButton(387, 472, 9721, 9724, 6, GumpButtonType.Reply, 0);
+            }
 
             #endregion
 
@@ -188,20 +191,6 @@ namespace Server
             
             if (ship != null)
             {
-                //TEST
-                ship.m_ThemeUpgrade = ShipUpgrades.ThemeType.Pirate;
-                ship.m_PaintUpgrade = ShipUpgrades.PaintType.DarkGrey;
-                ship.m_CannonMetalUpgrade = ShipUpgrades.CannonMetalType.Bloodstone;
-
-                ship.m_OutfittingUpgrade = ShipUpgrades.OutfittingType.Hunter;
-                ship.m_BannerUpgrade = ShipUpgrades.BannerType.Corsairs;
-                ship.m_CharmUpgrade = ShipUpgrades.CharmType.BarrelOfLimes;
-
-                ship.m_MinorAbilityUpgrade = ShipUpgrades.MinorAbilityType.ExpediteRepairs;
-                ship.m_MajorAbilityUpgrade = ShipUpgrades.MajorAbilityType.Smokescreen;
-                ship.m_EpicAbilityUpgrade = ShipUpgrades.EpicAbilityType.Hellfire;
-                //-----
-
                 shipType = ship.GetType();
 
                 hitPoints = ship.HitPoints;
@@ -211,37 +200,11 @@ namespace Server
                 maxSailPoints = ship.MaxSailPoints;
 
                 gunPoints = ship.GunPoints;
-                maxGunPoints = ship.MaxGunPoints;                
-
-                themeDetail = ShipUpgrades.GetThemeDetail(ship.m_ThemeUpgrade);
-                paintDetail = ShipUpgrades.GetPaintDetail(ship.m_PaintUpgrade);
-                cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(ship.m_CannonMetalUpgrade);
-
-                outfittingDetail = ShipUpgrades.GetOutfittingDetail(ship.m_OutfittingUpgrade);
-                bannerDetail = ShipUpgrades.GetBannerDetail(ship.m_BannerUpgrade);
-                charmDetail = ShipUpgrades.GetCharmDetail(ship.m_CharmUpgrade);
-
-                minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(ship.m_MinorAbilityUpgrade);
-                majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(ship.m_MajorAbilityUpgrade);
-                epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(ship.m_EpicAbilityUpgrade);
+                maxGunPoints = ship.MaxGunPoints;
             }
 
             if (shipDeed != null)
-            {
-                //TEST
-                shipDeed.m_ThemeUpgrade = ShipUpgrades.ThemeType.Pirate;
-                shipDeed.m_PaintUpgrade = ShipUpgrades.PaintType.DarkGrey;
-                shipDeed.m_CannonMetalUpgrade = ShipUpgrades.CannonMetalType.Bloodstone;
-
-                shipDeed.m_OutfittingUpgrade = ShipUpgrades.OutfittingType.Hunter;
-                shipDeed.m_BannerUpgrade = ShipUpgrades.BannerType.Corsairs;
-                shipDeed.m_CharmUpgrade = ShipUpgrades.CharmType.BarrelOfLimes;
-
-                shipDeed.m_MinorAbilityUpgrade = ShipUpgrades.MinorAbilityType.ExpediteRepairs;
-                shipDeed.m_MajorAbilityUpgrade = ShipUpgrades.MajorAbilityType.Smokescreen;
-                shipDeed.m_EpicAbilityUpgrade = ShipUpgrades.EpicAbilityType.Hellfire;
-                //-----
-
+            {                
                 shipType = shipDeed.ShipType;
 
                 hitPoints = shipDeed.HitPoints;
@@ -252,18 +215,6 @@ namespace Server
 
                 gunPoints = shipDeed.GunPoints;
                 maxGunPoints = shipStatsProfile.MaxGunPointsAdjusted;
-
-                themeDetail = ShipUpgrades.GetThemeDetail(shipDeed.m_ThemeUpgrade);
-                paintDetail = ShipUpgrades.GetPaintDetail(shipDeed.m_PaintUpgrade);
-                cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(shipDeed.m_CannonMetalUpgrade);
-
-                outfittingDetail = ShipUpgrades.GetOutfittingDetail(shipDeed.m_OutfittingUpgrade);
-                bannerDetail = ShipUpgrades.GetBannerDetail(shipDeed.m_BannerUpgrade);
-                charmDetail = ShipUpgrades.GetCharmDetail(shipDeed.m_CharmUpgrade);
-
-                minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(shipDeed.m_MinorAbilityUpgrade);
-                majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(shipDeed.m_MajorAbilityUpgrade);
-                epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(shipDeed.m_EpicAbilityUpgrade);
             }
 
             double hullPercent = (double)hitPoints / (double)maxHullPoints;
@@ -305,9 +256,19 @@ namespace Server
 			        
                     #region Abilities
 
-                    string minorAbilityCooldownText = "1m 59s"; //TEST
-                    string majorAbilityCooldownText = "4m 59s"; //TEST
-                    string epicAbilityCooldownText = "9m 59s"; //TEST
+                    if (ship != null)
+                    {
+                        minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(ship.m_MinorAbilityUpgrade);
+                        majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(ship.m_MajorAbilityUpgrade);
+                        epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(ship.m_EpicAbilityUpgrade);
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(shipDeed.m_MinorAbilityUpgrade);
+                        majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(shipDeed.m_MajorAbilityUpgrade);
+                        epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(shipDeed.m_EpicAbilityUpgrade);
+                    }
 
                     int offsetX = -32;
                     int offsetY = -22;
@@ -317,6 +278,20 @@ namespace Server
                     AddImage(62, 197, 2328);
                     if (minorAbilityDetail != null)
                     {
+                        string minorAbilityCooldownText = "";
+
+                        if (ship != null)
+                        {
+                            if (ship.m_MinorAbilityLastActivated + TimeSpan.FromSeconds(ship.MinorAbilityCooldownDuration) <= DateTime.UtcNow)
+                                minorAbilityCooldownText = "Ready";
+
+                            else
+                                minorAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.m_MinorAbilityLastActivated + TimeSpan.FromSeconds(ship.MinorAbilityCooldownDuration), true, false, false, true, true);   
+                        }
+
+                        if (shipDeed != null)                        
+                            minorAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromSeconds(shipStatsProfile.MinorAbilityCooldownDurationAdjusted), true, false, false, true, true);   
+                        
                         AddLabel(Utility.CenteredTextOffset(110, minorAbilityDetail.m_UpgradeName), 173, WhiteTextHue, minorAbilityDetail.m_UpgradeName);
                         AddButton(57, 263, 2151, 2151, 16, GumpButtonType.Reply, 0);
                         AddLabel(94, 267, WhiteTextHue, minorAbilityCooldownText);
@@ -331,6 +306,20 @@ namespace Server
                     AddImage(192, 197, 2328);
                     if (majorAbilityDetail != null)
                     {
+                        string majorAbilityCooldownText = "";
+
+                        if (ship != null)
+                        {
+                            if (ship.m_MajorAbilityLastActivated + TimeSpan.FromSeconds(ship.MajorAbilityCooldownDuration) <= DateTime.UtcNow)
+                                majorAbilityCooldownText = "Ready";
+
+                            else
+                                majorAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.m_MajorAbilityLastActivated + TimeSpan.FromSeconds(ship.MajorAbilityCooldownDuration), true, false, false, true, true);
+                        }
+
+                        if (shipDeed != null)
+                            majorAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromSeconds(shipStatsProfile.MajorAbilityCooldownDurationAdjusted), true, false, false, true, true);   
+
                         AddLabel(Utility.CenteredTextOffset(239, majorAbilityDetail.m_UpgradeName), 173, WhiteTextHue, majorAbilityDetail.m_UpgradeName);
                         AddButton(187, 263, 2151, 2151, 17, GumpButtonType.Reply, 0);
                         AddLabel(220, 267, WhiteTextHue, majorAbilityCooldownText);
@@ -345,6 +334,20 @@ namespace Server
                     AddImage(320, 197, 2328);
                     if (epicAbilityDetail != null)
                     {
+                        string epicAbilityCooldownText = "";
+
+                        if (ship != null)
+                        {
+                            if (ship.m_EpicAbilityLastActivated + TimeSpan.FromSeconds(ship.EpicAbilityCooldownDuration) <= DateTime.UtcNow)
+                                epicAbilityCooldownText = "Ready";
+
+                            else
+                                epicAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.m_EpicAbilityLastActivated + TimeSpan.FromSeconds(ship.EpicAbilityCooldownDuration), true, false, false, true, true);
+                        }
+
+                        if (shipDeed != null)
+                            epicAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + TimeSpan.FromSeconds(shipStatsProfile.EpicAbilityCooldownDurationAdjusted), true, false, false, true, true);   
+
                         AddLabel(Utility.CenteredTextOffset(370, epicAbilityDetail.m_UpgradeName), 173, WhiteTextHue, epicAbilityDetail.m_UpgradeName);
                         AddButton(315, 263, 2151, 2151, 18, GumpButtonType.Reply, 0);
                         AddLabel(349, 267, WhiteTextHue, epicAbilityCooldownText);
@@ -374,8 +377,14 @@ namespace Server
                             string itemCount = ship.Hold.TotalItems.ToString() + "/" + ship.Hold.MaxItems.ToString();
 
                             AddLabel(259, 298, 149, "Items in Hold");
-                            AddLabel(Utility.CenteredTextOffset(297, itemCount) , 318, WhiteTextHue, itemCount);
+                            AddLabel(Utility.CenteredTextOffset(297, itemCount), 318, WhiteTextHue, itemCount);
                         }
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        AddLabel(203, 298, 149, "Hold Size");
+                        AddLabel(Utility.CenteredTextOffset(233, shipStatsProfile.HoldSize.ToString()), 318, WhiteTextHue, shipStatsProfile.HoldSize.ToString());
                     }
 
                     #endregion
@@ -454,7 +463,7 @@ namespace Server
                     if (ship == null)
                     {
                         AddButton(276, 419, 4017, 4019, 15, GumpButtonType.Reply, 0);
-                        if ((IsOwner || IsInBackpack))     
+                        if (IsInBackpack)     
                             AddLabel(313, 419, WhiteTextHue, "Launch The Ship");
                         else
                             AddLabel(313, 419, 2401, "Launch The Ship");
@@ -477,6 +486,36 @@ namespace Server
                 #region Upgrades                
 
                 case ShipPageType.Upgrades:
+                    if (ship != null)
+                    {
+                        themeDetail = ShipUpgrades.GetThemeDetail(ship.m_ThemeUpgrade);
+                        paintDetail = ShipUpgrades.GetPaintDetail(ship.m_PaintUpgrade);
+                        cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(ship.m_CannonMetalUpgrade);
+
+                        outfittingDetail = ShipUpgrades.GetOutfittingDetail(ship.m_OutfittingUpgrade);
+                        bannerDetail = ShipUpgrades.GetBannerDetail(ship.m_BannerUpgrade);
+                        charmDetail = ShipUpgrades.GetCharmDetail(ship.m_CharmUpgrade);
+
+                        minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(ship.m_MinorAbilityUpgrade);
+                        majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(ship.m_MajorAbilityUpgrade);
+                        epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(ship.m_EpicAbilityUpgrade);
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        themeDetail = ShipUpgrades.GetThemeDetail(shipDeed.m_ThemeUpgrade);
+                        paintDetail = ShipUpgrades.GetPaintDetail(shipDeed.m_PaintUpgrade);
+                        cannonMetalDetail = ShipUpgrades.GetCannonMetalDetail(shipDeed.m_CannonMetalUpgrade);
+
+                        outfittingDetail = ShipUpgrades.GetOutfittingDetail(shipDeed.m_OutfittingUpgrade);
+                        bannerDetail = ShipUpgrades.GetBannerDetail(shipDeed.m_BannerUpgrade);
+                        charmDetail = ShipUpgrades.GetCharmDetail(shipDeed.m_CharmUpgrade);
+
+                        minorAbilityDetail = ShipUpgrades.GetMinorAbilityDetail(shipDeed.m_MinorAbilityUpgrade);
+                        majorAbilityDetail = ShipUpgrades.GetMajorAbilityDetail(shipDeed.m_MajorAbilityUpgrade);
+                        epicAbilityDetail = ShipUpgrades.GetEpicAbilityDetail(shipDeed.m_EpicAbilityUpgrade);
+                    }
+
                     offsetX = -32;
                     offsetY = -22;
 
@@ -484,7 +523,7 @@ namespace Server
                     AddImage(58, 80, 2328);
                     if (themeDetail != null)
                     {
-                        AddButton(74, 143, 2117, 2118, 0, GumpButtonType.Reply, 0);
+                        AddButton(74, 143, 2117, 2118, 10, GumpButtonType.Reply, 0);
                         AddLabel(94, 140, 2550, "Info");                       
                         AddLabel(Utility.CenteredTextOffset(105, themeDetail.m_UpgradeName), 58, WhiteTextHue, themeDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(themeDetail.GumpCollectionId, -1), offsetX + 58, offsetY + 80);
@@ -497,7 +536,7 @@ namespace Server
                     AddImage(190, 80, 2328);
                     if (paintDetail != null)
                     {
-                        AddButton(206, 143, 2117, 2118, 0, GumpButtonType.Reply, 0);
+                        AddButton(206, 143, 2117, 2118, 11, GumpButtonType.Reply, 0);
                         AddLabel(226, 140, 2550, "Info");
                         AddLabel(Utility.CenteredTextOffset(237, paintDetail.m_UpgradeName), 58, WhiteTextHue, paintDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(paintDetail.GumpCollectionId, -1), offsetX + 190, offsetY + 80);
@@ -510,7 +549,7 @@ namespace Server
                     AddImage(318, 80, 2328);
                     if (cannonMetalDetail != null)
                     {
-                        AddButton(334, 143, 2117, 2118, 0, GumpButtonType.Reply, 0);
+                        AddButton(334, 143, 2117, 2118, 12, GumpButtonType.Reply, 0);
                         AddLabel(354, 140, 2550, "Info");                    
                         AddLabel(Utility.CenteredTextOffset(368, cannonMetalDetail.m_UpgradeName), 58, WhiteTextHue, cannonMetalDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(cannonMetalDetail.GumpCollectionId, -1), offsetX + 318, offsetY + 80);
@@ -523,7 +562,7 @@ namespace Server
                     AddImage(58, 218, 2328);
                     if (outfittingDetail != null)
                     {
-                        AddButton(74, 281, 2117, 2117, 0, GumpButtonType.Reply, 0);
+                        AddButton(74, 281, 2117, 2117, 13, GumpButtonType.Reply, 0);
                         AddLabel(94, 278, 2550, "Info");                      
                         AddLabel(Utility.CenteredTextOffset(105, outfittingDetail.m_UpgradeName), 196, WhiteTextHue, outfittingDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(outfittingDetail.GumpCollectionId, -1), offsetX + 58, offsetY + 218);
@@ -536,7 +575,7 @@ namespace Server
                     AddImage(190, 218, 2328);
                     if (bannerDetail != null)
                     {
-                        AddButton(206, 281, 2117, 2117, 0, GumpButtonType.Reply, 0);
+                        AddButton(206, 281, 2117, 2117, 14, GumpButtonType.Reply, 0);
                         AddLabel(226, 278, 2550, "Info");
                         AddLabel(Utility.CenteredTextOffset(237, bannerDetail.m_UpgradeName), 196, WhiteTextHue, bannerDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(bannerDetail.GumpCollectionId, -1), offsetX + 190, offsetY + 218);
@@ -549,7 +588,7 @@ namespace Server
                     AddImage(318, 218, 2328);
                     if (charmDetail != null)
                     {
-                        AddButton(334, 281, 2117, 2117, 0, GumpButtonType.Reply, 0);
+                        AddButton(334, 281, 2117, 2117, 15, GumpButtonType.Reply, 0);
                         AddLabel(354, 278, 2550, "Info");
                         AddLabel(Utility.CenteredTextOffset(368, charmDetail.m_UpgradeName), 196, WhiteTextHue, charmDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(charmDetail.GumpCollectionId, -1), offsetX + 318, offsetY + 218);
@@ -562,7 +601,7 @@ namespace Server
                     AddImage(58, 358, 2328);
                     if (minorAbilityDetail != null)
                     {
-                        AddButton(74, 421, 2117, 2117, 0, GumpButtonType.Reply, 0);
+                        AddButton(74, 421, 2117, 2117, 16, GumpButtonType.Reply, 0);
                         AddLabel(94, 418, 2550, "Info");
                         AddLabel(Utility.CenteredTextOffset(105, minorAbilityDetail.m_UpgradeName), 336, WhiteTextHue, minorAbilityDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(minorAbilityDetail.GumpCollectionId, -1), offsetX + 58, offsetY + 358);
@@ -575,7 +614,7 @@ namespace Server
                     AddImage(190, 358, 2328);
                     if (majorAbilityDetail != null)
                     {
-                        AddButton(206, 421, 2117, 2117, 0, GumpButtonType.Reply, 0);
+                        AddButton(206, 421, 2117, 2117, 17, GumpButtonType.Reply, 0);
                         AddLabel(226, 418, 2550, "Info");
                         AddLabel(Utility.CenteredTextOffset(237, majorAbilityDetail.m_UpgradeName), 336, WhiteTextHue, majorAbilityDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(majorAbilityDetail.GumpCollectionId, -1), offsetX + 190, offsetY + 358);
@@ -588,7 +627,7 @@ namespace Server
 			        AddImage(318, 358, 2328);
                     if (epicAbilityDetail != null)
                     {
-                        AddButton(334, 421, 2117, 2117, 0, GumpButtonType.Reply, 0);
+                        AddButton(334, 421, 2117, 2117, 18, GumpButtonType.Reply, 0);
                         AddLabel(354, 418, 2550, "Info");
                         AddLabel(Utility.CenteredTextOffset(368, epicAbilityDetail.m_UpgradeName), 336, WhiteTextHue, epicAbilityDetail.m_UpgradeName);
                         AddGumpCollection(GumpCollections.GetGumpCollection(epicAbilityDetail.GumpCollectionId, -1), offsetX + 318, offsetY + 358);
@@ -632,6 +671,8 @@ namespace Server
                     int textHue = WhiteTextHue;
                     int positiveTextHue = 63;
                     int negativeTextHue = 1256;
+
+                    //TEST: REDO ALL THIS
 
                     switch (m_ShipGumpObject.m_Page)
                     {
@@ -863,22 +904,66 @@ namespace Server
                 #region Players                
 
                 case ShipPageType.Players:
-                    string shipOwner = "Luthius"; //TEST
+                    string shipOwnerText = "Luthius"; //TEST
 
-                    AddLabel(Utility.CenteredTextOffset(235, "Owned by " + shipOwner), 34, WhiteTextHue, "Owned by " + shipOwner);
+                    bool guildAsFriends = false;
+                    bool ipAsFriends = false;
+                    bool guildAsCoOwners = false;
+                    bool ipAsCoOwners = false;
+                    
+                    if (ship != null)
+                    {
+                        if (ship.Owner != null)
+                            shipOwnerText = ship.Owner.RawName;
+
+                        guildAsFriends = ship.GuildAsFriends;
+                        ipAsFriends = ship.IPAsFriends;
+                        guildAsCoOwners = ship.GuildAsCoOwners;
+                        ipAsCoOwners = ship.GuildAsCoOwners;
+
+                        switch (m_ShipGumpObject.m_PlayersPage)
+                        {
+                            case PlayersPageType.Friends: m_ShipGumpObject.m_PlayerList = ship.Friends; break;
+                            case PlayersPageType.CoOwners: m_ShipGumpObject.m_PlayerList = ship.CoOwners; break;
+                        }
+                    }
+
+                    if (shipDeed != null)
+                    {
+                        if (shipDeed.m_Owner != null)
+                            shipOwnerText = shipDeed.m_Owner.RawName;
+
+                        guildAsFriends = shipDeed.m_GuildAsFriends;
+                        ipAsFriends = shipDeed.m_IPAsFriends;
+                        guildAsCoOwners = shipDeed.m_GuildAsCoOwners;
+                        ipAsCoOwners = shipDeed.m_IPAsCoOwners;
+
+                        switch (m_ShipGumpObject.m_PlayersPage)
+                        {
+                            case PlayersPageType.Friends: m_ShipGumpObject.m_PlayerList = shipDeed.m_Friends; break;
+                            case PlayersPageType.CoOwners: m_ShipGumpObject.m_PlayerList = shipDeed.m_CoOwners; break;
+                        }
+                    }
+
+                    AddLabel(Utility.CenteredTextOffset(235, "Owned by " + shipOwnerText), 34, WhiteTextHue, "Owned by " + shipOwnerText);
                     
                     switch (m_ShipGumpObject.m_PlayersPage)
                     {
                         case PlayersPageType.Friends:
-
                             AddButton(41, 83, 2472, 2474, 10, GumpButtonType.Reply, 0);
                             AddLabel(74, 87, 1256, "Clear Entire Friends List");
 
-                            AddButton(40, 113, 2154, 2154, 11, GumpButtonType.Reply, 0);
+                            if (ipAsFriends)
+                                AddButton(40, 113, 2154, 2151, 11, GumpButtonType.Reply, 0);
+                            else
+                                AddButton(40, 113, 2151, 2154, 11, GumpButtonType.Reply, 0);
 			                AddLabel(75, 116, 149, "Set all on owner IP as");
                             AddLabel(221, 116, 2599, "Friends");
 
-                            AddButton(40, 146, 2154, 2154, 12, GumpButtonType.Reply, 0);
+                            if (guildAsFriends)
+                                AddButton(40, 146, 2154, 2151, 12, GumpButtonType.Reply, 0);
+                            else
+                                AddButton(40, 146, 2151, 2154, 12, GumpButtonType.Reply, 0);
 			                AddLabel(75, 151, 149, "Set all in owner Guild as");
                             AddLabel(234, 151, 2599, "Friends"); 
 
@@ -891,19 +976,25 @@ namespace Server
 			                AddItem(336, 121, 2543);
                             AddButton(396, 121, 2224, 2224, 15, GumpButtonType.Reply, 0);
 
-                            AddLabel(180, 226, 2550, "Remove Friend");
-
+                            if (m_ShipGumpObject.m_PlayerList.Count > 0)
+                                AddLabel(180, 226, 2550, "Remove Friend");
                         break;
 
                         case PlayersPageType.CoOwners:
                             AddButton(41, 83, 2472, 2474, 10, GumpButtonType.Reply, 0);
                             AddLabel(74, 87, 1256, "Clear Entire Co-Owners List");
 
-                            AddButton(40, 113, 2154, 2154, 11, GumpButtonType.Reply, 0);
+                            if (ipAsCoOwners)
+                                AddButton(40, 113, 2154, 2151, 11, GumpButtonType.Reply, 0);
+                            else
+                                AddButton(40, 113, 2151, 2154, 11, GumpButtonType.Reply, 0);
 			                AddLabel(75, 116, 149, "Set all on owner IP as");
                             AddLabel(221, 116, 2603, "Co-Owner");
 
-                            AddButton(40, 146, 2154, 2154, 12, GumpButtonType.Reply, 0);
+                            if (guildAsCoOwners)
+                                AddButton(40, 146, 2154, 2151, 12, GumpButtonType.Reply, 0);
+                            else
+                                AddButton(40, 146, 2151, 2154, 12, GumpButtonType.Reply, 0);
 			                AddLabel(75, 151, 149, "Set all in owner Guild as");
                             AddLabel(234, 151, 2603, "Co-Owner");
 
@@ -916,22 +1007,81 @@ namespace Server
 			                AddItem(333, 113, 2462);
                             AddButton(396, 121, 2224, 2224, 15, GumpButtonType.Reply, 0);
 
-                            AddLabel(180, 226, 2550, "Remove Co-Owner");
+                            if (m_ShipGumpObject.m_PlayerList.Count > 0)
+                                AddLabel(180, 226, 2550, "Remove Co-Owner");
                         break;
-                    }  
+                    }
 
-                    //Left Row
-                    AddButton(40, 244, 9721, 9721, 0, GumpButtonType.Reply, 0);
-                    AddLabel(75, 248, WhiteTextHue, "Merrill Calder");
+                    int totalPlayers = m_ShipGumpObject.m_PlayerList.Count;
+                    int totalPlayerPages = (int)(Math.Ceiling((double)totalPlayers / (double)PlayersPerPage));
 
-                    //Right Row
-                    AddButton(280, 244, 9721, 9721, 0, GumpButtonType.Reply, 0);
-                    AddLabel(315, 248, WhiteTextHue, "Fendrake");
+                    if (m_ShipGumpObject.m_Page >= totalPlayerPages)
+                        m_ShipGumpObject.m_Page = totalPlayerPages - 1;
 
-                    AddButton(136, 416, 4014, 4016, 0, GumpButtonType.Reply, 0);			       
-			        AddLabel(201, 416, 2599, "Page");
-			        AddLabel(237, 416, WhiteTextHue, "10/10");
-                    AddButton(306, 416, 4005, 4007, 0, GumpButtonType.Reply, 0);
+                    if (m_ShipGumpObject.m_Page < 0)
+                        m_ShipGumpObject.m_Page = 0;
+
+                    int playerStartIndex = m_ShipGumpObject.m_Page * PlayersPerPage;
+                    int playerEndIndex = (m_ShipGumpObject.m_Page * PlayersPerPage) + (PlayersPerPage - 1);
+
+                    if (playerEndIndex >= totalPlayers)
+                        playerEndIndex = totalPlayers - 1;
+
+                    int playerDisplayCount = playerEndIndex - playerStartIndex;
+
+                    int rowSpacing = 50;
+
+                    int leftStartX = 75;
+                    int leftStartY = 248;
+
+                    int rightStartX = 315;
+                    int rightStartY = 248;
+
+                    for (int a = 0; a < playerDisplayCount + 1; a++)
+                    {
+                        if (totalPlayers == 0)
+                            continue;
+
+                        int playerIndex = playerStartIndex + a;
+
+                        if (playerIndex >= totalPlayers)
+                            continue;
+
+                        PlayerMobile targetPlayer = m_ShipGumpObject.m_PlayerList[playerIndex] as PlayerMobile;
+
+                        if (targetPlayer == null)
+                            continue;
+
+                        //Left Side
+                        if (a < PlayersPerSide)
+                        {
+                            AddButton(leftStartX - 35, leftStartY - 4, 9721, 9721, 20 + a, GumpButtonType.Reply, 0);
+                            AddLabel(leftStartX, leftStartY, WhiteTextHue, targetPlayer.RawName);
+
+                            leftStartY += rowSpacing;
+                        }
+
+                        //Right Side
+                        else
+                        {
+                            AddButton(rightStartX - 35, rightStartY - 4, 9721, 9721, 20 + a, GumpButtonType.Reply, 0);
+                            AddLabel(rightStartX, rightStartY, WhiteTextHue, targetPlayer.RawName);
+
+                            rightStartY += rowSpacing;
+                        }
+                    }
+
+                    if (m_ShipGumpObject.m_Page > 0)
+                        AddButton(136, 416, 4014, 4016, 16, GumpButtonType.Reply, 0);
+
+                    if (m_ShipGumpObject.m_Page > 0 || m_ShipGumpObject.m_Page < totalPlayerPages - 1)
+                    {
+                        AddLabel(201, 416, 2599, "Page");
+                        AddLabel(237, 416, WhiteTextHue, m_ShipGumpObject.m_Page.ToString() + "/" + totalPlayerPages.ToString());
+                    }
+
+                    if (m_ShipGumpObject.m_Page < totalPlayerPages - 1)
+                        AddButton(306, 416, 4005, 4007, 17, GumpButtonType.Reply, 0);
                 break;
 
                 #endregion
@@ -954,8 +1104,12 @@ namespace Server
             bool IsOnBoard = false;
             bool IsInBackpack = false;
 
+            string shipNameText = "";
+
             if (ship != null)
-            {                
+            {
+                shipNameText = ship.ShipName;
+
                 IsFriend = ship.IsFriend(m_Player);
                 IsCoOwner = ship.IsCoOwner(m_Player);
                 IsOwner = ship.IsOwner(m_Player);
@@ -964,6 +1118,8 @@ namespace Server
 
             if (shipDeed != null)
             {
+                shipNameText = shipDeed.m_ShipName;
+
                 IsFriend = shipDeed.IsFriend(m_Player);
                 IsCoOwner = shipDeed.IsCoOwner(m_Player);
                 IsOwner = shipDeed.IsOwner(m_Player);
@@ -986,6 +1142,8 @@ namespace Server
                 //Overview
                 case 2:
                     m_ShipGumpObject.m_ShipPage = ShipPageType.Overview;
+                    m_ShipGumpObject.m_Page = 0;
+
                     m_Player.SendSound(ChangePageSound);
 
                     closeGump = false;
@@ -994,6 +1152,8 @@ namespace Server
                 //Upgrades
                 case 3:
                     m_ShipGumpObject.m_ShipPage = ShipPageType.Upgrades;
+                    m_ShipGumpObject.m_Page = 0;
+
                     m_Player.SendSound(ChangePageSound);
 
                     closeGump = false;
@@ -1002,6 +1162,8 @@ namespace Server
                 //Stats
                 case 4:
                     m_ShipGumpObject.m_ShipPage = ShipPageType.Stats;
+                    m_ShipGumpObject.m_Page = 0;
+
                     m_Player.SendSound(ChangePageSound);
 
                     closeGump = false;
@@ -1010,6 +1172,8 @@ namespace Server
                 //History
                 case 5:
                     m_ShipGumpObject.m_ShipPage = ShipPageType.History;
+                    m_ShipGumpObject.m_Page = 0;
+
                     m_Player.SendSound(ChangePageSound);
 
                     closeGump = false;
@@ -1017,8 +1181,13 @@ namespace Server
 
                 //Players
                 case 6:
-                    m_ShipGumpObject.m_ShipPage = ShipPageType.Players;
-                    m_Player.SendSound(ChangePageSound);
+                    if (IsFriend || IsCoOwner || IsOwner || IsInBackpack)
+                    {
+                        m_ShipGumpObject.m_ShipPage = ShipPageType.Players;
+                        m_ShipGumpObject.m_Page = 0;
+
+                        m_Player.SendSound(ChangePageSound);
+                    }
 
                     closeGump = false;
                 break;
@@ -1228,8 +1397,16 @@ namespace Server
 
                         //Rename Ship
                         case 20:
-                            //TEST: FINISH
-                            closeGump = false;
+                            if (IsOwner || IsInBackpack)
+                            {
+                                m_Player.CloseGump(typeof(ShipGump));
+                                m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                                m_Player.CloseGump(typeof(ShipRenameGump));
+                                m_Player.SendGump(new ShipRenameGump(m_Player, m_ShipGumpObject, shipNameText));
+                            }
+
+                            return;
                         break;
                     }
                 break;
@@ -1243,38 +1420,299 @@ namespace Server
                     {
                         //Theme
                         case 10:
+                            ShipUpgradeGumpObject shipUgradeGumpObject = new ShipUpgradeGumpObject();
+
+                            shipUgradeGumpObject.m_Ship = ship;
+                            shipUgradeGumpObject.m_ShipDeed = shipDeed;
+
+                            shipUgradeGumpObject.m_UpgradeType = ShipUpgrades.UpgradeType.Theme;
+                            shipUgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.InstalledOnShip;
+
+                            if (ship != null)
+                            {                                
+                                shipUgradeGumpObject.m_ShipType = ship.GetType();
+                                shipUgradeGumpObject.m_Theme = ship.m_ThemeUpgrade;
+                            }
+
+                            if (shipDeed != null)
+                            {
+                                shipUgradeGumpObject.m_ShipType = shipDeed.ShipType;
+                                shipUgradeGumpObject.m_Theme = shipDeed.m_ThemeUpgrade;
+                            }
+
+                            m_Player.CloseGump(typeof(ShipGump));
+                            m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                            m_Player.CloseGump(typeof(ShipUpgradeGump));
+                            m_Player.SendGump(new ShipUpgradeGump(m_Player, shipUgradeGumpObject));
+
+                            m_Player.SendSound(OpenGumpSound);
+
+                            return;
                         break;
 
                         //Paint
                         case 11:
+                            shipUgradeGumpObject = new ShipUpgradeGumpObject();
+
+                            shipUgradeGumpObject.m_Ship = ship;
+                            shipUgradeGumpObject.m_ShipDeed = shipDeed;
+                            
+                            shipUgradeGumpObject.m_UpgradeType = ShipUpgrades.UpgradeType.Paint;
+                            shipUgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.InstalledOnShip;
+
+                            if (ship != null)
+                            {                                
+                                shipUgradeGumpObject.m_ShipType = ship.GetType();
+                                shipUgradeGumpObject.m_Paint = ship.m_PaintUpgrade;
+                            }
+
+                            if (shipDeed != null)
+                            {
+                                shipUgradeGumpObject.m_ShipType = shipDeed.ShipType;
+                                shipUgradeGumpObject.m_Paint = shipDeed.m_PaintUpgrade;
+                            }
+
+                            m_Player.CloseGump(typeof(ShipGump));
+                            m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                            m_Player.CloseGump(typeof(ShipUpgradeGump));
+                            m_Player.SendGump(new ShipUpgradeGump(m_Player, shipUgradeGumpObject));
+
+                            m_Player.SendSound(OpenGumpSound);
+
+                            return;
                         break;
 
                         //Cannon Metal
                         case 12:
+                            shipUgradeGumpObject = new ShipUpgradeGumpObject();
+
+                            shipUgradeGumpObject.m_Ship = ship;
+                            shipUgradeGumpObject.m_ShipDeed = shipDeed;
+                            
+                            shipUgradeGumpObject.m_UpgradeType = ShipUpgrades.UpgradeType.CannonMetal;
+                            shipUgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.InstalledOnShip;
+
+                            if (ship != null)
+                            {                                
+                                shipUgradeGumpObject.m_ShipType = ship.GetType();
+                                shipUgradeGumpObject.m_CannonMetal = ship.m_CannonMetalUpgrade;
+                            }
+
+                            if (shipDeed != null)
+                            {
+                                shipUgradeGumpObject.m_ShipType = shipDeed.ShipType;
+                                shipUgradeGumpObject.m_CannonMetal = shipDeed.m_CannonMetalUpgrade;
+                            }
+                            
+                            m_Player.CloseGump(typeof(ShipGump));
+                            m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                            m_Player.CloseGump(typeof(ShipUpgradeGump));
+                            m_Player.SendGump(new ShipUpgradeGump(m_Player, shipUgradeGumpObject));
+
+                            m_Player.SendSound(OpenGumpSound);
+
+                            return;
                         break;
 
                         //Outfitting 
                         case 13:
+                            shipUgradeGumpObject = new ShipUpgradeGumpObject();
+
+                            shipUgradeGumpObject.m_Ship = ship;
+                            shipUgradeGumpObject.m_ShipDeed = shipDeed;
+                            
+                            shipUgradeGumpObject.m_UpgradeType = ShipUpgrades.UpgradeType.Outfitting;
+                            shipUgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.InstalledOnShip;
+
+                            if (ship != null)
+                            {                                
+                                shipUgradeGumpObject.m_ShipType = ship.GetType();
+                                shipUgradeGumpObject.m_Outfitting = ship.m_OutfittingUpgrade;
+                            }
+
+                            if (shipDeed != null)
+                            {
+                                shipUgradeGumpObject.m_ShipType = shipDeed.ShipType;
+                                shipUgradeGumpObject.m_Outfitting = shipDeed.m_OutfittingUpgrade;
+                            }
+                            
+                            m_Player.CloseGump(typeof(ShipGump));
+                            m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                            m_Player.CloseGump(typeof(ShipUpgradeGump));
+                            m_Player.SendGump(new ShipUpgradeGump(m_Player, shipUgradeGumpObject));
+
+                            m_Player.SendSound(OpenGumpSound);
+
+                            return;
                         break;
 
-                        //Flag
+                        //Banner
                         case 14:
+                            shipUgradeGumpObject = new ShipUpgradeGumpObject();
+
+                            shipUgradeGumpObject.m_Ship = ship;
+                            shipUgradeGumpObject.m_ShipDeed = shipDeed;
+                            
+                            shipUgradeGumpObject.m_UpgradeType = ShipUpgrades.UpgradeType.Banner;
+                            shipUgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.InstalledOnShip;
+
+                            if (ship != null)
+                            {                                
+                                shipUgradeGumpObject.m_ShipType = ship.GetType();
+                                shipUgradeGumpObject.m_Banner = ship.m_BannerUpgrade;
+                            }
+
+                            if (shipDeed != null)
+                            {
+                                shipUgradeGumpObject.m_ShipType = shipDeed.ShipType;
+                                shipUgradeGumpObject.m_Banner = shipDeed.m_BannerUpgrade;
+                            }
+                            
+                            m_Player.CloseGump(typeof(ShipGump));
+                            m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                            m_Player.CloseGump(typeof(ShipUpgradeGump));
+                            m_Player.SendGump(new ShipUpgradeGump(m_Player, shipUgradeGumpObject));
+
+                            m_Player.SendSound(OpenGumpSound);
+
+                            return;
                         break;
 
                         //Charm
                         case 15:
+                            shipUgradeGumpObject = new ShipUpgradeGumpObject();
+
+                            shipUgradeGumpObject.m_Ship = ship;
+                            shipUgradeGumpObject.m_ShipDeed = shipDeed;
+                            
+                            shipUgradeGumpObject.m_UpgradeType = ShipUpgrades.UpgradeType.Charm;
+                            shipUgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.InstalledOnShip;
+
+                            if (ship != null)
+                            {                                
+                                shipUgradeGumpObject.m_ShipType = ship.GetType();
+                                shipUgradeGumpObject.m_Charm = ship.m_CharmUpgrade;
+                            }
+
+                            if (shipDeed != null)
+                            {
+                                shipUgradeGumpObject.m_ShipType = shipDeed.ShipType;
+                                shipUgradeGumpObject.m_Charm = shipDeed.m_CharmUpgrade;
+                            }
+                            
+                            m_Player.CloseGump(typeof(ShipGump));
+                            m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                            m_Player.CloseGump(typeof(ShipUpgradeGump));
+                            m_Player.SendGump(new ShipUpgradeGump(m_Player, shipUgradeGumpObject));
+
+                            m_Player.SendSound(OpenGumpSound);
+
+                            return;
                         break;
 
                         //Minor Ability
                         case 16:
+                            shipUgradeGumpObject = new ShipUpgradeGumpObject();
+
+                            shipUgradeGumpObject.m_Ship = ship;
+                            shipUgradeGumpObject.m_ShipDeed = shipDeed;
+                            
+                            shipUgradeGumpObject.m_UpgradeType = ShipUpgrades.UpgradeType.MinorAbility;
+                            shipUgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.InstalledOnShip;
+
+                            if (ship != null)
+                            {                                
+                                shipUgradeGumpObject.m_ShipType = ship.GetType();
+                                shipUgradeGumpObject.m_MinorAbility = ship.m_MinorAbilityUpgrade;
+                            }
+
+                            if (shipDeed != null)
+                            {
+                                shipUgradeGumpObject.m_ShipType = shipDeed.ShipType;
+                                shipUgradeGumpObject.m_MinorAbility = shipDeed.m_MinorAbilityUpgrade;
+                            }
+                            
+                            m_Player.CloseGump(typeof(ShipGump));
+                            m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                            m_Player.CloseGump(typeof(ShipUpgradeGump));
+                            m_Player.SendGump(new ShipUpgradeGump(m_Player, shipUgradeGumpObject));
+
+                            m_Player.SendSound(OpenGumpSound);
+
+                            return;
                         break;
 
                         //Major Ability
                         case 17:
+                            shipUgradeGumpObject = new ShipUpgradeGumpObject();
+
+                            shipUgradeGumpObject.m_Ship = ship;
+                            shipUgradeGumpObject.m_ShipDeed = shipDeed;
+                            
+                            shipUgradeGumpObject.m_UpgradeType = ShipUpgrades.UpgradeType.MajorAbility;
+                            shipUgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.InstalledOnShip;
+
+                            if (ship != null)
+                            {                                
+                                shipUgradeGumpObject.m_ShipType = ship.GetType();
+                                shipUgradeGumpObject.m_MajorAbility = ship.m_MajorAbilityUpgrade;
+                            }
+
+                            if (shipDeed != null)
+                            {
+                                shipUgradeGumpObject.m_ShipType = shipDeed.ShipType;
+                                shipUgradeGumpObject.m_MajorAbility = shipDeed.m_MajorAbilityUpgrade;
+                            }
+                            
+                            m_Player.CloseGump(typeof(ShipGump));
+                            m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                            m_Player.CloseGump(typeof(ShipUpgradeGump));
+                            m_Player.SendGump(new ShipUpgradeGump(m_Player, shipUgradeGumpObject));
+
+                            m_Player.SendSound(OpenGumpSound);
+
+                            return;
                         break;
 
                         //Epic Ability
                         case 18:
+                            shipUgradeGumpObject = new ShipUpgradeGumpObject();
+
+                            shipUgradeGumpObject.m_Ship = ship;
+                            shipUgradeGumpObject.m_ShipDeed = shipDeed;
+                            
+                            shipUgradeGumpObject.m_UpgradeType = ShipUpgrades.UpgradeType.EpicAbility;
+                            shipUgradeGumpObject.m_UpgradeDisplayMode = ShipUpgradeGump.UpgradeDisplayMode.InstalledOnShip;
+
+                            if (ship != null)
+                            {                                
+                                shipUgradeGumpObject.m_ShipType = ship.GetType();
+                                shipUgradeGumpObject.m_EpicAbility = ship.m_EpicAbilityUpgrade;
+                            }
+
+                            if (shipDeed != null)
+                            {
+                                shipUgradeGumpObject.m_ShipType = shipDeed.ShipType;
+                                shipUgradeGumpObject.m_EpicAbility = shipDeed.m_EpicAbilityUpgrade;
+                            }
+
+                            m_Player.CloseGump(typeof(ShipGump));
+                            m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                            m_Player.CloseGump(typeof(ShipUpgradeGump));
+                            m_Player.SendGump(new ShipUpgradeGump(m_Player, shipUgradeGumpObject));
+
+                            m_Player.SendSound(OpenGumpSound);
+
+                            return;
                         break;
                     }
                 break;
@@ -1354,25 +1792,185 @@ namespace Server
                 #region Players
 
                 case ShipPageType.Players:
+
                     switch (info.ButtonID)
                     {
                         //Clear All
                         case 10:
+                            if (IsOwner || IsInBackpack)
+                            {
+                                switch (m_ShipGumpObject.m_PlayersPage)
+                                {
+                                    case PlayersPageType.Friends:
+                                        if (ship != null)                                        
+                                            ship.Friends.Clear();
+
+                                        if (shipDeed != null)
+                                            shipDeed.m_Friends.Clear();
+
+                                        m_Player.SendMessage("Ships friend list cleared.");
+                                    break;
+
+                                    case PlayersPageType.CoOwners:
+                                        if (ship != null)                                        
+                                            ship.CoOwners.Clear();
+
+                                        if (shipDeed != null)
+                                            shipDeed.m_CoOwners.Clear();
+
+                                        m_Player.SendMessage("Ships co-owner list cleared.");
+                                    break;
+                                }
+                            }
+
                             closeGump = false;
                         break;
 
                         //Set All on IP
                         case 11:
+                            if (IsOwner || IsInBackpack)
+                            {
+                                switch (m_ShipGumpObject.m_PlayersPage)
+                                {
+                                    case PlayersPageType.Friends:
+                                        if (ship != null)
+                                        {
+                                            ship.IPAsFriends = !ship.IPAsFriends;
+
+                                            if (ship.IPAsFriends)
+                                                m_Player.SendMessage("All characters on your IP address will be treated as friends to this ship.");
+
+                                            else
+                                                m_Player.SendMessage("Characters on your IP address will no longer be treated as friends to this ship.");
+                                        }
+
+                                        if (shipDeed != null)
+                                        {
+                                            shipDeed.m_IPAsFriends = !shipDeed.m_IPAsFriends;
+
+                                            if (shipDeed.m_IPAsFriends)
+                                                m_Player.SendMessage("All characters on your IP address will be treated as friends to this ship.");
+
+                                            else
+                                                m_Player.SendMessage("Characters on your IP address will no longer be treated as friends to this ship.");
+                                        }                                        
+                                    break;
+
+                                    case PlayersPageType.CoOwners:
+                                        if (ship != null)
+                                        {
+                                            ship.IPAsCoOwners = !ship.IPAsCoOwners;
+
+                                            if (ship.IPAsFriends)
+                                                m_Player.SendMessage("All characters on your IP will be treated as co-owners to this ship.");
+
+                                            else
+                                                m_Player.SendMessage("Characters on your IP will no longer be treated as co-owners to this ship.");
+                                        }
+
+                                        if (shipDeed != null)
+                                        {
+                                            shipDeed.m_IPAsCoOwners = !shipDeed.m_IPAsCoOwners;
+
+                                            if (shipDeed.m_IPAsCoOwners)
+                                                m_Player.SendMessage("All characters on your IP will be treated as co-owners to this ship.");
+
+                                            else
+                                                m_Player.SendMessage("Characters on your IP will no longer be treated as co-owners to this ship.");
+                                        }
+                                    break;
+                                }
+                            }
+
                             closeGump = false;
                         break;
 
                         //Set All in Guild
                         case 12:
+                            if (IsOwner || IsInBackpack)
+                            {
+                                switch (m_ShipGumpObject.m_PlayersPage)
+                                {
+                                    case PlayersPageType.Friends:
+                                        if (ship != null)
+                                        {
+                                            ship.GuildAsFriends = !ship.GuildAsFriends;
+
+                                            if (ship.GuildAsFriends)
+                                                m_Player.SendMessage("All characters in your guild will be treated as friends to this ship.");
+
+                                            else
+                                                m_Player.SendMessage("Characters in your guild will longer be treated as friends to this ship.");
+                                        }
+
+                                        if (shipDeed != null)
+                                        {
+                                            shipDeed.m_GuildAsFriends = !shipDeed.m_GuildAsFriends;
+
+                                            if (shipDeed.m_GuildAsFriends)
+                                                m_Player.SendMessage("All characters in your guild will be treated as friends to this ship.");
+
+                                            else
+                                                m_Player.SendMessage("Characters in your guild will longer be treated as friends to this ship.");
+                                        }                                        
+                                    break;
+
+                                    case PlayersPageType.CoOwners:
+                                        if (ship != null)
+                                        {
+                                            ship.GuildAsCoOwners = !ship.GuildAsCoOwners;
+
+                                            if (ship.GuildAsCoOwners)
+                                                m_Player.SendMessage("All characters in your guild will be treated as co-owners to this ship.");
+
+                                            else
+                                                m_Player.SendMessage("Characters in your guild will longer be treated as co-owners to this ship.");
+                                        }
+
+                                        if (shipDeed != null)
+                                        {
+                                            shipDeed.m_GuildAsCoOwners = !shipDeed.m_GuildAsCoOwners;
+
+                                            if (shipDeed.m_GuildAsCoOwners)
+                                                m_Player.SendMessage("All characters in your guild will be treated as co-owners to this ship.");
+
+                                            else
+                                                m_Player.SendMessage("Characters in your guild will longer be treated as co-owners to this ship.");
+                                        }
+                                    break;
+                                }
+                            }
+
                             closeGump = false;
                         break;
 
                         //Add
                         case 13:
+                            switch (m_ShipGumpObject.m_PlayersPage)
+                            {
+                                case PlayersPageType.Friends:                                   
+                                    if (IsOwner || IsInBackpack)
+                                    {
+                                        m_Player.SendMessage("Who do you wish to make a friend of this ship.");
+                                        m_Player.Target = new AddFriendCoOwnerTarget(m_Player, m_ShipGumpObject, AddFriendCoOwnerTarget.DesiredShipAccessLevel.Friend);
+                                    }
+
+                                    else
+                                        m_Player.SendMessage("You do not have a high enough access level to add friends to this ship.");
+                                break;
+
+                                case PlayersPageType.CoOwners:                                    
+                                    if (IsOwner || IsCoOwner || IsInBackpack)
+                                    {
+                                        m_Player.SendMessage("Who do you wish to make a friend of this ship.");
+                                        m_Player.Target = new AddFriendCoOwnerTarget(m_Player, m_ShipGumpObject, AddFriendCoOwnerTarget.DesiredShipAccessLevel.CoOwner);
+                                    }
+
+                                    else
+                                        m_Player.SendMessage("You do not have a high enough access level to add co-owners to this ship.");
+                                break;
+                            }
+
                             closeGump = false;
                         break;
 
@@ -1397,12 +1995,80 @@ namespace Server
 
                             closeGump = false;
                         break;
-                        
+
+                        //Previous Page
+                        case 16:
+                            m_ShipGumpObject.m_Page--;
+
+                            closeGump = false;
+                        break;
+
+                        //Next Page
+                        case 17:
+                            m_ShipGumpObject.m_Page++;
+
+                            closeGump = false;
+                        break;
                     }
 
                     if (info.ButtonID >= 20 && info.ButtonID < 30)
                     {
                         int playerIndex = (info.ButtonID - 20) + (m_ShipGumpObject.m_Page * ShipGump.PlayersPerPage);
+
+                        if (playerIndex < m_ShipGumpObject.m_PlayerList.Count)
+                        {
+                            PlayerMobile playerTarget = m_ShipGumpObject.m_PlayerList[playerIndex] as PlayerMobile;
+
+                            if (playerTarget != null)
+                            {
+                                switch (m_ShipGumpObject.m_PlayersPage)
+                                {
+                                    case PlayersPageType.Friends:
+                                        if (ship != null)
+                                        {
+                                            if (ship.Friends.Contains(playerTarget))
+                                                ship.Friends.Remove(playerTarget);
+                                            else
+                                                m_Player.SendMessage("That player entry is no longer accessible.");
+                                        }
+
+                                        if (shipDeed != null)
+                                        {
+                                            if (shipDeed.m_Friends.Contains(playerTarget))
+                                                shipDeed.m_Friends.Remove(playerTarget);
+                                            else
+                                                m_Player.SendMessage("That player entry is no longer accessible.");
+                                        }                                       
+                                    break;
+
+                                    case PlayersPageType.CoOwners:
+                                        if (ship != null)
+                                        {
+                                            if (ship.CoOwners.Contains(playerTarget))
+                                                ship.CoOwners.Remove(playerTarget);
+                                            else
+                                                m_Player.SendMessage("That player entry is no longer accessible.");
+                                        }
+
+                                        if (shipDeed != null)
+                                        {
+                                            if (shipDeed.m_CoOwners.Contains(playerTarget))
+                                                shipDeed.m_CoOwners.Remove(playerTarget);
+                                            else
+                                                m_Player.SendMessage("That player entry is no longer accessible.");
+                                        } 
+                                    break;
+                                }
+                            }
+
+                            else
+                                m_Player.SendMessage("That player entry is no longer accessible.");
+                        }
+
+                        else
+                            m_Player.SendMessage("That player entry is no longer accessible.");
+
+                        closeGump = false;
                     }
 
                 break;
@@ -1473,7 +2139,236 @@ namespace Server
         }
 
         #endregion
-    }
+
+        #region Add Friend / Co-Owner
+
+        private class AddFriendCoOwnerTarget : Target
+        {
+            public enum DesiredShipAccessLevel
+            {
+                Friend,
+                CoOwner
+            }
+
+            private PlayerMobile m_Player;
+            private ShipGumpObject m_ShipGumpObject;
+            private DesiredShipAccessLevel m_DesiredShipAccessLevel;
+
+            public AddFriendCoOwnerTarget(PlayerMobile player, ShipGumpObject shipGumpObject, DesiredShipAccessLevel desiredShipAccessLevel): base(25, false, TargetFlags.None, false)
+            {
+                m_Player = player;
+                m_ShipGumpObject = shipGumpObject;
+                m_DesiredShipAccessLevel = desiredShipAccessLevel;
+            }
+
+            protected override void OnTarget(Mobile from, object target)
+            {
+                if (m_Player == null) return;
+                if (m_ShipGumpObject == null) return;
+
+                PlayerMobile playerTarget = target as PlayerMobile;
+
+                if (playerTarget == null)
+                {
+                    m_Player.SendMessage("You must target a player.");
+
+                    LaunchGump();
+                    return;
+                }
+
+                if (playerTarget == m_Player)
+                {
+                    m_Player.SendMessage("You cannot change your own access to this ship.");
+
+                    LaunchGump();
+                    return;
+                }
+
+                BaseShip ship = m_ShipGumpObject.m_Ship;
+                BaseShipDeed shipDeed = m_ShipGumpObject.m_ShipDeed;
+
+                bool IsFriend = false;
+                bool IsCoOwner = false;
+                bool IsOwner = false;
+                bool IsInBackpack = false;
+
+                if (ship != null)
+                {
+                    if (ship.IsFriend(m_Player))
+                        IsFriend = true;
+
+                    if (ship.IsCoOwner(m_Player))
+                        IsCoOwner = true;
+
+                    if (ship.IsOwner(m_Player))
+                        IsOwner = true;
+
+                    switch(m_DesiredShipAccessLevel)
+                    {
+                        case DesiredShipAccessLevel.Friend:
+                            if (ship.Friends.Contains(playerTarget))
+                            {
+                                m_Player.SendMessage("That player is already a friend of this ship.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            if (ship.m_CoOwners.Contains(playerTarget) || ship.Owner == playerTarget)
+                            {
+                                m_Player.SendMessage("That player already has a higher access level to this ship.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            if (!(IsCoOwner || IsOwner || IsInBackpack))
+                            {
+                                m_Player.SendMessage("You do not have a high enough access level to this ship to do that.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            ship.Friends.Add(playerTarget);
+
+                            m_Player.SendMessage("You add a friend to the ship.");
+
+                            LaunchGump();
+                            return;
+                        break;
+
+                        case DesiredShipAccessLevel.CoOwner:
+                            if (ship.Friends.Contains(playerTarget))
+                            {
+                                m_Player.SendMessage("That player is already a co-owner of this ship.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            if (ship.Owner == playerTarget)
+                            {
+                                m_Player.SendMessage("That player is the owner of this ship.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            if (!(IsOwner || IsInBackpack))
+                            {
+                                m_Player.SendMessage("You do not have a high enough access level to this ship to do that.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            ship.CoOwners.Add(playerTarget);
+
+                            m_Player.SendMessage("You add a co-owner to the ship.");
+
+                            LaunchGump();
+                            return;
+                        break;
+                    }                   
+                }
+
+                if (shipDeed != null)
+                {
+                    if (shipDeed.IsFriend(m_Player))
+                        IsFriend = true;
+
+                    if (shipDeed.IsCoOwner(m_Player))
+                        IsCoOwner = true;
+
+                    if (shipDeed.IsOwner(m_Player))
+                        IsOwner = true;
+
+                    switch (m_DesiredShipAccessLevel)
+                    {
+                        case DesiredShipAccessLevel.Friend:
+                            if (shipDeed.m_Friends.Contains(playerTarget))
+                            {
+                                m_Player.SendMessage("That player is already a friend of this ship.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            if (shipDeed.m_CoOwners.Contains(playerTarget) || shipDeed.m_Owner == playerTarget)
+                            {
+                                m_Player.SendMessage("That player already has a higher access level to this ship.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            if (!(IsCoOwner || IsOwner || IsInBackpack))
+                            {
+                                m_Player.SendMessage("You do not have a high enough access level to this ship to do that.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            shipDeed.m_Friends.Add(playerTarget);
+
+                            m_Player.SendMessage("You add a friend to the ship.");
+
+                            LaunchGump();
+                            return;
+                            break;
+
+                        case DesiredShipAccessLevel.CoOwner:
+                            if (shipDeed.m_Friends.Contains(playerTarget))
+                            {
+                                m_Player.SendMessage("That player is already a co-owner of this ship.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            if (shipDeed.m_Owner == playerTarget)
+                            {
+                                m_Player.SendMessage("That player is the owner of this ship.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            if (!(IsOwner || IsInBackpack))
+                            {
+                                m_Player.SendMessage("You do not have a high enough access level to this ship to do that.");
+
+                                LaunchGump();
+                                return;
+                            }
+
+                            shipDeed.m_CoOwners.Add(playerTarget);
+
+                            m_Player.SendMessage("You add a co-owner to the ship.");
+
+                            LaunchGump();
+                            return;
+                        break;
+                    }
+                }
+            }
+
+            protected void LaunchGump()
+            {
+                if (m_Player == null) return;
+                if (m_ShipGumpObject == null) return;
+
+                m_Player.CloseGump(typeof(ShipGump));
+                m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+            }
+        }
+
+        #endregion
+    }  
+
+    #region Ship Registration
 
     public class ShipRegistrationGump : Gump
     {
@@ -1789,6 +2684,196 @@ namespace Server
         }
     }
 
+    #endregion
+
+    #region Ship Rename
+
+    public class ShipRenameGump : Gump
+    {
+        public PlayerMobile m_Player;
+        public ShipGumpObject m_ShipGumpObject;
+        public string m_NameText = "New Ship Name";
+
+        public int WhiteTextHue = 2499;
+
+        public static int OpenGumpSound = 0x055;
+        public static int ChangePageSound = 0x057;
+        public static int SelectionSound = 0x4D2;
+        public static int LargeSelectionSound = 0x4D3;
+        public static int CloseGumpSound = 0x058;
+
+        public static int MinShipNameLength = 4;
+        public static int MaxShipNameLength = 35;
+
+        public ShipRenameGump(PlayerMobile player, ShipGumpObject shipGumpObject, string nameText): base(400, 150)
+        {
+            m_Player = player;
+            m_ShipGumpObject = shipGumpObject;
+            m_NameText = nameText;
+
+            if (m_Player == null) return;
+            if (m_Player.Deleted) return;
+            if (m_ShipGumpObject == null) return;
+
+            AddImage(270, 4, 103);
+            AddImage(270, 53, 103);
+            AddImage(140, 4, 103);
+            AddImage(140, 53, 103);
+            AddImage(5, 4, 103);
+            AddImage(5, 53, 103);
+            AddImage(15, 14, 3604, 2052);
+            AddImage(135, 14, 3604, 2052);
+            AddImage(231, 13, 3604, 2052);
+            AddImage(275, 13, 3604, 2052);            
+               
+            AddImage(68, 62, 1141);
+
+            AddTextEntry(80, 65, 248, 20, WhiteTextHue, 1, nameText, MaxShipNameLength);
+                
+            AddLabel(170, 25, 149, "Rename Ship");
+
+            AddLabel(166, 104, 63, "Confirm Name");
+            AddButton(133, 102, 2151, 2151, 2, GumpButtonType.Reply, 0);                
+        }
+
+        public override void OnResponse(NetState sender, RelayInfo info)
+        {
+            if (m_Player == null) return;
+            if (m_ShipGumpObject == null) return;
+
+            BaseShip ship = m_ShipGumpObject.m_Ship;
+            BaseShipDeed shipDeed = m_ShipGumpObject.m_ShipDeed;
+
+            string oldShipName = "";
+
+            bool IsOwner = false;
+            bool IsInBackpack = false;
+
+            if (ship != null)
+            {
+                oldShipName = ship.ShipName;
+
+                IsOwner = ship.IsOwner(m_Player);
+            }
+
+            if (shipDeed != null)
+            {
+                oldShipName = shipDeed.m_ShipName;
+
+                IsOwner = shipDeed.IsOwner(m_Player);
+
+                if (shipDeed.IsChildOf(m_Player.Backpack))
+                    IsInBackpack = true;
+            }
+
+            bool closeGump = true;
+
+            switch (info.ButtonID)
+            {
+                //Confirm Name
+                case 2:
+                    TextRelay shipNameTextRelay = info.GetTextEntry(1);
+
+                    string newShipName = "";
+
+                    if (shipNameTextRelay != null)
+                        newShipName = shipNameTextRelay.Text;
+
+                    newShipName.Trim();
+
+                    if (newShipName == "")
+                    {
+                        m_Player.SendMessage("That is not a valid ship name.");
+
+                        closeGump = false;
+                    }
+
+                    else if (newShipName == oldShipName)
+                    {
+                        m_Player.SendMessage("Your ship is already named that.");                       
+
+                        closeGump = false;
+                    }
+
+                    else if (newShipName.Length < MinShipNameLength)
+                    {
+                        m_Player.SendMessage("Ships names must be at least " + MinShipNameLength.ToString() + " characters in length.");
+
+                        closeGump = false;
+                    }
+
+                    else if (newShipName.Length > MaxShipNameLength)
+                    {
+                        m_Player.SendMessage("Ships names must be no more than " + MaxShipNameLength.ToString() + " characters in length.");
+
+                        closeGump = false;
+                    }
+
+                    else if (!Guilds.CheckProfanity(newShipName))
+                    {
+                        m_Player.SendMessage("That ship name is not allowed.");
+
+                        closeGump = false;
+                    }
+
+                    else
+                    {
+                        if (!(IsOwner || IsInBackpack))
+                        {
+                            m_Player.SendMessage("You do not have high enough access level to change this ship's name.");
+
+                            closeGump = false;
+                        }
+
+                        else
+                        {
+                            if (ship != null)
+                            {
+                                ship.ShipName = newShipName;
+
+                                m_Player.CloseGump(typeof(ShipGump));
+                                m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                                m_Player.SendMessage("You change the name of the ship.");
+
+                                return;
+                            }
+
+                            if (shipDeed != null)
+                            {
+                                shipDeed.m_ShipName = newShipName;
+
+                                m_Player.CloseGump(typeof(ShipGump));
+                                m_Player.SendGump(new ShipGump(m_Player, m_ShipGumpObject));
+
+                                m_Player.SendMessage("You change the name of the ship.");
+
+                                return;
+                            }
+
+                            m_Player.SendMessage("That ship is no longer accessible.");
+                        }
+                    }
+
+                    //TEST: POSSIBLY ADD NAME UNIQUENESS REQUIREMENTS TO SHIP NAMES
+                break;
+            }
+
+            if (!closeGump)
+            {
+                m_Player.CloseGump(typeof(ShipRenameGump));
+                m_Player.SendGump(new ShipRenameGump(m_Player, m_ShipGumpObject, oldShipName));
+            }
+
+            else
+                m_Player.SendSound(CloseGumpSound);
+        }
+    }
+
+    #endregion
+
+    #region Ship Gump Object
+
     public class ShipGumpObject
     {
         public PlayerMobile m_Player;
@@ -1799,6 +2884,8 @@ namespace Server
         public ShipGump.PlayersPageType m_PlayersPage = ShipGump.PlayersPageType.Friends;
         public int m_Page = 0;
 
+        public List<Mobile> m_PlayerList = new List<Mobile>();
+
         public ShipGumpObject(PlayerMobile player, BaseShip ship, BaseShipDeed deed)
         {
             m_Player = player;
@@ -1806,4 +2893,6 @@ namespace Server
             m_ShipDeed = deed;
         }
     }
+
+    #endregion
 }

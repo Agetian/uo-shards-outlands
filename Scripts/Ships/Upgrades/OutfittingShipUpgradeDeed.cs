@@ -17,7 +17,9 @@ namespace Server.Items
         {
             Name = "hunter";
 
-            m_Outfitting = ShipUpgrades.OutfittingType.Hunter;
+            m_OutfittingUpgrade = ShipUpgrades.OutfittingType.Hunter;
+
+            m_UpgradeType = ShipUpgrades.UpgradeType.Outfitting;
         }
 
         public HunterOutfittingShipUpgrade(Serial serial): base(serial)

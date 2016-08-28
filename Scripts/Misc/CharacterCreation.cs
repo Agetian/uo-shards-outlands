@@ -191,12 +191,14 @@ namespace Server.Misc
             AddPants(newChar, args.PantsHue);
             AddShoes(newChar);            
             
+            /*
             if (young)
             {
                 NewPlayerTicket ticket = new NewPlayerTicket();
                 ticket.Owner = newChar;
                 newChar.BankBox.DropItem(ticket);
             }
+            */
             
             CityInfo[] ci = new CityInfo[2];
 
