@@ -1022,32 +1022,6 @@ namespace Server.Items
 
             #endregion            
 
-            #region UOACZ Bonuses
-
-            //Iron Fists
-            if (weapon is Fists)
-            {
-                double ironFistsValue = attacker.GetSpecialAbilityEntryValue(SpecialAbilityEffect.IronFists);
-
-                if (pm_Defender != null)
-                    ironFistsValue *= .5;
-
-                damageScalar += ironFistsValue;
-            }
-
-            if (m_SlayerGroup == SlayerGroupType.Undead)
-            {
-                double slayerBonus = 0;                
-
-                if (slayerBonus > 0)
-                {
-                    defender.FixedEffect(0x37B9, 10, 5);
-                    damageScalar += slayerBonus;
-                }
-            }
-
-            #endregion        
-
             #region Dungeon Armor
 
             double MeleeDamageInflictedBonus = 0;
@@ -1159,8 +1133,7 @@ namespace Server.Items
                     damage = defenderWeapon.WeaponParry(defenderWeapon, finalDamage, defender);
             }
 
-            #endregion            
-                   
+            #endregion                               
 
             #region Reactive Armor
 
@@ -1205,7 +1178,27 @@ namespace Server.Items
             AddBlood(attacker, defender, finalDamage);
             
             int finalAdjustedDamage = AOS.Damage(defender, attacker, finalDamage, false, 100, 0, 0, 0, 0);
-            int displayedDamage = DamageTracker.AdjustDisplayedDamage(attacker, defender, finalAdjustedDamage);          
+            int displayedDamage = DamageTracker.AdjustDisplayedDamage(attacker, defender, finalAdjustedDamage);
+
+            #region Stamina Loss
+
+            if (!TrainingWeapon && pm_Attacker != null && (this is BaseBashing || this is BaseStaff))
+            {
+                int minStaminaLoss = (int)(Math.Ceiling((double)finalAdjustedDamage / 10.0));
+                int maxStaminaLoss = (int)(Math.Ceiling((double)finalAdjustedDamage / 5.0));
+
+                if (minStaminaLoss < 1)
+                    minStaminaLoss = 2;
+
+                if (maxStaminaLoss < 2)
+                    maxStaminaLoss = 2;
+
+                int staminaLoss = Utility.RandomMinMax(minStaminaLoss, maxStaminaLoss);
+
+                defender.Stam -= staminaLoss;
+            }
+
+            #endregion
 
             //Display Player Melee Damage
             DamageTracker.RecordDamage(attacker, attacker, defender, DamageTracker.DamageType.MeleeDamage, displayedDamage);
@@ -2156,9 +2149,9 @@ namespace Server.Items
 
         public virtual void PlaySwingAnimation(Mobile from)
         {
-            int action;
+            int action = 4;
 
-            PlayerMobile player = from as PlayerMobile;
+            PlayerMobile player = from as PlayerMobile;            
             
             if (from is BaseCreature)
             {
@@ -2186,63 +2179,55 @@ namespace Server.Items
                 }
             }
 
+            WeaponAnimationDetail weaponAnimationDetail = null;
+
             switch (from.Body.Type)
             {
                 case BodyType.Sea:
                 case BodyType.Animal:
-                    {
-                        action = Utility.Random(5, 2);
-                        break;
-                    }
+                {
+                    action = Utility.Random(5, 2);
+                    break;
+                }
+
                 case BodyType.Monster:
+                {
+                    switch (Animation)
                     {
-                        switch (Animation)
-                        {
-                            default:
-                            case WeaponAnimation.Wrestle:
-                            case WeaponAnimation.Bash1H:
-                            case WeaponAnimation.Pierce1H:
-                            case WeaponAnimation.Slash1H:
-                            case WeaponAnimation.Bash2H:
-                            case WeaponAnimation.Pierce2H:
-                            case WeaponAnimation.Slash2H: action = Utility.Random(4, 3); break;
-                            case WeaponAnimation.ShootBow: return; // 7
-                            case WeaponAnimation.ShootXBow: return; // 8
-                        }
-
-                        break;
+                        default:
+                        case WeaponAnimation.Wrestle:
+                        case WeaponAnimation.Bash1H:
+                        case WeaponAnimation.Pierce1H:
+                        case WeaponAnimation.Slash1H:
+                        case WeaponAnimation.Bash2H:
+                        case WeaponAnimation.Pierce2H:
+                        case WeaponAnimation.Slash2H: action = Utility.Random(4, 3); break;
+                        case WeaponAnimation.ShootBow: return; // 7
+                        case WeaponAnimation.ShootXBow: return; // 8
                     }
+
+                    break;
+                }
+
                 case BodyType.Human:
-                    {
-                        if (!from.Mounted)
-                            action = (int)this.GetAnimation();
+                {
+                    weaponAnimationDetail = WeaponAnimations.GetWeaponAnimationDetail(this, from);
 
-                        else
-                        {
-                            switch (Animation)
-                            {
-                                default:
-                                case WeaponAnimation.Wrestle:
-                                case WeaponAnimation.Bash1H:
-                                case WeaponAnimation.Pierce1H:
-                                case WeaponAnimation.Slash1H: action = 26; break;
-                                case WeaponAnimation.Bash2H:
-                                case WeaponAnimation.Pierce2H:
-                                case WeaponAnimation.Slash2H: action = 29; break;
-                                case WeaponAnimation.ShootBow: action = 27; break;
-                                case WeaponAnimation.ShootXBow: action = 28; break;
-                            }
-                        }
+                    break;
+                }
 
-                        break;
-                    }
                 default: return;
             }
 
-            from.Animate(action, 7, 1, true, false, 0);
+            if (weaponAnimationDetail != null)
+                from.Animate(weaponAnimationDetail.AnimationID, weaponAnimationDetail.FrameCount, 1, !weaponAnimationDetail.Reverse, false, 0);
+
+            else
+                from.Animate(action, 7, 1, true, false, 0);
         }
 
         #region Serialization/Deserialization
+
         private static void SetSaveFlag(ref SaveFlag flags, SaveFlag toSet, bool setIf)
         {
             if (setIf)
@@ -3071,6 +3056,11 @@ namespace Server.Items
         ShootXBow = 19,
         Wrestle = 31,
         Block = 30,
-        Crossbow = 19
+        Crossbow = 19,
+
+        MountedSlash1H = 26,
+        MountedBow = 27,
+        MountedCrossbow = 28,
+        MountedSlash2H = 29,
     }
 }

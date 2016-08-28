@@ -28,6 +28,7 @@ namespace Server.Items
 		public WarHammer() : base( 0x1439 )
 		{
             Name = "war hammer";
+
 			Weight = 7.0;
 			Layer = Layer.TwoHanded;
 		}

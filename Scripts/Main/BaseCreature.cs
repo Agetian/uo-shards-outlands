@@ -3926,26 +3926,6 @@ namespace Server.Mobiles
             {
             }
 
-            int disruptThreshold;
-
-            //NPCs can use bandages too!
-            if (!Core.AOS)
-                disruptThreshold = 0;
-
-            else if (from != null && from.Player)
-                disruptThreshold = 18;
-
-            else
-                disruptThreshold = 25;
-
-            if (amount > disruptThreshold)
-            {
-                BandageContext c = BandageContext.GetContext(this);
-
-                if (c != null)
-                    c.Slip();
-            }            
-
             if (from != this && from != null)
                 WeightOverloading.FatigueOnDamage(this, amount, 0.5);
 
@@ -4714,6 +4694,14 @@ namespace Server.Mobiles
                 writer.Write(m_SpecialAbilityEffectEntries[a].m_Value);
                 writer.Write(m_SpecialAbilityEffectEntries[a].m_Expiration);
             }
+
+            writer.Write(m_DamageFromShipEntries.Count);
+            for (int a = 0; a < m_DamageFromShipEntries.Count; a++)
+            {
+                writer.Write(m_DamageFromShipEntries[a].m_Ship);
+                writer.Write(m_DamageFromShipEntries[a].m_TotalAmount);
+                writer.Write(m_DamageFromShipEntries[a].m_LastDamageTime);
+            }
         }
 
         public override void Deserialize(GenericReader reader)
@@ -4859,6 +4847,18 @@ namespace Server.Mobiles
                     SpecialAbilityEffectEntry entry = new SpecialAbilityEffectEntry(effect, owner, value, expiration);
 
                     m_SpecialAbilityEffectEntries.Add(entry);
+                }
+
+                int damageFromShipEntryCount = reader.ReadInt();
+                for (int a = 0; a < damageFromShipEntryCount; a++)
+                {
+                    BaseShip ship = (BaseShip)reader.ReadItem();
+                    int totalAmount = reader.ReadInt();
+                    DateTime lastDamageTime = reader.ReadDateTime();
+
+                    DamageFromShipEntry damageFromShipEntry = new DamageFromShipEntry(ship, totalAmount, lastDamageTime);
+
+                    m_DamageFromShipEntries.Add(damageFromShipEntry);
                 }
             }
 
@@ -7964,9 +7964,12 @@ namespace Server.Mobiles
 
             int totalDamage = 0;
 
+            bool validLootDrop = (!Summoned && !m_NoKillAwards && !DiedByShipSinking && !(ControlMaster is PlayerMobile));
+            
             List<PlayerMobile> passiveTamingSkillGainPlayers = new List<PlayerMobile>();
 
-            Dictionary<PlayerMobile, int> damageInflicted = new Dictionary<PlayerMobile, int>();            
+            Dictionary<PlayerMobile, int> playerDamageEntries = new Dictionary<PlayerMobile, int>();
+            List<PlayerMobile> m_PlayerDamagers = new List<PlayerMobile>();
 
             //Determine Total Damaged Inflicted and Per Player
             foreach (DamageEntry entry in DamageEntries)
@@ -7979,7 +7982,9 @@ namespace Server.Mobiles
                 PlayerMobile creatureOwner = null;
 
                 bool passiveTamingSkillGainValid = false;
-                   
+
+                #region Killed by Tamed Creature
+
                 if (bc_Creature != null)
                 {
                     if (bc_Creature.Controlled && bc_Creature.ControlMaster is PlayerMobile && bc_Creature.Tameable)
@@ -8007,15 +8012,21 @@ namespace Server.Mobiles
                     }
                 }
 
+                #endregion
+
                 totalDamage += entry.DamageGiven;
 
                 if (playerDamager != null)
                 {
-                    if (damageInflicted.ContainsKey(playerDamager))
-                        damageInflicted[playerDamager] += entry.DamageGiven;
+                    if (playerDamageEntries.ContainsKey(playerDamager))
+                        playerDamageEntries[playerDamager] += entry.DamageGiven;
 
                     else
-                        damageInflicted.Add(playerDamager, entry.DamageGiven);
+                    {
+                        playerDamageEntries.Add(playerDamager, entry.DamageGiven);
+
+                        m_PlayerDamagers.Add(playerDamager);
+                    }
                 }
 
                 else if (bc_Creature != null)
@@ -8041,15 +8052,20 @@ namespace Server.Mobiles
                     //Creature is Controlled by Player in Some Fashion
                     if (creatureOwner != null)
                     {
-                        if (damageInflicted.ContainsKey(creatureOwner))
-                            damageInflicted[creatureOwner] += entry.DamageGiven;
+                        if (playerDamageEntries.ContainsKey(creatureOwner))
+                            playerDamageEntries[creatureOwner] += entry.DamageGiven;
 
                         else
-                            damageInflicted.Add(creatureOwner, entry.DamageGiven);
+                        {
+                            playerDamageEntries.Add(creatureOwner, entry.DamageGiven);
+
+                            m_PlayerDamagers.Add(creatureOwner);
+                        }
                     }
                 }
-                
             }
+
+            #region Bonded Creature
 
             if (IsBonded)
             {
@@ -8098,17 +8114,20 @@ namespace Server.Mobiles
                 CheckStatTimers();
             }
 
+            #endregion
+
             else
             {
-                //Rewards
-                if (!Summoned && !m_NoKillAwards && !DiedByShipSinking && !(ControlMaster is PlayerMobile))
+                if (validLootDrop)
                 {
-                    int totalFame = ComputedFame / 100;
-                    int totalKarma = -Karma / 100;
-
                     List<DamageStore> list = GetLootingRights(this.DamageEntries, this.HitsMax);
 
-                    bool givenQuestKill = false;                   
+                    List<Item> m_AspectGearExperienceAssigned = new List<Item>();
+
+                    #region Fame / Karma
+
+                    int totalFame = ComputedFame / 100;
+                    int totalKarma = -Karma / 100;
 
                     for (int i = 0; i < list.Count; ++i)
                     {
@@ -8120,17 +8139,13 @@ namespace Server.Mobiles
                         FameKarmaTitles.AwardFame(ds.m_Mobile, totalFame, true);
                         FameKarmaTitles.AwardKarma(ds.m_Mobile, totalKarma, true);
 
-                        XmlQuest.RegisterKill(this, ds.m_Mobile);
-
                         OnKilledBy(ds.m_Mobile);
-
-                        if (givenQuestKill)
-                            continue;
                     }
 
-                    List<Item> m_AspectGearExperienceAssigned = new List<Item>();
+                    #endregion                    
 
-                    foreach (KeyValuePair<PlayerMobile, int> pair in damageInflicted.OrderByDescending(key => key.Value))
+                    //Player Damage Entries
+                    foreach (KeyValuePair<PlayerMobile, int> pair in playerDamageEntries.OrderByDescending(key => key.Value))
                     {
                         PlayerMobile playerDamager = pair.Key;
                         int amount = pair.Value;
@@ -8139,6 +8154,8 @@ namespace Server.Mobiles
                         if (playerDamager.Deleted) continue;
 
                         double damagePercent = (double)pair.Value / (double)totalDamage;
+
+                        #region Passive Taming Skill Gain
 
                         //Passive Taming Skill Gain
                         if (passiveTamingSkillGainPlayers.Contains(playerDamager))
@@ -8157,6 +8174,8 @@ namespace Server.Mobiles
                                 playerDamager.m_LastPassiveTamingSkillGain = DateTime.UtcNow;
                             }
                         }
+
+                        #endregion
 
                         #region Aspect Gear Experience
 
@@ -8333,63 +8352,14 @@ namespace Server.Mobiles
 
                         #endregion
 
-                        //Monster Hunter Society
+                        #region Monster Hunter Society
+
                         MHSCreatures.CreatureKilled(this, playerDamager, damagePercent, TakenDamageFromPoison, TakenDamageFromCreature);
 
-                        //Doubloons
-                        if (DoubloonValue > 0)
-                        {
-                            double doubloonAmount = 0;
-                            bool doubloonsValid = false;
+                        #endregion
 
-                            bool validShip = false;
+                        #region Titles
 
-                            if (ShipOccupied != null)
-                            {
-                                if (!ShipOccupied.Deleted)
-                                    validShip = true;
-                            }
-
-                            if (validShip || IsOceanCreature)
-                            {
-                                if (DoubloonValue > 0)
-                                {
-                                    doubloonAmount = (double)DoubloonValue;
-
-                                    if (damagePercent < .5)
-                                        doubloonAmount *= .5;
-
-                                    doubloonsValid = true;
-                                }
-                            }
-
-                            if (doubloonsValid)
-                            {
-                                if (doubloonAmount < 1)
-                                    doubloonAmount = 1;
-
-                                int finalDoubloonValue = (int)doubloonAmount;
-
-                                if (finalDoubloonValue < 1)
-                                    finalDoubloonValue = 1;
-
-                                playerDamager.PirateScore += finalDoubloonValue;
-
-                                if (Banker.DepositUniqueCurrency(playerDamager, typeof(Doubloon), finalDoubloonValue))
-                                {
-                                    Doubloon doubloonPile = new Doubloon(finalDoubloonValue);
-                                    playerDamager.SendSound(doubloonPile.GetDropSound());
-                                    doubloonPile.Delete();
-
-                                    playerDamager.SendMessage("You've earned " + finalDoubloonValue.ToString() + " doubloons. They have been placed in your bank box.");
-                                }
-
-                                else
-                                    playerDamager.SendMessage("You've earned doubloons but there was no available space to place them in your bank box.");
-                            }
-                        }
-
-                        //Title Rewards
                         if (TitleReward != null && TitleReward != "")
                         {
                             /*
@@ -8403,6 +8373,8 @@ namespace Server.Mobiles
                             }
                             */
                         }
+
+                        #endregion
                     }
                 }
 
@@ -8415,8 +8387,58 @@ namespace Server.Mobiles
                 base.OnDeath(c);
 
                 if (DeleteCorpseOnDeath)                
-                    c.Delete();                
+                    c.Delete();
             }
+
+            #region Doubloons
+
+            if (DoubloonValue > 0 && validLootDrop)
+            {
+                totalDamage = 0;
+
+                foreach (DamageFromShipEntry damageFromShipEntry in m_DamageFromShipEntries)
+                {
+                    if (damageFromShipEntry == null) continue;
+                    if (damageFromShipEntry.m_LastDamageTime + DamageEntryExpiration <= DateTime.UtcNow) continue;
+
+                    totalDamage += damageFromShipEntry.m_TotalAmount;
+                }
+
+                foreach (DamageFromShipEntry damageFromShipEntry in m_DamageFromShipEntries)
+                {
+                    if (damageFromShipEntry == null) continue;
+                    if (damageFromShipEntry.m_LastDamageTime + DamageEntryExpiration <= DateTime.UtcNow) continue;
+
+                    double damagePercent = (double)damageFromShipEntry.m_TotalAmount / (double)totalDamage;
+
+                    int doubloonValue = (int)(Math.Ceiling(damagePercent * DoubloonValue));
+
+                    if (damageFromShipEntry.m_Ship != null)
+                    {
+                        int doubloonSound = 0x034;
+
+                        if (doubloonSound >= 50)
+                            doubloonSound = 0x033;
+
+                        if (doubloonSound >= 500)
+                            doubloonSound = 0x032;
+
+                        if (damageFromShipEntry.m_Ship.DepositDoubloons(doubloonValue))
+                        {
+                            damageFromShipEntry.m_Ship.ShipBroadcastMessage(doubloonValue.ToString() + " placed in the ship's hold.", 0);
+                            damageFromShipEntry.m_Ship.ShipBroadcastSound(doubloonSound);
+                        }
+
+                        else
+                        {
+                            damageFromShipEntry.m_Ship.ShipBroadcastMessage(doubloonValue.ToString() + " placed on the ship's deck (ship's hold is full).", 0);
+                            damageFromShipEntry.m_Ship.ShipBroadcastSound(doubloonSound);
+                        }
+                    }
+                }
+            }
+
+            #endregion
         }
 
         [CommandProperty(AccessLevel.Counselor)]
@@ -8427,54 +8449,6 @@ namespace Server.Mobiles
                 return (int)Math.Min(Difficulty * 800, 25000);
             }
         }
-
-        private List<PlayerMobile> ValidSkillScrollRecipients()
-        {
-            var validPlayers = new List<PlayerMobile>();
-            Mobile highest = FindMostTotalDamger(false);
-
-            if (highest is BaseCreature)
-            {
-                var creature = highest as BaseCreature;
-                if (creature.Controlled && creature.ControlMaster != null)
-                    highest = creature.ControlMaster;
-                else if (creature.BardProvoked && creature.BardMaster != null)
-                    highest = creature.BardMaster;
-                else if (creature.Summoned && creature.SummonMaster != null)
-                    highest = creature.SummonMaster;
-            }
-
-            if (highest != null && highest is PlayerMobile)
-            {
-                validPlayers.Add(highest as PlayerMobile);
-                Server.Engines.PartySystem.Party p = Server.Engines.PartySystem.Party.Get(highest);
-
-                if (p != null && p.Contains(highest))
-                {
-                    for (int i = 0; i < p.Members.Count; i++)
-                    {
-                        var pmi = p[i];
-
-                        if (pmi != null && pmi.Mobile is PlayerMobile)
-                        {
-                            var mob = pmi.Mobile as PlayerMobile;
-                            if (mob != null && InRange(mob.Location, 18) && !validPlayers.Contains(mob))
-                                validPlayers.Add(mob as PlayerMobile);
-                        }
-                    }
-                }
-            }
-
-            return validPlayers;
-        }
-
-        /* To save on cpu usage, RunUO creatures only reacquire creatures under the following circumstances:
-         *  - 10 seconds have elapsed since the last time it tried
-         *  - The creature was attacked
-         *  - Some creatures, like dragons, will reacquire when they see someone move
-         * 
-         * This functionality appears to be implemented on OSI as well
-         */
 
         private long m_NextReacquireTime;
 
@@ -8834,6 +8808,8 @@ namespace Server.Mobiles
 
         public void ClearExpiredDamageEntries()
         {
+            List<Mobile> m_ExpiredMobiles = new List<Mobile>();
+
             Queue m_Queue = new Queue();
 
             foreach (DamageEntry damageEntry in DamageEntries)
@@ -8841,7 +8817,15 @@ namespace Server.Mobiles
                 if (damageEntry == null) continue;
 
                 if (damageEntry.HasExpired)
+                {
+                    if (damageEntry.Damager != null)
+                    {
+                        if (!m_ExpiredMobiles.Contains(damageEntry.Damager))
+                            m_ExpiredMobiles.Add(damageEntry.Damager);
+                    }
+
                     m_Queue.Enqueue(damageEntry);
+                }
             }
 
             while (m_Queue.Count > 0)
@@ -8865,6 +8849,23 @@ namespace Server.Mobiles
             {
                 AspectGearExperienceEntry aspectGearExperienceEntry = (AspectGearExperienceEntry)m_Queue.Dequeue();
                 m_AspectGearExperienceEntries.Remove(aspectGearExperienceEntry);
+            }
+
+            m_Queue = new Queue();
+
+            foreach (DamageFromShipEntry damageFromShipEntry in m_DamageFromShipEntries)
+            {
+                if (damageFromShipEntry == null)
+                    continue;
+
+                if (damageFromShipEntry.m_LastDamageTime + DamageEntryExpiration <= DateTime.UtcNow)
+                    m_Queue.Enqueue(damageFromShipEntry);
+            }
+
+            while (m_Queue.Count > 0)
+            {
+                DamageFromShipEntry damageFromShipEntry = (DamageFromShipEntry)m_Queue.Dequeue();
+                m_DamageFromShipEntries.Remove(damageFromShipEntry);
             }
         }
 
@@ -9660,6 +9661,8 @@ namespace Server.Mobiles
         private BaseShip m_ShipOccupied = null;
         [CommandProperty(AccessLevel.GameMaster)]
         public BaseShip ShipOccupied { get { return m_ShipOccupied; } set { m_ShipOccupied = value; } }
+
+        public List<DamageFromShipEntry> m_DamageFromShipEntries = new List<DamageFromShipEntry>();
 
         private bool m_NoKillAwards = false;
         [CommandProperty(AccessLevel.GameMaster)]

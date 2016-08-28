@@ -29,6 +29,7 @@ namespace Server.Items
 		public Cutlass() : base( 0x1441 )
 		{
             Name = "cutlass";
+
 			Weight = 4.0;
 		}
 

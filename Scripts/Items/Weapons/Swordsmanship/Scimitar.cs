@@ -29,6 +29,7 @@ namespace Server.Items
 		public Scimitar() : base( 0x13B6 )
 		{
             Name = "scimitar";
+
 			Weight = 4.0;
 		}
 

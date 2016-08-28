@@ -26,6 +26,7 @@ namespace Server.Items
 		public Maul() : base( 0x143B )
 		{
             Name = "maul";
+
 			Weight = 4.0;
 		}
 

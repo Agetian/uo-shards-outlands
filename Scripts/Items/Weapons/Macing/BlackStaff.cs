@@ -26,6 +26,7 @@ namespace Server.Items
 		public BlackStaff() : base( 0xDF0 )
 		{
             Name = "black staff";
+
 			Weight = 6.0;
 		}
 

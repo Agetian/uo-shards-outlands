@@ -29,6 +29,7 @@ namespace Server.Items
 		public VikingSword() : base( 0x13B9 )
 		{
             Name = "viking sword";
+
 			Weight = 4.0;
 		}
 

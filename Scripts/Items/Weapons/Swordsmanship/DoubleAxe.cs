@@ -26,6 +26,7 @@ namespace Server.Items
 		public DoubleAxe() : base( 0xF4B )
 		{
             Name = "double axe";
+
 			Weight = 7.0;
 		}
 

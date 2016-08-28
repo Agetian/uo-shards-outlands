@@ -26,6 +26,7 @@ namespace Server.Items
 		public LargeBattleAxe() : base( 0x13FB )
 		{
             Name = "large battle axe";
+
 			Weight = 7.0;
 		}
 

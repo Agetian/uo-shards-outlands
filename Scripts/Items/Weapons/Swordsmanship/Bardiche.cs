@@ -28,6 +28,7 @@ namespace Server.Items
 		public Bardiche() : base( 0xF4D )
 		{
             Name = "bardiche";
+
 			Weight = 9.0;
 		}
 

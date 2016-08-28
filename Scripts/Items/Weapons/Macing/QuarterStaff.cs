@@ -26,6 +26,7 @@ namespace Server.Items
 		public QuarterStaff() : base( 0xE89 )
 		{
             Name = "quarter staff";
+
 			Weight = 6.0;
 		}
 

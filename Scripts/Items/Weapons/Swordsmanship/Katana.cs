@@ -29,6 +29,7 @@ namespace Server.Items
 		public Katana() : base( 0x13FF )
 		{
             Name = "katana";
+
 			Weight = 4.0;
 		}
 

@@ -26,6 +26,7 @@ namespace Server.Items
 		public TwoHandedAxe() : base( 0x1443 )
 		{
             Name = "two-handed axe";
+
 			Weight = 7.0;
 		}
 

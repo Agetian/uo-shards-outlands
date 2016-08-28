@@ -28,6 +28,7 @@ namespace Server.Items
 		public ShortSpear() : base( 0x1403 )
 		{
             Name = "short spear";
+
 			Weight = 5.0;
 		}
 
@@ -45,8 +46,6 @@ namespace Server.Items
 		{
 			base.Deserialize( reader );
 			int version = reader.ReadInt();
-
-            Name = "short spear";
 		}
 	}
 }

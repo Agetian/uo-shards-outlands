@@ -26,6 +26,7 @@ namespace Server.Items
 		public WarMace() : base( 0x1407 )
 		{
             Name = "war mace";
+
 			Weight = 4.0;
 		}
 

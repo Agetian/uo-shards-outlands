@@ -26,6 +26,7 @@ namespace Server.Items
 		public ThinLongsword() : base( 0x13B8 )
 		{
             Name = "longsword";
+
 			Weight = 4.0;
 		}
 

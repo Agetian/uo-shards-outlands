@@ -34,6 +34,7 @@ namespace Server.Items
 		public WarAxe() : base( 0x13B0 )
 		{
             Name = "war axe";
+
 			Weight = 4.0;
             Layer = Layer.OneHanded;
 		}

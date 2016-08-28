@@ -26,7 +26,8 @@ namespace Server.Items
 		public Mace() : base( 0xF5C )
 		{
             Name = "mace";
-			Weight = 4;
+
+			Weight = 4.0;
 		}
 
 		public Mace( Serial serial ) : base( serial )

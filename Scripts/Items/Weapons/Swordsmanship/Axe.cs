@@ -26,6 +26,7 @@ namespace Server.Items
 		public Axe() : base( 0xF49 )
 		{
             Name = "axe";
+
 			Weight = 7.0;
 		}
 

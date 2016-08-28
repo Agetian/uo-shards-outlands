@@ -26,6 +26,7 @@ namespace Server.Items
 		public HammerPick() : base( 0x143D )
 		{
             Name = "hammer pick";
+
 			Weight = 4.0;
 			Layer = Layer.OneHanded;
 		}

@@ -31,6 +31,7 @@ namespace Server.Items
 		public Crossbow() : base( 0xF50 )
 		{
             Name = "crossbow";
+
 			Weight = 5.0;
 			Layer = Layer.TwoHanded;
 		}
@@ -42,17 +43,13 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
-			writer.Write( (int) 1 ); // version
+			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
-
-            Name = "crossbow";
 		}
 	}
 }

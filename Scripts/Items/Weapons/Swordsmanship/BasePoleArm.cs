@@ -45,46 +45,6 @@ namespace Server.Items
 		{
 		}
 
-		public override WeaponAnimation GetAnimation()
-		{
-			WeaponAnimation animation = WeaponAnimation.Slash1H;
-
-			Mobile attacker = this.Parent as Mobile;
-
-			if (attacker != null)
-			{
-                if (attacker.FindItemOnLayer(Layer.TwoHanded) is BaseShield)
-                {
-                    switch (Utility.RandomMinMax(1, 5))
-                    {
-                        case 1: animation = WeaponAnimation.Pierce2H; break;
-                        case 2: animation = WeaponAnimation.Pierce2H; break;
-                        case 3: animation = WeaponAnimation.Pierce2H; break;
-                        case 4: animation = WeaponAnimation.ShootXBow; break;
-                        case 5: animation = WeaponAnimation.Slash2H; break;                        
-                    }
-
-                    return animation;
-                }
-
-                else if (attacker.FindItemOnLayer(Layer.TwoHanded) != null)
-                {
-                    switch (Utility.RandomMinMax(1, 5))
-                    {
-                        case 1: animation = WeaponAnimation.Slash2H; break;
-                        case 2: animation = WeaponAnimation.Slash2H; break;
-                        case 3: animation = WeaponAnimation.Bash2H; break;
-                        case 4: animation = WeaponAnimation.Pierce2H; break;
-                        case 5: animation = WeaponAnimation.Slash2H; break;                        
-                    }
-
-                    return animation;
-                }
-			}
-
-			return animation;
-		}
-
 		public override void OnDoubleClick( Mobile from )
 		{
 			if ( HarvestSystem == null )

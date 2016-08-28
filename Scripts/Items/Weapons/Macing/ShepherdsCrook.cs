@@ -30,6 +30,7 @@ namespace Server.Items
 		public ShepherdsCrook() : base( 0xE81 )
 		{
             Name = "shepherd's crook";
+
 			Weight = 4.0;
 		}
 

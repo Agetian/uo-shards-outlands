@@ -26,6 +26,7 @@ namespace Server.Items
 		public Halberd() : base( 0x143E )
 		{
             Name = "halberd";
+
 			Weight = 10.0;
 		}
 

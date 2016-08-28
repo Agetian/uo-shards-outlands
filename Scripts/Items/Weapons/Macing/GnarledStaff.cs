@@ -26,6 +26,7 @@ namespace Server.Items
 		public GnarledStaff() : base( 0x13F8 )
 		{
             Name = "gnarled staff";
+
 			Weight = 6.0;
 		}
 

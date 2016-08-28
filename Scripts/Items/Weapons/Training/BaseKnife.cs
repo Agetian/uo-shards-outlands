@@ -22,48 +22,6 @@ namespace Server.Items
         {
         }
 
-        public override WeaponAnimation GetAnimation()
-        {
-            WeaponAnimation animation = WeaponAnimation.Slash1H;
-
-            Mobile attacker = this.Parent as Mobile;
-
-            if (attacker != null)
-            {
-                if (attacker.FindItemOnLayer(Layer.TwoHanded) != null)
-                {
-                    switch (Utility.Random(7))
-                    {
-                        case 0: animation = WeaponAnimation.Pierce1H; break;
-                        case 1: animation = WeaponAnimation.Pierce1H; break;
-                        case 2: animation = WeaponAnimation.Bash1H; break;
-                        case 3: animation = WeaponAnimation.Slash1H; break;
-                        case 4: animation = WeaponAnimation.Wrestle; break;
-                        case 5: animation = WeaponAnimation.Bash2H; break;
-                        case 6: animation = WeaponAnimation.Slash2H; break;
-                    }
-
-                    return animation;
-                }
-
-                else
-                {
-                    switch (Utility.Random(5))
-                    {
-                        case 0: animation = WeaponAnimation.Pierce1H; break;
-                        case 1: animation = WeaponAnimation.Pierce1H; break;
-                        case 2: animation = WeaponAnimation.Bash1H; break;
-                        case 3: animation = WeaponAnimation.Slash1H; break;
-                        case 4: animation = WeaponAnimation.Wrestle; break;
-                    }
-
-                    return animation;
-                }
-            }
-
-            return animation;
-        }
-
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);

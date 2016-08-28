@@ -26,6 +26,7 @@ namespace Server.Items
 		public ExecutionersAxe() : base( 0xF45 )
 		{
             Name = "executioner's axe";
+
 			Weight = 7.0;
 		}
 

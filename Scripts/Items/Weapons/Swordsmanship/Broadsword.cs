@@ -26,6 +26,7 @@ namespace Server.Items
 		public Broadsword() : base( 0xF5E )
 		{
             Name = "broadsword";
+
 			Weight = 4.0;
 		}
 

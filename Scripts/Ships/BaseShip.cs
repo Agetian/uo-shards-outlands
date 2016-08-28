@@ -3775,7 +3775,7 @@ namespace Server
                 if (entry.m_Mobile == attacker && entry.m_Ship == attackerShip)
                 {
                     entry.m_TotalAmount += damageAmount;
-                    entry.m_lastDamage = time;
+                    entry.m_LastDamageTime = time;
 
                     foundExistingEntry = true;
 
@@ -3851,9 +3851,7 @@ namespace Server
             int totalDamageToShip = 0;
 
             Dictionary<BaseShip, int> DictShipDamagers = new Dictionary<BaseShip, int>();
-
-            PlayerMobile shipPlayer = Owner as PlayerMobile;
-
+            
             foreach (ShipDamageEntry entry in m_ShipDamageEntries)
             {
                 PlayerMobile attackerPlayer = entry.m_Mobile as PlayerMobile;
@@ -3926,11 +3924,11 @@ namespace Server
                         attackingShipPlayerOwner.SendSound(doubloonPile.GetDropSound());
                         doubloonPile.Delete();
 
-                        attackingShipPlayerOwner.SendMessage("You've received " + finalDoubloonAmount.ToString() + " doubloons for sinking their ship! The coins have been placed in your ship's hold.");
+                        attackingShipPlayerOwner.SendMessage("You've received " + finalDoubloonAmount.ToString() + " doubloons for sinking their ship! They have been placed in your ship's hold.");
                     }
 
                     else
-                        attackingShipPlayerOwner.SendMessage("You've sunk a ship but alas there was no room in your ship's hold to place all the doubloons!");
+                        attackingShipPlayerOwner.SendMessage("You've sunk a ship, and with no room in your ship's hold for doubloons, they have been placed on your ship's deck.");
                 }
             }
         }
@@ -3956,7 +3954,7 @@ namespace Server
                 {
                     ShipDamageEntry entry = m_Ship.m_ShipDamageEntries[a];
 
-                    if (entry.m_lastDamage + m_Ship.DamageEntryDuration < DateTime.UtcNow)
+                    if (entry.m_LastDamageTime + m_Ship.DamageEntryDuration < DateTime.UtcNow)
                         m_EntriesToRemove.Add(entry);
                 }
 
@@ -5002,12 +5000,6 @@ namespace Server
                     return;
                 }
 
-                else if (!CanMoveHoldDoubloonsToBank(from))
-                {
-                    from.SendMessage("Your bankbox would not be able to hold all of the doubloons from your ship's hold. You must clear out some items from your bank before you may dock this ship.");
-                    return;
-                }
-
                 else
                     from.SendGump(new ConfirmDryDockGump(from, this));                
             }
@@ -5293,146 +5285,7 @@ namespace Server
                 m_TillerMan.Say("Aye, clearing the decks of rubbish!");            
         } 
 
-        #endregion
-
-        #region Divide the Plunder
-
-        public void BeginDivideThePlunder(Mobile from)
-        {
-            if (from == null)
-                return;
-
-            if (Deleted)
-                return;
-
-            if (GetHoldDoubloonTotal(this) < 50)
-            {
-                from.SendMessage("You must have at least 50 doubloons in the hold to divide the plunder.");
-                return;
-            }
-
-            if (m_ScuttleInProgress)
-            {
-                from.SendMessage("You can cannot divide the plunder while the ship is being scuttled.");
-                return;
-            }
-
-            if (!GetMobilesOnShip(true, true).Contains(from))
-            {
-                from.SendMessage("You must be onboard this ship in order to divide the plunder.");
-                return;
-            }
-
-            DryDockResult result = CheckDryDock(from);
-
-            if (result == DryDockResult.Dead)
-            {
-                from.SendMessage("You must be alive in order to divide the plunder.");
-                return;
-            }
-
-            else if (result == DryDockResult.NotAnchored)
-            {
-                from.SendMessage("The anchor must be lowered before you can divide the plunder.");
-                return;
-            }
-
-            if (m_LastCombatTime + TimeNeededToBeOutOfCombat > DateTime.UtcNow)
-            {
-                string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_LastCombatTime + TimeNeededToBeOutOfCombat, false, true, true, true, true);
-
-                from.SendMessage("The ship has been been in combat too recently to divide the plunder. You must wait " + timeRemaining + ".");
-
-                return;
-            }
-
-            else if (m_TimeLastMoved + DryDockMinimumLastMovement > DateTime.UtcNow)
-            {
-                string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_TimeLastMoved + DryDockMinimumLastMovement, false, true, true, true, true);
-
-                from.SendMessage("The ship has not been stationary long enough to divide the plunder. You must wait " + timeRemaining + ".");
-
-                return;
-            }
-
-            List<Point3D> m_PointsToCheckForLand = new List<Point3D>();
-
-            if (Hold != null)
-            {
-                for (int a = 0; a < 8; a++)
-                {
-                    for (int b = 0; b < 8; b++)
-                    {
-                        m_PointsToCheckForLand.Add(new Point3D(Hold.Location.X - 4 + a, Hold.Location.Y - 4 + b, Hold.Location.Z));
-                    }
-                }
-            }
-
-            for (int a = 0; a < 16; a++)
-            {
-                for (int b = 8; b < 16; b++)
-                {
-                    m_PointsToCheckForLand.Add(new Point3D(Location.X - 8 + a, Location.Y - 8 + b, Location.Z));
-                }
-            }
-
-            if (TillerMan != null)
-            {
-                for (int a = 0; a < 8; a++)
-                {
-                    for (int b = 0; b < 8; b++)
-                    {
-                        m_PointsToCheckForLand.Add(new Point3D(TillerMan.Location.X - 4 + a, TillerMan.Location.Y - 4 + b, TillerMan.Location.Z));
-                    }
-                }
-            }
-
-            bool foundNearbyLand = false;
-
-            foreach (Point3D point in m_PointsToCheckForLand)
-            {
-                LandTile landTile = Map.Tiles.GetLandTile(point.X, point.Y);
-                StaticTile[] tiles = Map.Tiles.GetStaticTiles(point.X, point.Y, true);
-
-                bool hasWaterLandTile = false;
-                bool hasWaterStaticTile = false;
-                bool hasGuildDock = false;
-
-                if (((landTile.ID >= 168 && landTile.ID <= 171) || (landTile.ID >= 310 && landTile.ID <= 311)))
-                    hasWaterLandTile = true;
-
-                for (int i = 0; i < tiles.Length; ++i)
-                {
-                    StaticTile tile = tiles[i];
-
-                    if (tile.ID >= 1993 && tile.ID <= 2000)
-                    {
-                        hasGuildDock = true;
-                        break;
-                    }
-
-                    if (tile.ID >= 0x1796 && tile.ID <= 0x17B2)
-                        hasWaterStaticTile = true;
-                }
-
-                if ((!hasWaterLandTile && !hasWaterStaticTile) || hasGuildDock)
-                {
-                    foundNearbyLand = true;
-                    break;
-                }
-            }
-
-            if (!foundNearbyLand)
-            {
-                from.SendMessage("Your ship is not close enough to land to divide the plunder.");
-                return;
-            }
-
-            //from.CloseAllGumps();
-            //from.SendGump(new DivideThePlunderGump(from, this, DivideMode.CaptainOnly));
-        }
-
-        #endregion
+        #endregion        
 
         #region Doubloons
 
@@ -5459,61 +5312,6 @@ namespace Server
             }
 
             return balance;
-        }
-
-        public bool TransferDoubloons(Mobile from, BaseShip ship, int amount, out int deposited)
-        {
-            deposited = 0;
-
-            if (ship == null)
-                return false;
-
-            if (ship.Hold == null)
-                return false;
-
-            if (ship.Hold.Deleted)
-                return false;
-
-            int amountRemaining = amount;
-
-            foreach (Item item in ship.Hold.FindItemsByType(typeof(Doubloon)))
-            {
-                if (item.Amount < 60000 && ((item.Amount + amount) <= 60000))
-                {
-                    item.Amount += amount;
-                    deposited += amount;
-
-                    amountRemaining = 0;
-                }
-
-                else if (item.Amount < 60000)
-                {
-                    int incrementAmount = 60000 - item.Amount;
-
-                    item.Amount += incrementAmount;
-                    deposited += incrementAmount;
-
-                    amountRemaining -= incrementAmount;
-                }
-            }
-
-            if (amountRemaining > 0)
-            {
-                Item newCurrency = (Item)Activator.CreateInstance(typeof(Doubloon));
-               
-                newCurrency.Amount = amountRemaining;
-
-                if (ship.Hold.TryDropItem(from, newCurrency, true))
-                {
-                }
-
-                else
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         public bool DepositDoubloons(int amount)
@@ -5552,13 +5350,13 @@ namespace Server
                 }
             }
 
+            bool floorStacksOccurred = false;
+
             if (doubloonsRemaining > 0)
             {
                 int doubloonStacks = (int)(Math.Floor((double)doubloonsRemaining / 60000)) + 1;
                 int doubloonsToDeposit = doubloonsRemaining % 60000;
-
-                bool unableToDropDoubloons = false;
-
+                
                 for (int a = 0; a < doubloonStacks; a++)
                 {
                     Doubloon newDoubloons = new Doubloon();
@@ -5580,44 +5378,17 @@ namespace Server
 
                     else
                     {
-                        newDoubloons.Delete();
+                        Point3D doubloonDropLocation = GetRandomEmbarkLocation(false);
 
-                        return false;
+                        newDoubloons.MoveToWorld(doubloonDropLocation, Map);
+
+                        floorStacksOccurred = true;
                     }
                 }
             }
 
-            return true;
-        }
-
-        public bool CanMoveHoldDoubloonsToBank(Mobile from)
-        {
-            int holdDoubloons = GetHoldDoubloonTotal(this);
-
-            if (Banker.CanDepositUniqueCurrency(from, typeof(Doubloon), holdDoubloons))
-                return true;
-
-            return false;
-        }
-
-        public bool MoveHoldDoubloonsToBank(Mobile from, bool OnlyCheckIfPossible)
-        {
-            BankBox bankBox = from.FindBankNoCreate();
-
-            if (!(bankBox == null || Hold == null))
-            {
-                Item[] doubloonsInHold = Hold.FindItemsByType(typeof(Doubloon));
-
-                int doubloonCount = GetHoldDoubloonTotal(this);
-                int doubloonPiles = doubloonsInHold.Length;
-
-                for (int a = 0; a < doubloonPiles; a++)
-                {
-                    doubloonsInHold[0].Delete();
-                }
-
-                Banker.DepositUniqueCurrency(from, typeof(Doubloon), doubloonCount);
-            }
+            if (floorStacksOccurred)
+                return false;
 
             return true;
         }
@@ -5685,6 +5456,36 @@ namespace Server
 
         #endregion               
 
+        #region Ship Broadcasts
+
+        public void ShipBroadcastMessage(string message, int hue)
+        {
+            List<Mobile> m_MobilesOnShip = GetMobilesOnShip(true, false);
+
+            foreach (Mobile mobile in m_MobilesOnShip)
+            {
+                if (mobile is BaseCreature) continue;
+                if (!(IsFriend(mobile) || IsCoOwner(mobile) || IsOwner(mobile))) continue;
+
+                mobile.SendMessage(hue, message);
+            }
+        }
+
+        public void ShipBroadcastSound(int sound)
+        {
+            List<Mobile> m_MobilesOnShip = GetMobilesOnShip(true, false);
+
+            foreach (Mobile mobile in m_MobilesOnShip)
+            {
+                if (mobile is BaseCreature) continue;
+                if (!(IsFriend(mobile) || IsCoOwner(mobile) || IsOwner(mobile))) continue;
+
+                mobile.SendSound(sound);
+            }
+        }
+
+        #endregion
+
         #region On Speech
 
         public override void OnSpeech(SpeechEventArgs e)
@@ -5734,13 +5535,7 @@ namespace Server
                     if (IsOwner(from))
                         BeginDryDock(from);
                 }
-
-                if (text.IndexOf("i wish to divide the plunder") != -1)
-                {
-                    if (IsOwner(from))
-                        BeginDivideThePlunder(from);
-                }
-
+                
                 if (text.IndexOf("i wish to dock") != -1)
                 {
                     if (IsOwner(from))
@@ -6685,7 +6480,7 @@ namespace Server
                 writer.Write(entry.m_Mobile);
                 writer.Write(entry.m_Ship);
                 writer.Write(entry.m_TotalAmount);
-                writer.Write((DateTime)entry.m_lastDamage);
+                writer.Write((DateTime)entry.m_LastDamageTime);
             }
 
             writer.Write((int)m_Facing);
@@ -7197,14 +6992,32 @@ namespace Server
         public Mobile m_Mobile;
         public BaseShip m_Ship;
         public int m_TotalAmount;
-        public DateTime m_lastDamage;
+        public DateTime m_LastDamageTime;
 
         public ShipDamageEntry(Mobile mobile, BaseShip ship, int totalAmount, DateTime lastDamage)
         {
             m_Mobile = mobile;
             m_Ship = ship;
             m_TotalAmount = totalAmount;
-            m_lastDamage = lastDamage;
+            m_LastDamageTime = lastDamage;
+        }
+    }
+
+    #endregion
+
+    #region Ship/Players on Ship Damage to Creature Entry
+
+    public class DamageFromShipEntry
+    {
+        public BaseShip m_Ship;
+        public int m_TotalAmount;
+        public DateTime m_LastDamageTime;
+
+        public DamageFromShipEntry(BaseShip ship, int totalAmount, DateTime lastDamage)
+        {
+            m_Ship = ship;
+            m_TotalAmount = totalAmount;
+            m_LastDamageTime = lastDamage;
         }
     }
 

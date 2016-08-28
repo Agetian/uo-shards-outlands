@@ -26,6 +26,7 @@ namespace Server.Items
 		public Pitchfork() : base( 0xE87 )
 		{
             Name = "pitchfork";
+
 			Weight = 6.0;
 		}
 
@@ -36,20 +37,13 @@ namespace Server.Items
 		public override void Serialize( GenericWriter writer )
 		{
 			base.Serialize( writer );
-
 			writer.Write( (int) 0 ); // version
 		}
 
 		public override void Deserialize( GenericReader reader )
 		{
 			base.Deserialize( reader );
-
 			int version = reader.ReadInt();
-
-			if ( Weight >= 10.0 )
-				Weight = 10;
-
-            Name = "pitchfork";
 		}
 	}
 }

@@ -633,6 +633,7 @@
     <Compile Include="Items\Weapons\Other\Wooden\ArcanistsWildStaff.cs" />
     <Compile Include="Items\Weapons\Other\Wooden\HardenedWildStaff.cs" />
     <Compile Include="Items\Weapons\Other\Wooden\ThornedWildStaff.cs" />
+    <Compile Include="Main\WeaponAnimations.cs" />
     <Compile Include="Main\GumpCollections.cs" />
     <Compile Include="Main\Stables.cs" />
     <Compile Include="Main\DamageTracker.cs" />
@@ -1115,7 +1116,6 @@
     <Compile Include="Ships\BoardingRope.cs" />
     <Compile Include="Ships\ConfirmDryDockGump.cs" />
     <Compile Include="Ships\Doubloon.cs" />
-    <Compile Include="Ships\DoubloonGeneratorStone.cs" />
     <Compile Include="Ships\Hold.cs" />
     <Compile Include="Ships\PirateHelper.cs" />
     <Compile Include="Ships\Plank.cs" />

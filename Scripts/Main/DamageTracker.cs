@@ -1,10 +1,10 @@
 using System;
 using Server;
 using Server.Mobiles;
-using System.Collections;
-using System.Collections.Generic;
 using Server.Network;
 using Server.Gumps;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Server
 {
@@ -107,6 +107,61 @@ namespace Server
 
             if (player.m_DamageTracker == null)
                 player.m_DamageTracker = new DamageTracker(player);
+
+            #region Ship Damage to Creature: For Doubloon Distribution on Death
+
+            BaseCreature bc_Target = target as BaseCreature;
+
+            if (bc_Target != null)
+            {
+                if (bc_Target.DoubloonValue > 0)
+                {
+                    BaseShip shipFrom = null;
+
+                    BaseCreature bc_From = from as BaseCreature;
+                    PlayerMobile pm_From = from as PlayerMobile;
+
+                    if (bc_From != null)
+                    {
+                        if (bc_From.ShipOccupied != null)
+                            shipFrom = bc_From.ShipOccupied;
+                    }
+
+                    if (pm_From != null)
+                    {
+                        if (pm_From.ShipOccupied != null)
+                            shipFrom = pm_From.ShipOccupied;
+                    }
+
+                    if (shipFrom != null)
+                    {
+                        bool foundDamageEntry = false;
+
+                        foreach (DamageFromShipEntry damageFromShipEntry in bc_Target.m_DamageFromShipEntries)
+                        {
+                            if (damageFromShipEntry == null)
+                                continue;
+
+                            if (damageFromShipEntry.m_Ship == shipFrom)
+                            {
+                                damageFromShipEntry.m_TotalAmount += amount;
+                                damageFromShipEntry.m_LastDamageTime = DateTime.UtcNow;
+
+                                foundDamageEntry = true;
+                            }
+                        }
+
+                        if (!foundDamageEntry)
+                        {
+                            DamageFromShipEntry damageEntry = new DamageFromShipEntry(shipFrom, amount, DateTime.UtcNow);
+
+                            bc_Target.m_DamageFromShipEntries.Add(damageEntry);
+                        }
+                    }
+                }
+            }
+
+            #endregion
 
             switch (damageType)
             {
