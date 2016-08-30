@@ -50,14 +50,9 @@ namespace Server.Mobiles
 			pack.DropItem( new Arrow( Utility.RandomMinMax( 25, 35 ) ) );
 			pack.DropItem( new Bandage( Utility.RandomMinMax( 5, 15 ) ) );
 			pack.DropItem( new Bandage( Utility.RandomMinMax( 5, 15 ) ) );
-			pack.DropItem( Loot.RandomGem() );
 			pack.DropItem( new ArcaneGem() );
 
-			PackItem( pack );
-
 			AddItem( new JukaBow() );
-
-			// TODO: Bandage self
 		}
 
 		public override void OnDamage( int amount, Mobile from, bool willKill )

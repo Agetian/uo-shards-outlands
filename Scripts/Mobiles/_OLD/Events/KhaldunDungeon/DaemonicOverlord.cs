@@ -33,9 +33,7 @@ namespace Server.Mobiles
         public int totalIntervals = 20;
 
         public int damageProgress = 0;
-        public int intervalCount = 0;
-
-        public override Loot.LootTier LootTier { get { return Loot.LootTier.Eight; } }        
+        public int intervalCount = 0;     
 
 		[Constructable]
 		public DaemonicOverlord() : base( AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4 )

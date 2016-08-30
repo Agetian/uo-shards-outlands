@@ -55,8 +55,6 @@ namespace Server.Mobiles
 
             AddItem(new HeavyOrnateAxe() { Movable = false, Hue = itemHue, Layer = Layer.FirstValid, Name = "an orghereim throwing axe" });
             AddItem(new WoodenShield() { Movable = false, Hue = 0 });
-
-            PackItem(new Arrow(10));
         }
 
         public override void SetUniqueAI()

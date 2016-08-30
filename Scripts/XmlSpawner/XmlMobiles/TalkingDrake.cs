@@ -39,8 +39,6 @@ namespace Server.Mobiles
 			Karma = -5500;
 
 			VirtualArmor = 46;
-
-			PackReg( 3 );
 		}
 
         public override void SetUniqueAI()

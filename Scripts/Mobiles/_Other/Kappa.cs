@@ -40,17 +40,6 @@ namespace Server.Mobiles
 
 			Fame = 1700;
 			Karma = -1700;
-
-			PackItem( new RawFishSteak( 3 ) );
-			for( int i = 0; i < 2; i++ )
-			{
-				switch ( Utility.Random( 6 ) )
-				{
-					case 0: PackItem( new Gears() ); break;
-					case 1: PackItem( new Hinge() ); break;
-					case 2: PackItem( new Axle() ); break;
-				}
-			}
 		}
 		 
 		public override int GetAngerSound()

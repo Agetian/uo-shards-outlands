@@ -59,24 +59,8 @@ namespace Server.Mobiles
 			}
 
 			Container bag = new Bag();
-
-			int count = Utility.RandomMinMax( 10, 20 );
-
-			for ( int i = 0; i < count; ++i )
-			{
-				Item item = Loot.RandomReagent();
-
-				if ( item == null )
-					continue;
-
-				if ( !bag.TryDropItem( this, item, false ) )
-					item.Delete();
-			}
-
-			pack.DropItem( bag );
-
+            
 			AddItem( new Crossbow() );
-			PackItem( pack );
 
 			m_NextAbilityTime = DateTime.UtcNow + TimeSpan.FromSeconds( Utility.RandomMinMax( 2, 5 ) );
 		}

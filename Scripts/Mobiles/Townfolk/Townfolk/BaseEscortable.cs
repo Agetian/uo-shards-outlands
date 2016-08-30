@@ -76,8 +76,6 @@ namespace Server.Mobiles
 		    AddItem(new Boots(Utility.RandomNeutralHue()));
 
 		    Utility.AssignRandomHair(this);
-
-		    PackGold(66, 85);
 	    }
 
         public override void OnDeath(Container c)

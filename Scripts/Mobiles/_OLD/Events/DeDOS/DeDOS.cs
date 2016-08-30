@@ -70,8 +70,6 @@ namespace Server.Mobiles
         public int BlackHoleTextHue = 2603;
         public int FirewallTextHue = 2116;
 
-        public override Loot.LootTier LootTier { get { return Loot.LootTier.Eight; } }
-
 		[Constructable]
 		public DeDOS() : base( AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4 )
 		{

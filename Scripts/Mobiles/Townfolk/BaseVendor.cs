@@ -324,8 +324,6 @@ namespace Server.Mobiles
 					case 1: AddItem( new ShortPants( GetRandomHue() ) ); break;
 				}
 			}
-
-			PackGold( 100, 200 );
 		}
 
 		public virtual void Restock()

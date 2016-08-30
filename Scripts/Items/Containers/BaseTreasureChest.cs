@@ -328,7 +328,8 @@ namespace Server.Items
 			}
 
 			//potion
-            AddRare((int)m_TreasureLevel + 1, 0.75, Loot.PotionTypes); //0.75% chance per level for a potion
+            //TEST
+            //AddRare((int)m_TreasureLevel + 1, 0.75, Loot.PotionTypes); //0.75% chance per level for a potion
 
 			// gold
 			DropItem( new Gold( MinGold, MaxGold ) );
@@ -338,6 +339,10 @@ namespace Server.Items
             AddGems((int)m_TreasureLevel * 2);
 
 			// reagents
+
+            //TEST
+
+            /*
 			Item ReagentLoot = Loot.RandomReagent();
 			ReagentLoot.Amount = Utility.Random(minRegs, maxRegs-minRegs);
 			DropItem(ReagentLoot);
@@ -345,6 +350,7 @@ namespace Server.Items
 			// clothing
 			for (int i = Utility.Random(1, 2); i > 1; i--)
 				DropItem(Loot.RandomClothing());
+            */
          
             //Crafting Component Scroll
             if (Utility.RandomDouble() <= craftingComponentChance)
@@ -365,6 +371,9 @@ namespace Server.Items
 				// Equipment
 				for (int i = Utility.Random(1, level-1); i > 1; i--)
 				{
+                    //TEST: FIX
+
+                    /*
                     Item item = Utility.RandomBool() ? Loot.RandomWeapon() as Item : Loot.RandomArmorOrShield() as Item;				
 					
 					if (item is BaseWeapon)
@@ -384,6 +393,7 @@ namespace Server.Items
 					}
 
 					DropItem(item);
+                    */
 				}
 			}
 		}
@@ -393,15 +403,23 @@ namespace Server.Items
             if (amount <= 0)
                 return;
 
+
+            //TEST: FIX
+
+            /*
             Item gem = Loot.RandomGem();
 
             gem.Amount = amount;
-
-            DropItem(gem);
+             DropItem(gem);
+             * 
+             */
         }
 
         public void AddRare(int quantity, double chance, params Type[][] types)
         {
+            //TEST
+
+            /*
             for (int i = 0; i < quantity; i++)
             {
                 if (Utility.RandomDouble() < chance)
@@ -410,10 +428,14 @@ namespace Server.Items
                     DropItem(item);
                 }
             }
+            */
         }
 
         public void AddRare(int quantity, double chance, params Type[] type)
         {
+            //TEST
+
+            /*
             for (int i = 0; i < quantity; i++)
             {
                 if (Utility.RandomDouble() < chance)
@@ -422,6 +444,7 @@ namespace Server.Items
                     DropItem(item);
                 }
             }
+             * */
         }
 
 		public void ClearContents()

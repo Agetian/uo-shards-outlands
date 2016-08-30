@@ -39,22 +39,6 @@ namespace Server.Mobiles
 
 			Fame = 4200;	
 			Karma = -4200;
-
-			PackItem( new Gourd() );
-			PackItem( new ExecutionersAxe() );
-
-			if( Utility.RandomBool() )
-				PackItem( new LongPants() );
-			else
-				PackItem( new ShortPants() );
-
-			switch ( Utility.Random( 4 ) )
-			{
-				case 0: PackItem( new Shoes() ); break;
-				case 1: PackItem( new Sandals() ); break;
-				case 2: PackItem( new Boots() ); break;
-				case 3: PackItem( new ThighBoots() ); break;
-			}
 		}
 
 		public override bool CanRummageCorpses{ get{ return true; } }

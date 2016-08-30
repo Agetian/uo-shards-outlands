@@ -29,7 +29,6 @@ namespace Server.Mobiles
             SetSkill(SkillName.Forensics, 80.0, 100.0);
             SetSkill(SkillName.SpiritSpeak, 80.0, 100.0);
             SetSkill(SkillName.Swords, 80.0, 100.0);
-            PackItem(new Bandage(25));
         }
 
         public override bool AlwaysMurderer { get { return true; } }

@@ -70,10 +70,7 @@ namespace Server.Items
 				int v = Utility.RandomMinMax( 0, 10000 );
 
 				v = (int) Math.Sqrt( v );
-				v = 100 - v;
-
-				if ( LootPack.CheckLuck( m_LuckChance ) )
-					v += 10;
+				v = 100 - v;				
 
 				if ( v < min )
 					v = min;

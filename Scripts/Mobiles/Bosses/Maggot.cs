@@ -70,8 +70,6 @@ namespace Server.Mobiles
             VirtualArmor = 25;
 
             CantWalk = true;
-
-            PackItem(new Bone(100));
         }
 
         public override int PoisonResistance { get { return 5; } }

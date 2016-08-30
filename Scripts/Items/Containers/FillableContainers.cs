@@ -622,6 +622,9 @@ namespace Server.Items
 
 		public virtual Item Construct()
 		{
+            //TEST: FIX!!!
+
+            /*
 			Item item = Loot.Construct( m_Types );
 
 			if( item is Key )
@@ -630,9 +633,12 @@ namespace Server.Items
 				item.Amount = Utility.RandomMinMax( 2, 6 );
 			else if( item is Bandage || item is Lockpick )
 				item.Amount = Utility.RandomMinMax( 1, 3 );
+             * 
+             * 	return item;
+             * */
 
-			return item;
-		}
+            return null;
+        }
 	}
 
 	public class FillableBvrge : FillableEntry
@@ -951,10 +957,13 @@ namespace Server.Items
 			},
 			new FillableEntry[]
 			{
+                //TEST: ????
+                /*
 				new FillableEntry( 12, Loot.ArmorTypes ),
 				new FillableEntry(  8, Loot.WeaponTypes ),
 				new FillableEntry(  3, Loot.ShieldTypes ),
 				new FillableEntry(  1, typeof( Arrow ) )
+                */
 			} );
 
 		public static FillableContent Guard = new FillableContent(
@@ -964,10 +973,13 @@ namespace Server.Items
 			},
 			new FillableEntry[]
 			{
+                //TEST: ????
+                /*
 				new FillableEntry( 12, Loot.ArmorTypes ),
 				new FillableEntry(  8, Loot.WeaponTypes ),
 				new FillableEntry(  3, Loot.ShieldTypes ),
 				new FillableEntry(  1, typeof( Arrow ) )
+                 * */
 			} );
 
 		public static FillableContent Healer = new FillableContent(
@@ -1023,7 +1035,9 @@ namespace Server.Items
 				new FillableEntry( 1, typeof( GoldBeadNecklace ) ),
 				new FillableEntry( 1, typeof( Necklace ) ),
 				new FillableEntry( 1, typeof( Beads ) ),
-				new FillableEntry( 9, Loot.GemTypes )
+
+                //TEST
+				//new FillableEntry( 9, Loot.GemTypes )
 			} );
 
 		public static FillableContent Library = new FillableContent(
@@ -1257,8 +1271,11 @@ namespace Server.Items
 			},
 			new FillableEntry[]
 			{
+                //TEST: ???
+                /*
 				new FillableEntry( 8, Loot.WeaponTypes ),
 				new FillableEntry( 1, typeof( Arrow ) )
+                */
 			} );
 
 		public static FillableContent Lookup( FillableContentType type )

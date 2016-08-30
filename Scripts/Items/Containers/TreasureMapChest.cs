@@ -199,6 +199,9 @@ namespace Server.Items
 
                 int reagents = level == 0 ? 4 : 8;
 
+                //TEST: FIX 
+
+                /*
                 for (int i = 0; i < reagents; i++)
                 {
                     Item item = Loot.RandomPossibleReagent();
@@ -208,6 +211,7 @@ namespace Server.Items
 
                 for (int i = 0; i < level * 3; ++i)
                     cont.DropItem(Loot.RandomScroll(0, Math.Min(47, (level + 1) * 8 - 1), SpellbookType.Regular));
+                 * */
 
                 int minimumMod = 1;
                 int maximumMod = MaxModPerLevel[level];
@@ -276,30 +280,42 @@ namespace Server.Items
 				{
                     if (Utility.RandomDouble() < 0.30)
                     {
+                        //TEST: FIX
+
+                        /*
                         BaseWeapon weapon = Loot.RandomWeapon();
                         weapon.DamageLevel = (WeaponDamageLevel)Utility.RandomMinMax(minimumMod, maximumMod);
                         weapon.AccuracyLevel = (WeaponAccuracyLevel)Utility.RandomMinMax(minimumMod, maximumMod);
                         weapon.DurabilityLevel = (WeaponDurabilityLevel)Utility.RandomMinMax(minimumMod, maximumMod);
                         
                         cont.DropItem(weapon);
+                         * */
                     }
+
                     else
                     {
+                        //TEST: FIX
+                        /*
                         BaseArmor armor = Loot.RandomArmorOrShield();
                         armor.ProtectionLevel = (ArmorProtectionLevel)Utility.RandomMinMax(minimumMod, maximumMod);
                         armor.DurabilityLevel = (ArmorDurabilityLevel)Utility.RandomMinMax(minimumMod, maximumMod);
 
                         cont.DropItem(armor);
+                         * */
                     }
 				}
 			}
 
+            //TEST: FIX
+
+            /*
             for (int i = 0; i < level; i++)
             {
                 Item item = Loot.RandomGem();
                 item.Amount = GemsPerLevel[level];
                 cont.DropItem(item);
             }
+             * */
 
             // rares
             if (level == 6 && Utility.Random(50) == 0)

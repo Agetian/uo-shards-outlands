@@ -673,8 +673,6 @@ namespace Server.Mobiles
 
         public override void OnDeath(Container c)
         {
-            PackItem(new EasterBasket());
-
             base.OnDeath(c);
         }
 

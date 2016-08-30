@@ -44,9 +44,6 @@ namespace Server.Mobiles
 			Karma = -9000;
 							
 			AddItem( new Tessen() );
-			
-			if ( 0.02 >= Utility.RandomDouble() )
-				PackItem( new OrigamiPaper() );
 		}
 							
 		public override bool Uncalmable{ get{ return true; } }

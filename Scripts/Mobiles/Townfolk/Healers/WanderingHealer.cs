@@ -30,7 +30,6 @@ namespace Server.Mobiles
             SetSkill(SkillName.Camping, 80.0, 100.0);
             SetSkill(SkillName.Forensics, 80.0, 100.0);
             SetSkill(SkillName.SpiritSpeak, 80.0, 100.0);
-            PackItem(new Bandage(25));
         }
 
         public override bool ClickTitle { get { return false; } } // Do not display title in OnSingleClick

@@ -31,9 +31,7 @@ namespace Server.Mobiles
             VirtualArmor = 25;
 
 			Fame = 4500;
-			Karma = -4500;
-			
-			PackItem( new Bone() );
+			Karma = -4500;			
 		}
 
         public override void SetUniqueAI()

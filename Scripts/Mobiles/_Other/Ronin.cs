@@ -68,15 +68,10 @@ namespace Server.Mobiles
 				case 2: AddItem( new PlateSuneate() ); break;
 			}
 			
-
-			
 			if( Utility.RandomDouble() > .2 )
 				AddItem( new NoDachi() );
 			else
 				AddItem( new Halberd() );
-
-			PackItem( new Wakizashi() );
-			PackItem( new Longsword() );
 
 			Utility.AssignRandomHair( this );
 		}

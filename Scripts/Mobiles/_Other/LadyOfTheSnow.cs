@@ -41,9 +41,6 @@ namespace Server.Mobiles
 
 			Fame = 15200;
 			Karma = -15200;
-
-			PackReg( 3 );
-			PackItem( new Necklace() );
 		}
 
 		public override int GetDeathSound()

@@ -90,15 +90,14 @@ namespace Server.Mobiles
             {
                 case 1:
                     AddItem(new Bow() { Movable = false, Hue = 0 });
-                    PackItem(new Arrow(10));
                 break;
+
                 case 2:
                     AddItem(new Crossbow() { Movable = false, Hue = 0 });
-                    PackItem(new Bolt(10));
                 break;
+
                 case 3:
                     AddItem(new HeavyCrossbow() { Movable = false, Hue = 0 });
-                    PackItem(new Bolt(10));
                 break;
             }           
         }

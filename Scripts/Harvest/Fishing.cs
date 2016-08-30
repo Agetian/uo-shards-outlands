@@ -556,7 +556,8 @@ namespace Server.Engines.Harvest
                 serp.Home = serp.Location;
                 serp.RangeHome = 10;
 
-                serp.PackItem(item);
+                //TEST: FIX
+                //serp.PackItem(item);
 
                 from.SendLocalizedMessage(503170); // Uh oh! That doesn't look like a fish!
 

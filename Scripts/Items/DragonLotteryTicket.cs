@@ -95,17 +95,7 @@ namespace Server.Items
             }
 
             else if (seed < 65)
-            {
-                text = "You win a magical weapon!";
-                BaseWeapon wep = Loot.RandomWeapon();
-                if (wep != null)
-                {
-                    wep.AccuracyLevel = (WeaponAccuracyLevel)Utility.Random(6);
-                    wep.DamageLevel = WeaponDamageLevel.Might;
-                    wep.DurabilityLevel = (WeaponDurabilityLevel)Utility.Random(6);
-                }
-
-                i = wep;
+            {               
             }
             else if (seed < 70)
             {

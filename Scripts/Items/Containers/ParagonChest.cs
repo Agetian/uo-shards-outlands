@@ -85,8 +85,9 @@ namespace Server.Items
             if (Utility.Random(chance) == 0)
                 DropItem(new RareCloth());
 
-			for ( int i = 0; i < level; ++i )
-                DropItem(Loot.RandomScroll(0, Math.Min(47, (level + 1) * 8 - 1), SpellbookType.Regular));
+            //TEST: FIX
+			//for ( int i = 0; i < level; ++i )
+                //DropItem(Loot.RandomScroll(0, Math.Min(47, (level + 1) * 8 - 1), SpellbookType.Regular));
 
 			for ( int i = 0; i < level * 2; ++i )
 			{
@@ -94,23 +95,35 @@ namespace Server.Items
 
                 if (Utility.RandomDouble() < 0.60)
                 {
+                    //TEST: FIX
+
+                    /*
                     BaseWeapon weapon = Loot.RandomWeapon();
                     weapon.DamageLevel = (WeaponDamageLevel)Utility.RandomMinMax(1, maxMod);
                     weapon.AccuracyLevel = (WeaponAccuracyLevel)Utility.Random(6);
                     weapon.DurabilityLevel = (WeaponDurabilityLevel)Utility.Random(6);
 
                     DropItem(weapon);
+                    */
                 }
+
                 else
                 {
+                    //TEST: FIX
+
+                    /*
                     BaseArmor armor = Loot.RandomArmorOrShield();
                     armor.ProtectionLevel = (ArmorProtectionLevel)Utility.RandomMinMax(1, maxMod);
                     armor.DurabilityLevel = (ArmorDurabilityLevel)Utility.Random(6);
 
                     DropItem(armor);
+                    */
                 }
 			}
 
+            //TEST: FIX
+
+            /*
 			for ( int i = 0; i < level; i++ )
 			{
 				Item item = Loot.RandomPossibleReagent();
@@ -123,6 +136,7 @@ namespace Server.Items
 				Item item = Loot.RandomGem();
 				DropItem( item );
 			}
+             * */
 
 			DropItem( new TreasureMap( Math.Min(6, level + 1), ( Map.Felucca ) ) );
 		}

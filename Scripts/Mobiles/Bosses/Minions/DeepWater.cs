@@ -45,8 +45,6 @@ namespace Server.Mobiles
 
             ResolveAcquireTargetDelay = 1.0;
             RangePerception = 24;
-
-            PackItem(new BlackPearl(2));
         }
 
         public override void SetUniqueAI()

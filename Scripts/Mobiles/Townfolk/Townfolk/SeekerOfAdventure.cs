@@ -74,8 +74,6 @@ namespace Server.Mobiles
 			AddItem( new Longsword() );
 
 			Utility.AssignRandomHair( this );
-
-			PackGold( 100, 150 );
 		}
 
 		public SeekerOfAdventure( Serial serial ) : base( serial )

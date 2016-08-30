@@ -40,9 +40,7 @@ namespace Server.Mobiles
 
             Fame = 3000;
             Karma = -3000;
-
-            PackReg(6);
-
+            
             Utility.AssignRandomHair(this, 0);
 
             AddItem(new Sandals() { Hue = 1175, Movable = false });

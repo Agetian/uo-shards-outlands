@@ -43,8 +43,6 @@ namespace Server.Mobiles
             
 			Fame = 3000;
 			Karma = -3000;
-
-			PackItem( new Club() );
 		}
 
         public override bool CanRummageCorpses { get { return true; } }

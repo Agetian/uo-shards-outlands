@@ -47,11 +47,7 @@ namespace Server.Mobiles
             DictCombatAction[CombatAction.CombatSpecialAction] = 3;
             DictCombatSpecialAction[CombatSpecialAction.FireBreathAttack] = 1;
         }
-
-        public override void GenerateLoot()
-        {
-        }
-
+        
         public override void OnDeath(Container c)
         {
             base.OnDeath(c);

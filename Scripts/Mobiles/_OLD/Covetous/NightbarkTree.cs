@@ -32,10 +32,7 @@ namespace Server.Mobiles
 			Fame = 3500;
 			Karma = -3500;
 
-			VirtualArmor = 75;
-
-			PackItem( new Log( 10 ) );
-			PackItem( new MandrakeRoot( 5 ) );            
+			VirtualArmor = 75;           
 		}
 
         public override bool DisallowAllMoves { get { return true; } }

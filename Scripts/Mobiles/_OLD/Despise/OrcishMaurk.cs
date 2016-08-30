@@ -50,7 +50,6 @@ namespace Server.Mobiles
             AddItem(new Boots() { Movable = false, Hue = 1175 });            
 
             AddItem(new Bow());
-            PackItem(new Arrow(20));
         }
 
         public override int DoubloonValue { get { return 10; } }

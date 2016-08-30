@@ -43,20 +43,6 @@ namespace Server.Mobiles
 
 			Fame = 15000;
 			Karma = -15000;
-							
-			switch ( Utility.Random( 10 ))
-			{
-				case 0: PackItem( new LeftArm() ); break;
-				case 1: PackItem( new RightArm() ); break;
-				case 2: PackItem( new Torso() ); break;
-				case 3: PackItem( new Bone() ); break;
-				case 4: PackItem( new RibCage() ); break;
-				case 5: PackItem( new RibCage() ); break;
-				case 6: PackItem( new BonePile() ); break;
-				case 7: PackItem( new BonePile() ); break;
-				case 8: PackItem( new BonePile() ); break;
-				case 9: PackItem( new BonePile() ); break;
-			}
 		}
 
 		public override int GetAngerSound()

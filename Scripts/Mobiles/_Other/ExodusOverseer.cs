@@ -46,11 +46,6 @@ namespace Server.Mobiles
 			Karma = -10000;
 			VirtualArmor = 50;
 
-			if ( Utility.Random( 2 ) == 0 )
-				PackItem( new PowerCrystal() );
-			else
-				PackItem( new ArcaneGem() );
-
 			m_FieldActive = CanUseField;
 		}
 

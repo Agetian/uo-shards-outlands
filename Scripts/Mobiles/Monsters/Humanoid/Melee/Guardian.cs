@@ -36,9 +36,6 @@ namespace Server.Mobiles
 
 			AddItem( bow ); 
 
-			PackItem( new Arrow( 250 ) );
-			PackGold( 250, 500 );
-
 			Skills[SkillName.Anatomy].Base = 120.0; 
 			Skills[SkillName.Tactics].Base = 120.0; 
 			Skills[SkillName.Archery].Base = 120.0; 

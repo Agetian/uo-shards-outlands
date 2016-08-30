@@ -73,10 +73,7 @@ namespace Server.Mobiles
             rm.MoveToWorld(Location, Map);
 
             Effects.SendLocationEffect(Location, Map, 0x376A, 10, 1);
-
-            Gold gold = new Gold(GoldWorth);
-            gold.MoveToWorld(Location, Map);
-
+            
             Delete();            
 
             return false;

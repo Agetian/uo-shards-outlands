@@ -309,9 +309,7 @@ namespace Server.Mobiles
                 return null;
             }
         }
-
-        public const int MaxLoyalty = 100;
-
+        
         #region Var declarations
 
         private BaseAI m_AI;                    // THE AI
@@ -1063,15 +1061,8 @@ namespace Server.Mobiles
 
         protected bool HasBurrowed = false;
 
-        public BaseCreature(AIType ai,
-            FightMode mode,
-            int iRangePerception,
-            int iRangeFight,
-            double dActiveSpeed,
-            double dPassiveSpeed)
+        public BaseCreature(AIType ai, FightMode mode, int iRangePerception, int iRangeFight, double dActiveSpeed, double dPassiveSpeed)
         {
-            m_Loyalty = MaxLoyalty;
-
             Hunger = Utility.RandomMinMax(10, 20);
 
             m_iRangePerception = iRangePerception;
@@ -1103,9 +1094,7 @@ namespace Server.Mobiles
 
             if (IsInvulnerable && !Core.AOS)
                 NameHue = 0x35;
-
-            GenerateLoot(true);
-
+            
             m_VisitedWaypoints = new List<WayPoint>();
 
             m_SpecialAbilityEffectEntries = new List<SpecialAbilityEffectEntry>();
@@ -1499,15 +1488,6 @@ namespace Server.Mobiles
 
             if (AIObject != null && AIObject.m_Timer != null)
                 AIObject.m_Timer.Priority = TimerPriority.FiftyMS;
-        }
-
-        [CommandProperty(AccessLevel.Counselor)]
-        public virtual Server.Loot.LootTier LootTier
-        {
-            get
-            {
-                return Loot.GetLootTier(this);
-            }
         }
 
         [CommandProperty(AccessLevel.Counselor)]
@@ -2524,7 +2504,7 @@ namespace Server.Mobiles
         public virtual bool Uncalmable { get { return BardImmune || m_IsDeadPet; } }
         public virtual bool AreaPeaceImmune { get { return BardImmune || m_IsDeadPet; } }
 
-        public virtual bool AllowParagon { get { return (LootTier < Loot.LootTier.Eight && !IsChamp() && !IsBoss() && !IsLoHBoss() && !IsEventBoss()) && !Rare; } }
+        public virtual bool AllowParagon { get { return (!IsChamp() && !IsBoss() && !IsLoHBoss() && !IsEventBoss()) && !Rare; } }
 
         public virtual bool AlwaysChamp { get { return false; } }
         public virtual bool AlwaysChampMinion { get { return false; } }
@@ -3302,19 +3282,6 @@ namespace Server.Mobiles
                 return true;
 
             return false;
-        }
-
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int Loyalty
-        {
-            get
-            {
-                return m_Loyalty;
-            }
-            set
-            {
-                m_Loyalty = Math.Min(Math.Max(value, 0), MaxLoyalty);
-            }
         }
 
         [CommandProperty(AccessLevel.GameMaster)]
@@ -6944,484 +6911,6 @@ namespace Server.Mobiles
                 val = max;
         }
 
-        #region Pack & Loot
-
-        public void PackCraftingComponent(int chanceAttempts, double chance)
-        {
-            for (int a = 0; a < chanceAttempts; a++)
-            {
-                if (Utility.RandomDouble() <= chance)
-                    PackItem(CraftingComponent.GetRandomCraftingComponent(1));
-            }
-        }
-
-        public void PackResearchMaterials(int chanceAttempts, double chance)
-        {
-            for (int a = 0; a < chanceAttempts; a++)
-            {
-                if (Utility.RandomDouble() <= chance)
-                    PackItem(new Custom.ResearchMaterials());
-            }
-        }
-        
-        public void PackPetDye(int chanceAttempts, double chance)
-        {
-            for (int a = 0; a < chanceAttempts; a++)
-            {
-                if (Utility.RandomDouble() <= chance)
-                {
-                    switch (Utility.RandomMinMax(1, 3))
-                    {
-                        case 1: PackItem(new EmeraldPetDye()); break;
-                        case 2: PackItem(new SapphirePetDye()); break;
-                        case 3: PackItem(new AmethystPetDye()); break;
-                    }
-                }
-            }
-        }
-
-        public void PackSpellHueDeed(int chanceAttempts, double chance)
-        {
-            for (int a = 0; a < chanceAttempts; a++)
-            {
-                if (Utility.RandomDouble() <= chance)
-                    PackItem(new Custom.SpellHueDeed());
-            }
-        }
-        
-        public void PackPotion()
-        {
-            PackItem(Loot.RandomPotion());
-        }
-
-        public void PackScroll(int minCircle, int maxCircle)
-        {
-            PackScroll(Utility.RandomMinMax(minCircle, maxCircle));
-        }
-
-        public void PackScroll(int circle)
-        {
-            int min = (circle - 1) * 8;
-
-            PackItem(Loot.RandomScroll(min, min + 7, SpellbookType.Regular));
-        }
-
-        public void PackMagicItems(int minLevel, int maxLevel)
-        {
-            float increaseChance = 1.0f;
-            float armorChance = .30f * increaseChance;
-            float weaponChance = .15f * increaseChance;
-
-            PackMagicItems(minLevel, maxLevel, armorChance, weaponChance);
-        }
-
-        public void PackMagicItems(int minLevel, int maxLevel, double armorChance, double weaponChance)
-        {
-            if (!PackArmor(minLevel, maxLevel, armorChance))
-                PackWeapon(minLevel, maxLevel, weaponChance);
-        }
-
-        public void PackMagicItems(int minLevel, int maxLevel, double bothChance)
-        {
-            if (!PackArmor(minLevel, maxLevel, bothChance))
-                PackWeapon(minLevel, maxLevel, bothChance);
-        }
-
-        public virtual void DropBackpack()
-        {
-            if (Backpack != null)
-            {
-                if (Backpack.Items.Count > 0)
-                {
-                    Backpack b = new CreatureBackpack(Name);
-
-                    List<Item> list = new List<Item>(Backpack.Items);
-                    foreach (Item item in list)
-                    {
-                        b.DropItem(item);
-                    }
-
-                    BaseHouse house = BaseHouse.FindHouseAt(this);
-                    if (house != null)
-                        b.MoveToWorld(house.BanLocation, house.Map);
-                    else
-                        b.MoveToWorld(Location, Map);
-                }
-            }
-        }
-
-        protected bool m_Spawning;
-        protected int m_KillersLuck = -1;
-
-        public virtual void GenerateLoot(bool spawning)
-        {
-            m_Spawning = spawning;
-
-            if (!spawning)
-            {
-                int gold = GoldWorth;                
-
-                if (gold > 0)
-                {
-                    if (LootDropMode != LootDropModeType.None)
-                    {
-                        switch (LootDropMode)
-                        {
-                            case LootDropModeType.Gold:
-                                PackGold(gold);
-                            break;
-
-                            case LootDropModeType.Hides:
-                                int hideAmount = (int)(Math.Round((double)gold / (double)Hide.GetSBSellValue()));
-
-                                if (hideAmount < 1)
-                                    hideAmount = 1;
-
-                                PackItem(new Hide(hideAmount));
-                            break;
-                        }
-                        
-                        Loot.AddTieredLoot(this);
-                    }
-                }
-            }
-
-            if (!NoKillAwards)
-                GenerateLoot();
-
-            m_Spawning = false;
-        }
-
-        [CommandProperty(AccessLevel.Counselor)]
-        public virtual int GoldWorth
-        {
-            get
-            {
-                double goldValue = 5;
-
-                goldValue = InitialDifficulty * 12.5;
-
-                if (goldValue < 5)
-                    goldValue = 5;
-
-                double goldScalar = 1.0 + RegionGoldMod.GetModifier(Region);
-
-                if (Region is NewbieDungeonRegion)
-                    goldScalar -= NewbieRegionGoldDropScalar;
-
-                goldValue *= goldScalar;
-                
-                int minGold = (int)(Math.Round((1 - GoldDropVariation) * goldValue));
-                int maxGold = (int)(Math.Round((1 + GoldDropVariation) * goldValue));
-
-                if (minGold < 1)
-                    minGold = 1;
-
-                if (maxGold < 1)
-                    maxGold = 1;
-
-                int finalGoldAmount = Utility.RandomMinMax(minGold, maxGold);
-
-                return finalGoldAmount;
-            }
-        }
-
-        public virtual void GenerateLoot()
-        {
-        }
-
-        public virtual void AddLoot(LootPack pack, int amount)
-        {
-            for (int i = 0; i < amount; ++i)
-                AddLoot(pack);
-        }
-
-        public virtual void AddLoot(LootPack pack)
-        {
-            if (Summoned)
-                return;
-
-            Container backpack = Backpack;
-
-            if (backpack == null)
-            {
-                backpack = new Backpack();
-
-                backpack.Movable = false;
-
-                AddItem(backpack);
-            }
-
-            pack.Generate(this, backpack, m_Spawning);
-        }
-
-        public int GetLuckChanceForKiller()
-        {
-            if (m_Spawning) return 0;
-            if (m_KillersLuck > -1) return m_KillersLuck; // already computed
-
-            List<DamageStore> list = GetLootingRights(DamageEntries, HitsMax);
-
-            DamageStore highest = null;
-
-            for (int i = 0; i < list.Count; ++i)
-            {
-                DamageStore ds = list[i];
-
-                if (ds.m_HasRight && (highest == null || ds.m_Damage > highest.m_Damage))
-                    highest = ds;
-            }
-
-            if (highest == null)
-                return 0;
-
-            m_KillersLuck = highest.m_Mobile.Luck;
-            return m_KillersLuck;
-        }
-
-        public bool PackArmor(int minLevel, int maxLevel)
-        {
-            return PackArmor(minLevel, maxLevel, 1.0);
-        }
-
-        public bool PackArmor(int minLevel, int maxLevel, double chance)
-        {
-            double random = Utility.RandomDouble();
-            double luckBonus = GetLuckChanceForKiller() / 100.0;
-
-            if (chance <= random + luckBonus)
-                return false;
-
-            if (luckBonus > Utility.RandomDouble())
-                minLevel++;
-
-            Cap(ref minLevel, 0, 5);
-            Cap(ref maxLevel, 0, 5);
-
-            BaseArmor armor = Loot.RandomArmorOrShield();
-            if (armor == null)
-                return false;
-
-            armor.ProtectionLevel = (ArmorProtectionLevel)RandomMinMaxScaled(minLevel, maxLevel);
-            armor.DurabilityLevel = (ArmorDurabilityLevel)RandomMinMaxScaled(minLevel, maxLevel);
-            PackItem(armor);
-
-            return true;
-        }
-
-        public static int RandomMinMaxScaled(int min, int max)
-        {
-            if (min == max)
-                return min;
-
-            if (min > max)
-            {
-                int hold = min;
-                min = max;
-                max = hold;
-            }
-
-            /* Example:
-             *    min: 1
-             *    max: 5
-             *  count: 5
-             * 
-             * total = (5*5) + (4*4) + (3*3) + (2*2) + (1*1) = 25 + 16 + 9 + 4 + 1 = 55
-             * 
-             * chance for min+0 : 25/55 : 45.45%
-             * chance for min+1 : 16/55 : 29.09%
-             * chance for min+2 :  9/55 : 16.36%
-             * chance for min+3 :  4/55 :  7.27%
-             * chance for min+4 :  1/55 :  1.81%
-             * 
-             * 
-             * 
-             * 
-             * 
-             * 
-             */
-            /*  1 - 4:
-                   res 1 53,39% chance
-                   res 2 30,02% chance
-                   res 3 13,24% chance
-                   res 4 3,35% chance
-               2 - 5:
-                   res 2 53,42% chance
-                   res 3 30,03% chance
-                   res 4 13,38% chance
-                   res 5 3,17% chance
-               3 - 5:
-                   res 3 64,78% chance
-                   res 4 28,05% chance
-                   res 5 7,17% chance
-               4 - 5:
-                   res 4 80,17% chance
-                   res 5 19,83% chance
-            */
-
-            int count = max - min + 1;
-            int total = 0, toAdd = count;
-
-            for (int i = 0; i < count; ++i, --toAdd)
-                total += toAdd * toAdd;
-
-            int rand = Utility.Random(total);
-            toAdd = count;
-
-            int val = min;
-
-            for (int i = 0; i < count; ++i, --toAdd, ++val)
-            {
-                rand -= toAdd * toAdd;
-
-                if (rand < 0)
-                    break;
-            }
-
-            return val;
-        }
-
-        public bool PackSlayer()
-        {
-            return PackSlayer(0.05);
-        }
-
-        public bool PackSlayer(double chance)
-        {
-            if (chance <= Utility.RandomDouble())
-                return false;
-
-            return true;
-        }
-
-        public bool PackWeapon(int minLevel, int maxLevel)
-        {
-            return PackWeapon(minLevel, maxLevel, 1.0);
-        }
-
-        public bool PackWeapon(int minLevel, int maxLevel, double chance)
-        {
-            double random = Utility.RandomDouble();
-            double luckBonus = GetLuckChanceForKiller() / 100.0;
-
-            if (chance <= random + luckBonus)
-                return false;
-
-            if (luckBonus > Utility.RandomDouble()) //chance to up the min level with luck
-                minLevel++;
-
-            Cap(ref minLevel, 0, 5);
-            Cap(ref maxLevel, 0, 5);
-
-            BaseWeapon weapon = Loot.RandomWeapon();
-            if (weapon == null)
-                return false;
-
-            weapon.DamageLevel = (WeaponDamageLevel)RandomMinMaxScaled(minLevel, maxLevel);
-            if ((int)weapon.DamageLevel >= 4 && Utility.RandomBool())
-                weapon.DamageLevel = (WeaponDamageLevel)((int)weapon.DamageLevel - 1);
-
-            weapon.AccuracyLevel = (WeaponAccuracyLevel)RandomMinMaxScaled(minLevel, maxLevel);
-            weapon.DurabilityLevel = (WeaponDurabilityLevel)RandomMinMaxScaled(minLevel, maxLevel);
-
-            PackItem(weapon);
-
-            return true;
-        }
-
-        public void PackGold(int amount)
-        {
-            if (amount > 0)
-                PackItem(new Gold(amount));
-        }
-
-        public void PackGold(int min, int max)
-        {
-            PackGold(Utility.RandomMinMax(min, max));
-        }
-
-        public void PackStatue(int min, int max)
-        {
-            PackStatue(Utility.RandomMinMax(min, max));
-        }
-
-        public void PackStatue(int amount)
-        {
-            for (int i = 0; i < amount; ++i)
-                PackStatue();
-        }
-
-        public void PackStatue()
-        {
-            PackItem(Loot.RandomStatue());
-        }
-
-        public void PackGem()
-        {
-            PackGem(1);
-        }
-
-        public void PackGem(int min, int max)
-        {
-            PackGem(Utility.RandomMinMax(min, max));
-        }
-
-        public void PackGem(int amount)
-        {
-            if (amount <= 0)
-                return;
-
-            Item gem = Loot.RandomGem();
-
-            gem.Amount = amount;
-
-            PackItem(gem);
-        }
-
-        public void PackReg(int min, int max)
-        {
-            PackReg(Utility.RandomMinMax(min, max));
-        }
-
-        public void PackReg(int amount)
-        {
-            if (amount <= 0)
-                return;
-
-            Item reg = Loot.RandomReagent();
-
-            reg.Amount = amount;
-
-            PackItem(reg);
-        }
-
-        public void PackItem(Item item)
-        {
-            if (Summoned || item == null || NoKillAwards)
-            {
-                if (item != null)                
-                    item.Delete();                
-
-                return;
-            }
-
-            Container pack = Backpack;
-
-            if (pack == null)
-            {
-                pack = new Backpack();
-
-                pack.Movable = false;
-
-                AddItem(pack);
-            }
-
-            if (!item.Stackable || !pack.TryDropItem(this, item, false)) // try stack
-                pack.DropItem(item); // failed, drop it anyway
-        }
-
-        #endregion
-
         public override void OnDoubleClick(Mobile from)
         {
             if (from.AccessLevel >= AccessLevel.GameMaster && !Body.IsHuman)
@@ -7468,9 +6957,6 @@ namespace Server.Mobiles
         public override void AddNameProperties(ObjectPropertyList list)
         {
             base.AddNameProperties(list);
-
-            //if ( MLQuestSystem.Enabled && CanGiveMLQuest )
-            //    list.Add( 1072269 ); // Quest Giver
 
             if (Core.ML)
             {
@@ -7594,113 +7080,10 @@ namespace Server.Mobiles
             base.OnSingleClick(from);
         }
 
-        public virtual double TreasureMapChance { get { return TreasureMap.LootChance; } }
-        public virtual int TreasureMapLevel
-        {
-            get
-            {
-                switch (LootTier)
-                {
-                    case Loot.LootTier.Two:
-                        return 1;
-                        break;
-                    case Loot.LootTier.Three:
-                        return 2;
-                        break;
-                    case Loot.LootTier.Four:
-                        return 3;
-                        break;
-                    case Loot.LootTier.Five:
-                        return 3;
-                        break;
-                    case Loot.LootTier.Six:
-                        return 4;
-                        break;
-                    case Loot.LootTier.Seven:
-                        return 5;
-                        break;
-                    case Loot.LootTier.Eight:
-                        return 6;
-                        break;
-                }
-
-                return -1;
-            }
-        }
-
         public virtual bool IgnoreYoungProtection { get { return false; } }
 
         public override bool OnBeforeDeath()
-        {
-            if (IsBoss() && !(Region is NewbieDungeonRegion) && !DiedByShipSinking && !IsLoHBoss())
-            {
-                double dungeonArmorChance = 1;
-                double dungeonArmorUpgradeHammerChance = 1;
-                double powerScrollChance = 1;
-
-                if (m_AncientMysteryCreature)
-                {
-                    powerScrollChance = 0;
-                    dungeonArmorChance = 1.0;
-                    dungeonArmorUpgradeHammerChance = 0.5;
-                }
-
-                if (Utility.RandomDouble() < dungeonArmorChance)
-                {
-                    //PackItem(DungeonArmor.CreateDungeonArmor(DungeonEnum.None, DungeonArmor.ArmorTierEnum.Tier1, DungeonArmor.ArmorLocation.Unspecified));
-                    //PackItem(new ArcaneDust());
-                }
-
-                //if (Utility.RandomDouble() < dungeonArmorUpgradeHammerChance)
-                //PackItem(new DungeonArmorUpgradeHammer());
-
-                if (Utility.RandomDouble() < powerScrollChance)
-                    HandoutPowerScrolls(Utility.RandomMinMax(1, 3), true);
-
-                PackCraftingComponent(10, 0.5);
-                PackResearchMaterials(2, 0.5);
-                PackSpellHueDeed(1, .15);
-
-                PackItem(new TreasureMap(RandomMinMaxScaled(3, 6)));
-            }
-
-            else if (IsChamp() && !(Region is NewbieDungeonRegion) && !DiedByShipSinking)
-            {
-                double dungeonArmorChance = 1;
-                double dungeonArmorUpgradeHammerChance = .25;
-                double powerScrollChance = .4;
-
-                if (Utility.RandomDouble() < dungeonArmorChance)
-                {
-                    //PackItem(DungeonArmor.CreateDungeonArmor(DungeonEnum.None, DungeonArmor.ArmorTierEnum.Tier1, DungeonArmor.ArmorLocation.Unspecified));
-                    //PackItem(new ArcaneDust());
-                }
-
-                //if (Utility.RandomDouble() < dungeonArmorUpgradeHammerChance)
-                //PackItem(new DungeonArmorUpgradeHammer());
-
-                if (Utility.RandomDouble() < powerScrollChance)
-                    HandoutPowerScrolls(Utility.RandomMinMax(1, 2), false);
-
-                PackCraftingComponent(10, 0.1);
-                PackResearchMaterials(2, 0.1);
-                PackSpellHueDeed(1, .03);
-
-                PackItem(new TreasureMap(RandomMinMaxScaled(2, 6)));
-            }
-            
-            if (!Summoned && !NoKillAwards && !IsBonded && TreasureMapLevel >= 0 && !DiedByShipSinking)
-            {
-                if (m_Paragon && Paragon.ChestChance > Utility.RandomDouble())
-                    PackItem(new ParagonChest(this.Name, TreasureMapLevel));
-
-                else if ((Map == Map.Felucca || Map == Map.Trammel) && TreasureMap.LootChance >= Utility.RandomDouble())
-                    PackItem(new TreasureMap(TreasureMapLevel, Map));
-            }
-
-            if (!Summoned && !NoKillAwards && !DiedByShipSinking)
-                GenerateLoot(false);
-
+        {   
             if (IsAnimatedDead)
                 Effects.SendLocationEffect(Location, Map, 0x3728, 13, 1, 0x461, 4);
 
@@ -7950,6 +7333,30 @@ namespace Server.Mobiles
             }
         }
 
+        public void PackItem(Item item)
+        {
+            if (Summoned || item == null || NoKillAwards)
+            {
+                if (item != null)
+                    item.Delete();
+
+                return;
+            }
+
+            Container pack = Backpack;
+
+            if (pack == null)
+            {
+                pack = new Backpack();
+                pack.Movable = false;
+
+                AddItem(pack);
+            }
+
+            if (!item.Stackable || !pack.TryDropItem(this, item, false))
+                pack.DropItem(item);
+        }
+
         public override void OnDeath(Container c)
         {
             ClearExpiredDamageEntries();
@@ -7965,6 +7372,9 @@ namespace Server.Mobiles
             int totalDamage = 0;
 
             bool validLootDrop = (!Summoned && !m_NoKillAwards && !DiedByShipSinking && !(ControlMaster is PlayerMobile));
+
+            if (validLootDrop)            
+                Loot.GenerateLoot(this);            
             
             List<PlayerMobile> passiveTamingSkillGainPlayers = new List<PlayerMobile>();
 

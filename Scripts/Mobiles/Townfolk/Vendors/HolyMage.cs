@@ -57,8 +57,6 @@ namespace Server.Mobiles
 			}
 
 			HairHue = 0x47E;
-
-			PackGold( 100, 200 );
 		}
 
 		public HolyMage( Serial serial ) : base( serial )

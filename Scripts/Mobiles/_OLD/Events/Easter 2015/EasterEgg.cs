@@ -111,18 +111,6 @@ namespace Server.Items
 
             else if (seed <= 850)
             {
-                text = "You receive a magical weapon!";
-                
-                BaseWeapon wep = Loot.RandomWeapon();
-
-                if (wep != null)
-                {
-                    wep.AccuracyLevel = (WeaponAccuracyLevel)Utility.RandomMinMax(1, 5);
-                    wep.DamageLevel = (WeaponDamageLevel)Utility.RandomMinMax(1, 5);
-                    wep.DurabilityLevel = (WeaponDurabilityLevel)Utility.RandomMinMax(1, 5);
-                }
-
-                i = wep;
             }
 
             else if (seed <= 3150)

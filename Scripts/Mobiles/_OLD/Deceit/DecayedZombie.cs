@@ -37,15 +37,6 @@ namespace Server.Mobiles
 
             Fame = 720;
             Karma = -600;
-            
-            PackItem(new Bone(2));
-
-            switch (Utility.Random(3))
-            {
-                case 0: PackItem(new LeftArm()); break;
-                case 1: PackItem(new RightArm()); break;
-                case 2: PackItem(new Torso()); break;
-            }
         }
 
         public override int PoisonResistance { get { return 5; } }

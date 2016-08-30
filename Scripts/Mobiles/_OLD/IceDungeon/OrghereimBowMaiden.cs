@@ -45,7 +45,6 @@ namespace Server.Mobiles
             AddItem(new ThighBoots() { Movable = false, Hue = itemHue });            
 
             AddItem(new Yumi() { Movable = false, Hue = 0, Speed = 30, MaxRange = 14, Name = "an orghereim longbow" });
-            PackItem(new Arrow(15));
         }
 
         public override void SetUniqueAI()

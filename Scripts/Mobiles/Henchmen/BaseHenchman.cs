@@ -101,8 +101,8 @@ namespace Server.Custom
                         {
                             if (!IsRangedPrimary)
                                 AddItem(item);
-                            else
-                                PackItem(item);
+                            else                            
+                                Backpack.DropItem(item);                                                         
                         }
 
                         else if (item is BaseRanged)
@@ -110,7 +110,7 @@ namespace Server.Custom
                             if (IsRangedPrimary)
                                 AddItem(item);
                             else
-                                PackItem(item);
+                                Backpack.DropItem(item);         
                         }
 
                         else

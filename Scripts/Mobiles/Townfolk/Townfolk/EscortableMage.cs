@@ -49,8 +49,6 @@ namespace Server.Mobiles
 				AddItem( new Boots( lowHue ) );
 
 			Utility.AssignRandomHair( this );
-
-			PackGold( 200, 250 );
 		}
 
 		public EscortableMage( Serial serial ) : base( serial )

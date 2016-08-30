@@ -38,24 +38,6 @@ namespace Server.Mobiles
 
 			Fame = 700;
 			Karma = -700;
-
-
-			if( Utility.RandomBool() )
-			{
-				Item i = Loot.RandomReagent();
-				i.Amount = 3;
-				PackItem( i );
-			}
-			
-			switch ( Utility.Random( 12 ) )
-			{
-				case 0: PackItem( new LeatherGorget() ); break;
-				case 1: PackItem( new LeatherGloves() ); break;
-				case 2: PackItem( new LeatherArms() ); break;
-				case 3: PackItem( new LeatherLegs() ); break;
-				case 4: PackItem( new LeatherCap() ); break;
-				case 5: PackItem( new LeatherChest() ); break;
-			}
 		}
 
 		public override int GetAngerSound()

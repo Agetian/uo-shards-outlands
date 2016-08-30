@@ -58,8 +58,6 @@ namespace Server.Mobiles
 				HairItemID = 0x203C;
 
 			HairHue = this.Race.RandomHairHue();
-
-			PackGold( 200, 250 );
 		}
 
 		public BrideGroom( Serial serial ) : base( serial )

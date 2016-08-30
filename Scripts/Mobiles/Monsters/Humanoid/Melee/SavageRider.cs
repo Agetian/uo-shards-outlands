@@ -36,8 +36,6 @@ namespace Server.Mobiles
 			Fame = 1000;
 			Karma = -1000;
 
-			PackItem( new Bandage( Utility.RandomMinMax( 1, 15 ) ) );
-
 			AddItem( new TribalSpear() );
 			AddItem( new BoneArms() );
 			AddItem( new BoneLegs() );

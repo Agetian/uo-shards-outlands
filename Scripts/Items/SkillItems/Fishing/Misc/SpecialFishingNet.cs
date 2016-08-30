@@ -330,9 +330,10 @@ namespace Server.Items
             }
 
             spawn.MoveToWorld(new Point3D(x, y, p.Z), map);
-
-            if (spawn is Kraken && 0.4 > Utility.RandomDouble())
-                spawn.PackItem(new MessageInABottle(map == Map.Felucca ? Map.Felucca : Map.Trammel));
+            
+            //TEST: REPLACE
+            //if (spawn is Kraken && 0.4 > Utility.RandomDouble())
+                //spawn.PackItem(new MessageInABottle(map == Map.Felucca ? Map.Felucca : Map.Trammel));
         }
 
         protected virtual void FinishEffect(Point3D p, Map map, Mobile from)

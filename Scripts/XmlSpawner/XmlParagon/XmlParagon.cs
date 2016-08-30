@@ -143,7 +143,6 @@ namespace Server.Engines.XmlSpawner2
             }
         }
 
-
         public static void AddChest(BaseCreature bc, int treasureLevel)
         {
             XmlParagon xa = GetXmlParagon(bc);
@@ -151,10 +150,6 @@ namespace Server.Engines.XmlSpawner2
             if (xa != null)
             {
                 xa.XmlAddChest(bc, treasureLevel);
-            }
-            else
-            {
-                bc.PackItem(new ParagonChest(bc.Name, treasureLevel));
             }
         }
 
@@ -222,8 +217,6 @@ namespace Server.Engines.XmlSpawner2
         public virtual void XmlAddChest(BaseCreature bc, int treasureLevel)
         {
             if (bc == null) return;
-
-            bc.PackItem(new ParagonChest(bc.Name, treasureLevel));
         }
 
         public virtual double XmlChestChance(BaseCreature bc)

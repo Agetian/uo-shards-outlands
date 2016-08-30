@@ -7046,16 +7046,7 @@ namespace Server.Mobiles
 
                                         int circle = Utility.RandomMinMax(minCircle, maxCircle);
                                         int min = (circle - 1) * 8;
-                                        Item item = Loot.RandomScroll(min, min + 7, SpellbookType.Regular);
-                                        if (item != null)
-                                        {
-                                            pack.DropItem(item);
-                                            // could call applyobjectstringproperties on a nested propertylist here to set item attributes
-                                            if (itemargstring != null)
-                                            {
-                                                ApplyObjectStringProperties(spawner, itemargstring, item, trigmob, refobject, out status_str);
-                                            }
-                                        }
+                                        
                                     }
                                     else
                                     {
@@ -7066,17 +7057,6 @@ namespace Server.Mobiles
                                 }
                             case itemKeyword.POTION:
                                 {
-                                    // syntax is POTION
-                                    Item item = Loot.RandomPotion();
-                                    if (item != null)
-                                    {
-                                        pack.DropItem(item);
-                                        // could call applyobjectstringproperties on a nested propertylist here to set item attributes
-                                        if (itemargstring != null)
-                                        {
-                                            ApplyObjectStringProperties(spawner, itemargstring, item, trigmob, refobject, out status_str);
-                                        }
-                                    }
                                     break;
                                 }
                             case itemKeyword.TAKEN:
@@ -7273,7 +7253,7 @@ namespace Server.Mobiles
                                         int m_KillersLuck = 0;
                                         if (trigmob != null)
                                         {
-                                            m_KillersLuck = LootPack.GetLuckChanceForKiller(trigmob);
+                                           // m_KillersLuck = LootPack.GetLuckChanceForKiller(trigmob);
                                         }
 
                                         bool converterror = false;
@@ -7814,15 +7794,7 @@ namespace Server.Mobiles
             BaseCreature.Cap(ref minLevel, 0, 5);
             BaseCreature.Cap(ref maxLevel, 0, 5);
 
-            BaseArmor armor = Loot.RandomArmorOrShield();
-
-            if (armor == null)
-                return null;
-
-            armor.ProtectionLevel = (ArmorProtectionLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-            armor.DurabilityLevel = (ArmorDurabilityLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-
-            return armor;
+            return null;
         }
 
         public static Item MagicShield(int minLevel, int maxLevel)
@@ -7830,15 +7802,7 @@ namespace Server.Mobiles
             BaseCreature.Cap(ref minLevel, 0, 5);
             BaseCreature.Cap(ref maxLevel, 0, 5);
 
-            BaseArmor armor = Loot.RandomShield();
-
-            if (armor == null)
-                return null;
-
-            armor.ProtectionLevel = (ArmorProtectionLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-            armor.DurabilityLevel = (ArmorDurabilityLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-
-            return armor;
+            return null;
         }
 
         public static Item MagicWeapon(int minLevel, int maxLevel, bool jewel)
@@ -7846,16 +7810,7 @@ namespace Server.Mobiles
             BaseCreature.Cap(ref minLevel, 0, 5);
             BaseCreature.Cap(ref maxLevel, 0, 5);
 
-            BaseWeapon weapon = Loot.RandomWeapon();
-
-            if (weapon == null)
-                return null;
-            
-            weapon.DamageLevel = (WeaponDamageLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-            weapon.AccuracyLevel = (WeaponAccuracyLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-            weapon.DurabilityLevel = (WeaponDurabilityLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-
-            return weapon;
+            return null;
         }
 
 
@@ -10817,11 +10772,7 @@ namespace Server.Mobiles
                                     }
                                     int circle = Utility.RandomMinMax(minCircle, maxCircle);
                                     int min = (circle - 1) * 8;
-                                    Item item = Loot.RandomScroll(min, min + 7, SpellbookType.Regular);
-                                    if (item != null)
-                                    {
-                                        AddSpawnItem(spawner, TheSpawn, item, location, map, triggermob, requiresurface, spawnpositioning, substitutedtypeName, out status_str);
-                                    }
+                                   
                                 }
                                 else
                                 {
@@ -10891,12 +10842,6 @@ namespace Server.Mobiles
                             }
                         case itemKeyword.POTION:
                             {
-                                // syntax is POTION
-                                Item item = Loot.RandomPotion();
-                                if (item != null)
-                                {
-                                    AddSpawnItem(spawner, TheSpawn, item, location, map, triggermob, requiresurface, spawnpositioning, substitutedtypeName, out status_str);
-                                }
                                 break;
                             }
                         case itemKeyword.TAKEN:

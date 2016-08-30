@@ -211,7 +211,7 @@ namespace Server.SkillHandlers
                             AddItem(74 + bc_Creature.TamedItemXOffset, 62 + bc_Creature.TamedItemYOffset, shrinkTableIcon, 0);
                     }
                     
-                    string creatureDifficulty = Utility.CreateDecimalString(bc_Creature.InitialDifficulty, 1);
+                    string creatureDifficulty = Utility.CreateDecimalString(bc_Creature.InitialDifficulty, 2);
                     string slayerGroup = bc_Creature.SlayerGroup.ToString();
 
                     int level = bc_Creature.ExperienceLevel;
@@ -537,9 +537,9 @@ namespace Server.SkillHandlers
                     if (bc_Creature.PoisonResistance > 0)
                     {
                         if (bc_Creature.PoisonResistance > 1)
-                            AddLabel(valuesX, startY, ValueTextHue, bc_Creature.PoisonResistance.ToString() + " Levels");
+                            AddLabel(valuesX, startY, ValueTextHue, "Reduced " + bc_Creature.PoisonResistance.ToString() + " Levels");
                         else
-                            AddLabel(valuesX, startY, ValueTextHue, bc_Creature.PoisonResistance.ToString() + " Level");
+                            AddLabel(valuesX, startY, ValueTextHue, "Reduced " + bc_Creature.PoisonResistance.ToString() + " Level");
                     }
 
                     else
@@ -880,7 +880,7 @@ namespace Server.SkillHandlers
                                     FollowerTraitDetail followerTraitDetail = FollowerTraits.GetFollowerTraitDetail(traitOption);
 
                                     if (followerTraitDetail != null)
-                                        pm_Player.SendMessage(followerTraitDetail.Description + ".");
+                                        pm_Player.SendMessage(2550, followerTraitDetail.Description + ".");
                                 break;
 
                                 //Left Selection
@@ -905,7 +905,7 @@ namespace Server.SkillHandlers
                                     followerTraitDetail = FollowerTraits.GetFollowerTraitDetail(traitOption);
 
                                     if (followerTraitDetail != null)
-                                        pm_Player.SendMessage(followerTraitDetail.Description + ".");
+                                        pm_Player.SendMessage(2550, followerTraitDetail.Description + ".");
                                 break;
 
                                 //Right Selection

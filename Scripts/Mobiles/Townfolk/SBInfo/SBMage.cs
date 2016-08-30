@@ -21,6 +21,10 @@ namespace Server.Mobiles
 		{
 			public InternalBuyInfo()
 			{
+                //TEST: FIX THIS!!!!
+
+
+                /*
 				Type[] types = Loot.RegularScrollTypes;
 
 				//for ( int i = 0; i < types.Length; ++i )
@@ -38,6 +42,7 @@ namespace Server.Mobiles
                     //TEST: DETERMINE SCROLL PRICES
 					Add( new GenericBuyInfo( types[i], 12 + ((i / 3) * 10), 20, itemID, 0 ) );
 				}
+                */
 
                 Add(new GenericBuyInfo("Black Pearl", typeof(BlackPearl), BlackPearl.GetSBPurchaseValue(), 500, 0xF7A, 0));
                 Add(new GenericBuyInfo("Bloodmoss", typeof(Bloodmoss), Bloodmoss.GetSBPurchaseValue(), 500, 0xF7B, 0));
@@ -60,7 +65,10 @@ namespace Server.Mobiles
 		{
 			public InternalSellInfo()
 			{
+                //TEST: FIX THIS !!!!!
+
                 //TEST: DETERMINE SPELL SCROLL PRICES
+                /*
                 Type[] types = Loot.RegularScrollTypes;
 
                 for (int i = 0; i < types.Length; ++i)
@@ -90,6 +98,7 @@ namespace Server.Mobiles
                     //TEST: DETERMINE SCROLL SELL PRICES
                     Add(type, Math.Min(6 + ((i / 8) * 5), cost));
                 }
+                */
 
                 Add(typeof(BlackPearl), BlackPearl.GetSBSellValue());
                 Add(typeof(Bloodmoss), Bloodmoss.GetSBSellValue());

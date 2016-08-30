@@ -135,8 +135,6 @@ namespace Server.Mobiles
                 case 2: AddItem(new ReceedingHair(Utility.RandomHairHue())); break;
                 case 3: AddItem(new KrisnaHair(Utility.RandomHairHue())); break;
             }
-
-            PackGold(200, 250);
         }
 
         public virtual bool SayDestinationTo(Mobile m)

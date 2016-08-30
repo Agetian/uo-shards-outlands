@@ -71,8 +71,6 @@ namespace Server.Mobiles
 				case 2: AddItem( new ReceedingHair( Utility.RandomHairHue() ) ); break;
 				case 3: AddItem( new KrisnaHair( Utility.RandomHairHue() ) ); break;
 			}
-
-			PackGold( 100, 150 );
 		}
 
 		public TalkingSeekerOfAdventure( Serial serial ) : base( serial )

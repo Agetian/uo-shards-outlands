@@ -43,8 +43,6 @@ namespace Server.Mobiles
 
         public List<Mobile> m_Trampled = new List<Mobile>();
 
-        public override Loot.LootTier LootTier { get { return Loot.LootTier.Eight; } }
-
 		[Constructable]
 		public BloodyReaver() : base( AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4 )
 		{

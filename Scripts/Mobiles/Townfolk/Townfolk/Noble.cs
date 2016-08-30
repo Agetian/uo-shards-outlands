@@ -59,8 +59,6 @@ namespace Server.Mobiles
 				AddItem( new Longsword() );
 
 			Utility.AssignRandomHair( this );
-
-			PackGold( 200, 250 );
 		}
 
 		public Noble( Serial serial ) : base( serial )

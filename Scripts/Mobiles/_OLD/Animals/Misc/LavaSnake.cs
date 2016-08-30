@@ -35,8 +35,6 @@ namespace Server.Mobiles
 
 			Fame = 600;
 			Karma = -600;
-
-			PackItem( new SulfurousAsh() );
 		}
 
         public override void SetUniqueAI()

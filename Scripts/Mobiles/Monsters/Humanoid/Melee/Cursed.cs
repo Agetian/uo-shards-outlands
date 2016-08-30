@@ -40,10 +40,6 @@ namespace Server.Mobiles
 
             AddItem(new ShortPants(Utility.RandomNeutralHue()));
             AddItem(new Shirt(Utility.RandomNeutralHue()));
-
-            BaseWeapon weapon = Loot.RandomWeapon();
-            weapon.Movable = false;
-            AddItem(weapon);
 		}
 
         public override bool AlwaysMurderer { get { return true; } }

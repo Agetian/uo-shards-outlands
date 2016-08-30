@@ -32,8 +32,6 @@ namespace Server.Mobiles
 
         public List<Point3D> m_BackupLocations = new List<Point3D>();
 
-        public override Loot.LootTier LootTier { get { return Loot.LootTier.Eight; } }
-
         public enum RiftType
         {
             Normal,

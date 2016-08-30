@@ -49,7 +49,6 @@ namespace Server.Mobiles
             AddItem(new LeatherGorget() { Movable = false, Hue = 0 });
 
             AddItem(new Bow() { Movable = false, Hue = 0 });
-            PackItem(new Arrow(10));
         }
 
         public override void SetUniqueAI()
