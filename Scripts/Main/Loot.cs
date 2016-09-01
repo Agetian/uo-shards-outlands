@@ -22,17 +22,17 @@ namespace Server
             
             if (creature.IsParagon)
             {
-                creature.PackItem(new ArcaneEssence());
+                creature.PackItem(new ArcaneScroll());
             }
 
             if (creature.Rare)
             {
-                creature.PackItem(new ArcaneEssence());
+                creature.PackItem(new ArcaneScroll());
             }
 
             if (creature.IsLoHBoss())
             {
-                creature.PackItem(new ArcaneEssence());
+                creature.PackItem(new ArcaneScroll());
 
                 switch (Utility.RandomMinMax(1, 3))
                 {
@@ -44,7 +44,7 @@ namespace Server
 
             if (creature.IsChamp())
             {
-                creature.PackItem(new ArcaneEssence());
+                creature.PackItem(new ArcaneScroll());
 
                 switch (Utility.RandomMinMax(1, 3))
                 {
@@ -57,7 +57,7 @@ namespace Server
             if (creature.IsBoss())
             {
                 for (int a = 0; a < 5; a++)
-                    creature.PackItem(new ArcaneEssence());
+                    creature.PackItem(new ArcaneScroll());
 
                 creature.PackItem(new SkillMasteryOrb());
                 creature.PackItem(new SkillMasteryScroll());
