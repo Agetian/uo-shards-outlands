@@ -171,6 +171,9 @@
     <Compile Include="DonationShop\DragonCoin.cs" />
     <Compile Include="DonationShop\DonationShopGump.cs" />
     <Compile Include="DonationShop\DonationShop.cs" />
+    <Compile Include="Enhancements\Enhancements.cs" />
+    <Compile Include="Enhancements\EnhancementsGump.cs" />
+    <Compile Include="Enhancements\EnhancementsPersistance.cs" />
     <Compile Include="Faction\CaptureLocations\Town\PrevaliaTownsquareAndSlums.cs" />
     <Compile Include="Faction\CaptureLocations\Town\PrevaliaBankAndShipwright.cs" />
     <Compile Include="Faction\FactionPlayerProfile.cs" />

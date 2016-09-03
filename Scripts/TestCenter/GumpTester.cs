@@ -27,13 +27,13 @@ namespace Server.Items
 
             if (player != null)
             {
+                EnhancementsGumpObject enhancementGumpObject = new EnhancementsGumpObject(player);
+
+                player.CloseGump(typeof(EnhancementsGump));
+                player.SendGump(new EnhancementsGump(player, enhancementGumpObject));
+
                 //player.CloseGump(typeof(TestGump));
                 //player.SendGump(new TestGump(player));
-
-                ShipHotbarGumpObject shipHotbarGumpObject = new ShipHotbarGumpObject();
-
-                player.CloseGump(typeof(ShipHotbarGump));
-                player.SendGump(new ShipHotbarGump(player, shipHotbarGumpObject));
             }
         }
 

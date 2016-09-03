@@ -1287,13 +1287,14 @@ namespace Server.Mobiles
         
         public TitleCollection m_TitleCollection = null;
         public AchievementAccountEntry m_AchievementAccountEntry = null;
+        public EnhancementsAccountEntry m_EnhancementsAccountEntry = null;
         public CaptchaAccountData m_CaptchaAccountData = null;
         public PlayerEnhancementAccountEntry m_PlayerEnhancementAccountEntry = null;       
         public Guild Guild = null;
         public GuildMemberEntry m_GuildMemberEntry = null;
         public GuildSettings m_GuildSettings = null;
         public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;
-        public ArenaPlayerSettings m_ArenaPlayerSettings = null;
+        public ArenaPlayerSettings m_ArenaPlayerSettings = null;        
 
         public CompetitionContext m_CompetitionContext = null;
 
@@ -4302,6 +4303,7 @@ namespace Server.Mobiles
             writer.Write(m_ShowAdminFilterText);
             writer.Write(m_TitleCollection);
             writer.Write(m_AchievementAccountEntry);
+            writer.Write(m_EnhancementsAccountEntry);
             writer.Write(m_CaptchaAccountData);
             writer.Write(m_PlayerEnhancementAccountEntry);
             writer.Write((int)m_ShowFollowerDamageTaken);
@@ -4398,6 +4400,7 @@ namespace Server.Mobiles
                 m_ShowAdminFilterText = reader.ReadBool();
                 m_TitleCollection = (TitleCollection)reader.ReadItem() as TitleCollection;
                 m_AchievementAccountEntry = (AchievementAccountEntry)reader.ReadItem() as AchievementAccountEntry;
+                m_EnhancementsAccountEntry = (EnhancementsAccountEntry)reader.ReadItem() as EnhancementsAccountEntry;
                 m_CaptchaAccountData = (CaptchaAccountData)reader.ReadItem() as CaptchaAccountData;
                 m_PlayerEnhancementAccountEntry = (PlayerEnhancementAccountEntry)reader.ReadItem() as PlayerEnhancementAccountEntry;
                 m_ShowFollowerDamageTaken = (DamageDisplayMode)reader.ReadInt();
