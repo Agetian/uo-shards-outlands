@@ -1034,8 +1034,7 @@ namespace Server.Mobiles
             Faction.OnLogin(player);
             TitlePersistance.OnLogin(player);
             AchievementsPersistance.OnLogin(player);
-            CaptchaPersistance.OnLogin(player);
-            PlayerCustomization.OnLogin(player);          
+            CaptchaPersistance.OnLogin(player);          
             ChatPersistance.OnLogin(player);
             MHSPersistance.CheckAndCreateMHSAccountEntry(player);
             EventCalendarPersistance.CheckAndCreateEventCalendarAccount(player);
@@ -1288,8 +1287,7 @@ namespace Server.Mobiles
         public TitleCollection m_TitleCollection = null;
         public AchievementAccountEntry m_AchievementAccountEntry = null;
         public EnhancementsAccountEntry m_EnhancementsAccountEntry = null;
-        public CaptchaAccountData m_CaptchaAccountData = null;
-        public PlayerEnhancementAccountEntry m_PlayerEnhancementAccountEntry = null;       
+        public CaptchaAccountData m_CaptchaAccountData = null;             
         public Guild Guild = null;
         public GuildMemberEntry m_GuildMemberEntry = null;
         public GuildSettings m_GuildSettings = null;
@@ -3172,7 +3170,7 @@ namespace Server.Mobiles
                 HueMod = KinPaintHue;
             
             //Player Enhancement Customization: Lifegiver
-            bool reborn = PlayerEnhancementPersistance.IsCustomizationEntryActive(this, CustomizationType.Reborn);
+            bool reborn = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(this, CustomizationType.Reborn);
 
             if (reborn)
                 CustomizationAbilities.Reborn(this);
@@ -3606,8 +3604,8 @@ namespace Server.Mobiles
             }
 
             //Player Enhancement Customization: Carnage and Violent Death
-            bool carnage = PlayerEnhancementPersistance.IsCustomizationEntryActive(killer, CustomizationType.Carnage);
-            bool violentDeath = PlayerEnhancementPersistance.IsCustomizationEntryActive(this, CustomizationType.ViolentDeath);
+            bool carnage = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(killer, CustomizationType.Carnage);
+            bool violentDeath = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(this, CustomizationType.ViolentDeath);
 
             if (carnage && Utility.RandomDouble() >= .75)
                 carnage = false;
@@ -4305,7 +4303,6 @@ namespace Server.Mobiles
             writer.Write(m_AchievementAccountEntry);
             writer.Write(m_EnhancementsAccountEntry);
             writer.Write(m_CaptchaAccountData);
-            writer.Write(m_PlayerEnhancementAccountEntry);
             writer.Write((int)m_ShowFollowerDamageTaken);
             writer.Write(m_LastPlayerKilledBy);
             writer.Write(m_LastInstrument);
@@ -4402,7 +4399,6 @@ namespace Server.Mobiles
                 m_AchievementAccountEntry = (AchievementAccountEntry)reader.ReadItem() as AchievementAccountEntry;
                 m_EnhancementsAccountEntry = (EnhancementsAccountEntry)reader.ReadItem() as EnhancementsAccountEntry;
                 m_CaptchaAccountData = (CaptchaAccountData)reader.ReadItem() as CaptchaAccountData;
-                m_PlayerEnhancementAccountEntry = (PlayerEnhancementAccountEntry)reader.ReadItem() as PlayerEnhancementAccountEntry;
                 m_ShowFollowerDamageTaken = (DamageDisplayMode)reader.ReadInt();
                 m_LastPlayerKilledBy = (PlayerMobile)reader.ReadMobile();
                 m_LastInstrument = (BaseInstrument)reader.ReadItem();

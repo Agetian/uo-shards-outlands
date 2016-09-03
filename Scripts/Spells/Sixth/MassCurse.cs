@@ -70,7 +70,7 @@ namespace Server.Spells.Sixth
 					eable.Free();
 				}
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.MassCurse);
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.MassCurse);      
 
 				for ( int i = 0; i < targets.Count; ++i )
 				{

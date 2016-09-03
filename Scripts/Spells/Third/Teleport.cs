@@ -116,14 +116,14 @@ namespace Server.Spells.Third
 					m.Location = to;
 					m.ProcessDelta();
 
-                    int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.Teleport);
+                    int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Teleport);      
 
                     if (m.Player)
                     {
                         Effects.SendLocationParticles(EffectItem.Create(from, m.Map, EffectItem.DefaultDuration), 0x3728, 10, 10, spellHue, 0, 2023, 0);
 
                         //Player Enhancement Customization: Blink
-                        bool blink = PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Blink);
+                        bool blink = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Blink);
 
                         if (blink)
                         {

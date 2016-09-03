@@ -167,8 +167,8 @@ namespace Server.Engines.Craft
                 else if (makersMark && quality == 2)
                 {
                     //Player Enhancement Customization: Artisan
-                    if (PlayerEnhancementPersistance.IsCustomizationEntryActive(from, CustomizationType.Artisan))
-                        CustomizationAbilities.Artisan(from, from.Location, from.Map);
+                    //if (PlayerEnhancementPersistance.IsCustomizationEntryActive(from, CustomizationType.Artisan))
+                        //CustomizationAbilities.Artisan(from, from.Location, from.Map);
 
                     return 1044156; // You create an exceptional quality item and affix your maker's mark.
                 }

@@ -67,6 +67,7 @@ namespace Server.Spells.Fifth
 
                     bool shadowSkin = false;
 
+                    /*
                     //Player Enhancement Customization: Shadowskin
                     if (PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Shadowskin))
                     {
@@ -75,6 +76,7 @@ namespace Server.Spells.Fifth
                     }
 
                     else
+                    */
                         Caster.HueMod = Caster.Race.RandomSkinHue();
 
                     Caster.NameMod = Caster.Female ? NameList.RandomName("female") : NameList.RandomName("male");

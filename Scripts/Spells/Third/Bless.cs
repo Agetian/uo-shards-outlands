@@ -64,7 +64,7 @@ namespace Server.Spells.Third
                 
                 bool enhancedSpellcast = SpellHelper.IsEnhancedSpell(Caster, m, EnhancedSpellbookType.Wizard, false, true);
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.Bless);
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Bless);      
 
                 if (enhancedSpellcast)
                 {

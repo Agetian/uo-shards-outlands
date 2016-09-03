@@ -167,7 +167,7 @@ namespace Server.Spells.Seventh
 				Caster.SendLocalizedMessage( 501024 ); // You open a magical gate to another location
 
                 //Player Enhancement Customization: Traveler
-                bool traveler = PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Traveler);
+                bool traveler = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Traveler);
 
                 if (traveler)
                 {

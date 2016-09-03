@@ -59,7 +59,7 @@ namespace Server.Spells.Seventh
                 Boolean chargedSpellcast = SpellHelper.IsChargedSpell(Caster, mobile, true, Scroll != null);
                 Boolean isTamedTarget = SpellHelper.IsTamedTarget(Caster, mobile);
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.Flamestrike);
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Flamestrike);      
 
                 if (enhancedSpellcast)
                 {

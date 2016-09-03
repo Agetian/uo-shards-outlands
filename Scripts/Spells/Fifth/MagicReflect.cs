@@ -162,7 +162,7 @@ namespace Server.Spells.Fifth
                     if (enhancedSpellcast)
                         value += 8;
 
-                    int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.MagicReflect);
+                    int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.MagicReflect);      
 
                     if (enhancedSpellcast)
                     {

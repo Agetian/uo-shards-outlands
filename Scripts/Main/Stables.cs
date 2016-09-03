@@ -53,11 +53,13 @@ namespace Server
             if (player.Skills[SkillName.AnimalLore].Value == 120)
                 stableSlots += 4;
 
+            /*
             if (PlayerEnhancementPersistance.IsCustomizationEntryActive(player, CustomizationType.Herdsman))
                 stableSlots += 5;
 
             if (PlayerEnhancementPersistance.IsCustomizationEntryActive(player, CustomizationType.Rancher))
                 stableSlots += 5;
+            */
 
             return stableSlots;
         }

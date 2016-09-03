@@ -124,12 +124,12 @@ namespace Server.Spells.Third
             {
                 Visible = false;
                 Movable = false;
-
+                
                 //Player Enhancement Customization: Geomancer
-                if (PlayerEnhancementPersistance.IsCustomizationEntryActive(caster, CustomizationType.Geomancer))
-                    ItemID = 376;
+                //if (PlayerEnhancementPersistance.IsCustomizationEntryActive(caster, CustomizationType.Geomancer))
+                    //ItemID = 376;
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(caster, HueableSpell.WallOfStone);
+                int spellHue = Enhancements.GetMobileSpellHue(caster, Enhancements.SpellType.WallOfStone);      
 
                 Hue = spellHue;
 

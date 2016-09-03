@@ -140,7 +140,7 @@ namespace Server.Spells.Seventh
                 Movable = false;
                 Light = LightType.Circle300;
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(caster, HueableSpell.EnergyField);
+                int spellHue = Enhancements.GetMobileSpellHue(caster, Enhancements.SpellType.EnergyField);      
 
                 Hue = spellHue;
 

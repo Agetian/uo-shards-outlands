@@ -72,7 +72,7 @@ namespace Server.Spells.Fifth
 
                     summon.SetDispelResistance(Caster, enhancedSpellcast, 0);
 
-                    int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.SummonCreature);
+                    int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.SummonCreature);      
 
                     summon.Hue = spellHue;
 

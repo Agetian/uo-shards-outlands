@@ -121,7 +121,7 @@ namespace Server.Spells.Sixth
                 Movable = false;
                 Light = LightType.Circle300;
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(caster, HueableSpell.ParalyzeField);
+                int spellHue = Enhancements.GetMobileSpellHue(caster, Enhancements.SpellType.ParalyzeField);      
 
                 Hue = spellHue;
 

@@ -42,7 +42,7 @@ namespace Server.Spells.Eighth
                 Map map = Caster.Map;
 
                 //Player Enhancement Customization: Tremor
-                bool tremor = PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Tremors);
+                bool tremor = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Tremors);
 
                 bool enhancedSpellcast = SpellHelper.IsEnhancedSpell(Caster, null, EnhancedSpellbookType.Wizard, false, true);
                 Boolean chargedSpellcast = SpellHelper.IsChargedSpell(Caster, null, false, Scroll != null);

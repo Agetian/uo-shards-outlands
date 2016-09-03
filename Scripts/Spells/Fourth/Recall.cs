@@ -221,7 +221,7 @@ namespace Server.Spells.Fourth
                 Map targetMap = map;
 
                 //Player Enhancement Customization: PhaseShift
-                bool phaseShift = PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.PhaseShift);
+                bool phaseShift = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.PhaseShift);
 
                 if (phaseShift)
                 {

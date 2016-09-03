@@ -71,7 +71,7 @@ namespace Server.Spells.Eighth
 
                 summon.SetDispelResistance(Caster, enhancedSpellcast, .15);
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.WaterElemental);
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.WaterElemental);      
 
                 summon.Hue = spellHue;
 

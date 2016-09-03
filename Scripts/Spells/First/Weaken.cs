@@ -55,7 +55,7 @@ namespace Server.Spells.First
 
                 mobile.Paralyzed = false;
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.Weaken); 
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Weaken);      
 
                 mobile.FixedParticles(0x3779, 10, 15, 5002, spellHue, 0, EffectLayer.Head);
 				mobile.PlaySound( 0x1E6 );

@@ -43,11 +43,7 @@ namespace Server.Spells.Fourth
                 Caster.Target = new InternalTarget(this);
             }
 		}
-
-        //Removed by IPY
-		// Archcure is now 1/4th of a second faster
-		//public override TimeSpan CastDelayBase{ get{ return base.CastDelayBase - TimeSpan.FromSeconds( 0.25 ); } }
-
+        
 		public void Target( IPoint3D p )
 		{
 			if ( !Caster.CanSee( p ) )
@@ -83,13 +79,13 @@ namespace Server.Spells.Fourth
 				{
 					int cured = 0;
 
-                    int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.ArchCure);
+                    int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.ArchCure);      
 
 					for ( int i = 0; i < targets.Count; ++i )
 					{
 						Mobile m = targets[i];
 
-						if( m.Player ) // UOAC : No flagging when doing AC around a monster.
+						if( m.Player )
 							Caster.DoBeneficial( m );
 
 						if ( m.CurePoison( Caster ) )
@@ -100,7 +96,7 @@ namespace Server.Spells.Fourth
 					}
 
 					if ( cured > 0 )
-						Caster.SendLocalizedMessage( 1010058 ); // You have cured the target of all poisons!
+						Caster.SendLocalizedMessage( 1010058 );
 				}
 			}
 

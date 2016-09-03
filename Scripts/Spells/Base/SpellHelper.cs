@@ -1352,14 +1352,16 @@ namespace Server.Spells
 
                 if (reflect)
                 {
-                    int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(caster, HueableSpell.MagicReflect);
+                    int spellHue = Enhancements.GetMobileSpellHue(caster, Enhancements.SpellType.MagicReflect);      
 
+                    /*
                     //Player Enhancement Customization: Bounce
                     bool shielded = PlayerEnhancementPersistance.IsCustomizationEntryActive(target, CustomizationType.Shielded);
 
                     if (shielded)
                         CustomizationAbilities.Shielded(target);
                     else
+                        */
                         target.FixedEffect(0x37B9, 10, 5, spellHue, 0);
 
                     Mobile temp = caster;

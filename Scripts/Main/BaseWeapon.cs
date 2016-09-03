@@ -1154,7 +1154,7 @@ namespace Server.Items
 
                     attacker.Damage(react, defender);
 
-                    int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(defender, HueableSpell.ReactiveArmor);
+                    int spellHue = Enhancements.GetMobileSpellHue(defender, Enhancements.SpellType.ReactiveArmor);      
 
                     attacker.PlaySound(0x1F1);
                     attacker.FixedEffect(0x374A, 10, 16, spellHue, 0);
@@ -1817,7 +1817,7 @@ namespace Server.Items
                 int maxBlood = 2;
 
                 //Player Enhancement Customization: Vicious
-                bool vicious = PlayerEnhancementPersistance.IsCustomizationEntryActive(attacker, CustomizationType.Vicious);
+                bool vicious = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(attacker, CustomizationType.Vicious);
 
                 if (vicious)
                 {
@@ -2732,7 +2732,7 @@ namespace Server.Items
                         int effectHue = 0;
 
                         //Player Enhancement Customization: Venomous
-                        bool venomous = PlayerEnhancementPersistance.IsCustomizationEntryActive(attacker, CustomizationType.Venomous);
+                        bool venomous = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(attacker, CustomizationType.Venomous);
 
                         if (venomous)
                             CustomizationAbilities.Venomous(defender);

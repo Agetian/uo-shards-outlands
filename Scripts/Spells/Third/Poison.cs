@@ -153,7 +153,7 @@ namespace Server.Spells.Third
                 }
 
                 //Player Enhancement Customization: Venomous
-                bool venomous = PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Venomous);
+                bool venomous = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Venomous);
 
                 if (venomous)
                 {

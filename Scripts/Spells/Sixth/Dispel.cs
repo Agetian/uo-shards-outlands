@@ -53,8 +53,8 @@ namespace Server.Spells.Sixth
             else if (CheckHSequence(mobile))
             {
                 SpellHelper.Turn(Caster, mobile);
-                
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.Dispel);
+
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Dispel);      
 
                 Caster.DoHarmful(bc_Creature);
 

@@ -916,7 +916,7 @@ namespace Server.Mobiles
 			}
 
             //Player Enhancement Customization: Customer Loyalty
-            bool customerLoyalty = PlayerEnhancementPersistance.IsCustomizationEntryActive(buyer, Custom.CustomizationType.CustomerLoyalty);
+            bool customerLoyalty = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(buyer, Custom.CustomizationType.CustomerLoyalty);
 
             if (customerLoyalty)
                 CustomizationAbilities.CustomerLoyalty(this);

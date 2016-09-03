@@ -872,7 +872,7 @@ namespace Server.Items
         public virtual void OnDrink(Mobile from)
         {
             //Player Enhancement Customization: Mouthy
-            bool mouthy = PlayerEnhancementPersistance.IsCustomizationEntryActive(from, CustomizationType.Mouthy);
+            bool mouthy = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(from, CustomizationType.Mouthy);
 
             if (from.Body.IsHuman && !from.Mounted)
                 from.Animate(34, 5, 1, true, false, 0);
@@ -1023,7 +1023,7 @@ namespace Server.Items
                     int maxActions = 2;
 
                     //Player Enhancement Customization: Drunkard
-                    bool drunkard = PlayerEnhancementPersistance.IsCustomizationEntryActive(m_Drunk, CustomizationType.Drunkard);
+                    bool drunkard = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(m_Drunk, CustomizationType.Drunkard);
 
                     if (drunkard)
                         maxActions += 4;

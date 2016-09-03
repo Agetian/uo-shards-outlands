@@ -59,7 +59,7 @@ namespace Server.Spells.Seventh
                 bool enhancedSpellcast = false;
                 Boolean chargedSpellcast = false;
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.MeteorSwarm);
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.MeteorSwarm);      
 
                 int radius = 3;
 

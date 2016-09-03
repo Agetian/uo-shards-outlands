@@ -319,7 +319,7 @@ namespace Server
 
                         Enhancements.SpellType spellType = (Enhancements.SpellType)spellHueIndex;
                         Enhancements.SpellHueEntry spellHueEntry = Enhancements.GetSpellHueEntry(m_Player, spellType);
-                        Enhancements.SpellHueDetail spellHueDetail = Enhancements.GetSpellHueDetail(spellType);
+                        Enhancements.SpellTypeDetail spellHueDetail = Enhancements.GetSpellTypeDetail(spellType);
 
                         if (spellHueEntry == null)
                             spellHueEntry = new Enhancements.SpellHueEntry(spellType);
@@ -341,34 +341,29 @@ namespace Server
                         int spellHueTypeIndex = -1;
 
                         spellHueTypeIndex = m_AvailableSpellHues.IndexOf(spellHueEntry.m_SelectedHue);
-
-                        int spellHue = spellHueTypeDetail.m_Hue;
-
-                        if (spellHue == 0)
-                            spellHue = 2499;
-
+                        
                         //Left Side
                         if (a < (EntriesPerSpellHuePage / 2))
                         {
                             if (m_AvailableSpellHues.Count > 1)
                             {
                                 if (spellHueTypeIndex > 0)
-                                    AddButton(leftStartX + 5, leftStartY + 66, 9909, 2151, 10 + a, GumpButtonType.Reply, 0);
+                                    AddButton(leftStartX + 5, leftStartY + 66, 9909, 9909, 10 + a, GumpButtonType.Reply, 0);
 
                                 if (spellHueTypeIndex < m_AvailableSpellHues.Count - 1)
-                                    AddButton(leftStartX + 40, leftStartY + 65, 9903, 2151, 20 + a, GumpButtonType.Reply, 0);
+                                    AddButton(leftStartX + 40, leftStartY + 65, 9903, 9903, 20 + a, GumpButtonType.Reply, 0);
                             }
 
                             AddBackground(leftStartX + 0, leftStartY + 0, 64, 61, 9270);
-                            AddItem(leftStartX + 10, leftStartY + 9, spellHueDetail.m_ItemID, spellHueTypeDetail.m_Hue);
+                            AddItem(leftStartX + 10, leftStartY + 9, spellHueDetail.m_ItemID, spellHueTypeDetail.m_IconHue);
 
                             AddLabel(leftStartX + 66, leftStartY + -1, 149, spellHueDetail.m_SpellName);
-                            AddLabel(leftStartX + 66, leftStartY + 19, spellHue, spellHueTypeDetail.m_SpellHueTypeName);
-                            AddLabel(leftStartX + 66, leftStartY + 39, WhiteTextHue, "Hue ");
-                            AddLabel(leftStartX + 96, leftStartY + 39, spellHue, spellHueTypeDetail.m_Hue.ToString());
+                            AddLabel(leftStartX + 66, leftStartY + 19, spellHueTypeDetail.m_TextHue, spellHueTypeDetail.m_SpellHueTypeName);
+                            AddLabel(leftStartX + 66, leftStartY + 39, WhiteTextHue, "Hue: ");
+                            AddLabel(leftStartX + 96, leftStartY + 39, spellHueTypeDetail.m_TextHue, spellHueTypeDetail.m_SpellHue.ToString());
 
                             if (m_AvailableSpellHues.Count > 1)
-                                AddLabel(leftStartX + 66, leftStartY + 66, WhiteTextHue, (spellHueTypeIndex + 1).ToString() + " / " + m_AvailableSpellHues.Count.ToString());
+                                AddLabel(leftStartX + 66, leftStartY + 66, WhiteTextHue, "Selected: " + (spellHueTypeIndex + 1).ToString() + " / " + m_AvailableSpellHues.Count.ToString());
 
                             leftStartY += rowSpacing;
                         }
@@ -379,22 +374,22 @@ namespace Server
                             if (m_AvailableSpellHues.Count > 1)
                             {
                                 if (spellHueTypeIndex > 0)
-                                    AddButton(rightStartX + 5, rightStartY + 66, 9909, 2151, 10 + a, GumpButtonType.Reply, 0);
+                                    AddButton(rightStartX + 5, rightStartY + 66, 9909, 9909, 10 + a, GumpButtonType.Reply, 0);
 
                                 if (spellHueTypeIndex < m_AvailableSpellHues.Count - 1)
-                                    AddButton(rightStartX + 40, rightStartY + 65, 9903, 2151, 20 + a, GumpButtonType.Reply, 0);
+                                    AddButton(rightStartX + 40, rightStartY + 65, 9903, 9903, 20 + a, GumpButtonType.Reply, 0);
                             }
 
                             AddBackground(rightStartX + 0, rightStartY + 0, 64, 61, 9270);
-                            AddItem(rightStartX + 10, rightStartY + 9, spellHueDetail.m_ItemID, spellHueTypeDetail.m_Hue);
+                            AddItem(rightStartX + 10, rightStartY + 9, spellHueDetail.m_ItemID, spellHueTypeDetail.m_IconHue);
 
                             AddLabel(rightStartX + 66, rightStartY + -1, 149, spellHueDetail.m_SpellName);
-                            AddLabel(rightStartX + 66, rightStartY + 19, spellHue, spellHueTypeDetail.m_SpellHueTypeName);
-                            AddLabel(rightStartX + 66, rightStartY + 39, WhiteTextHue, "Hue ");
-                            AddLabel(rightStartX + 96, rightStartY + 39, spellHue, spellHueTypeDetail.m_Hue.ToString());
+                            AddLabel(rightStartX + 66, rightStartY + 19, spellHueTypeDetail.m_TextHue, spellHueTypeDetail.m_SpellHueTypeName);
+                            AddLabel(rightStartX + 66, rightStartY + 39, WhiteTextHue, "Hue: ");
+                            AddLabel(rightStartX + 96, rightStartY + 39, spellHueTypeDetail.m_TextHue, spellHueTypeDetail.m_SpellHue.ToString());
 
                             if (m_AvailableSpellHues.Count > 1)
-                                AddLabel(rightStartX + 66, rightStartY + 66, WhiteTextHue, (spellHueTypeIndex + 1).ToString() + " / " + m_AvailableSpellHues.Count.ToString());
+                                AddLabel(rightStartX + 66, rightStartY + 66, WhiteTextHue, "Selected: " + (spellHueTypeIndex + 1).ToString() + " / " + m_AvailableSpellHues.Count.ToString());
 
                             rightStartY += rowSpacing;
                         }
@@ -597,15 +592,22 @@ namespace Server
                         {
                             Enhancements.CustomizationType customizationType = (Enhancements.CustomizationType)customizationIndex;
                             Enhancements.CustomizationEntry customizationEntry = Enhancements.GetCustomizationEntry(m_Player, customizationType);
+                            Enhancements.CustomizationDetail customizationDetail = Enhancements.GetCustomizationDetail(customizationType);
 
                             if (customizationEntry == null)
                                 customizationEntry = new Enhancements.CustomizationEntry(customizationType, false, false);
 
                             if (customizationEntry.m_Unlocked)
                             {
-                                customizationEntry.m_Active = !customizationEntry.m_Active;
+                                if (customizationDetail.m_AlwaysActive)                                
+                                    m_Player.SendMessage("This customization cannot be deactivated once acquired.");                                
 
-                                m_Player.SendSound(LargeSelectionSound);
+                                else
+                                {
+                                    customizationEntry.m_Active = !customizationEntry.m_Active;
+
+                                    m_Player.SendSound(LargeSelectionSound);
+                                }
                             }
                         }
 
@@ -614,7 +616,7 @@ namespace Server
 
                     if (info.ButtonID >= 20 && info.ButtonID < 30)
                     {
-                        int customizationIndex = (m_EnhancementsGumpObject.m_Page * EntriesPerCustomizationPage) + info.ButtonID - 10;
+                        int customizationIndex = (m_EnhancementsGumpObject.m_Page * EntriesPerCustomizationPage) + info.ButtonID - 20;
                         int customizationCount = Enum.GetNames(typeof(Enhancements.CustomizationType)).Length;
 
                         if (customizationIndex < customizationCount)
@@ -654,17 +656,16 @@ namespace Server
                             closeGump = false;
                         break;
                     }
-
-                    int spellHuesCount = Enum.GetNames(typeof(Enhancements.CustomizationType)).Length;
                     
                     //Previous Hue
                     if (info.ButtonID >= 10 && info.ButtonID < 20)
                     {
-                        int spellHueIndex = (m_EnhancementsGumpObject.m_Page * EntriesPerSpellHuePage) + info.ButtonID - 10;
+                        int spellTypeIndex = (m_EnhancementsGumpObject.m_Page * EntriesPerSpellHuePage) + info.ButtonID - 10;
+                        int spellTypeCount = Enum.GetNames(typeof(Enhancements.SpellType)).Length;
 
-                        if (spellHueIndex < spellHuesCount)
+                        if (spellTypeIndex < spellTypeCount)
                         {
-                            Enhancements.SpellType spellType = (Enhancements.SpellType)spellHueIndex;
+                            Enhancements.SpellType spellType = (Enhancements.SpellType)spellTypeIndex;
                             Enhancements.SpellHueEntry spellHueEntry = Enhancements.GetSpellHueEntry(m_Player, spellType);
 
                             if (spellHueEntry == null)
@@ -684,7 +685,7 @@ namespace Server
 
                             if (m_AvailableHues.Count > 0)
                             {
-                                spellHueIndex = m_AvailableHues.IndexOf(spellHueEntry.m_SelectedHue);
+                                int spellHueIndex = m_AvailableHues.IndexOf(spellHueEntry.m_SelectedHue);
                                                                
                                 spellHueIndex--;                                
 
@@ -704,13 +705,14 @@ namespace Server
                     }
 
                     //Next Hue
-                    if (info.ButtonID >= 202 && info.ButtonID < 30)
+                    if (info.ButtonID >= 20 && info.ButtonID < 30)
                     {
-                        int spellHueIndex = (m_EnhancementsGumpObject.m_Page * EntriesPerSpellHuePage) + info.ButtonID - 20;
+                        int spellTypeIndex = (m_EnhancementsGumpObject.m_Page * EntriesPerSpellHuePage) + info.ButtonID - 20;
+                        int spellTypeCount = Enum.GetNames(typeof(Enhancements.SpellType)).Length;
 
-                        if (spellHueIndex < spellHuesCount)
+                        if (spellTypeIndex < spellTypeCount)
                         {
-                            Enhancements.SpellType spellType = (Enhancements.SpellType)spellHueIndex;
+                            Enhancements.SpellType spellType = (Enhancements.SpellType)spellTypeIndex;
                             Enhancements.SpellHueEntry spellHueEntry = Enhancements.GetSpellHueEntry(m_Player, spellType);
 
                             if (spellHueEntry == null)
@@ -730,7 +732,7 @@ namespace Server
 
                             if (m_AvailableHues.Count > 0)
                             {
-                                spellHueIndex = m_AvailableHues.IndexOf(spellHueEntry.m_SelectedHue);
+                                int spellHueIndex = m_AvailableHues.IndexOf(spellHueEntry.m_SelectedHue);
 
                                 spellHueIndex++;
 

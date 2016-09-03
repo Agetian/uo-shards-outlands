@@ -199,6 +199,38 @@ namespace Server
             return detail;
         }
 
+        public static int GetMobileSpellHue(Mobile mobile, SpellType spellType)
+        {
+            int hue = 0;
+
+            BaseCreature bc_Creature = mobile as BaseCreature;
+
+            if (bc_Creature != null)
+                return bc_Creature.SpellHue;
+
+            PlayerMobile player = mobile as PlayerMobile;
+
+            if (player == null)
+                return hue;
+
+            EnhancementsPersistance.CheckAndCreateEnhancementsAccountEntry(player);
+
+            foreach (Enhancements.SpellHueEntry entry in player.m_EnhancementsAccountEntry.m_SpellHues)
+            {
+                if (entry == null)
+                    continue;
+
+                if (entry.m_SpellType == spellType)
+                {
+                    Enhancements.SpellHueTypeDetail hueTypeDetail = Enhancements.GetSpellHueTypeDetail(entry.m_SelectedHue);
+
+                    return hueTypeDetail.m_SpellHue;
+                }
+            }
+
+            return hue;
+        }
+
         public static SpellHueEntry GetSpellHueEntry(PlayerMobile player, SpellType spellType)
         {
             SpellHueEntry entry = null;
@@ -217,13 +249,13 @@ namespace Server
             return entry;
         }
 
-        public static SpellHueDetail GetSpellHueDetail(SpellType spellType)
+        public static SpellTypeDetail GetSpellTypeDetail(SpellType spellType)
         {
-            SpellHueDetail detail = new SpellHueDetail();
+            SpellTypeDetail detail = new SpellTypeDetail();
 
             detail.m_SpellType = spellType;
 
-            #region Spell Hue Details
+            #region Spell Type Details
 
             switch (spellType)
             {
@@ -415,27 +447,42 @@ namespace Server
             {
                 case SpellHueType.Standard:
                     detail.m_SpellHueTypeName = "Standard";
-                    detail.m_Hue = 0;
+
+                    detail.m_IconHue = 0;
+                    detail.m_TextHue = 2499;
+                    detail.m_SpellHue = 0;
                 break;
 
                 case SpellHueType.Charcoal:
                     detail.m_SpellHueTypeName = "Fire";
-                    detail.m_Hue = 2117;
+
+                    detail.m_IconHue = 2117;
+                    detail.m_TextHue = 2117;
+                    detail.m_SpellHue = 2117;
                 break;
 
                 case SpellHueType.Earthen:
                     detail.m_SpellHueTypeName = "Earthen";
-                    detail.m_Hue = 2550;
+
+                    detail.m_IconHue = 2550;
+                    detail.m_TextHue = 2550;
+                    detail.m_SpellHue = 2550;
                 break;
 
                 case SpellHueType.Rose:
                     detail.m_SpellHueTypeName = "Rose";
-                    detail.m_Hue = 2660;
+                   
+                    detail.m_IconHue = 2660;
+                    detail.m_TextHue = 2660;
+                    detail.m_SpellHue = 2660;
                 break;
 
                 case SpellHueType.Otherworldly:
                     detail.m_SpellHueTypeName = "Otherworldly";
-                    detail.m_Hue = 2962;
+
+                    detail.m_IconHue = 2962;
+                    detail.m_TextHue = 2962;
+                    detail.m_SpellHue = 2962;
                 break;
             }
 
@@ -665,13 +712,13 @@ namespace Server
             }
         }
 
-        public class SpellHueDetail
+        public class SpellTypeDetail
         {
             public SpellType m_SpellType;
             public string m_SpellName = "";
             public int m_ItemID = 0;
 
-            public SpellHueDetail()
+            public SpellTypeDetail()
             {
             }
         }
@@ -680,7 +727,10 @@ namespace Server
         {
             public SpellHueType m_SpellHueType;
             public string m_SpellHueTypeName = "";
-            public int m_Hue = 0;
+
+            public int m_IconHue = 0;
+            public int m_TextHue = 0;
+            public int m_SpellHue = 0;
 
             public SpellHueTypeDetail()
             {

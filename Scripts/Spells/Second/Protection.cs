@@ -115,8 +115,8 @@ namespace Server.Spells.Second
 				    new InternalTimer( m, Caster, val ).Start();
 
                     bool enhancedSpellcast = SpellHelper.IsEnhancedSpell(Caster, m, EnhancedSpellbookType.Wizard, false, true);
-                    
-                    int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.Protection);
+
+                    int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Protection);      
 
                     if (enhancedSpellcast)
                     {

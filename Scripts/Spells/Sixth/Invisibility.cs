@@ -69,7 +69,7 @@ namespace Server.Spells.Sixth
                 int spellHue = 0;
 
                 //Player Enhancement Customization: Vanish
-                bool vanish = PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Vanish);
+                bool vanish = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(Caster, CustomizationType.Vanish);
 
                 if (vanish)                
                     CustomizationAbilities.Vanish(mobile);

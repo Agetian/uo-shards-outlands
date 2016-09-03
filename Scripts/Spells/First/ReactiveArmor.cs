@@ -138,7 +138,7 @@ namespace Server.Spells.First
                                 
                 bool enhancedSpellcast = SpellHelper.IsEnhancedSpell(Caster, null, EnhancedSpellbookType.Wizard, false, true);
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.ReactiveArmor);    
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.ReactiveArmor);      
 
                 //Spirit Speak Bonus
                 value += (int)(20 * (Caster.Skills[SkillName.SpiritSpeak].Value / 100));

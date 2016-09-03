@@ -439,7 +439,7 @@ namespace Server
 
             for (int a = 0; a < projectiles; a++)
             {
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(mobile, HueableSpell.MagicReflect);
+                int spellHue = Enhancements.GetMobileSpellHue(mobile, Enhancements.SpellType.MagicReflect);      
 
                 Point3D newLocation = new Point3D(mobile.X + Utility.RandomList(-1, 1), mobile.Y + Utility.RandomList(-1, 1), mobile.Z);
                 SpellHelper.AdjustField(ref newLocation, mobile.Map, 12, false);

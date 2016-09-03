@@ -3053,7 +3053,7 @@ namespace Server
                     {
                         if (pm_ShipOwner.ShipOccupied == m_Ship)
                         {
-                            bool smoothSailing = PlayerEnhancementPersistance.IsCustomizationEntryActive(pm_ShipOwner, CustomizationType.SmoothSailing);
+                            bool smoothSailing = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(pm_ShipOwner, CustomizationType.SmoothSailing);
 
                             if (smoothSailing)
                                 CustomizationAbilities.SmoothSailing(pm_ShipOwner);

@@ -109,7 +109,7 @@ namespace Server.Spells.Fifth
 
                 summon.SetDispelResistance(Caster, enhancedSpellcast, 0);
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.BladeSpirits);
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.BladeSpirits);      
 
                 summon.Hue = spellHue;
 

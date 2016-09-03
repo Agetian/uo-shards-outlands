@@ -74,7 +74,7 @@ namespace Server.Spells.Fourth
 
             mobile.Paralyzed = false;
 
-            int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.Curse);            
+            int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Curse);              
 
             mobile.FixedParticles(0x374A, 10, 15, 5028, spellHue, 0, EffectLayer.Waist);
             mobile.PlaySound(0x1E1);

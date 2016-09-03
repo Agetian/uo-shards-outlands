@@ -79,7 +79,7 @@ namespace Server.Spells.Second
                     }
                 }
 
-                int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.Cure);    
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Cure);      
 
                 m.FixedParticles(0x373A, 10, 15, 5012, spellHue, 0, EffectLayer.Waist);
                 m.PlaySound(0x1E0);

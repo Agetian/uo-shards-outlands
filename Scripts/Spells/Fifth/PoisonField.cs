@@ -285,7 +285,7 @@ namespace Server.Spells.Fifth
                     m_Caster.DoHarmful(mobile);
 
                     //Player Enhancement Customization: Venomous
-                    bool venomous = PlayerEnhancementPersistance.IsCustomizationEntryActive(m_Caster, CustomizationType.Venomous);
+                    bool venomous = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(m_Caster, CustomizationType.Venomous);
 
                     if (venomous)
                         CustomizationAbilities.Venomous(mobile);
@@ -365,7 +365,7 @@ namespace Server.Spells.Fifth
                                 caster.DoHarmful(mobile);
 
                                 //Player Enhancement Customization: Venomous
-                                bool venomous = PlayerEnhancementPersistance.IsCustomizationEntryActive(caster, CustomizationType.Venomous);
+                                bool venomous = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(caster, CustomizationType.Venomous);
 
                                 if (venomous)
                                     CustomizationAbilities.Venomous(mobile);

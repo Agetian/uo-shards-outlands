@@ -116,7 +116,7 @@ namespace Server.Spells.Fourth
                             if (enhancedSpellcast)
                                 chargeUsed = true;
 
-                            int spellHue = PlayerEnhancementPersistance.GetSpellHueFor(Caster, HueableSpell.ArchProtection);
+                            int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.ArchProtection);      
 
                             if (enhancedSpellcast)
                             {

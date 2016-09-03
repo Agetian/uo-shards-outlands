@@ -239,7 +239,7 @@ namespace Server.Items
 			if (AttemptEat(from))
 			{
                 //Player Enhancement Customization: Mouthy
-                bool mouthy = PlayerEnhancementPersistance.IsCustomizationEntryActive(from, CustomizationType.Mouthy);
+                bool mouthy = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(from, CustomizationType.Mouthy);
 
                 if (from.Body.IsHuman && !from.Mounted)
                     from.Animate(34, 5, 1, true, false, 0);
