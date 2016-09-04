@@ -30,7 +30,13 @@ namespace Server
         //Achievement Category Page
         public AchievementCategory m_AchievementCategory = AchievementCategory.Battle;
         public int m_AchievementListPage = 0;
-        public int m_AchievementSelectedIndex = 0;         
+        public int m_AchievementSelectedIndex = 0;
+
+        public static int OpenGumpSound = 0x055;
+        public static int ChangePageSound = 0x057;
+        public static int SelectionSound = 0x4D2;
+        public static int LargeSelectionSound = 0x4D3;
+        public static int CloseGumpSound = 0x058;
 
         public AchievementsGump(Mobile from, PageType selectedPageType, int mainPage, AchievementCategory achievementCategory, int achievementListPage, int achievementSelectedIndex): base(10, 10)
         {
@@ -55,7 +61,7 @@ namespace Server
             int WhiteTextHue = 2655;
             int GreenTextHue = 63;
             int YellowTextHue = 2550;
-            int GreyTextHue = 2401;
+            int GreyTextHue = 1102;
 
             int startX = 0;
             int startY = 0;
@@ -64,64 +70,73 @@ namespace Server
 
             int totalPages;
 
+            #region Background
+
+            AddImage(409, 8, 103, 2401);
+            AddImage(142, 105, 103);
+            AddImage(143, 148, 103);
+            AddImage(143, 234, 103);
+            AddImage(143, 324, 103);
+            AddImage(145, 410, 103, 2401);
+            AddImage(8, 410, 103, 2401);
+            AddImage(8, 233, 103, 2401);
+            AddImage(142, 8, 103, 2401);
+            AddImage(7, 147, 103, 2401);
+            AddImage(8, 7, 103, 2401);
+            AddImage(8, 104, 103, 2401);
+            AddImage(17, 107, 3604, 2052);
+            AddImage(143, 107, 3604, 2052);
+            AddImage(17, 18, 3604, 2052);
+            AddImage(143, 18, 3604, 2052);            
+            AddImage(8, 323, 103, 2401);
+            AddImage(17, 194, 3604, 2052);
+            AddImage(143, 194, 3604, 2052);
+            AddImage(17, 286, 3604, 2052);
+            AddImage(143, 286, 3604, 2052);
+            AddImage(17, 370, 3604, 2052);
+            AddImage(143, 370, 3604, 2052);
+            AddImage(274, 105, 103);
+            AddImage(275, 148, 103);
+            AddImage(275, 234, 103);
+            AddImage(275, 324, 103);
+            AddImage(276, 410, 103, 2401);
+            AddImage(274, 8, 103, 2401);
+            AddImage(409, 91, 103, 2401);
+            AddImage(409, 182, 103, 2401);
+            AddImage(409, 261, 103, 2401);
+            AddImage(409, 354, 103, 2401);
+            AddImage(409, 410, 103, 2401);
+            AddImage(267, 107, 3604, 2052);
+            AddImage(267, 18, 3604, 2052);
+            AddImage(267, 194, 3604, 2052);
+            AddImage(267, 286, 3604, 2052);
+            AddImage(267, 370, 3604, 2052);
+            AddImage(375, 107, 3604, 2052);
+            AddImage(375, 18, 3604, 2052);
+            AddImage(375, 194, 3604, 2052);
+            AddImage(375, 286, 3604, 2052);
+            AddImage(375, 370, 3604, 2052);
+            AddImage(411, 107, 3604, 2052);
+            AddImage(411, 18, 3604, 2052);
+            AddImage(411, 194, 3604, 2052);
+            AddImage(411, 286, 3604, 2052);
+            AddImage(412, 370, 3604, 2052);
+
+            #endregion
+
+            //Header
+            AddImage(144, -2, 1143, 2499);
+            AddLabel(235, 0, 2606, "Achievements");
+
+            //Guide
+            AddButton(7, 8, 2094, 2095, 1, GumpButtonType.Reply, 0);
+            AddLabel(3, -2, 149, "Guide");
+
             switch (m_SelectedPageType)
             {
                 #region Main
 
                 case PageType.Main:
-                    AddImage(142, 105, 103);
-                    AddImage(143, 148, 103);
-                    AddImage(143, 234, 103);
-                    AddImage(143, 324, 103);
-                    AddImage(145, 409, 103, 2401);
-                    AddImage(8, 410, 103, 2401);
-                    AddImage(8, 233, 103, 2401);
-                    AddImage(142, 8, 103, 2401);
-                    AddImage(7, 147, 103, 2401);
-                    AddImage(8, 7, 103, 2401);
-                    AddImage(8, 104, 103, 2401);
-                    AddImage(17, 107, 3604, 2052);
-                    AddImage(143, 107, 3604, 2052);
-                    AddImage(17, 18, 3604, 2052);
-                    AddImage(143, 18, 3604, 2052);            
-                    AddImage(8, 323, 103, 2401);
-                    AddImage(17, 194, 3604, 2052);
-                    AddImage(143, 194, 3604, 2052);
-                    AddImage(17, 286, 3604, 2052);
-                    AddImage(143, 286, 3604, 2052);
-                    AddImage(17, 370, 3604, 2052);
-                    AddImage(143, 370, 3604, 2052);
-                    AddImage(274, 105, 103);
-                    AddImage(275, 148, 103);
-                    AddImage(275, 234, 103);
-                    AddImage(275, 324, 103);
-                    AddImage(276, 410, 103, 2401);
-                    AddImage(274, 8, 103, 2401);
-                    AddImage(406, 105, 103, 2401);
-                    AddImage(407, 148, 103, 2401);
-                    AddImage(407, 234, 103, 2401);
-                    AddImage(407, 324, 103, 2401);
-                    AddImage(408, 410, 103, 2401);
-                    AddImage(406, 8, 103, 2401);
-                    AddImage(267, 107, 3604, 2052);
-                    AddImage(267, 18, 3604, 2052);
-                    AddImage(267, 194, 3604, 2052);
-                    AddImage(267, 286, 3604, 2052);
-                    AddImage(267, 370, 3604, 2052);
-                    AddImage(375, 107, 3604, 2052);
-                    AddImage(375, 18, 3604, 2052);
-                    AddImage(375, 194, 3604, 2052);
-                    AddImage(375, 286, 3604, 2052);
-                    AddImage(375, 370, 3604, 2052);
-                    AddImage(409, 107, 3604, 2052);
-                    AddImage(409, 18, 3604, 2052);
-                    AddImage(409, 194, 3604, 2052);
-                    AddImage(409, 286, 3604, 2052);
-                    AddImage(409, 370, 3604, 2052);
-                    AddImage(144, -2, 1143, 2499);
-
-                    AddLabel(235, 0, Achievements.AchievementTextHue, "Achievements");    
-                   
                     int categoriesPerPage = categoryRows * categoryColumns;
                     int totalCategories = Enum.GetNames(typeof(AchievementCategory)).Length;
                     int totalCategoryPages = (int)(Math.Ceiling((double)totalCategories / (double)categoriesPerPage));
@@ -140,27 +155,23 @@ namespace Server
 
                     int totalCompletedAchievements = Achievements.GetCompletedAchievementCount(m_Player);
                     int totalAchievementsAvailable = Achievements.GetTotalAchievementsCount();
-
-                    //Guild
-                    AddButton(7, 4, 2094, 2095, 1, GumpButtonType.Reply, 0);
-                    AddLabel(30, 4, 149, "Guide");
-
+                    
                     //Previous
                     if (m_MainPage > 0)
                     {
                         AddLabel(57, 472, WhiteTextHue, "Previous Page");
-                        AddButton(23, 471, 4014, 4019, 2, GumpButtonType.Reply, 0);
+                        AddButton(23, 471, 4014, 4016, 2, GumpButtonType.Reply, 0);
                     }
 
                     //Next
                     if (m_MainPage < totalCategoryPages - 1)
                     {
-                        AddButton(502, 471, 4005, 4019, 3, GumpButtonType.Reply, 0);
+                        AddButton(502, 471, 4005, 4007, 3, GumpButtonType.Reply, 0);
                         AddLabel(432, 472, WhiteTextHue, "Next Page");
                     }
 
                     //Settings
-                    AddButton(243, 471, 4029, 4019, 4, GumpButtonType.Reply, 0);
+                    AddButton(243, 471, 4029, 4031, 4, GumpButtonType.Reply, 0);
                     AddLabel(277, 472, 63, "Settings");
 
                     int textHue = GreyTextHue;
@@ -202,264 +213,15 @@ namespace Server
                             continue;
 
                         AchievementCategory category = (AchievementCategory)categoryIndex;
+                        AchievementCategoryDetail achievementCategoryDetail = Achievements.GetCategoryDetail(category);
 
-                        #region Achievement Category Images
+                        AddGumpCollection(GumpCollections.GetGumpCollection(achievementCategoryDetail.GumpCollectionGroupId, achievementCategoryDetail.GumpCollectionItemId), startX - 40, startY + 8);
 
-                        switch (category)
-                        {
-                            case AchievementCategory.Battle:
-                                AddItem(startX + 19, startY + 34, 18210, 2500);
-                                AddItem(startX + 21, startY + 33, 5049, 2500);
-                                AddItem(startX + 14, startY + 22, 5138, 2500);
-                                AddItem(startX + 4, startY + 40, 7028, 2500);
-                                AddLabel(startX + 45, startY + 5, 2220, "Battle");
-                                AddImage(startX + 60, startY + 32, 10550, 2220);
-                                AddImage(startX + 88, startY + 32, 10552, 2220);
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.Adventuring:
-                                AddItem(startX + 4, startY + 19, 3226);
-                                AddItem(startX + 19, startY + 44, 4967);
-                                AddItem(startX + 11, startY + 55, 4970);
-                                AddImage(startX + 60, startY + 32, 10550, 149);
-                                AddImage(startX + 88, startY + 32, 10552, 149);
-                                AddItem(startX + 26, startY + 69, 2648);
-                                AddItem(startX + -4, startY + 58, 5356);
-                                AddItem(startX + 2, startY + 65, 3922);
-                                AddItem(startX + -37, startY + 50, 3898);
-                                AddLabel(startX + 27, startY + 5, 148, "Adventuring");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.Slaying:
-                                AddItem(startX + 3, startY + 31, 7433);
-                                AddItem(startX + 8, startY + 56, 4655);
-                                AddItem(startX + 21, startY + 20, 7438);
-                                AddItem(startX + 45, startY + 34, 7419);
-                                AddItem(startX + 68, startY + 33, 7418);
-                                AddItem(startX + 7, startY + 54, 7782);
-                                AddItem(startX + 43, startY + 68, 7430);
-                                AddImage(startX + 60, startY + 32, 10550, 2116);
-                                AddImage(startX + 88, startY + 32, 10552, 2116);
-                                AddItem(startX + 23, startY + 52, 3910);
-                                AddLabel(startX + 44, startY + 5, 2116, "Slaying");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.Seafaring:
-                                AddItem(startX + 5, startY + 50, 5363);
-                                AddItem(startX + 23, startY + 60, 5365);
-                                AddItem(startX + 24, startY + 37, 5370);
-                                AddImage(startX + 60, startY + 32, 10550, 2602);
-                                AddImage(startX + 88, startY + 32, 10552, 2602);
-                                AddLabel(startX + 36, startY + 5, 2603, "Seafaring");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.Luxury:
-                                AddItem(startX + -3, startY + 68, 2448, 2425);
-                                AddImage(startX + 60, startY + 32, 10550, 2618);
-                                AddImage(startX + 88, startY + 32, 10552, 2618);
-                                AddItem(startX + 19, startY + 30, 16508);
-                                AddItem(startX + 1, startY + 63, 2459, 2562);
-                                AddItem(startX + -8, startY + 63, 2459, 2600);
-                                AddItem(startX + -4, startY + 67, 2459, 2606);
-                                AddLabel(startX + 43, startY + 5, 2618, "Luxury");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.Competition:
-                                AddItem(startX + 7, startY + 40, 16434);
-                                AddItem(startX + 18, startY + 26, 16433);
-                                AddImage(startX + 60, startY + 32, 10550, 2963);
-                                AddImage(startX + 88, startY + 32, 10552, 2963);
-                                AddItem(startX + 8, startY + 35, 4006);
-                                AddItem(startX + 0, startY + 48, 4008, 2500);
-                                AddItem(startX + 10, startY + 34, 4008, 1107);
-                                AddLabel(startX + 26, startY + 5, 2962, "Competition");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.AnimalTaming:
-                                AddImage(startX + 60, startY + 32, 10550, 2208);
-                                AddImage(startX + 88, startY + 32, 10552, 2208);
-                                AddItem(startX + 13, startY + 49, 2476);
-                                AddItem(startX + 10, startY + 40, 3191);
-                                AddItem(startX + 14, startY + 38, 3191);
-                                AddItem(startX + 13, startY + 39, 3713);
-                                AddLabel(startX + 23, startY + 5, 2599, "Animal Taming");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.Harvesting:
-                                AddImage(startX + 88, startY + 32, 10552, 2417);
-                                AddItem(startX + 27, startY + 44, 3346, 2208);
-                                AddImage(startX + 60, startY + 32, 10550, 2417);
-                                AddItem(startX + 6, startY + 33, 3670);
-                                AddItem(startX + 36, startY + 29, 3351, 2208);
-                                AddItem(startX + -15, startY + 79, 3352, 2208);
-                                AddItem(startX + 2, startY + 65, 3344, 2208);
-                                AddItem(startX + 18, startY + 62, 7137);
-                                AddItem(startX + 27, startY + 57, 3908);
-                                AddItem(startX + 28, startY + 71, 2482, 2500);
-                                AddLabel(startX + 28, startY + 5, 2417, "Harvesting");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.Virtue:
-                                AddItem(startX + -5, startY + 16, 2);
-                                AddImage(startX + 60, startY + 32, 10550, 2589);
-                                AddImage(startX + 88, startY + 32, 10552, 2589);
-                                AddItem(startX + 15, startY + 18, 3);
-                                AddItem(startX + 23, startY + 79, 3618);
-                                AddItem(startX + 28, startY + 60, 3619);
-                                AddLabel(startX + 48, startY + 5, 2590, "Virtue");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.Crafting:
-                                AddItem(startX + -10, startY + 41, 4142);
-                                AddItem(startX + 1, startY + 41, 4150);
-                                AddImage(startX + 60, startY + 32, 10550, 2401);
-                                AddImage(startX + 88, startY + 32, 10552, 2401);
-                                AddItem(startX + 22, startY + 49, 2920);
-                                AddItem(startX + 10, startY + 39, 2921);
-                                AddItem(startX + 40, startY + 77, 4148);
-                                AddItem(startX + 9, startY + 45, 4189);
-                                AddItem(startX + 22, startY + 61, 4179);
-                                AddItem(startX + 3, startY + 53, 4139);
-                                AddItem(startX + 21, startY + 43, 2581);
-                                AddItem(startX + 3, startY + 29, 2503);
-                                AddItem(startX + 11, startY + 22, 4172);
-                                AddLabel(startX + 36, startY + 5, 2036, "Crafting");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.SkillMastery:
-                                AddImage(startX + 60, startY + 32, 10550, 2652);
-                                AddImage(startX + 88, startY + 32, 10552, 2652);
-                                AddItem(startX + 21, startY + 42, 2942);
-                                AddItem(startX + -4, startY + 28, 2943);
-                                AddItem(startX + 16, startY + 33, 2507);
-                                AddItem(startX + 15, startY + 49, 4030);
-                                AddItem(startX + 28, startY + 28, 7716);
-                                AddItem(startX + -4, startY + 20, 7717, 2652);
-                                AddItem(startX + 18, startY + 39, 4031);
-                                AddLabel(startX + 21, startY + 5, 2652, "Skill Mastery");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            case AchievementCategory.Vice:
-                                AddItem(startX + 27, startY + 71, 6872);
-                                AddItem(startX + 6, startY + 51, 6873);
-                                AddItem(startX + -10, startY + 42, 6874);
-                                AddItem(startX + 25, startY + 32, 6875);
-                                AddItem(startX + 51, startY + 52, 6876);
-                                AddItem(startX + 69, startY + 46, 6877);
-                                AddItem(startX + 14, startY + 84, 6880);
-                                AddImage(startX + 60, startY + 32, 10550, 1106);
-                                AddImage(startX + 88, startY + 32, 10552, 1106);
-                                AddItem(startX + -17, startY + 83, 6883);
-                                AddLabel(startX + 48, startY + 5, 1106, "Vice");
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-
-                            #region Guild
-
-                            /*
-                            case AchievementCategory.Messages:
-                                AddLabel(startX + 36, startY + 5, 2526, "Messages");
-                                AddImage(startX + 60, startY + 32, 10550, 55);
-                                AddImage(startX + 88, startY + 32, 10552, 55);
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                                AddItem(startX + -1, startY + 18, 7774);
-                            break;
-
-                            case AchievementCategory.Overview:
-                                AddLabel(startX + 34, startY + 5, 2401, "Overview");
-                                AddImage(startX + 60, startY + 32, 10550, 2401);
-                                AddImage(startX + 88, startY + 32, 10552, 2401);
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                                AddImage(startX + 13, startY + 35, 11016);
-                            break;
-
-                            case AchievementCategory.Invitations:
-                                AddItem(startX + 21, startY + 41, 2942);
-                                AddItem(startX + -3, startY + 25, 2943);
-                                AddLabel(startX + 12, startY + 5, 2564, "Guild Invitations");
-                                AddImage(startX + 60, startY + 32, 10550, 2566);
-                                AddImage(startX + 88, startY + 32, 10552, 2566);
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                                AddItem(startX + 9, startY + 31, 5359);
-                                AddItem(startX + 23, startY + 24, 4031);
-                                AddItem(startX + 23, startY + 50, 5357);
-                                AddItem(startX + 27, startY + 52, 5357);
-                            break;
-
-                            case AchievementCategory.Members:
-                                AddLabel(startX + 35, startY + 5, 64, "Members");
-                                AddItem(startX + 69, startY + 46, 6877);
-                                AddImage(startX + 60, startY + 32, 10550, 2551);
-                                AddImage(startX + 88, startY + 32, 10552, 2551);
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                                AddItem(startX + 20, startY + 29, 10905);
-                                AddItem(startX + 19, startY + 33, 3746);
-                            break;
-
-                            case AchievementCategory.Candidates:
-                                AddLabel(startX + 27, startY + 4, 2553, "Candidates");
-                                AddImage(startX + 60, startY + 32, 10550, 2566);
-                                AddImage(startX + 88, startY + 32, 10552, 2566);
-                                AddButton(startX + 74, startY + 45, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                                AddItem(startX + 28, startY + 45, 4647, 2563);
-                                AddItem(startX + 11, startY + 36, 4645, 2563);
-                                AddItem(startX + -5, startY + 42, 5018, 2563);
-                            break;
-
-                            case AchievementCategory.CreateGuild:
-                                AddImage(startX + 88, startY + 32, 10552, 2401);
-                                AddLabel(startX + 25, startY + 5, 2401, "Create Guild");
-                                AddImage(startX + 60, startY + 32, 10550, 2401);
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                                AddItem(startX + 15, startY + 29, 3796);
-                            break;
-
-                            case AchievementCategory.Faction:
-                                AddLabel(startX + 44, startY + 5, 1256, "Faction");
-                                AddItem(startX + -15, startY + 20, 3936);
-                                AddItem(startX + 18, startY + 21, 18194);
-                                AddItem(startX + 10, startY + 13, 5129);
-                                AddItem(startX + 32, startY + 31, 18196);
-                                AddItem(startX + 9, startY + 30, 5050);
-                                AddItem(startX + 26, startY + 22, 5135, 2500);
-                                AddImage(startX + 60, startY + 32, 10550, 1256);
-                                AddImage(startX + 88, startY + 32, 10552, 1256);
-                                AddItem(startX + 26, startY + 47, 7034);
-                                AddButton(startX + 74, startY + 46, 9721, 2151, buttonIndex, GumpButtonType.Reply, 0);
-                                AddItem(startX + -4, startY + 33, 543);
-                                AddItem(startX + 14, startY + 45, 543);
-                            break;
-
-                            case AchievementCategory.Diplomacy:
-                                AddItem(startX + 21, startY + 42, 2942);
-                                AddItem(startX + -4, startY + 28, 2943);
-                                AddItem(startX + 11, startY + 20, 4031);
-                                AddItem(startX + 13, startY + 38, 4030);
-                                AddItem(startX + 20, startY + 59, 2507);
-                                AddItem(startX + 22, startY + 44, 2459);
-                                AddLabel(startX + 35, startY + 5, 2606, "Diplomacy");
-                                AddImage(startX + 60, startY + 32, 10550, 2606);
-                                AddImage(startX + 88, startY + 32, 10552, 2606);
-                                AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
-                            break;
-                            */
-
-                            #endregion
-                        }
-
-                        #endregion
-
+                        AddLabel(Utility.CenteredTextOffset(startX + 65, achievementCategoryDetail.m_CategoryName), startY + 5, achievementCategoryDetail.m_TextHue, achievementCategoryDetail.m_CategoryName);
+                        AddImage(startX + 60, startY + 32, 10550, achievementCategoryDetail.m_IconHue);
+                        AddImage(startX + 88, startY + 32, 10552, achievementCategoryDetail.m_IconHue);
+                        AddButton(startX + 74, startY + 46, 9721, 9721, buttonIndex, GumpButtonType.Reply, 0);
+                        
                         //Category Progress
                         int completedAchievementsInCategory = Achievements.GetCompletedCategoryAchievements(m_Player, category);
                         int achievementsInCategory = Achievements.GetCategoryAchievements(category).Count;
@@ -496,66 +258,16 @@ namespace Server
 
                 #endregion
 
+                #region Category
+
                 case PageType.Category:
-                    AddImage(142, 105, 103);
-			        AddImage(143, 148, 103);
-			        AddImage(143, 234, 103);
-			        AddImage(143, 324, 103);
-			        AddImage(145, 409, 103, 2401);
-			        AddImage(8, 410, 103, 2401);
-			        AddImage(8, 233, 103, 2401);
-			        AddImage(142, 8, 103, 2401);
-			        AddImage(7, 147, 103, 2401);
-			        AddImage(8, 7, 103, 2401);
-			        AddImage(8, 104, 103, 2401);
-			        AddImage(17, 107, 3604, 2052);
-			        AddImage(143, 107, 3604, 2052);
-			        AddImage(17, 18, 3604, 2052);
-			        AddImage(143, 18, 3604, 2052);
-			        
-			        AddImage(8, 323, 103, 2401);
-			        AddImage(17, 194, 3604, 2052);
-			        AddImage(143, 194, 3604, 2052);
-			        AddImage(17, 286, 3604, 2052);
-			        AddImage(143, 286, 3604, 2052);
-			        AddImage(17, 370, 3604, 2052);
-			        AddImage(143, 370, 3604, 2052);
-			        AddImage(274, 105, 103);
-			        AddImage(275, 148, 103);
-			        AddImage(275, 234, 103);
-			        AddImage(275, 324, 103);
-			        AddImage(276, 410, 103, 2401);
-			        AddImage(274, 8, 103, 2401);
-			        AddImage(406, 105, 103, 2401);
-			        AddImage(407, 148, 103, 2401);
-			        AddImage(407, 234, 103, 2401);
-			        AddImage(407, 324, 103, 2401);
-			        AddImage(408, 410, 103, 2401);
-			        AddImage(406, 8, 103, 2401);
-			        AddImage(267, 107, 3604, 2052);
-			        AddImage(267, 18, 3604, 2052);
-			        AddImage(267, 194, 3604, 2052);
-			        AddImage(267, 286, 3604, 2052);
-			        AddImage(267, 370, 3604, 2052);
-			        AddImage(375, 107, 3604, 2052);
-			        AddImage(375, 18, 3604, 2052);
-			        AddImage(375, 194, 3604, 2052);
-			        AddImage(375, 286, 3604, 2052);
-			        AddImage(375, 370, 3604, 2052);
-			        AddImage(409, 107, 3604, 2052);
-			        AddImage(409, 18, 3604, 2052);
-			        AddImage(409, 194, 3604, 2052);
-			        AddImage(409, 286, 3604, 2052);
-			        AddImage(409, 370, 3604, 2052);
-			        AddImage(144, -2, 1143, 2499);
-
-                    AddLabel(235, 0, Achievements.AchievementTextHue, "Achievements");
-
                     List<Achievement> m_AchievementsInCategory = Achievements.GetCategoryAchievements(m_AchievementCategory);
+                    
+                    AchievementCategoryDetail categoryDetail = Achievements.GetCategoryDetail(m_AchievementCategory);
 
                     if (m_AchievementsInCategory.Count == 0)
                         return;
-
+                    
                     if (m_AchievementSelectedIndex >= m_AchievementsInCategory.Count)
                         m_AchievementSelectedIndex = 0;
 
@@ -578,283 +290,25 @@ namespace Server
                         achievementEndIndex = totalAchievements - 1;
                                 
                     int achievementCount = achievementEndIndex - achievementStartIndex;
-
-                    //Guide
-                    AddButton(7, 4, 2094, 2095, 1, GumpButtonType.Reply, 0);
-			        AddLabel(30, 4, 149, "Guide");
+                    
+                    //Return to Categories
+                    AddButton(23, 471, 4014, 4016, 5, GumpButtonType.Reply, 0);
+                    AddLabel(57, 472, 149, "Categories");
 
                     //Previous List Page
                     if (m_AchievementListPage > 0)
-                        AddButton(69, 470, 9909, 9909, 3, GumpButtonType.Reply, 0); 
+                        AddButton(172, 471, 9909, 9909, 3, GumpButtonType.Reply, 0); 
+
+                    if (m_AchievementListPage > 0 || m_AchievementListPage < totalAchievementPages - 1)
+                        AddLabel(201, 472, 149, "More");
 
                     //Next List Page
                     if (m_AchievementListPage < totalAchievementPages - 1)
-                        AddButton(115, 470, 9903, 9903, 4, GumpButtonType.Reply, 0);                    
-
-                    //Return
-                    AddButton(243, 471, 4014, 4016, 5, GumpButtonType.Reply, 0);
-                    AddLabel(277, 472, WhiteTextHue, "Return");
+                        AddButton(239, 471, 9903, 9903, 4, GumpButtonType.Reply, 0);      
 
                     //Category
                     startX = 25;
-                    startY = 30;
-
-                    #region Achievement Category Images
-
-                    switch (m_AchievementCategory)
-                    {
-                        case AchievementCategory.Battle:
-                            AddItem(startX + 19, startY + 34, 18210, 2500);
-                            AddItem(startX + 21, startY + 33, 5049, 2500);
-                            AddItem(startX + 14, startY + 22, 5138, 2500);
-                            AddItem(startX + 4, startY + 40, 7028, 2500);
-                            AddLabel(startX + 45, startY + 5, 2220, "Battle");
-                            AddImage(startX + 60, startY + 32, 10550, 2220);
-                            AddImage(startX + 88, startY + 32, 10552, 2220);
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                        break;
-
-                        case AchievementCategory.Adventuring:
-                            AddItem(startX + 4, startY + 19, 3226);
-                            AddItem(startX + 19, startY + 44, 4967);
-                            AddItem(startX + 11, startY + 55, 4970);
-                            AddImage(startX + 60, startY + 32, 10550, 149);
-                            AddImage(startX + 88, startY + 32, 10552, 149);
-                            AddItem(startX + 26, startY + 69, 2648);
-                            AddItem(startX + -4, startY + 58, 5356);
-                            AddItem(startX + 2, startY + 65, 3922);
-                            AddItem(startX + -37, startY + 50, 3898);
-                            AddLabel(startX + 27, startY + 5, 148, "Adventuring");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                        break;
-
-                        case AchievementCategory.Slaying:
-                            AddItem(startX + 3, startY + 31, 7433);
-                            AddItem(startX + 8, startY + 56, 4655);
-                            AddItem(startX + 21, startY + 20, 7438);
-                            AddItem(startX + 45, startY + 34, 7419);
-                            AddItem(startX + 68, startY + 33, 7418);
-                            AddItem(startX + 7, startY + 54, 7782);
-                            AddItem(startX + 43, startY + 68, 7430);
-                            AddImage(startX + 60, startY + 32, 10550, 2116);
-                            AddImage(startX + 88, startY + 32, 10552, 2116);
-                            AddItem(startX + 23, startY + 52, 3910);
-                            AddLabel(startX + 44, startY + 5, 2116, "Slaying");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            break;
-
-                        case AchievementCategory.Seafaring:
-                            AddItem(startX + 5, startY + 50, 5363);
-                            AddItem(startX + 23, startY + 60, 5365);
-                            AddItem(startX + 24, startY + 37, 5370);
-                            AddImage(startX + 60, startY + 32, 10550, 2602);
-                            AddImage(startX + 88, startY + 32, 10552, 2602);
-                            AddLabel(startX + 36, startY + 5, 2603, "Seafaring");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            break;
-
-                        case AchievementCategory.Luxury:
-                            AddItem(startX + -3, startY + 68, 2448, 2425);
-                            AddImage(startX + 60, startY + 32, 10550, 2618);
-                            AddImage(startX + 88, startY + 32, 10552, 2618);
-                            AddItem(startX + 19, startY + 30, 16508);
-                            AddItem(startX + 1, startY + 63, 2459, 2562);
-                            AddItem(startX + -8, startY + 63, 2459, 2600);
-                            AddItem(startX + -4, startY + 67, 2459, 2606);
-                            AddLabel(startX + 43, startY + 5, 2618, "Luxury");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            break;
-
-                        case AchievementCategory.Competition:
-                            AddItem(startX + 7, startY + 40, 16434);
-                            AddItem(startX + 18, startY + 26, 16433);
-                            AddImage(startX + 60, startY + 32, 10550, 2963);
-                            AddImage(startX + 88, startY + 32, 10552, 2963);
-                            AddItem(startX + 8, startY + 35, 4006);
-                            AddItem(startX + 0, startY + 48, 4008, 2500);
-                            AddItem(startX + 10, startY + 34, 4008, 1107);
-                            AddLabel(startX + 26, startY + 5, 2962, "Competition");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            break;
-
-                        case AchievementCategory.AnimalTaming:
-                            AddImage(startX + 60, startY + 32, 10550, 2208);
-                            AddImage(startX + 88, startY + 32, 10552, 2208);
-                            AddItem(startX + 13, startY + 49, 2476);
-                            AddItem(startX + 10, startY + 40, 3191);
-                            AddItem(startX + 14, startY + 38, 3191);
-                            AddItem(startX + 13, startY + 39, 3713);
-                            AddLabel(startX + 23, startY + 5, 2599, "Animal Taming");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            break;
-
-                        case AchievementCategory.Harvesting:
-                            AddImage(startX + 88, startY + 32, 10552, 2417);
-                            AddItem(startX + 27, startY + 44, 3346, 2208);
-                            AddImage(startX + 60, startY + 32, 10550, 2417);
-                            AddItem(startX + 6, startY + 33, 3670);
-                            AddItem(startX + 36, startY + 29, 3351, 2208);
-                            AddItem(startX + -15, startY + 79, 3352, 2208);
-                            AddItem(startX + 2, startY + 65, 3344, 2208);
-                            AddItem(startX + 18, startY + 62, 7137);
-                            AddItem(startX + 27, startY + 57, 3908);
-                            AddItem(startX + 28, startY + 71, 2482, 2500);
-                            AddLabel(startX + 28, startY + 5, 2417, "Harvesting");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            break;
-
-                        case AchievementCategory.Virtue:
-                            AddItem(startX + -5, startY + 16, 2);
-                            AddImage(startX + 60, startY + 32, 10550, 2589);
-                            AddImage(startX + 88, startY + 32, 10552, 2589);
-                            AddItem(startX + 15, startY + 18, 3);
-                            AddItem(startX + 23, startY + 79, 3618);
-                            AddItem(startX + 28, startY + 60, 3619);
-                            AddLabel(startX + 48, startY + 5, 2590, "Virtue");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            break;
-
-                        case AchievementCategory.Crafting:
-                            AddItem(startX + -10, startY + 41, 4142);
-                            AddItem(startX + 1, startY + 41, 4150);
-                            AddImage(startX + 60, startY + 32, 10550, 2401);
-                            AddImage(startX + 88, startY + 32, 10552, 2401);
-                            AddItem(startX + 22, startY + 49, 2920);
-                            AddItem(startX + 10, startY + 39, 2921);
-                            AddItem(startX + 40, startY + 77, 4148);
-                            AddItem(startX + 9, startY + 45, 4189);
-                            AddItem(startX + 22, startY + 61, 4179);
-                            AddItem(startX + 3, startY + 53, 4139);
-                            AddItem(startX + 21, startY + 43, 2581);
-                            AddItem(startX + 3, startY + 29, 2503);
-                            AddItem(startX + 11, startY + 22, 4172);
-                            AddLabel(startX + 36, startY + 5, 2036, "Crafting");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            break;
-
-                        case AchievementCategory.SkillMastery:
-                            AddImage(startX + 60, startY + 32, 10550, 2652);
-                            AddImage(startX + 88, startY + 32, 10552, 2652);
-                            AddItem(startX + 21, startY + 42, 2942);
-                            AddItem(startX + -4, startY + 28, 2943);
-                            AddItem(startX + 16, startY + 33, 2507);
-                            AddItem(startX + 15, startY + 49, 4030);
-                            AddItem(startX + 28, startY + 28, 7716);
-                            AddItem(startX + -4, startY + 20, 7717, 2652);
-                            AddItem(startX + 18, startY + 39, 4031);
-                            AddLabel(startX + 21, startY + 5, 2652, "Skill Mastery");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            break;
-
-                        case AchievementCategory.Vice:
-                            AddItem(startX + 27, startY + 71, 6872);
-                            AddItem(startX + 6, startY + 51, 6873);
-                            AddItem(startX + -10, startY + 42, 6874);
-                            AddItem(startX + 25, startY + 32, 6875);
-                            AddItem(startX + 51, startY + 52, 6876);
-                            AddItem(startX + 69, startY + 46, 6877);
-                            AddItem(startX + 14, startY + 84, 6880);
-                            AddImage(startX + 60, startY + 32, 10550, 1106);
-                            AddImage(startX + 88, startY + 32, 10552, 1106);
-                            AddItem(startX + -17, startY + 83, 6883);
-                            AddLabel(startX + 48, startY + 5, 1106, "Vice");
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                        break;
-
-                        #region Guild
-
-                        /*
-                        case AchievementCategory.Messages:
-                            AddLabel(startX + 36, startY + 5, 2526, "Messages");
-                            AddImage(startX + 60, startY + 32, 10550, 55);
-                            AddImage(startX + 88, startY + 32, 10552, 55);
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            AddItem(startX + -1, startY + 18, 7774);
-                        break;
-
-                        case AchievementCategory.Overview:
-                            AddLabel(startX + 34, startY + 5, 2401, "Overview");
-                            AddImage(startX + 60, startY + 32, 10550, 2401);
-                            AddImage(startX + 88, startY + 32, 10552, 2401);
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            AddImage(startX + 13, startY + 35, 11016);
-                        break;
-
-                        case AchievementCategory.Invitations:
-                            AddItem(startX + 21, startY + 41, 2942);
-                            AddItem(startX + -3, startY + 25, 2943);
-                            AddLabel(startX + 12, startY + 5, 2564, "Guild Invitations");
-                            AddImage(startX + 60, startY + 32, 10550, 2566);
-                            AddImage(startX + 88, startY + 32, 10552, 2566);
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            AddItem(startX + 9, startY + 31, 5359);
-                            AddItem(startX + 23, startY + 24, 4031);
-                            AddItem(startX + 23, startY + 50, 5357);
-                            AddItem(startX + 27, startY + 52, 5357);
-                        break;
-
-                        case AchievementCategory.Members:
-                            AddLabel(startX + 35, startY + 5, 64, "Members");
-                            AddItem(startX + 69, startY + 46, 6877);
-                            AddImage(startX + 60, startY + 32, 10550, 2551);
-                            AddImage(startX + 88, startY + 32, 10552, 2551);
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            AddItem(startX + 20, startY + 29, 10905);
-                            AddItem(startX + 19, startY + 33, 3746);
-                        break;
-
-                        case AchievementCategory.Candidates:
-                            AddLabel(startX + 27, startY + 4, 2553, "Candidates");
-                            AddImage(startX + 60, startY + 32, 10550, 2566);
-                            AddImage(startX + 88, startY + 32, 10552, 2566);
-                            AddButton(startX + 74, startY + 45, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            AddItem(startX + 28, startY + 45, 4647, 2563);
-                            AddItem(startX + 11, startY + 36, 4645, 2563);
-                            AddItem(startX + -5, startY + 42, 5018, 2563);
-                        break;
-
-                        case AchievementCategory.CreateGuild:
-                            AddImage(startX + 88, startY + 32, 10552, 2401);
-                            AddLabel(startX + 25, startY + 5, 2401, "Create Guild");
-                            AddImage(startX + 60, startY + 32, 10550, 2401);
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                            AddItem(startX + 15, startY + 29, 3796);
-                        break;
-
-                        case AchievementCategory.Faction:
-                            AddLabel(startX + 44, startY + 5, 1256, "Faction");
-                            AddItem(startX + -15, startY + 20, 3936);
-                            AddItem(startX + 18, startY + 21, 18194);
-                            AddItem(startX + 10, startY + 13, 5129);
-                            AddItem(startX + 32, startY + 31, 18196);
-                            AddItem(startX + 9, startY + 30, 5050);
-                            AddItem(startX + 26, startY + 22, 5135, 2500);
-                            AddImage(startX + 60, startY + 32, 10550, 1256);
-                            AddImage(startX + 88, startY + 32, 10552, 1256);
-                            AddItem(startX + 26, startY + 47, 7034);
-                            AddButton(startX + 74, startY + 46, 9721, 2151, 2, GumpButtonType.Reply, 0);
-                            AddItem(startX + -4, startY + 33, 543);
-                            AddItem(startX + 14, startY + 45, 543);
-                        break;
-
-                        case AchievementCategory.Diplomacy:
-                            AddItem(startX + 21, startY + 42, 2942);
-                            AddItem(startX + -4, startY + 28, 2943);
-                            AddItem(startX + 11, startY + 20, 4031);
-                            AddItem(startX + 13, startY + 38, 4030);
-                            AddItem(startX + 20, startY + 59, 2507);
-                            AddItem(startX + 22, startY + 44, 2459);
-                            AddLabel(startX + 35, startY + 5, 2606, "Diplomacy");
-                            AddImage(startX + 60, startY + 32, 10550, 2606);
-                            AddImage(startX + 88, startY + 32, 10552, 2606);
-                            AddButton(startX + 74, startY + 46, 9721, 9721, 2, GumpButtonType.Reply, 0);
-                        break;  
-                        */
-
-                        #endregion
-                    }
-
-                    #endregion                    
+                    startY = 30;                                        
 
                     int playerCompletedAchievementsInCategory = Achievements.GetCompletedCategoryAchievements(m_Player, m_AchievementCategory);
                     int totalAchievementsInCategory = m_AchievementsInCategory.Count;
@@ -871,10 +325,21 @@ namespace Server
 
                     string categoryProgressText = playerCompletedAchievementsInCategory.ToString() + "/" + totalAchievementsInCategory.ToString();
 
+                    startX = 25;
+                    startY = 30;
+
+                    //Category Image                    
+                    AddGumpCollection(GumpCollections.GetGumpCollection(categoryDetail.GumpCollectionGroupId, categoryDetail.GumpCollectionItemId), startX - 40, startY + 8);
+
+                    AddLabel(Utility.CenteredTextOffset(startX + 65, categoryDetail.m_CategoryName), startY + 5, categoryDetail.m_TextHue, categoryDetail.m_CategoryName);
+                    AddImage(startX + 60, startY + 32, 10550, categoryDetail.m_IconHue);
+                    AddImage(startX + 88, startY + 32, 10552, categoryDetail.m_IconHue);
+
+                    //Category Progress
                     AddImage(startX + 10, startY + 99, Achievements.GetProgressBarBackground(playerCategoryAchievementProgress));
                     AddImageTiled(startX + 10 + Utility.ProgressBarX(playerCategoryAchievementProgress), startY + 102, Utility.ProgressBarWidth(playerCategoryAchievementProgress), 7, 2488);
                     AddLabel(Utility.CenteredTextOffset(startX + 60, categoryProgressText), startY + 113, textHue, categoryProgressText);
-
+                    
                     startX = 3;
                     startY = 165;
 
@@ -927,7 +392,7 @@ namespace Server
                             if (!achievementEntry.m_Unlocked)
                             {
                                 textHue = GreyTextHue;
-                                AddItem(startX, startY + 5, 573); //Orange Orb
+                                //AddItem(startX, startY + 5, 573); //Orange Orb
                             }
 
                             if (achievementSelected == achievement)
@@ -942,56 +407,61 @@ namespace Server
                         startY += achievementSpacing;
                     }
 
-                    //Achivement Window
-                    AddImage(383, 233, 103, 2401);
-			        AddImage(383, 150, 103, 2401);
-			        AddImage(383, 60, 103, 2401);
-			        AddImage(281, 150, 103);
-			        AddImage(278, 234, 103, 2401);
-			        AddImage(278, 150, 103, 2401);
-			        AddImage(278, 60, 103, 2401);
-			        AddImage(291, 72, 3604, 2052);
-			        AddImage(291, 195, 3604, 2052);
-			        AddImage(385, 72, 3604, 2052);
-			        AddImage(386, 195, 3604, 2052);
-			        AddImage(383, 322, 103, 2401);
-			        AddImage(278, 323, 103, 2401);
-			        AddImage(291, 284, 3604, 2052);
-			        AddImage(386, 284, 3604, 2052);
-			        AddImage(383, 362, 103, 2401);
-			        AddImage(278, 363, 103, 2401);
-			        AddImage(291, 324, 3604, 2052);
-			        AddImage(386, 324, 3604, 2052);
-                    
+                    #region Achievement Window
+
+                    AddImage(408, 233, 103, 2401);
+			        AddImage(408, 150, 103, 2401);
+			        AddImage(408, 60, 103, 2401);
+			        AddImage(306, 150, 103);
+			        AddImage(303, 234, 103, 2401);
+			        AddImage(303, 150, 103, 2401);
+			        AddImage(303, 60, 103, 2401);
+			        AddImage(316, 72, 3604, 2052);
+			        AddImage(316, 195, 3604, 2052);
+			        AddImage(410, 72, 3604, 2052);
+			        AddImage(411, 195, 3604, 2052);
+			        AddImage(408, 322, 103, 2401);
+			        AddImage(303, 323, 103, 2401);
+			        AddImage(316, 284, 3604, 2052);
+			        AddImage(411, 284, 3604, 2052);
+			        AddImage(408, 362, 103, 2401);
+			        AddImage(303, 363, 103, 2401);
+			        AddImage(316, 324, 3604, 2052);
+			        AddImage(411, 324, 3604, 2052);
+                    AddImage(516, 49, 10441, 2401);                   
+
+                    #endregion
+			        
                     AchievementDetail selectedAchievementDetail = Achievements.GetAchievementDetail(achievementSelected);
                     AchievementEntry selectedAchievementEntry = Achievements.GetAchievementEntry(m_Player, achievementSelected);
 
-                    int centerTextX = 400;
+                    int centerTextX = 440;
+                    int textY = 80;
 
+                    rowSpacing = 20;
+                    
+                    AddImage(349, 54, 2440, 1102);
+                    AddLabel(Utility.CenteredTextOffset(centerTextX, selectedAchievementDetail.m_DisplayName), 55, categoryDetail.m_TextHue, selectedAchievementDetail.m_DisplayName);
+                    
                     if (selectedAchievementDetail != null && selectedAchievementEntry != null)
-                    {
-                        AddLabel(Utility.CenteredTextOffset(centerTextX + 5, selectedAchievementDetail.m_DisplayName), 73, 2603, selectedAchievementDetail.m_DisplayName);
-
+                    {                        
                         if (!selectedAchievementEntry.m_Unlocked)
                         {
                             string unlockedText = "Stage " + selectedAchievementDetail.m_Stage.ToString() + " (Not Yet Unlocked)";
 
-                            AddLabel(Utility.CenteredTextOffset(centerTextX + 10, unlockedText), 93, 149, unlockedText);
-                        }
+                            AddLabel(Utility.CenteredTextOffset(centerTextX, unlockedText), textY, GreyTextHue, unlockedText);
 
-                        int selectedAchievementDescriptionY = 113;
-
-                        if (selectedAchievementDetail.m_Description != null)
+                            textY += rowSpacing;
+                        }                        
+                        
+                        for (int a = 0; a < selectedAchievementDetail.m_Description.Length; a++)
                         {
-                            for (int a = 0; a < selectedAchievementDetail.m_Description.Length; a++)
-                            {
-                                AddLabel(Utility.CenteredTextOffset(centerTextX + 15, selectedAchievementDetail.m_Description[a]), selectedAchievementDescriptionY, WhiteTextHue, selectedAchievementDetail.m_Description[a]);
+                            AddLabel(Utility.CenteredTextOffset(centerTextX, selectedAchievementDetail.m_Description[a]), textY, WhiteTextHue, selectedAchievementDetail.m_Description[a]);
 
-                                selectedAchievementDescriptionY += 20;
-                            }
-                        }
+                            textY += rowSpacing;
+                        }                        
 
-                        AddLabel(373, 184, 2599, "Progress");                        
+                        AddLabel(409, 184, 2599, "Progress");                        
 
                         double selectedAchievementProgress = (double)selectedAchievementEntry.m_Progress / (double)selectedAchievementDetail.m_ProgressNeeded;
                         
@@ -1003,31 +473,45 @@ namespace Server
                         if (selectedAchievementEntry.m_Progress == selectedAchievementDetail.m_ProgressNeeded)
                             textHue = GreenTextHue;
 
-                        AddImage(345, 205, Achievements.GetProgressBarBackground(selectedAchievementProgress));
-                        AddImageTiled(345 + Utility.ProgressBarX(selectedAchievementProgress), 208, Utility.ProgressBarWidth(selectedAchievementProgress), 7, 2488);
+                        AddImage(382, 205, Achievements.GetProgressBarBackground(selectedAchievementProgress));
+                        AddImageTiled(382 + Utility.ProgressBarX(selectedAchievementProgress), 208, Utility.ProgressBarWidth(selectedAchievementProgress), 7, 2488);
 
                         string progressText = selectedAchievementEntry.m_Progress.ToString() + "/" + selectedAchievementDetail.m_ProgressNeeded.ToString();
 
-                        AddLabel(Utility.CenteredTextOffset(centerTextX, progressText), 219, textHue, progressText);
+                        AddLabel(Utility.CenteredTextOffset(centerTextX - 5, progressText), 220, textHue, progressText);
 
-                        AddLabel(375, 253, 63, "Reward");
-                        AddLabel(Utility.CenteredTextOffset(centerTextX, selectedAchievementDetail.m_RewardName), 273, WhiteTextHue, selectedAchievementDetail.m_RewardName);
+                        AddLabel(415, 250, 63, "Reward");
 
-                        AddItem(355 + selectedAchievementDetail.m_RewardItemOffsetX, 316 + selectedAchievementDetail.m_RewardItemOffsetY, selectedAchievementDetail.m_RewardItemID, selectedAchievementDetail.m_RewardItemHue);
+                        textY = 270;
+
+                        for (int a = 0; a < selectedAchievementDetail.m_RewardDescription.Length; a++)
+                        {
+                            AddLabel(Utility.CenteredTextOffset(centerTextX, selectedAchievementDetail.m_RewardDescription[a]), textY, WhiteTextHue, selectedAchievementDetail.m_RewardDescription[a]);
+
+                            textY += rowSpacing;
+                        }
+
+                        if (selectedAchievementDetail.m_RewardItemID != 0)                        
+                            AddItem(360 + selectedAchievementDetail.m_RewardItemOffsetX, textY + 20 + selectedAchievementDetail.m_RewardItemOffsetY, selectedAchievementDetail.m_RewardItemID, selectedAchievementDetail.m_RewardItemHue);
+                            
+                        else
+                            AddGumpCollection(GumpCollections.GetGumpCollection(selectedAchievementDetail.GumpCollectionGroupId, selectedAchievementDetail.GumpCollectionItemId), 355, 350);
 
                         if (selectedAchievementEntry.m_Completed)     
                         {
                             if (selectedAchievementEntry.m_Claimed)
                             {
-                                AddLabel(418, 420, 63, "Claim");
-                                AddButton(384, 416, 2151, 2151, 6, GumpButtonType.Reply, 0);
+                                AddLabel(426, 472, 63, "Claim");
+                                AddButton(426, 442, 2151, 2154, 6, GumpButtonType.Reply, 0);
                             }
 
                             else
-                                AddLabel(413, 420, 149, "Claimed");
+                                AddLabel(393, 462, 149, "Already Claimed");
                         }
                     }
                 break;
+
+                #endregion
 
                 case PageType.Settings:
                 break;
@@ -1072,6 +556,8 @@ namespace Server
                             if (m_MainPage > 0)
                                 m_MainPage--;
 
+                            m_Player.SendSound(ChangePageSound);
+
                             closeGump = false;
                         break;
 
@@ -1080,12 +566,16 @@ namespace Server
                             if (m_MainPage < totalPages - 1)
                                 m_MainPage++;
 
+                            m_Player.SendSound(ChangePageSound);
+
                             closeGump = false;
                         break;
 
                         //Settings
                         case 4:
                             m_SelectedPageType = PageType.Settings;
+
+                            m_Player.SendSound(ChangePageSound);
 
                             closeGump = false;
                         break;
@@ -1104,6 +594,8 @@ namespace Server
                         m_AchievementCategory = (AchievementCategory)categorySelectionIndex;
                         m_AchievementListPage = 0;
                         m_AchievementSelectedIndex = 0;
+
+                        m_Player.SendSound(ChangePageSound);
 
                         closeGump = false;
                     }
@@ -1158,6 +650,8 @@ namespace Server
                             if (m_AchievementListPage > 0)
                                 m_AchievementListPage--;
 
+                            m_Player.SendSound(ChangePageSound);
+
                             closeGump = false;
                         break;
 
@@ -1166,12 +660,16 @@ namespace Server
                             if (m_AchievementListPage < totalAchievementPages - 1)
                                 m_AchievementListPage++;
 
+                            m_Player.SendSound(ChangePageSound);
+
                             closeGump = false;
                         break;
 
                         //Return
                         case 5:
                             m_SelectedPageType = PageType.Main;
+
+                            m_Player.SendSound(ChangePageSound);
 
                             closeGump = false;
                         break;
@@ -1198,7 +696,9 @@ namespace Server
 
                         m_AchievementSelectedIndex = achievementSelectionIndex;
 
-                        Achievement testAchievement = m_AchievementsInCategory[achievementSelectionIndex];    
+                        Achievement testAchievement = m_AchievementsInCategory[achievementSelectionIndex];
+
+                        m_Player.SendSound(SelectionSound);
 
                         closeGump = false;
                     }
@@ -1215,6 +715,8 @@ namespace Server
                        //Return
                         case 2:
                             m_SelectedPageType = PageType.Main;
+
+                            m_Player.SendSound(ChangePageSound);
 
                             closeGump = false;
                         break;

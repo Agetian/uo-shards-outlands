@@ -29,8 +29,11 @@ namespace Server.Items
             {
                 EnhancementsGumpObject enhancementGumpObject = new EnhancementsGumpObject(player);
 
-                player.CloseGump(typeof(EnhancementsGump));
-                player.SendGump(new EnhancementsGump(player, enhancementGumpObject));
+                //player.CloseGump(typeof(EnhancementsGump));
+                //player.SendGump(new EnhancementsGump(player, enhancementGumpObject));
+
+                player.CloseGump(typeof(AchievementsGump));
+                player.SendGump(new AchievementsGump(player, AchievementsGump.PageType.Main, 0, AchievementCategory.Adventuring, 0, 0));
 
                 //player.CloseGump(typeof(TestGump));
                 //player.SendGump(new TestGump(player));

@@ -12,7 +12,7 @@ namespace Server
     {
         Battle,
         Seafaring,
-        AnimalTaming,
+        AnimalHandling,
         Crafting,
 
         Adventuring,
@@ -40,11 +40,115 @@ namespace Server
         GunsAndRum,
         BackFromTheBrink,
         GhostPirate,
+
+        TEST1,
+        TEST2,
+        TEST3
     }
 
     public class Achievements
     {
         public static int AchievementTextHue = 2606;
+
+        public static AchievementCategoryDetail GetCategoryDetail(AchievementCategory achievementCategory)
+        {
+            AchievementCategoryDetail detail = new AchievementCategoryDetail();
+
+            detail.m_AchievementCategory = achievementCategory;
+
+            #region Categories
+
+            switch (achievementCategory)
+            {
+                case AchievementCategory.Adventuring:
+                    detail.GumpCollectionGroupId = "AdventuringAchievementCategory";
+                    detail.m_TextHue = 148;
+                    detail.m_IconHue = 149;
+                    detail.m_CategoryName = "Adventuring";
+                break;
+
+                case AchievementCategory.AnimalHandling:
+                    detail.GumpCollectionGroupId = "AnimalHandlingAchievementCategory";
+                    detail.m_TextHue = 2599;
+                    detail.m_IconHue = 2208;
+                    detail.m_CategoryName = "Animal Handling";
+                break;
+
+                case AchievementCategory.Battle:
+                    detail.GumpCollectionGroupId = "BattleAchievementCategory";
+                    detail.m_TextHue = 1256;
+                    detail.m_IconHue = 1256;
+                    detail.m_CategoryName = "Battle";
+                break;
+
+                case AchievementCategory.Competition:
+                    detail.GumpCollectionGroupId = "CompetitionAchievementCategory";
+                    detail.m_TextHue = 2963;
+                    detail.m_IconHue = 2963;
+                    detail.m_CategoryName = "Competition";
+                break;
+
+                case AchievementCategory.Crafting:
+                    detail.GumpCollectionGroupId = "CraftingAchievementCategory";
+                    detail.m_TextHue = 2499;
+                    detail.m_IconHue = 2401;
+                    detail.m_CategoryName = "Crafting";
+                break;
+
+                case AchievementCategory.Harvesting:
+                    detail.GumpCollectionGroupId = "HarvestingAchievementCategory";
+                    detail.m_TextHue = 2417;
+                    detail.m_IconHue = 2417;
+                    detail.m_CategoryName = "Harvesting";
+                break;
+
+                case AchievementCategory.Luxury:
+                    detail.GumpCollectionGroupId = "LuxuryAchievementCategory";
+                    detail.m_TextHue = 2618;
+                    detail.m_IconHue = 2618;
+                    detail.m_CategoryName = "Luxury";
+                break;
+
+                case AchievementCategory.Seafaring:
+                    detail.GumpCollectionGroupId = "SeafaringAchievementCategory";
+                    detail.m_TextHue = 2603;
+                    detail.m_IconHue = 2602;
+                    detail.m_CategoryName = "Seafaring";
+                break;
+
+                case AchievementCategory.SkillMastery:
+                    detail.GumpCollectionGroupId = "SkillMasteryAchievementCategory";
+                    detail.m_TextHue = 2550;
+                    detail.m_IconHue = 2652;
+                    detail.m_CategoryName = "Skill Mastery";
+                break;
+
+                case AchievementCategory.Slaying:
+                    detail.GumpCollectionGroupId = "SlayingAchievementCategory";
+                    detail.m_TextHue = 2116;
+                    detail.m_IconHue = 2116;
+                    detail.m_CategoryName = "Slaying";
+                break;
+
+                case AchievementCategory.Vice:
+                    detail.GumpCollectionGroupId = "ViceAchievementCategory";
+                    detail.m_TextHue = 1106;
+                    detail.m_IconHue = 1106;
+                    detail.m_CategoryName = "Vice";
+                break;
+
+                case AchievementCategory.Virtue:
+                    detail.GumpCollectionGroupId = "VirtueAchievementCategory";
+                    detail.m_TextHue = 2590;
+                    detail.m_IconHue = 2589;
+                    detail.m_CategoryName = "Virtue";
+                break;
+            }
+
+            #endregion
+
+            return detail;
+        }
 
         public static List<Achievement> GetCategoryAchievements(AchievementCategory category)
         {
@@ -67,6 +171,10 @@ namespace Server
                     achievementsList.Add(Achievement.GunsAndRum);
                     achievementsList.Add(Achievement.BackFromTheBrink);
                     achievementsList.Add(Achievement.GhostPirate);
+
+                    achievementsList.Add(Achievement.TEST1);
+                    achievementsList.Add(Achievement.TEST2);
+                    achievementsList.Add(Achievement.TEST3);
                 break;
             }
 
@@ -95,14 +203,16 @@ namespace Server
                     detail.m_DisplayName = "Sink or Swim";
                     detail.m_Description = new string[] { "Kill 1,000 enemy ship combatants" };
 
-                    detail.m_RewardName = "Driftwood";
-                    detail.m_RewardDescription = "Receive a decorative piece of driftwood";
+                    detail.m_RewardDescription = new string[] { "Liquor" };
+
+                    detail.GumpCollectionGroupId = "";
+                    detail.GumpCollectionItemId = 0;
 
                     detail.m_RewardItemID = 2500;
                     detail.m_RewardItemHue = 0;
-                    detail.m_RewardItemOffsetX = 0;
-                    detail.m_RewardItemOffsetY = 0;
-                    break;
+                    detail.m_RewardItemOffsetX = 48;
+                    detail.m_RewardItemOffsetY = 34;
+                break;
 
                 case Achievement.WalkThePlank:
                     detail.m_Category = AchievementCategory.Seafaring;
@@ -114,14 +224,16 @@ namespace Server
                     detail.m_DisplayName = "Walk the Plank";
                     detail.m_Description = new string[] { "Kill 5,000 enemy ship combatants" };
 
-                    detail.m_RewardName = "Driftwood 2";
-                    detail.m_RewardDescription = "Receive a 2nd decorative piece of driftwood";
+                    detail.m_RewardDescription = new string[] { "Driftwood" };
+
+                    detail.GumpCollectionGroupId = "";
+                    detail.GumpCollectionItemId = 0;
 
                     detail.m_RewardItemID = 2500;
                     detail.m_RewardItemHue = 0;
-                    detail.m_RewardItemOffsetX = 0;
-                    detail.m_RewardItemOffsetY = 0;
-                    break;
+                    detail.m_RewardItemOffsetX = 48;
+                    detail.m_RewardItemOffsetY = 34;
+                break;
 
                 case Achievement.HighTide:
                     detail.m_Category = AchievementCategory.Seafaring;
@@ -133,14 +245,16 @@ namespace Server
                     detail.m_DisplayName = "High Tide";
                     detail.m_Description = new string[] { "Kill 25,000 enemy ship combatants" };
 
-                    detail.m_RewardName = "Driftwood 3";
-                    detail.m_RewardDescription = "Receive a 3rd decorative piece of driftwood";
+                    detail.m_RewardDescription = new string[] { "Driftwood" };
+
+                    detail.GumpCollectionGroupId = "";
+                    detail.GumpCollectionItemId = 0;
 
                     detail.m_RewardItemID = 2500;
                     detail.m_RewardItemHue = 0;
-                    detail.m_RewardItemOffsetX = 0;
-                    detail.m_RewardItemOffsetY = 0;
-               break;                
+                    detail.m_RewardItemOffsetX = 48;
+                    detail.m_RewardItemOffsetY = 34;
+                break;                
 
                 #endregion
             }
@@ -510,7 +624,21 @@ namespace Server
                 }
             }
         }               
-    }    
+    }  
+  
+    public class AchievementCategoryDetail
+    {
+        public AchievementCategory m_AchievementCategory;
+        public string m_CategoryName = "";
+        public int m_TextHue = 2499;
+        public int m_IconHue = 0;
+        public string GumpCollectionGroupId = "";
+        public int GumpCollectionItemId = -1;
+
+        public AchievementCategoryDetail()
+        {
+        }
+    }
 
     public class AchievementDetail
     {
@@ -525,12 +653,14 @@ namespace Server
         public int m_ProgressNeeded = 1;
 
         public string m_DisplayName = "Achievement Name";
-        public string[] m_Description = new string[] {"Achievement Description" };
+        public string[] m_Description = new string[] { "Achievement Description" };
 
-        public string m_RewardName = "Reward Name";
-        public string m_RewardDescription = "Reward Description";
+        public string[] m_RewardDescription = new string[] { "Achievement Description" };
 
-        public int m_RewardItemID = 2500;
+        public string GumpCollectionGroupId = "";
+        public int GumpCollectionItemId = -1;
+
+        public int m_RewardItemID = 0;
         public int m_RewardItemHue = 0;
         public int m_RewardItemOffsetX = 0;
         public int m_RewardItemOffsetY = 0;
