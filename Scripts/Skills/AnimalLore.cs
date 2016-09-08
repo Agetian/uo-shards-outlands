@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace Server.SkillHandlers
+namespace Server
 {
     public class AnimalLore
     {
@@ -67,7 +67,7 @@ namespace Server.SkillHandlers
                     }
 
                     from.SendGump(new AnimalLoreGump(player, bc_Creature, AnimalLoreGump.AnimalLoreGumpPage.Stats, new List<AnimalLoreGump.TraitSelectionType>()));
-                    from.PlaySound(0x055);
+                    from.SendSound(0x055);
                 }
 
                 else
@@ -144,7 +144,7 @@ namespace Server.SkillHandlers
             int MainTextHue = 149; // 149; //2036      
             int BlueTextHue = 2603;
             int GreenTextHue = 0x3F;
-            int RedTextHue = 0x22;
+            int RedTextHue = 1256; //0x22
             int ValueTextHue = 2655; // 2036; //2610
             int DifficultyTextHue = 2114;
             int SlayerGroupTextHue = 2606;
@@ -159,7 +159,7 @@ namespace Server.SkillHandlers
 
             AddLabel(10, 0, 149, "Guide");
             AddButton(14, 15, 2094, 2095, 1, GumpButtonType.Reply, 0);
-
+            
             switch (m_Page)
             {
                 //Main
@@ -170,16 +170,28 @@ namespace Server.SkillHandlers
                         AddButton(45, 369, 4011, 4013, 2, GumpButtonType.Reply, 0);
 
                         if (traitsAvailable > 0)
-                            AddLabel(123, 370, GreenTextHue, "(" + traitsAvailable.ToString() + " Available)");                    
-                    
-                        AddButton(221, 369, 4029, 4031, 3, GumpButtonType.Reply, 0);
-                        AddLabel(259, 370, WhiteTextHue, "Info");
+                            AddLabel(123, 370, GreenTextHue, "(" + traitsAvailable.ToString() + " Available)");
+
+                        if (bc_Creature.RessPenaltyCount > 0)
+                        {
+                            AddItem(172, 363, 6227, 0);
+                            AddLabel(206, 370, 2116, bc_Creature.RessPenaltyCount.ToString());
+
+                            AddButton(221, 369, 4029, 4031, 3, GumpButtonType.Reply, 0);
+                            AddLabel(259, 370, 2116, "Info");
+                        }
+
+                        else
+                        {
+                            AddButton(221, 369, 4029, 4031, 3, GumpButtonType.Reply, 0);
+                            AddLabel(259, 370, WhiteTextHue, "Info");
+                        }
                     }
 
                     #region Main
-
+                    
                     int shrinkTableIcon = ShrinkTable.Lookup(bc_Creature);
-
+                    
                     if (shrinkTableIcon == 6256)
                         shrinkTableIcon = 7960;
 
@@ -228,7 +240,7 @@ namespace Server.SkillHandlers
 
                     string passiveTamingSkillGainRemainingText = Utility.CreateDecimalString(passiveTamingSkillGainRemaining, 1);
 
-                    if (!(bc_Creature.Controlled && bc_Creature.ControlMaster == player))
+                    if (!(bc_Creature.IsStabled || bc_Creature.ControlMaster == player))
                         passiveTamingSkillGainRemainingText = "-";
                                         
                     int hitsAdjusted = bc_Creature.Hits;
@@ -352,9 +364,8 @@ namespace Server.SkillHandlers
                     if (poisoningTamedScalar.Length == 3)
                         poisoningTamedScalar = poisoningTamedScalar.Insert(2, ".0");
 
-                    if (bc_Creature.Controlled && bc_Creature.ControlMaster is PlayerMobile)
+                    if (bc_Creature.IsStabled || (bc_Creature.Controlled && bc_Creature.ControlMaster is PlayerMobile))
                     {
-
                         AddLabel(166, 50, MainTextHue, "Level:");                        
                         if (traitsAvailable > 0)
                             AddLabel(210, 50, GreenTextHue, level.ToString());
@@ -376,9 +387,9 @@ namespace Server.SkillHandlers
                         AddLabel(160, 90, MainTextHue, "Passive Taming");
                         AddLabel(130, 105, MainTextHue, "Skill Gain Remaining");
                         if (passiveTamingSkillGainRemaining > 0)
-                            AddLabel(260, 100, GreenTextHue, passiveTamingSkillGainRemainingText);
+                            AddLabel(260, 100, 2603, passiveTamingSkillGainRemainingText);
                         else
-                            AddLabel(260, 100, WhiteTextHue, passiveTamingSkillGainRemainingText);
+                            AddLabel(260, 100, 2401, passiveTamingSkillGainRemainingText);
                     }
 
                     else
@@ -545,7 +556,7 @@ namespace Server.SkillHandlers
                     else
                         AddLabel(valuesX, startY, ValueTextHue, "-");
 
-                    startY += rowHeight;                   
+                    startY += rowHeight;   
 
                     #endregion
                 break;
@@ -562,7 +573,7 @@ namespace Server.SkillHandlers
 
                     string traitsText = "Traits";
 
-                    if (bc_Creature.Controlled && bc_Creature.ControlMaster == pm_Player && traitsAvailable > 0)
+                    if ((bc_Creature.IsStabled || (bc_Creature.Controlled && bc_Creature.ControlMaster == pm_Player)) && traitsAvailable > 0)
                     {
                         if (traitsAvailable == 1)
                             traitsText = traitsAvailable.ToString() + " Trait Available";
@@ -677,9 +688,7 @@ namespace Server.SkillHandlers
                             iStartY += rowSpacing;
                         }
                     }
-
-                    //-----
-
+                    
                     bool selectionsMade = false;
 
                     for (int a = 0; a < m_TraitGumpSelections.Count; a++)
@@ -703,12 +712,28 @@ namespace Server.SkillHandlers
                     AddButton(45, 369, 4011, 4013, 2, GumpButtonType.Reply, 0);
 
                     if (traitsAvailable > 0)            
-                        AddLabel(123, 370, GreenTextHue, "(" + traitsAvailable.ToString() + " Available)");
+                        AddLabel(120, 370, GreenTextHue, "(" + traitsAvailable.ToString() + " Available)");
                     
                     AddButton(221, 369, 4029, 4031, 3, GumpButtonType.Reply, 0);
                     AddLabel(259, 370, WhiteTextHue, "Stats");
 
                     #region Info
+
+                    if (bc_Creature.RessPenaltyCount > 0)
+                    {
+                        AddLabel(73, 47, 149, "Current Ress Penalty");
+                        AddItem(198, 42, 6227, 0);
+                        AddLabel(232, 47, 2116, "x" + bc_Creature.RessPenaltyCount.ToString());
+
+                        string timeRemainingText = "Expires in " + Utility.CreateTimeRemainingString(DateTime.UtcNow, bc_Creature.RessPenaltyExpiration, true, false, true, true, true);
+                        string textA = "-" + Utility.CreateDecimalPercentageString(bc_Creature.GetRessPenaltyDamageDealtModifier(), 0) + " Damage Dealt";
+                        string textB = "+" + Utility.CreateDecimalPercentageString(bc_Creature.GetRessPenaltyDamageReceivedModifier(), 0) + " Damage Received";
+
+                        AddLabel(Utility.CenteredTextOffset(165, timeRemainingText), 67, 2550, timeRemainingText);
+                        AddLabel(Utility.CenteredTextOffset(165, textA), 87, 1256, textA);
+                        AddLabel(Utility.CenteredTextOffset(165, textB), 107, 1256, textB);
+                    }
+
                     #endregion
                 break;
             }    

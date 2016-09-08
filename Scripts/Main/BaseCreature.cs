@@ -489,6 +489,25 @@ namespace Server.Mobiles
         public static double GoldDropVariation = .10;
         public static double NewbieRegionGoldDropScalar = .5;
 
+        public double m_MinTamedStatSkillScalar = .90;
+        public double m_RareMinTamedStatSkillScalar = 1.0;
+        public double m_MaxTamedStatSkillScalar = 1.10;
+
+        public static double HitsExperienceScalar = .50;
+        public static double ManaExperienceScalar = .50;
+        public static double DamageExperienceScalar = .33;
+        public static double WrestlingExperienceScalar = .25;
+        public static double EvalIntExperienceScalar = 1.0;
+        public static double MageryExperienceScalar = .5;
+        public static double MeditationExperienceScalar = .5;
+        public static double MagicResistExperienceScalar = .5;
+        public static double PoisoningExperienceScalar = .10;
+        public static double VirtualArmorExperienceScalar = .5;
+
+        public static int MaxRessPenaltyCount = 9;
+        public static double RessPenaltyDamageDealtReduction = .5;
+        public static double RessPenaltyDamageReceivedIncrease = .5;
+
         public List<AspectGearExperienceEntry> m_AspectGearExperienceEntries = new List<AspectGearExperienceEntry>();
 
         public virtual void SetRare()
@@ -657,24 +676,63 @@ namespace Server.Mobiles
         {
             get { return m_CreaturesKilled; }
             set { m_CreaturesKilled = value; }
-        }               
+        }  
 
-        //Base Creature Stats/Skill Tamed Adjustment: Generated Upon Creature Spawn
-        public double m_MinTamedStatSkillScalar = .90;
-        public double m_RareMinTamedStatSkillScalar = 1.0;
-        public double m_MaxTamedStatSkillScalar = 1.10;
+        private int m_RessPenaltyCount = 0;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int RessPenaltyCount
+        {
+            get 
+            {
+                if (RessPenaltyExpiration <= DateTime.UtcNow)
+                    m_RessPenaltyCount = 0;
 
-        public static double HitsExperienceScalar = .50;
-        public static double ManaExperienceScalar = .50;
-        public static double DamageExperienceScalar = .33;
-        public static double WrestlingExperienceScalar = .25;
-        public static double EvalIntExperienceScalar = 1.0;
-        public static double MageryExperienceScalar = .5;
-        public static double MeditationExperienceScalar = .5;
-        public static double MagicResistExperienceScalar = .5;
-        public static double PoisoningExperienceScalar = .10;
-        public static double VirtualArmorExperienceScalar = .5;
+                return m_RessPenaltyCount;
+            }
 
+            set 
+            {
+                m_RessPenaltyCount = value;
+
+                if (m_RessPenaltyCount < 0)
+                    m_RessPenaltyCount = 0;
+
+                if (m_RessPenaltyCount > MaxRessPenaltyCount)
+                    m_RessPenaltyCount = MaxRessPenaltyCount;
+            }
+        }
+
+        private DateTime m_RessPenaltyExpiration = DateTime.UtcNow;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public DateTime RessPenaltyExpiration
+        {
+            get
+            {
+                if (m_RessPenaltyExpiration <= DateTime.UtcNow)
+                    m_RessPenaltyCount = 0;
+
+                return m_RessPenaltyExpiration;
+            }
+
+            set
+            { 
+                m_RessPenaltyExpiration = value;
+
+                if (m_RessPenaltyExpiration <= DateTime.UtcNow)
+                    m_RessPenaltyCount = 0;
+            }
+        }
+
+        public double GetRessPenaltyDamageDealtModifier()
+        {
+            return RessPenaltyCount * RessPenaltyDamageDealtReduction;
+        }
+
+        public double GetRessPenaltyDamageReceivedModifier()
+        {
+            return RessPenaltyCount * RessPenaltyDamageReceivedIncrease;
+        }
+        
         private string m_InitialName = "";
         [CommandProperty(AccessLevel.GameMaster)]
         public string InitialName
@@ -925,7 +983,7 @@ namespace Server.Mobiles
                 ApplyExperience();
             }
         }
-
+        
         public static int GetMaxLevelExperience(int level)
         {
             if (level > ExperiencePerLevel.Length)
@@ -1104,15 +1162,6 @@ namespace Server.Mobiles
             m_SpecialAbilityEffectTimer = new SpecialAbilityEffectTimer(this);
             m_SpecialAbilityEffectTimer.Stop();
 
-            Timer.DelayCall(TimeSpan.FromMilliseconds(3000), delegate
-            {
-                if (this != null)
-                {
-                    if (!this.Deleted)
-                        StartStamFreeMoveAuraTimer();
-                }
-            });
-
             SetSpeed();
             PopulateDefaultAI();
             UpdateAI(true);
@@ -1124,7 +1173,16 @@ namespace Server.Mobiles
             {
                 if (this != null)                
                     InitialName = RawName;
-            });            
+            });
+
+            Timer.DelayCall(TimeSpan.FromMilliseconds(3000), delegate
+            {
+                if (this != null)
+                {
+                    if (!this.Deleted)
+                        StartStamFreeMoveAuraTimer();
+                }
+            });
         }
 
         public BaseCreature(Serial serial): base(serial)
@@ -2504,7 +2562,7 @@ namespace Server.Mobiles
         public virtual bool Uncalmable { get { return BardImmune || m_IsDeadPet; } }
         public virtual bool AreaPeaceImmune { get { return BardImmune || m_IsDeadPet; } }
 
-        public virtual bool AllowParagon { get { return (!IsChamp() && !IsBoss() && !IsLoHBoss() && !IsEventBoss()) && !Rare; } }
+        public virtual bool AllowParagon { get { return (!IsChamp() && !IsChampMinion() && !IsBoss() && !IsBossMinion() && !IsLoHBoss() && !IsLoHMinion() && !IsEventBoss() && !IsEventMinion()) && !Rare; } }
 
         public virtual bool AlwaysChamp { get { return false; } }
         public virtual bool AlwaysChampMinion { get { return false; } }
@@ -3240,10 +3298,7 @@ namespace Server.Mobiles
             }
 
             if (Paragon.CheckConvert(this, location, m))
-                IsParagon = true;
-
-            if (Tameable && !m_GeneratedTamedStats)
-                GenerateTamedScalars();
+                IsParagon = true;            
 
             base.OnBeforeSpawn(location, m);
         }
@@ -4625,6 +4680,8 @@ namespace Server.Mobiles
             writer.Write(m_ExperienceLevel);
             writer.Write(m_TimeStabled);
             writer.Write(m_InitialName);
+            writer.Write(m_RessPenaltyCount);
+            writer.Write(m_RessPenaltyExpiration);
 
             writer.Write(m_FollowerTraitSelections.Count);
             for (int a = 0; a < m_FollowerTraitSelections.Count; a++)
@@ -4770,6 +4827,8 @@ namespace Server.Mobiles
                 m_ExperienceLevel = reader.ReadInt();
                 m_TimeStabled = reader.ReadDateTime();
                 m_InitialName = reader.ReadString();
+                m_RessPenaltyCount = reader.ReadInt();
+                m_RessPenaltyExpiration = reader.ReadDateTime();
 
                 int followerTraitSelectionCount = reader.ReadInt();
                 for (int a = 0; a < followerTraitSelectionCount; a++)
@@ -8821,6 +8880,9 @@ namespace Server.Mobiles
         public override void MoveToWorld(Point3D newLocation, Map map)
         {
             base.MoveToWorld(newLocation, map);
+
+            if (Tameable && !m_GeneratedTamedStats)
+                GenerateTamedScalars();
 
             //Adding a Creature to a Ship
             BaseShip ship = BaseShip.FindShipAt(Location, Map);

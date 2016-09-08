@@ -1365,7 +1365,7 @@ namespace Server
             {
                 Map = map;
                 Location = location;
-            }
+            }           
         }
 
         public bool Deleted { get { return GetFlag(ImplFlag.Deleted); } }

@@ -15,7 +15,6 @@ namespace Server
     public class Stables
     {
         public static double GoldCostPerControlSlotPerDay = 10;
-        public static double ResFeeMinTamingSkillDivisor = 50;
 
         public static int GetUsedStableSlots(PlayerMobile player)
         {
@@ -76,14 +75,7 @@ namespace Server
                 daysStabled = 1;
 
             cost += ((double)daysStabled * GoldCostPerControlSlotPerDay * (double)creature.ControlSlots);
-
-            if (!creature.Alive || creature.IsDeadBondedPet)
-            {
-                double resFee = ((creature.MinTameSkill * creature.MinTameSkill) / ResFeeMinTamingSkillDivisor) * (double)creature.ControlSlots;
-
-                cost += resFee;
-            }
-
+            
             int finalCost = (int)(Math.Round(cost));
 
             return finalCost;
@@ -268,6 +260,12 @@ namespace Server
             if (player == null || creature == null) return;
             if (creature.Deleted) return;
 
+            SpecialAbilities.ClearSpecialEffects(creature);
+
+            creature.Poison = null;
+
+            creature.Blessed = true;
+
             creature.ControlTarget = null;
             creature.ControlOrder = OrderType.Stay;
             creature.Internalize();
@@ -292,6 +290,8 @@ namespace Server
 
             if (player.Stabled.Contains(creature))
                 player.Stabled.Remove(creature);
+
+            creature.Blessed = false;
 
             creature.SetControlMaster(player);
 
@@ -434,20 +434,18 @@ namespace Server
             AddLabel(75, 112, 2599, "Slots");
             AddLabel(126, 112, 2599, "Claim Cost");
             AddLabel(310, 112, 2599, "Follower");
-            AddLabel(448, 112, 2599, "Status");
-            AddLabel(505, 112, 2599, "Level");
-            AddLabel(560, 112, 2599, "Exp");
+            AddLabel(455, 112, 2599, "Lore");
+            AddLabel(498, 112, 2599, "Level");
+            AddLabel(556, 112, 2599, "Exp");
             AddLabel(602, 112, 2599, "Dismiss");
 
             //Guide
-            AddButton(11, 4, 2094, 2095, 1, GumpButtonType.Reply, 0);
-            AddLabel(38, 13, 149, "Guide");
+            AddButton(10, 11, 2094, 2095, 1, GumpButtonType.Reply, 0);
+            AddLabel(7, 0, 149, "Guide");
 
             AddLabel(304, 27, 2201, "Claim Followers");
             AddLabel(282, 62, 2610, "Stable Slots Used:");
             AddLabel(402, 62, WhiteTextHue, usedStableSlots.ToString() + " / " + maxStableSlots.ToString());
-
-            //Loop
 
             int startY = 142;
             int itemSpacing = 40;
@@ -471,29 +469,23 @@ namespace Server
                 string claimCost = Stables.GetClaimCost(m_Vendor, m_Player, bc_Creature).ToString();
                 string followerName = bc_Creature.GetTamedDisplayName();
 
-                string followerStatus = "Alive";
                 int aliveTextHue = WhiteTextHue;
                 int claimCostTextHue = WhiteTextHue;
-
-                if (!bc_Creature.Alive || bc_Creature.IsDeadBondedPet)
-                {
-                    followerStatus = "Dead";
-                    aliveTextHue = 2201;
-                    claimCostTextHue = 2201;
-                }
-
+                
                 string experienceLevel = bc_Creature.ExperienceLevel.ToString();
-                string experience = bc_Creature.Experience.ToString();
+                string experience = bc_Creature.Experience.ToString() + "/" + BaseCreature.GetMaxLevelExperience(bc_Creature.ExperienceLevel);
 
                 AddButton(24, startY - 5, 2151, 2152, creatureButtonIndex, GumpButtonType.Reply, 0); //Claim Button
                 AddLabel(Utility.CenteredTextOffset(90, controlSlots), startY, WhiteTextHue, controlSlots); //Slots
                 AddItem(117, startY - 5, 3823); //Gold Image
                 AddLabel(160, startY, claimCostTextHue, claimCost.ToString()); //Claim Cost
                 AddLabel(Utility.CenteredTextOffset(335, followerName), startY, 2603, followerName); //Follower Name
-                AddLabel(453, startY, aliveTextHue, followerStatus);
-                AddLabel(Utility.CenteredTextOffset(520, experienceLevel), startY, WhiteTextHue, experienceLevel);
-                AddLabel(Utility.CenteredTextOffset(568, experience), startY, WhiteTextHue, experience);
-                AddButton(611, startY - 5, 2472, 2473, creatureButtonIndex + 1, GumpButtonType.Reply, 0);
+
+                AddButton(455, startY - 5, 9721, 9724, creatureButtonIndex + 1, GumpButtonType.Reply, 0);
+                
+                AddLabel(Utility.CenteredTextOffset(515, experienceLevel), startY, WhiteTextHue, experienceLevel);
+                AddLabel(Utility.CenteredTextOffset(565, experience), startY, WhiteTextHue, experience);
+                AddButton(611, startY - 5, 2472, 2473, creatureButtonIndex + 2, GumpButtonType.Reply, 0);
 
                 startY += itemSpacing;
             }
@@ -515,10 +507,9 @@ namespace Server
                 AddLabel(547, 408, WhiteTextHue, "Next Page");
                 AddButton(616, 409, 4005, 4007, 4, GumpButtonType.Reply, 0);
             }
-
-            string claimMessage = "Claim Cost: 10 Gold Per Control Slot Each Day (paid when claimed)";
-
-            AddLabel(Utility.CenteredTextOffset(350, claimMessage), 433, 2550, claimMessage);
+            
+            AddLabel(212, 433, 149, "Claim Cost:");
+            AddLabel(294, 433, 2550, "Days Housed  X  Control Slots  X  " + Stables.GoldCostPerControlSlotPerDay.ToString());
         }
         
         public override void OnResponse(NetState sender, RelayInfo info)
@@ -644,8 +635,19 @@ namespace Server
                                     }
                                 break;
 
+                                //Animal Lore
+                                case 1:
+                                     m_Player.CloseGump(typeof(StableGump));
+                                    m_Player.SendGump(new StableGump(m_Vendor, m_Player, m_Page));
+
+                                    m_Player.SendGump(new AnimalLoreGump(m_Player, bc_Creature, AnimalLoreGump.AnimalLoreGumpPage.Stats, new List<AnimalLoreGump.TraitSelectionType>()));
+                                    m_Player.SendSound(openGumpSound);
+
+                                    return;
+                                break;
+
                                 //Dismiss Follower
-                                case 1:                                   
+                                case 2:
 
                                     m_Player.CloseGump(typeof(StableDismissFollowerGump));
                                     m_Player.SendGump(new StableDismissFollowerGump(m_Vendor, m_Player, bc_Creature, m_Page));

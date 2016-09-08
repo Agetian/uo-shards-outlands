@@ -180,6 +180,8 @@ namespace Server.Mobiles
             CommandSystem.Register("CreateTestLoadout", AccessLevel.GameMaster, new CommandEventHandler(CreateTestLoadout));
             CommandSystem.Register("Anim", AccessLevel.GameMaster, new CommandEventHandler(Anim));
             CommandSystem.Register("AnimationTest", AccessLevel.GameMaster, new CommandEventHandler(AnimationTest));
+            CommandSystem.Register("AnimationTestFast", AccessLevel.GameMaster, new CommandEventHandler(AnimationTestFast));
+            CommandSystem.Register("BodyTest", AccessLevel.GameMaster, new CommandEventHandler(BodyTest));
             CommandSystem.Register("SetAllHues", AccessLevel.GameMaster, new CommandEventHandler(SetAllHues));
             CommandSystem.Register("SetAllAspect", AccessLevel.GameMaster, new CommandEventHandler(SetAllAspect));
             CommandSystem.Register("SetAllExceptional", AccessLevel.GameMaster, new CommandEventHandler(SetAllExceptional));
@@ -743,6 +745,71 @@ namespace Server.Mobiles
 
                     player.Say("Animation: " + animation.ToString());
                     player.Animate(animation, frameCount, 1, true, false, 0);
+                });
+            }
+        }
+
+        [Usage("Animation Test Fast")]
+        [Description("Loop through all animations of a Bodyvalue Faster")]
+        public static void AnimationTestFast(CommandEventArgs arg)
+        {
+            PlayerMobile player = arg.Mobile as PlayerMobile;
+
+            if (player == null)
+                return;
+
+            int animations = 32;
+            int frameCount = 15;
+            int delayBetween = 3;
+
+            Point3D location = player.Location;
+            Map map = player.Map;
+
+            for (int a = 1; a < animations + 1; a++)
+            {
+                int animation = a;
+
+                Timer.DelayCall(TimeSpan.FromSeconds((animation - 1) * delayBetween), delegate
+                {
+                    if (player == null) return;
+                    if (player.Location != location) return;
+
+                    player.Say("Animation: " + animation.ToString());
+                    player.Animate(animation, frameCount, 1, true, false, 0);
+                });
+            }
+        }
+
+        [Usage("Body Test")]
+        [Description("Loop through all BodyValues starting at index")]
+        public static void BodyTest(CommandEventArgs arg)
+        {
+            PlayerMobile player = arg.Mobile as PlayerMobile;
+
+            if (player == null)
+                return;
+
+            int startingBodyValue = 1;
+
+            if (arg.Length == 1)
+                startingBodyValue = arg.GetInt32(0);
+
+            int totalBodyValues = 2000;
+
+            Point3D location = player.Location;
+            Map map = player.Map;
+
+            for (int a = 0; a < totalBodyValues; a++)
+            {
+                int bodyTestValue = startingBodyValue + a;
+
+                Timer.DelayCall(TimeSpan.FromSeconds(a), delegate
+                {
+                    if (player == null) return;
+                    if (player.Location != location) return;
+
+                    player.BodyValue = bodyTestValue;
+                    player.Say("BodyValue: " + bodyTestValue.ToString());
                 });
             }
         }
