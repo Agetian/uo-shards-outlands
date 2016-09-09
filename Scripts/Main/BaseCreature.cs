@@ -196,18 +196,14 @@ namespace Server.Mobiles
     public partial class BaseCreature : Mobile
     {
         public delegate void OnBeforeDeathCB();
-        public OnBeforeDeathCB m_OnBeforeDeathCallback;
-
-        public virtual LootDropModeType LootDropMode { get { return LootDropModeType.Gold; } }
+        public OnBeforeDeathCB m_OnBeforeDeathCallback;        
 
         private bool m_FreelyLootable = false;
         public bool FreelyLootable
         {
             get { return m_FreelyLootable; }
             set { m_FreelyLootable = value; }
-        }
-
-        public virtual bool AlwaysFreelyLootable { get { return false; } }
+        }        
 
         public bool IsFreelyLootable()
         {
@@ -215,13 +211,8 @@ namespace Server.Mobiles
                 return true;
 
             return false;
-        }
+        }        
 
-        public int MassiveBreathRange = 4;
-
-        public virtual bool AlwaysRun { get { return false; } }
-
-        public virtual bool MovementRestrictionImmune { get { return false; } }
         public virtual double MovementImmunityChance
         {
             get
@@ -269,18 +260,7 @@ namespace Server.Mobiles
             }
 
             return base.Paralyze(from, duration);
-        }        
-
-        public int m_ResurrectionsRemaining = -1; //-1 is Unlimited
-        [CommandProperty(AccessLevel.Counselor)]
-        public int ResurrectionsRemaining
-        {
-            get { return m_ResurrectionsRemaining; }
-            set { m_ResurrectionsRemaining = value; }
         }
-
-        public virtual bool ImmuneToSpecialAttacks { get { return false; } }
-        public virtual bool ImmuneToChargedSpells { get { return false; } }
 
         public PlayerMobile LastPlayerKiller
         {
@@ -495,9 +475,9 @@ namespace Server.Mobiles
 
         public static double HitsExperienceScalar = .50;
         public static double ManaExperienceScalar = .50;
-        public static double DamageExperienceScalar = .33;
+        public static double DamageExperienceScalar = .30;
         public static double WrestlingExperienceScalar = .25;
-        public static double EvalIntExperienceScalar = 1.0;
+        public static double EvalIntExperienceScalar = .5;
         public static double MageryExperienceScalar = .5;
         public static double MeditationExperienceScalar = .5;
         public static double MagicResistExperienceScalar = .5;
@@ -507,6 +487,19 @@ namespace Server.Mobiles
         public static int MaxRessPenaltyCount = 9;
         public static double RessPenaltyDamageDealtReduction = .5;
         public static double RessPenaltyDamageReceivedIncrease = .5;
+        public static TimeSpan RessPenaltyDuration = TimeSpan.FromMinutes(30);
+
+        public virtual LootDropModeType LootDropMode { get { return LootDropModeType.Gold; } }
+
+        public int MassiveBreathRange = 4;
+
+        public virtual bool AlwaysRun { get { return false; } }
+        public virtual bool MovementRestrictionImmune { get { return false; } }
+
+        public virtual bool ImmuneToSpecialAttacks { get { return false; } }
+        public virtual bool ImmuneToChargedSpells { get { return false; } }
+
+        public virtual bool AlwaysFreelyLootable { get { return false; } }
 
         public List<AspectGearExperienceEntry> m_AspectGearExperienceEntries = new List<AspectGearExperienceEntry>();
 
@@ -953,10 +946,10 @@ namespace Server.Mobiles
 
                 if (newLevel < oldLevel)
                 {
-                    for (int a = 0; a < m_FollowerTraitSelections.Count; a++)
+                    for (int a = 0; a < m_SelectedTraits.Count; a++)
                     {
                         if (newLevel < a + 1)
-                            m_FollowerTraitSelections[a] = FollowerTraitType.None;
+                            m_SelectedTraits[a] = FollowerTraitType.None;
                     }
                 }
 
@@ -966,7 +959,13 @@ namespace Server.Mobiles
                     AnimateIdle();
 
                     if (pm_Controller != null)
-                        pm_Controller.SendMessage(0x3F, RawName + " has acquired enough experience to reach level " + ExperienceLevel.ToString() + "!");                          
+                    {
+                        if (newLevel % 2 == 0)
+                            pm_Controller.SendMessage(63, RawName + " has acquired enough experience to reach level " + ExperienceLevel.ToString() + " (new trait available).");
+
+                        else
+                            pm_Controller.SendMessage(63, RawName + " has acquired enough experience to reach level " + ExperienceLevel.ToString() + " (stats and skills increased).");
+                    } 
                 }                
 
                 if (m_ExperienceLevel < BaseCreature.RequiredLevelForBonding && IsBonded)
@@ -975,7 +974,7 @@ namespace Server.Mobiles
                 else if (oldLevel < BaseCreature.RequiredLevelForBonding && m_ExperienceLevel >= BaseCreature.RequiredLevelForBonding)
                 {
                     if (pm_Controller != null)                       
-                        pm_Controller.SendMessage(0x3F, RawName + " has bonded to you permanently.");
+                        pm_Controller.SendMessage(63, RawName + " has bonded to you permanently.");
 
                     IsBonded = true;
                 }
@@ -1029,10 +1028,11 @@ namespace Server.Mobiles
             if (!Tameable)
                 return 0;
 
-            if (Controlled && ControlMaster is PlayerMobile)
-                return (double)GetCumulativeExperience() / (double)GetMaxCumulativeExperience();            
+            if (Controlled && ControlMaster is PlayerMobile)            
+                return (Math.Ceiling((double)ExperienceLevel / 2)) / ((double)MaxExperienceLevel / 2);            
 
-            else return 0;
+            else 
+                return 0;
         }
 
         private int m_ExperienceLevel = 0;
@@ -1053,16 +1053,16 @@ namespace Server.Mobiles
         }
 
         public static int RequiredLevelForBonding = 1;
-        public static int[] ExperiencePerLevel = new int[] { 50, 100, 150, 200, 250 };
+        public static int[] ExperiencePerLevel = new int[] { 50, 100, 150, 200, 250, 300, 350, 400, 450, 500 };
 
         public static int MaxExperienceLevel
         {
             get { return ExperiencePerLevel.Length; }
         }
 
-        public static int TraitsAvailablePerLevel = 2;
+        public static int TraitOptionsPerLevel = 2;
 
-        public List<FollowerTraitType> m_FollowerTraitSelections = new List<FollowerTraitType>()
+        public List<FollowerTraitType> m_SelectedTraits = new List<FollowerTraitType>()
         {
             FollowerTraitType.None,
             FollowerTraitType.None,
@@ -1071,7 +1071,7 @@ namespace Server.Mobiles
             FollowerTraitType.None
         };
 
-        public virtual List<FollowerTraitType> TraitsSelectionsAvailable         
+        public virtual List<FollowerTraitType> TraitsList         
         { 
            get 
            { 
@@ -4656,7 +4656,6 @@ namespace Server.Mobiles
             writer.Write(m_EventBoss);
             writer.Write(m_EventMinion);
             writer.Write(m_FreelyLootable);
-            writer.Write(m_ResurrectionsRemaining);
             writer.Write(m_NoKillAwards);
             writer.Write(m_SpellSpeedScalar);
             writer.Write(m_SpellHue);
@@ -4683,10 +4682,10 @@ namespace Server.Mobiles
             writer.Write(m_RessPenaltyCount);
             writer.Write(m_RessPenaltyExpiration);
 
-            writer.Write(m_FollowerTraitSelections.Count);
-            for (int a = 0; a < m_FollowerTraitSelections.Count; a++)
+            writer.Write(m_SelectedTraits.Count);
+            for (int a = 0; a < m_SelectedTraits.Count; a++)
             {
-                writer.Write((int)m_FollowerTraitSelections[a]);
+                writer.Write((int)m_SelectedTraits[a]);
             }            
 
             if (m_Summoned)
@@ -4803,7 +4802,6 @@ namespace Server.Mobiles
                 m_EventBoss = reader.ReadBool();
                 m_EventMinion = reader.ReadBool();
                 m_FreelyLootable = reader.ReadBool();
-                m_ResurrectionsRemaining = reader.ReadInt();
                 m_NoKillAwards = reader.ReadBool();
                 m_SpellSpeedScalar = reader.ReadDouble();
                 m_SpellHue = reader.ReadInt();
@@ -4833,7 +4831,7 @@ namespace Server.Mobiles
                 int followerTraitSelectionCount = reader.ReadInt();
                 for (int a = 0; a < followerTraitSelectionCount; a++)
                 {
-                    m_FollowerTraitSelections.Add((FollowerTraitType)reader.ReadInt());
+                    m_SelectedTraits.Add((FollowerTraitType)reader.ReadInt());
                 }
 
                 if (m_Summoned)
@@ -7420,9 +7418,8 @@ namespace Server.Mobiles
         {
             ClearExpiredDamageEntries();
 
-            if (ResurrectionsRemaining == 0)
-                IsBonded = false;            
-                        
+            SpecialAbilities.ClearSpecialEffects(this);
+                                    
             BandageContext bandageContext = BandageContext.GetContext(this);
 
             if (bandageContext != null)
@@ -7581,6 +7578,12 @@ namespace Server.Mobiles
                 }
 
                 CheckStatTimers();
+
+                if (RessPenaltyExpiration <= DateTime.UtcNow)
+                    RessPenaltyCount = 0;
+
+                RessPenaltyExpiration = DateTime.UtcNow + RessPenaltyDuration;
+                RessPenaltyCount++;
             }
 
             #endregion
@@ -8849,9 +8852,9 @@ namespace Server.Mobiles
 
             Warmode = false;
 
-            Hits = 10;
+            Hits = (int)(Math.Ceiling((double)HitsMax * .10));
             Stam = StamMax;
-            Mana = 0;
+            Mana = ManaMax;
 
             ProcessDeltaQueue();
 

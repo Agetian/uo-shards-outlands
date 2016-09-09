@@ -19,8 +19,7 @@ namespace Server.Gumps
         {
         }
 
-        public PetResurrectGump(Mobile from, BaseCreature follower, double hitsScalar, VeterinarySalts salts = null)
-            : base(50, 50)
+        public PetResurrectGump(Mobile from, BaseCreature follower, double hitsScalar, VeterinarySalts salts = null): base(50, 50)
         {
             from.CloseGump(typeof(PetResurrectGump));
 
@@ -80,16 +79,6 @@ namespace Server.Gumps
                 {
                     ResurrectPet();
                     m_Salts.Charges -= m_Follower.ControlSlots;
-
-                    if (m_Follower.ResurrectionsRemaining != -1)
-                    {
-                        m_Follower.ResurrectionsRemaining--;
-
-                        if (m_Follower.ResurrectionsRemaining > 0)
-                            from.SendMessage("You resurrect your target. They may be resurrected " + m_Follower.ResurrectionsRemaining.ToString() + " more time(s) before they fade from creation."); 
-                        else
-                            from.SendMessage("You resurrect your target, however you are certain the next time they perish they will fade from creation."); 
-                    }
 
                     if (m_Salts.Charges <= 0)
                         m_Salts.Delete();

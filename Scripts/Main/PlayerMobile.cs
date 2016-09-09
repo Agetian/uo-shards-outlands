@@ -3226,7 +3226,6 @@ namespace Server.Mobiles
                     {
                         Send(OPLPacket);
                     }
-
                 }
 
                 enu.Free();
@@ -3243,6 +3242,8 @@ namespace Server.Mobiles
                 CustomizationAbilities.Reborn(this);
 
             AspectGear.PlayerResurrected(this);
+
+            Stam = StamMax;
         }
 
         public override void Resurrect()

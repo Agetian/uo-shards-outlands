@@ -362,8 +362,10 @@ namespace Server.Items
                             {
                                 healerNumber = 503255; // You are able to resurrect the creature.
 
-                                master.CloseGump(typeof(PetResurrectGump));
-                                master.SendGump(new PetResurrectGump(m_Healer, petPatient));
+                                //TEST: NEW RESSURECT GUMP
+
+                                //master.CloseGump(typeof(PetResurrectGump));
+                                //master.SendGump(new PetResurrectGump(m_Healer, petPatient));
                             }
 
                             else

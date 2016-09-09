@@ -62,6 +62,8 @@ namespace Server
         {
             FollowerTraitDetail traitDetail = new FollowerTraitDetail();
 
+            #region Traits
+
             switch (followerTraitType)
             {
                 case FollowerTraitType.Toughness:
@@ -455,25 +457,34 @@ namespace Server
                 break;
             }
 
+            #endregion
+
             return traitDetail;
+        }
+
+        public static int GetFollowerTraitsEarned(BaseCreature creature)
+        {
+            if (!creature.Tameable)
+                return 0;
+
+            return (int)((Math.Floor((double)creature.ExperienceLevel / 2.0)));
         }
 
         public static int GetFollowerTraitsAvailable(BaseCreature creature)
         {
+            int traitsEarned = GetFollowerTraitsEarned(creature);
             int traitsAvailable = 0;
 
             if (!creature.Tameable)
-                return 0;
+                return 0;            
 
-            int level = creature.ExperienceLevel;
-
-            for (int a = 0; a < level; a++)
+            for (int a = 0; a < traitsEarned; a++)
             {
-                FollowerTraitType trait = creature.m_FollowerTraitSelections[a];
+                FollowerTraitType trait = creature.m_SelectedTraits[a];
 
                 if (trait == FollowerTraitType.None)
                     traitsAvailable++;
-            }            
+            }
 
             return traitsAvailable;
         }

@@ -640,7 +640,7 @@ namespace Server
                                      m_Player.CloseGump(typeof(StableGump));
                                     m_Player.SendGump(new StableGump(m_Vendor, m_Player, m_Page));
 
-                                    m_Player.SendGump(new AnimalLoreGump(m_Player, bc_Creature, AnimalLoreGump.AnimalLoreGumpPage.Stats, new List<AnimalLoreGump.TraitSelectionType>()));
+                                    m_Player.SendGump(new AnimalLoreGump(m_Player, new AnimalLoreGumpObject(bc_Creature)));
                                     m_Player.SendSound(openGumpSound);
 
                                     return;

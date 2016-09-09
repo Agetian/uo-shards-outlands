@@ -263,8 +263,7 @@ namespace Server.Custom
                 henchman.TimesTamed++;
                 henchman.SetControlMaster(player);
                 henchman.IsBonded = true;
-                henchman.OwnerAbandonTime = DateTime.UtcNow + henchman.AbandonDelay;
-                henchman.ResurrectionsRemaining = 2;
+                henchman.OwnerAbandonTime = DateTime.UtcNow + henchman.AbandonDelay;               
 
                 henchman.Experience = Experience;
 
@@ -277,7 +276,7 @@ namespace Server.Custom
 
                 henchman.PlaySound(henchman.GetIdleSound());
 
-                player.SendMessage("You recruit the creature and they bond to you. They may be resurrected " + henchman.ResurrectionsRemaining.ToString() + " times before they fade from creation.");
+                player.SendMessage("You recruit the creature and they bond to you.");
             });
             
             Delete();
