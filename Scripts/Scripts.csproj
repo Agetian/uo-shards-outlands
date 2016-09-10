@@ -399,6 +399,8 @@
     <Compile Include="Items\Minor Artifacts\WrathOfTheDryad.cs" />
     <Compile Include="Items\DonationShop\Convenience\DiamondHatchet.cs" />
     <Compile Include="Items\DonationShop\Convenience\DiamondPickaxe.cs" />
+    <Compile Include="Items\Runebooks\RuneTome.cs" />
+    <Compile Include="Items\Runebooks\RuneTomeGump.cs" />
     <Compile Include="Items\SkillItems\Magical\Potions\MagicResist Potions\MagicResistPotion.cs" />
     <Compile Include="Items\SkillItems\Magical\Potions\MagicResist Potions\GreaterMagicResistPotion.cs" />
     <Compile Include="Items\SkillItems\Magical\Potions\MagicResist Potions\LesserMagicResistPotion.cs" />
@@ -2562,7 +2564,7 @@
     <Compile Include="Items\SkillItems\Magical\Potions\Strength Potions\BaseStrengthPotion.cs" />
     <Compile Include="Items\SkillItems\Magical\Potions\Strength Potions\GreaterStrengthPotion.cs" />
     <Compile Include="Items\SkillItems\Magical\Potions\Strength Potions\StrengthPotion.cs" />
-    <Compile Include="Items\SkillItems\Magical\Runebook.cs" />
+    <Compile Include="Items\Runebooks\Runebook.cs" />
     <Compile Include="Items\SkillItems\Magical\Scrolls\Eighth Circle\EarthquakeScroll.cs" />
     <Compile Include="Items\SkillItems\Magical\Scrolls\Eighth Circle\EnergyVortexScroll.cs" />
     <Compile Include="Items\SkillItems\Magical\Scrolls\Eighth Circle\ResurrectionScroll.cs" />
