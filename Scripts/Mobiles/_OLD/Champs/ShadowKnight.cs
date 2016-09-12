@@ -62,7 +62,7 @@ namespace Server.Mobiles
             
             if (Utility.RandomDouble() < 0.05 && DateTime.UtcNow > m_NextVanishAllowed)
             {
-                if (Combatant != null && !Paralyzed && !BardProvoked && !BardPacified)
+                if (Combatant != null && !Paralyzed && !IsHindered() && !BardProvoked && !BardPacified)
                 {
                     if (SpecialAbilities.VanishAbility(this, 1.0, true, -1, 3, 6, true, null))
                     {

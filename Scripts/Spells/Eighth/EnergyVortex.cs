@@ -62,89 +62,37 @@ namespace Server.Spells.Eighth
 
             SpellHelper.GetSurfaceTop(ref p);
 
-            if (map == null || !map.CanSpawnMobile(p.X, p.Y, p.Z) || BaseShip.FindShipAt(p, map) != null)
-            {
-                Caster.SendLocalizedMessage(501942); // That location is blocked.
-            }
+            if (map == null || !map.CanSpawnMobile(p.X, p.Y, p.Z) || BaseShip.FindShipAt(p, map) != null)            
+                Caster.SendLocalizedMessage(501942); // That location is blocked.            
 
             else if (SpellHelper.CheckTown(p, Caster) && CheckSequence())
             {
-                // Here's a little Napoleon Dynamite easter egg for IPY!
-                if (Utility.RandomDouble() < 0.005)
-                //if ( true )
+                bool enhancedSpellcast = SpellHelper.IsEnhancedSpell(Caster, null, EnhancedSpellbookType.Summoner, false, true);
+
+                BaseCreature summon = new EnergyVortex();
+
+                summon.StoreBaseSummonValues();
+
+                double duration = 2.0 * Caster.Skills[SkillName.Magery].Value;
+
+                if (enhancedSpellcast)
                 {
-                    EnergyVortex tina = new EnergyVortex();
-                    Slime ham = new Slime();
+                    duration *= SpellHelper.EnhancedSummonDurationMultiplier;
 
-                    tina.Name = "Tina";
-                    tina.Body = 0xDC;
-                    tina.Hue = 0;
-                    tina.Frozen = true;
+                    summon.DamageMin = (int)((double)summon.DamageMin * SpellHelper.EnhancedSummonDamageMultiplier);
+                    summon.DamageMax = (int)((double)summon.DamageMax * SpellHelper.EnhancedSummonDamageMultiplier);
 
-                    ham.Name = "Ham";
-                    ham.Hue = 0x76;
-                    ham.Frozen = true;
-
-                    bool validLocation = false;
-                    Point3D tinaLocation = new Point3D(p.X, p.Y, p.Z);
-                    Point3D hamLocation = new Point3D();
-
-                    // Find a suitable location for Ham to spawn.
-                    for (int j = 0; !validLocation && j < 10; ++j)
-                    {
-                        int x = tinaLocation.X + 1;
-                        int y = tinaLocation.Y + 1;
-                        int z = map.GetAverageZ(x, y);
-
-                        if (validLocation = map.CanFit(x, y, tinaLocation.Z, 16, false, false))
-                            hamLocation = new Point3D(x, y, tinaLocation.Z);
-                        else if (validLocation = map.CanFit(x, y, z, 16, false, false))
-                            hamLocation = new Point3D(x, y, z);
-                    }
-
-                    BaseCreature.Summon(tina, false, Caster, tinaLocation, 0x212, TimeSpan.FromSeconds(10.0));
-                    BaseCreature.Summon(ham, false, Caster, hamLocation, 0, TimeSpan.FromSeconds(10.0));
-
-                    List<Mobile> mobs = new List<Mobile>();
-                    mobs.Add(tina);
-                    mobs.Add(ham);
-
-                    // Wait 5 seconds, then make Tina talk.
-                    Timer.DelayCall(TimeSpan.FromSeconds(5.0), new TimerStateCallback(BeginAction), mobs);
-
-                    // Wait 8 seconds, then make Tina and Ham recall.
-                    Timer.DelayCall(TimeSpan.FromSeconds(8.0), new TimerStateCallback(EndAction), mobs);
+                    summon.SetHitsMax((int)((double)summon.HitsMax * SpellHelper.EnhancedSummonHitPointsMultiplier));
+                    summon.Hits = summon.HitsMax;
                 }
 
-                else
-                {
-                    bool enhancedSpellcast = SpellHelper.IsEnhancedSpell(Caster, null, EnhancedSpellbookType.Summoner, false, true);
+                summon.SetDispelResistance(Caster, enhancedSpellcast, 0);
 
-                    BaseCreature summon = new EnergyVortex();
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.EnergyVortex);      
 
-                    summon.StoreBaseSummonValues();
+                summon.Hue = spellHue;
 
-                    double duration = 2.0 * Caster.Skills[SkillName.Magery].Value;
-
-                    if (enhancedSpellcast)
-                    {
-                        duration *= SpellHelper.EnhancedSummonDurationMultiplier;
-
-                        summon.DamageMin = (int)((double)summon.DamageMin * SpellHelper.EnhancedSummonDamageMultiplier);
-                        summon.DamageMax = (int)((double)summon.DamageMax * SpellHelper.EnhancedSummonDamageMultiplier);
-
-                        summon.SetHitsMax((int)((double)summon.HitsMax * SpellHelper.EnhancedSummonHitPointsMultiplier));
-                        summon.Hits = summon.HitsMax;
-                    }
-
-                    summon.SetDispelResistance(Caster, enhancedSpellcast, 0);
-
-                    int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.EnergyVortex);      
-
-                    summon.Hue = spellHue;
-
-                    BaseCreature.Summon(summon, false, Caster, new Point3D(p), 0x212, TimeSpan.FromSeconds(duration));
-                }
+                BaseCreature.Summon(summon, false, Caster, new Point3D(p), 0x212, TimeSpan.FromSeconds(duration));                
             }
 
             FinishSequence();

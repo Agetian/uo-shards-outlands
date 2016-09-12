@@ -203,9 +203,11 @@ namespace Server.Mobiles
 
 			if ( !InRange( check, 2 ) )
 				PrivateOverheadMessage( MessageType.Label, 0x3B2, 500446, check.NetState ); // That is too far away.
-			else if ( m_OpenedBy != null && m_OpenedBy != check )
+			
+            else if ( m_OpenedBy != null && m_OpenedBy != check )
 				PrivateOverheadMessage( MessageType.Label, 0x3B2, 500365, check.NetState ); // That is being used by someone else
-			else if ( Frozen )
+			
+            else if ( Frozen )
 				return true;
 
 			return false;

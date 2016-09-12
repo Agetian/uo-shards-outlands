@@ -187,7 +187,7 @@ namespace Server.Custom
         {
             base.OnThink();
 
-            if (DateTime.UtcNow > m_NextDaggerAllowed && !CantWalk && !Frozen && !Hidden && Alive && Utility.RandomDouble() < .1)
+            if (DateTime.UtcNow > m_NextDaggerAllowed && !CantWalk && !Frozen && !IsHindered() && !Hidden && Alive && Utility.RandomDouble() < .1)
             {
                 Mobile combatant = Combatant;
 

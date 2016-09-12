@@ -256,8 +256,10 @@ namespace Server.Mobiles
                 break;
 
                 case BunnyType.Elusive:
-                if ((Frozen || CantWalk) && !digging)
+                if ((Frozen || IsHindered() || CantWalk) && !digging)
                     {
+                        SpecialAbilities.ClearSpecialEffects(this);
+
                         Say("*wriggles free*");
 
                         Frozen = false;

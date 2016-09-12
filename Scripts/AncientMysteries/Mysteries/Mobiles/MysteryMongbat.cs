@@ -95,11 +95,8 @@ namespace Server.Mobiles
             if (Paralyzed)
                 Paralyzed = false;
 
-            if (Frozen)
-                Frozen = false;
-
-            if (CantWalk)
-                CantWalk = false;
+            if (Frozen || IsHindered() || CantWalk)
+                SpecialAbilities.ClearSpecialEffects(this);
 
             if (!Hidden && DateTime.UtcNow > m_NextReflectAllowed && MagicDamageAbsorb < 1)
             {

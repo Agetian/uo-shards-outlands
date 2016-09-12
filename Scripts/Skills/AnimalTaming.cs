@@ -41,12 +41,6 @@ namespace Server.SkillHandlers
             return TimeSpan.FromHours(6.0);
         }
 
-        public static bool MustBeSubdued(BaseCreature bc)
-        {
-            if (bc.Owners.Count > 0) { return false; } //Checks to see if the animal has been tamed before
-            return bc.SubdueBeforeTame && (bc.Hits > (bc.HitsMax / 10));
-        }
-
         private class InternalTarget : Target
         {
             private bool m_SetSkillTime = true;
@@ -97,9 +91,6 @@ namespace Server.SkillHandlers
 
                         else if (creature.Owners.Count >= BaseCreature.MaxOwners && !creature.Owners.Contains(from))
                             creature.PrivateOverheadMessage(MessageType.Regular, 0x3B2, 1005615, from.NetState); // This animal has had too many owners and is too upset for you to tame.
-
-                        else if (MustBeSubdued(creature))
-                            creature.PrivateOverheadMessage(MessageType.Regular, 0x3B2, 1054025, from.NetState); // You must subdue this creature before you can tame it!
 
                         else if (from.Skills[SkillName.AnimalTaming].Value >= creature.MinTameSkill)
                         {
@@ -219,15 +210,6 @@ namespace Server.SkillHandlers
                         Stop();
                     }
 
-                    else if (MustBeSubdued(m_Creature))
-                    {
-                        m_BeingTamed.Remove(m_Creature);
-                        m_Tamer.NextSkillTime = Core.TickCount;
-                        m_Creature.PrivateOverheadMessage(MessageType.Regular, 0x3B2, 1054025, m_Tamer.NetState); // You must subdue this creature before you can tame it!
-                        
-                        Stop();
-                    }
-
                     else if (de != null && de.LastDamage > m_StartTime)
                     {
                         m_BeingTamed.Remove(m_Creature);
@@ -246,10 +228,7 @@ namespace Server.SkillHandlers
                             case 0: m_Tamer.PublicOverheadMessage(MessageType.Regular, 0x3B2, Utility.Random(502790, 4)); break;
                             case 1: m_Tamer.PublicOverheadMessage(MessageType.Regular, 0x3B2, Utility.Random(1005608, 6)); break;
                             case 2: m_Tamer.PublicOverheadMessage(MessageType.Regular, 0x3B2, Utility.Random(1010593, 4)); break;
-                        }
-
-                        if (!alreadyOwned) // Passively check animal lore for gain
-                            m_Tamer.CheckTargetSkill(SkillName.AnimalLore, m_Creature, 0.0, 120.0, 1.0);
+                        }                       
 
                         if (m_Creature.Paralyzed)
                             m_Paralyzed = true;
@@ -264,7 +243,11 @@ namespace Server.SkillHandlers
                         if (m_Creature.Paralyzed)
                             m_Paralyzed = true;
 
-                        double minSkill = m_Creature.MinTameSkill + (m_Creature.Owners.Count * 6.0);
+                        double minSkill = m_Creature.MinTameSkill;
+
+                        //TEST: CHECK THIS FOR BALANCE PURPOSES
+                        if (m_Creature.Owners.Count > 0)
+                            minSkill += 25;
 
                         //Check for Skillgain (Success Chance Calculated Separately)
                         if (!alreadyOwned)
@@ -277,6 +260,9 @@ namespace Server.SkillHandlers
                         double chanceResult = Utility.RandomDouble();
 
                         successChance = (m_Tamer.Skills[SkillName.AnimalTaming].Value - m_Creature.MinTameSkill) * .04;
+
+                        if (m_Tamer.Skills[SkillName.AnimalTaming].Value == m_Creature.MinTameSkill)
+                            successChance = 0.01;
 
                         var pmTamer = m_Tamer as PlayerMobile;
                         

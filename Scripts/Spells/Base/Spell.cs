@@ -534,7 +534,7 @@ namespace Server.Spells
             else if (m_Caster.Spell != null && m_Caster.Spell.IsCasting)            
                 m_Caster.SendLocalizedMessage(502642); // You are already casting a spell.            
 
-            else if (!(m_Scroll is BaseWand) && (m_Caster.Paralyzed || m_Caster.Frozen))            
+            else if (!(m_Scroll is BaseWand) && (m_Caster.Paralyzed || m_Caster.Frozen || m_Caster.IsHindered()))            
                 m_Caster.SendLocalizedMessage(502643); // You can not cast a spell while frozen.            
 
             else if (CheckNextSpellTime && DateTime.UtcNow < m_Caster.NextSpellTime)            

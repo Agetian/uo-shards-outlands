@@ -168,21 +168,35 @@ namespace Server
                     //TEST
                     if (runeTome.m_RecallRuneEntries.Count == 0)
                     {
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(true, "East Prevalia Bank", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 1", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 2", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 3", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 4", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 5", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 6", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 7", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 8", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 9", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 10", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 11", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 12", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 13", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia 14", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(true, "West Prevalia Bank", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "East Prevalia Bank", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Town Square", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Sewers", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Arena", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Stables", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Shipyard", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Alchemist", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Tailor", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Smith", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Tanner", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Healer", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Provisioner", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Jeweler", new Point3D(0, 0, 0), Map.Felucca, null));
+
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "West Cambria Bank", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "East Cambria Bank", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Town Square", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Bazaar", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Arena", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Stables", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Shipyard", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Alchemist", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Tailor", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Smith", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Tanner", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Healer", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Provisioner", new Point3D(0, 0, 0), Map.Felucca, null));
+                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Jeweler", new Point3D(0, 0, 0), Map.Felucca, null));
                     }
 
                     int leftStartX = 105;

@@ -475,7 +475,7 @@ namespace Server.Items
         {
             bool canSwing = true;
 
-            if (canSwing && attacker.HarmfulCheck(defender) && !attacker.Frozen)
+            if (canSwing && attacker.HarmfulCheck(defender) && !attacker.Frozen && !attacker.IsHindered())
             {
                 attacker.DisruptiveAction();
 
@@ -632,7 +632,7 @@ namespace Server.Items
 
             PlaySwingAnimation(attacker);
 
-            if (!defender.Frozen)
+            if (!(defender.Frozen || defender.IsHindered()))
                 PlayHurtAnimation(defender);
 
             PlayerMobile pm_Attacker = attacker as PlayerMobile;

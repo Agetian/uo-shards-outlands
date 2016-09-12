@@ -100,7 +100,7 @@ namespace Server.Mobiles
         {
             base.OnThink();
 
-            if (Combatant != null && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen)
+            if (Combatant != null && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !IsHindered())
             {
                 if (DateTime.UtcNow >= m_NextMassiveBreathAllowed && AICombatEpicAction.CanDoMassiveIceBreathAttack(this))
                 {

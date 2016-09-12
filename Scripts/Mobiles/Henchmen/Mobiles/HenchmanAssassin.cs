@@ -237,7 +237,7 @@ namespace Server.Custom
                 }
             }
 
-            if (DateTime.UtcNow > m_NextDaggerAllowed && !CantWalk && !Frozen && !Hidden && Alive)
+            if (DateTime.UtcNow > m_NextDaggerAllowed && !CantWalk && !Frozen && !IsHindered() && !Hidden && Alive)
             {
                 Mobile combatant = Combatant;
 

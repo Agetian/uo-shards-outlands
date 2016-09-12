@@ -224,7 +224,7 @@ namespace Server.Mobiles
             if (creature.Combatant == null)
                 return false;
 
-            if (creature.Frozen || !creature.Alive)
+            if (creature.Frozen || creature.IsHindered() || !creature.Alive)
                 return false;
 
             if (creature.GetDistanceToSqrt(creature.Combatant) > creature.RangePerception || !creature.InLOS(creature.Combatant))
@@ -238,7 +238,7 @@ namespace Server.Mobiles
             if (creature.Combatant == null)
                 return false;
 
-            if (creature.Frozen || !creature.Alive)
+            if (creature.Frozen || creature.IsHindered() || !creature.Alive)
                 return false;
 
             if (creature.GetDistanceToSqrt(creature.Combatant) > creature.RangePerception || !creature.InLOS(creature.Combatant))
@@ -252,7 +252,7 @@ namespace Server.Mobiles
             if (creature.Combatant == null)
                 return false;
 
-            if (creature.Frozen || !creature.Alive)
+            if (creature.Frozen || creature.IsHindered() || !creature.Alive)
                 return false;
 
             if (creature.GetDistanceToSqrt(creature.Combatant) > creature.RangePerception || !creature.InLOS(creature.Combatant))

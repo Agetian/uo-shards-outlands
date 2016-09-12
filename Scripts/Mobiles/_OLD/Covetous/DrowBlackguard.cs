@@ -89,7 +89,7 @@ namespace Server.Mobiles
             
             if (Utility.RandomDouble() < 0.05 && DateTime.UtcNow > m_NextVanishAllowed)
             {
-                if (Combatant != null && !Hidden && !Paralyzed && !BardProvoked && !BardPacified)
+                if (Combatant != null && !Hidden && !Paralyzed && !IsHindered() && !BardProvoked && !BardPacified)
                 {
                     if (SpecialAbilities.VanishAbility(this, 1.0, true, -1, 3, 6, true, null))                    
                         PublicOverheadMessage(MessageType.Regular, 0, false, "*vanishes*");

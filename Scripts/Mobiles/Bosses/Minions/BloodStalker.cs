@@ -64,7 +64,7 @@ namespace Server.Mobiles
            
             if (Utility.RandomDouble() < 0.05 && DateTime.UtcNow > m_NextVanishAllowed)
             {
-                if (Combatant != null && !Hidden && !Paralyzed && !BardProvoked && !BardPacified)
+                if (Combatant != null && !Hidden && !Paralyzed && !IsHindered() && !BardProvoked && !BardPacified)
                 {
                     Point3D originalLocation = Location;
 

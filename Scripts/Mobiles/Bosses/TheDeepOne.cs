@@ -1523,7 +1523,7 @@ namespace Server.Mobiles
                 }
 
                 //Move Towards Target Ship
-                if (m_ShipCombatant != null && !CantWalk && !Frozen && AIObject.NextMove <= DateTime.UtcNow)
+                if (m_ShipCombatant != null && !CantWalk && !Frozen && !IsHindered() && AIObject.NextMove <= DateTime.UtcNow)
                 {
                     if (m_ShipCombatant.m_SinkTimer == null && !m_ShipCombatant.Deleted && m_ShipCombatant.GetShipToLocationDistance(m_ShipCombatant, Location) > 4)
                     {

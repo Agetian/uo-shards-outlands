@@ -112,7 +112,7 @@ namespace Server.Mobiles
             if (creature.GetDistanceToSqrt(creature.Combatant) >= 2)
                 return false;
 
-            if (creature.Paralyzed || creature.Frozen || !creature.Alive)
+            if (creature.Paralyzed || creature.Frozen || creature.IsHindered() || !creature.Alive)
                 return false;
 
             return true;
@@ -150,7 +150,7 @@ namespace Server.Mobiles
                     if (creature == null)
                         return;
 
-                    if (!creature.Alive || creature.Paralyzed || creature.Frozen)
+                    if (!creature.Alive || creature.Paralyzed || creature.Frozen || creature.IsHindered())
                         return;
 
                     Effects.PlaySound(creature.Location, creature.Map, 0x51F);
@@ -170,7 +170,7 @@ namespace Server.Mobiles
                         if (creature == null)
                             return;
 
-                        if (!creature.Alive || creature.Paralyzed || creature.Frozen)
+                        if (!creature.Alive || creature.Paralyzed || creature.Frozen || creature.IsHindered())
                             return;
 
                         BaseWeapon weapon = creature.Weapon as BaseWeapon;
@@ -253,7 +253,7 @@ namespace Server.Mobiles
             if (creature.Combatant == null)
                 return false;
 
-            if (creature.Frozen || !creature.Alive)
+            if (creature.Frozen || creature.IsHindered() || !creature.Alive)
                 return false;
 
             if (Utility.GetDistance(creature.Location, creature.Combatant.Location) > creature.MassiveBreathRange)
@@ -270,7 +270,7 @@ namespace Server.Mobiles
             if (creature.Combatant == null)
                 return false;
 
-            if (creature.Frozen || !creature.Alive)
+            if (creature.Frozen || creature.IsHindered() || !creature.Alive)
                 return false;
 
             if (Utility.GetDistance(creature.Location, creature.Combatant.Location) > creature.MassiveBreathRange)
@@ -287,7 +287,7 @@ namespace Server.Mobiles
             if (creature.Combatant == null)
                 return false;
 
-            if (creature.Frozen || !creature.Alive)
+            if (creature.Frozen || creature.IsHindered() || !creature.Alive)
                 return false;
 
             if (Utility.GetDistance(creature.Location, creature.Combatant.Location) > creature.MassiveBreathRange)
@@ -304,7 +304,7 @@ namespace Server.Mobiles
             if (creature.Combatant == null)
                 return false;
 
-            if (creature.Frozen || !creature.Alive)
+            if (creature.Frozen || creature.IsHindered() || !creature.Alive)
                 return false;
 
             if (Utility.GetDistance(creature.Location, creature.Combatant.Location) > creature.MassiveBreathRange)
@@ -321,7 +321,7 @@ namespace Server.Mobiles
             if (creature.Combatant == null)
                 return false;
 
-            if (creature.Frozen || !creature.Alive)
+            if (creature.Frozen || creature.IsHindered() || !creature.Alive)
                 return false;
 
             if (Utility.GetDistance(creature.Location, creature.Combatant.Location) > creature.MassiveBreathRange)

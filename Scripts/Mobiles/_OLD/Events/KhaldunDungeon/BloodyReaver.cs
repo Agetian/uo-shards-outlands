@@ -255,7 +255,7 @@ namespace Server.Mobiles
 
             CheckChargeResolved();
 
-            if (Combatant != null && DateTime.UtcNow > m_NextAIChangeAllowed && !m_IsCharging && DateTime.UtcNow > m_NextChargeAllowed && DateTime.UtcNow > m_NextAbilityAllowed && !Paralyzed && !CantWalk && !Frozen)
+            if (Combatant != null && DateTime.UtcNow > m_NextAIChangeAllowed && !m_IsCharging && DateTime.UtcNow > m_NextChargeAllowed && DateTime.UtcNow > m_NextAbilityAllowed && !Paralyzed && !CantWalk && !Frozen && !IsHindered())
             {
                 Dictionary<Mobile, int> DictPossibleNewCombatants = new Dictionary<Mobile, int>();
 

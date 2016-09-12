@@ -85,9 +85,9 @@ namespace Server.Mobiles
         {
             base.OnThink();
 
-            CheckChargeResolved();            
+            CheckChargeResolved();
 
-            if (Combatant != null && !Frozen)
+            if (Combatant != null && !Frozen && !IsHindered())
             {
                 if (DateTime.UtcNow >= m_NextChargeAllowed)
                 {

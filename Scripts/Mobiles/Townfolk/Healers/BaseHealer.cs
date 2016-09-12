@@ -136,9 +136,9 @@ namespace Server.Mobiles
 
         public override void OnMovement(Mobile m, Point3D oldLocation)
         {
-            if (!m.Frozen && DateTime.UtcNow >= m_NextResurrect && InRange(m, 4) && !InRange(oldLocation, 4) && InLOS(m))
+            if (!m.Frozen && !IsHindered() && DateTime.UtcNow >= m_NextResurrect && InRange(m, 4) && !InRange(oldLocation, 4) && InLOS(m))
             {
-                if (!m.Frozen && !m.Alive && DateTime.UtcNow >= m_NextResurrect && InRange(m, 4) && !InRange(oldLocation, 4) && InLOS(m) && !(m.Region is HouseRegion) && !(m.Z <= this.Z - 5 || m.Z >= this.Z + 5)) // HouseRegion and Z level fix (with +/- 5 grace area.
+                if (!m.Frozen && !IsHindered() && !m.Alive && DateTime.UtcNow >= m_NextResurrect && InRange(m, 4) && !InRange(oldLocation, 4) && InLOS(m) && !(m.Region is HouseRegion) && !(m.Z <= this.Z - 5 || m.Z >= this.Z + 5)) // HouseRegion and Z level fix (with +/- 5 grace area.
                 {
                     m_NextResurrect = DateTime.UtcNow + ResurrectDelay;
 

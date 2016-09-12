@@ -2616,6 +2616,9 @@ namespace Server.Mobiles
 
             if (ns != null)
             {
+                if (IsHindered())
+                    return false;
+
                 if (HasGump(typeof(ResurrectGump)))
                 {
                     if (Alive)

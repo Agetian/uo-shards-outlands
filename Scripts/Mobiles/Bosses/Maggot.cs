@@ -505,7 +505,7 @@ namespace Server.Mobiles
                 m_NextSpeechAllowed = DateTime.UtcNow + NextSpeechDelay;
             }
 
-            if (SpecialAbilities.MonsterCanDamage(this, Combatant) && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !AbilityInProgress && !DamageIntervalInProgress)
+            if (SpecialAbilities.MonsterCanDamage(this, Combatant) && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !IsHindered() && !AbilityInProgress && !DamageIntervalInProgress)
             {                
                 switch (Utility.RandomMinMax(1, 2))
                 {

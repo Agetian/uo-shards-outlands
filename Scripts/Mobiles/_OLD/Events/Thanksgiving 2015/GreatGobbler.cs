@@ -331,7 +331,7 @@ namespace Server.Mobiles
 
             double spawnPercent = (double)intervalCount / (double)totalIntervals;
 
-            if (Combatant != null && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !AbilityInProgress && !DamageIntervalInProgress)
+            if (Combatant != null && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !IsHindered() && !AbilityInProgress && !DamageIntervalInProgress)
             {
                 switch (Utility.RandomMinMax(1, 3))
                 {

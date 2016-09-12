@@ -68,7 +68,7 @@ namespace Server.Mobiles
             
             if (Utility.RandomDouble() < 0.05 && DateTime.UtcNow > m_NextVanishAllowed)
             {
-                if (Combatant != null && !Hidden && !Paralyzed && !BardProvoked && !BardPacified)
+                if (Combatant != null && !Hidden && !Paralyzed && !IsHindered() && !BardProvoked && !BardPacified)
                 {
                     TimedStatic rock = new TimedStatic(Utility.RandomList(4967, 4970, 4973), 2);
                     rock.Name = "rock";

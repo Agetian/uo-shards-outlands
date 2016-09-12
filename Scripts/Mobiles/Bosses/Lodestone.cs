@@ -1892,7 +1892,7 @@ namespace Server.Mobiles
                 m_NextSpeechAllowed = DateTime.UtcNow + NextSpeechDelay;
             }
 
-            if (Combatant != null && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !AbilityInProgress && !DamageIntervalInProgress)
+            if (Combatant != null && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !IsHindered() && !AbilityInProgress && !DamageIntervalInProgress)
             {
                 int abilities = 3;
 

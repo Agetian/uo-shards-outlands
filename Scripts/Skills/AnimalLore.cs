@@ -453,19 +453,22 @@ namespace Server
 
                     startY += rowHeight;
 
-                    AddLabel(labelX, startY, MainTextHue, "Stam:");
-                    AddLabel(valuesX, startY, ValueTextHue, stamAdjusted + " / " + stamMaxAdjusted);
+                    AddLabel(labelX, startY, MainTextHue, "Dex:");
+                    AddLabel(valuesX, startY, ValueTextHue, stamMaxAdjusted.ToString());
                     if (showTamedScalars)
                         AddLabel(tamedScalarsX, startY, stamTamedColor, stamTamedScalar);
 
                     startY += rowHeight;
 
+                    /*
                     AddLabel(labelX, startY, MainTextHue, "Mana:");
                     AddLabel(valuesX, startY, ValueTextHue, manaAdjusted + " / " + manaMaxAdjusted);
                     if (showTamedScalars && manaAdjusted > 0 && manaMaxAdjusted > 0)
-                        AddLabel(tamedScalarsX, startY, manaTamedColor, manaTamedScalar);
+                        AddLabel(tamedScalarsX, startY, manaTamedColor, manaTamedScalar);                   
 
                     startY += rowHeight;
+                    */
+
                     startY += rowSpacer;
             
                     AddLabel(labelX, startY, MainTextHue, "Damage:");

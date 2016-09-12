@@ -58,13 +58,6 @@ namespace Server.Mobiles
                 if (entry == null)
                     continue;
 
-                if (entry.m_SpecialAbilityEffect == SpecialAbilityEffect.Hinder)
-                {
-                    //TEST: Fix This (Other Possible Sources of Frozen)
-                    if (DateTime.UtcNow >= entry.m_Expiration)                    
-                        mobile.Frozen = false;       
-                }
-
                 if (entry.m_SpecialAbilityEffect == SpecialAbilityEffect.Petrify)
                 {
                     if (DateTime.UtcNow >= entry.m_Expiration)
@@ -76,21 +69,15 @@ namespace Server.Mobiles
                             if (!KinPaint.IsWearingKinPaint(player))
                                 player.HueMod = -1;
                         }
-
-                        //TEST: Fix This (Other Possible Sources of Frozen)
-                        mobile.Frozen = false;
+                       
                         mobile.SendMessage("You are no longer petrified.");
                     }
                 }
 
                 if (entry.m_SpecialAbilityEffect == SpecialAbilityEffect.Entangle)
-                {
-                    //TEST: Fix This (Other Possible Sources of Frozen)
-                    if (DateTime.UtcNow >= entry.m_Expiration)
-                    {
-                        mobile.CantWalk = false;
-                        mobile.SendMessage("You are no longer entangled.");
-                    }
+                {                   
+                    if (DateTime.UtcNow >= entry.m_Expiration)                    
+                        mobile.SendMessage("You are no longer entangled.");                    
                 }
 
                 if (entry.m_SpecialAbilityEffect == SpecialAbilityEffect.Bleed)
@@ -914,7 +901,7 @@ namespace Server.Mobiles
 
                     if (bc_Defender.AIObject != null)
                     {
-                        bc_Defender.Frozen = true;
+                        //bc_Defender.Frozen = true;
 
                         bc_Defender.NextDecisionTime = DateTime.UtcNow + TimeSpan.FromSeconds(expirationSeconds);
 
@@ -963,7 +950,7 @@ namespace Server.Mobiles
 
                     pm_Defender.AddSpecialAbilityEffectEntry(new SpecialAbilityEffectEntry(SpecialAbilityEffect.Hinder, attacker, value, DateTime.UtcNow + TimeSpan.FromSeconds(expirationSeconds)));
 
-                    pm_Defender.Frozen = true;
+                    //pm_Defender.Frozen = true;
                     pm_Defender.LastSwingTime = pm_Defender.LastSwingTime + TimeSpan.FromSeconds(expirationSeconds);
                 }
             }

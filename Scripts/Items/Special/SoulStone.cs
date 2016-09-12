@@ -206,7 +206,7 @@ namespace Server.Items
 				from.SendLocalizedMessage( 1070734 ); // You may not use a Soulstone while your character is poisoned.
 				return false;
 			}
-			else if ( from.Paralyzed )
+			else if ( from.Paralyzed || from.IsHindered())
 			{
 				from.SendLocalizedMessage( 1070735 ); // You may not use a Soulstone while your character is paralyzed.
 				return false;

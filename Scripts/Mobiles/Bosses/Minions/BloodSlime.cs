@@ -75,7 +75,7 @@ namespace Server.Mobiles
 
             if (DateTime.UtcNow >= m_NextVoidAttackAllowed && AIObject.currentCombatRange != CombatRange.Withdraw && AIObject.Action != ActionType.Flee)
             {
-                if (combatant != null && !CantWalk && !Frozen && Alive && !IsDeadPet && !IsDeadBondedPet)
+                if (combatant != null && !CantWalk && !Frozen && !IsHindered() && Alive && !IsDeadPet && !IsDeadBondedPet)
                 {
                     if (combatant.Alive && InLOS(combatant) && GetDistanceToSqrt(combatant) <= 8)
                     {

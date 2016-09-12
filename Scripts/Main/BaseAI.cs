@@ -5010,7 +5010,7 @@ namespace Server.Mobiles
 
         public virtual MoveResult DoMoveImpl(Direction d)
         {
-            if (bc_Creature.Deleted || bc_Creature.Frozen || bc_Creature.Paralyzed || (bc_Creature.Spell != null && bc_Creature.Spell.IsCasting) || bc_Creature.DisallowAllMoves)
+            if (bc_Creature.Deleted || bc_Creature.Frozen || bc_Creature.IsHindered() || bc_Creature.Paralyzed || (bc_Creature.Spell != null && bc_Creature.Spell.IsCasting) || bc_Creature.DisallowAllMoves)
                 return MoveResult.BadState;
 
             else if (!CheckMove())

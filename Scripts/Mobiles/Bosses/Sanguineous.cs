@@ -2801,7 +2801,7 @@ namespace Server.Mobiles
                 m_NextSpeechAllowed = DateTime.UtcNow + NextSpeechDelay;
             }
 
-            if (Combatant != null && !m_IsCharging && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !AbilityInProgress && !DamageIntervalInProgress)
+            if (Combatant != null && !m_IsCharging && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !IsHindered() && !AbilityInProgress && !DamageIntervalInProgress)
             {
                 switch (m_BossPhase)
                 {

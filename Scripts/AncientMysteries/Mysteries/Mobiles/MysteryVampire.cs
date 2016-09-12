@@ -144,7 +144,7 @@ namespace Server.Mobiles
         {
             base.OnThink();
 
-            if ((Paralyzed || CantWalk || Frozen) && !IsFeeding)
+            if ((Paralyzed || CantWalk || Frozen || IsHindered()) && !IsFeeding)
             {
                 Effects.PlaySound(Location, Map, 0x657);
                 Effects.SendLocationParticles(EffectItem.Create(Location, Map, TimeSpan.FromSeconds(5)), 0x3728, 10, 10, 2023);
