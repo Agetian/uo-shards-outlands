@@ -8727,8 +8727,6 @@ public static void _TraceEnd(int index)
 
 				// and reset the kill count
 				KillCount = 0;
-
-                BossPersistance.ResetSequentialSpawner(this);
 			}
 		}
 
@@ -8785,7 +8783,6 @@ public static void _TraceEnd(int index)
 			if (m_SequentialSpawning >= 0)
 			{
 				m_SequentialSpawning = NextSequentialIndex(-1);
-                BossPersistance.ResetSequentialSpawner(this);
 			}
 
 			// reset the nextspawn times

@@ -59,7 +59,6 @@ namespace Server.Mobiles
 
         public override void SetUniqueAI()
         {
-            DictCombatSpell[CombatSpell.SpellDispelSummon] = 25;
         }
 
         public DrowSpellsinger(Serial serial): base(serial)

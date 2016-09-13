@@ -1316,16 +1316,8 @@ namespace Server.Mobiles
             DictCombatSpell.Add(CombatSpell.SpellDamage6, 0);
             DictCombatSpell.Add(CombatSpell.SpellDamage7, 0);
             DictCombatSpell.Add(CombatSpell.SpellDamageAOE7, 0);
+
             DictCombatSpell.Add(CombatSpell.SpellPoison, 0);
-            DictCombatSpell.Add(CombatSpell.SpellNegative1to3, 0);
-            DictCombatSpell.Add(CombatSpell.SpellNegative4to7, 0);
-            DictCombatSpell.Add(CombatSpell.SpellSummon5, 0);
-            DictCombatSpell.Add(CombatSpell.SpellSummon8, 0);
-            DictCombatSpell.Add(CombatSpell.SpellDispelSummon, 0);
-            DictCombatSpell.Add(CombatSpell.SpellHarmfulField, 0);
-            DictCombatSpell.Add(CombatSpell.SpellNegativeField, 0);
-            DictCombatSpell.Add(CombatSpell.SpellBeneficial1to2, 0);
-            DictCombatSpell.Add(CombatSpell.SpellBeneficial3to5, 0);
 
             //Combat Heal Self Actions
             DictCombatHealSelf.Clear();
@@ -1797,8 +1789,143 @@ namespace Server.Mobiles
             }
         }
 
+        public double DetermineAverageSpellDamage()
+        {
+            double averageDamage = 0;
+            double spellDamageScalar = 1.0;
+
+            //TEST: Adjust spellDamageScalar based on Eval Int
+
+            int totalFrequency = 0;
+
+            Dictionary<int, double> spellSelections = new Dictionary<int, double>();
+
+            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage1], 5.0);
+            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage2], 10.0);
+            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage3], 15.0);
+            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage4], 20.0);
+            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage5], 25.0);
+            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage6], 30.0);
+            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage7], 40.0);
+            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamageAOE7], 80.0);
+
+            spellSelections.Add(DictCombatSpell[CombatSpell.SpellPoison], 25.0);
+
+            foreach (KeyValuePair<int, double> pair in spellSelections)
+            {
+                totalFrequency += pair.Key;
+            }
+
+            foreach (KeyValuePair<int, double> pair in spellSelections)
+            {
+                double spellChance = ((double)pair.Key / (double)totalFrequency);
+                double spellDamage = pair.Value * spellDamageScalar;
+
+                double expectedDamage = spellChance * spellDamage;
+
+                averageDamage += expectedDamage;
+            }
+
+            return averageDamage;
+        }
+
         public double CalculateDifficulty(Mobile from, bool showValue, bool showFactors)
         {
+            double estimatedOpponentSkill = 90;
+
+            double healingValueFactor = 0.5;
+
+            BaseWeapon weapon = Weapon as BaseWeapon;
+
+            if (weapon == null)
+                return .01;
+
+            double meleeFrequency = 1.0;
+            double spellcastingFrequency = 0.0;
+
+            double adjustedMeleeDPS = 0;
+            double adjustedSpellcastingDPS = 0;
+            double adjustedPoisonDPS = 0;
+
+            #region Melee
+
+            double meleeCombatSkill = Enumerable.Max(new double[] { Skills.Swords.Value, Skills.Macing.Value, Skills.Archery.Value, Skills.Fencing.Value, Skills.Wrestling.Value });
+            double meleeHitChance = weapon.GetSimulatedHitChance(from, estimatedOpponentSkill, true);
+            double meleeAverageDamage = ((double)DamageMin + (double)DamageMax) / 2;
+            double meleeAttackDelay = weapon.GetDelay(this, true).TotalSeconds;
+            double meleeRangeFactor = .6;
+
+            if (CantWalk || DisallowAllMoves)
+                meleeRangeFactor -= .20;
+
+            else
+            {
+                switch (SpeedGroup)
+                {
+                    case SpeedGroupType.None: meleeRangeFactor -= .20; break;
+                    case SpeedGroupType.SuperSlow: meleeRangeFactor -= .15; break;
+                    case SpeedGroupType.VerySlow: meleeRangeFactor -= .10; break;
+                    case SpeedGroupType.Slow: meleeRangeFactor -= .05; break;
+                    case SpeedGroupType.Medium: meleeRangeFactor += 0; break;
+                    case SpeedGroupType.Fast: meleeRangeFactor += .05; break;
+                    case SpeedGroupType.VeryFast: meleeRangeFactor += .1; break;
+                    case SpeedGroupType.SuperFast: meleeRangeFactor += .15; break;
+                }
+            }
+            
+            if (Skills.Archery.Value > 0)
+                meleeRangeFactor += .3;
+
+            if (meleeRangeFactor > 1.0)
+                meleeRangeFactor = 1.0;            
+
+            #endregion
+
+            #region Spellcasting
+
+            double spellDelay = (SpellDelayMin + SpellDelayMax) / 2;
+            double spellAverageDamage = DetermineAverageSpellDamage();
+            double spellAverageHealing = 0;
+
+            /*              
+             SpellHealSelf100,
+        SpellHealSelf75,
+        SpellHealSelf50,
+        SpellHealSelf25,
+        SpellCureSelf,
+             
+             SpellHealOther100,
+        SpellHealOther75,
+        SpellHealOther50,
+        SpellHealOther25,
+        SpellCureOther,
+            */
+
+            #endregion
+
+            #region Poison
+            #endregion
+
+            #region Defense
+
+            /*
+            double hitPointsScalar = .5 + (Math.Sqrt(effectiveHitPoints) / 15);
+
+            double defenseSkillScalar = .75 + (combatSkill / 3);
+            double parrySkillScalar = 1 + (Skills.Parry.Base / 500);
+            double virtualArmorScalar = .99 + ((double)VirtualArmor / 2500);
+            double magicResistScalar = .98 + (Skills.MagicResist.Base / 1250);
+            double poisonImmunityScalar = 1;
+            */
+
+            #endregion
+
+            double baseMeleeDPS = (meleeHitChance * meleeAverageDamage) / meleeAttackDelay * meleeRangeFactor;
+            double baseSpellcastingDPS = spellAverageDamage + (spellAverageHealing * healingValueFactor);
+
+            double finalValue = 1.0;
+
+            /*
             double averageSpecialActionDelay = ((double)CombatSpecialActionMinDelay + (double)CombatSpecialActionMaxDelay) / 2;
             double averageEpicActionDelay = ((double)CombatEpicActionMinDelay + (double)CombatEpicActionMaxDelay) / 2;
             double averageHealActionDelay = ((double)CombatHealActionMinDelay + (double)CombatHealActionMaxDelay) / 2;
@@ -2008,7 +2135,7 @@ namespace Server.Mobiles
 
             //Ship Loot Adjustment
             if (isOnShip)
-                finalValue *= 1.0;
+                finalValue *= 1.0;           
 
             if (from != null && showFactors)
             {
@@ -2044,6 +2171,7 @@ namespace Server.Mobiles
 
                 PrivateOverheadMessage(MessageType.Regular, 0, false, "Difficulty: " + Math.Round(finalValue, 3).ToString(), from.NetState);
             }
+            */
 
             return finalValue;
         }

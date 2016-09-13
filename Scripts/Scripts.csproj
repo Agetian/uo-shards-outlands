@@ -1137,7 +1137,6 @@
     <Compile Include="Mobiles\Monsters\Elemental\Magic\ElderAcidElemental.cs" />
     <Compile Include="Mobiles\Monsters\Elemental\Melee\ElderSnowElemental.cs" />
     <Compile Include="Mobiles\Monsters\Humanoid\Magic\IceFiendLord.cs" />
-    <Compile Include="Main\BossPersistance.cs" />
     <Compile Include="Mobiles\Elemental\LuniteElemental.cs" />
     <Compile Include="Main\SpecialAbilities.cs" />
     <Compile Include="Mobiles\Tameables\ArcaneDragon.cs" />

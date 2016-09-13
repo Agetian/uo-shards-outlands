@@ -49,6 +49,7 @@ namespace Server.Mobiles
     public enum AIGroupType
     {
         Unspecified,
+
         None,
         EvilMonster,
         NeutralMonster,
@@ -70,60 +71,57 @@ namespace Server.Mobiles
     public enum AISubGroupType
     {
         Unspecified,
+
         Melee,
+
         MeleeMage1,
         MeleeMage2,
         MeleeMage3,
         MeleeMage4,
         MeleeMage5,
         MeleeMage6,
+
         Mage1,
         Mage2,
         Mage3,
         Mage4,
         Mage5,
         Mage6,
+
         GroupHealerMage1,
         GroupHealerMage2,
         GroupHealerMage3,
         GroupHealerMage4,
         GroupHealerMage5,
         GroupHealerMage6,
+
         GroupHealerMeleeMage1,
         GroupHealerMeleeMage2,
         GroupHealerMeleeMage3,
         GroupHealerMeleeMage4,
         GroupHealerMeleeMage5,
         GroupHealerMeleeMage6,
+
         GroupHealerMelee,
         GroupMedicMelee,
         GroupMedicRanged,
+
         SuperPredator,
         Predator,
         Prey,
         Hunter,
         Berserk,
-        MeleePotion,
-        Alchemist,
-        AntiArmor,
-        MageKiller,
-        Ranged,
-        Scout,
-        Thief,
-        Assassin,
-        Bomber,
-        WanderingHealer,
-        GuardMelee,
-        GuardRanged,
-        Dispeller,
-        BountyHunter,
-        PureHealer,
-        Sailor,
-        ShipCaptain,
-        Stealther,
         Swarm,
         Duelist,
-        Poisoner
+        MeleePotion,
+        Ranged,
+        Scout,
+        Assassin,
+        Stealther,
+        Poisoner,
+        WanderingHealer,
+        Sailor,
+        ShipCaptain,
     }
 
     public enum ActionType
@@ -189,6 +187,7 @@ namespace Server.Mobiles
     public enum CombatFlee
     {
         None,
+
         Flee50,
         Flee25,
         Flee10,
@@ -198,6 +197,7 @@ namespace Server.Mobiles
     public enum CombatAction
     {
         None,
+
         AttackOnly,
         CombatSpell,
         CombatHealSelf,
@@ -209,6 +209,7 @@ namespace Server.Mobiles
     public enum CombatSpell
     {
         None,
+
         SpellDamage1,
         SpellDamage2,
         SpellDamage3,
@@ -217,21 +218,13 @@ namespace Server.Mobiles
         SpellDamage6,
         SpellDamage7,
         SpellDamageAOE7,
-        SpellPoison,
-        SpellNegative1to3,
-        SpellNegative4to7,
-        SpellSummon5,
-        SpellSummon8,
-        SpellDispelSummon,
-        SpellHarmfulField,
-        SpellNegativeField,
-        SpellBeneficial1to2,
-        SpellBeneficial3to5
+        SpellPoison
     }
 
     public enum CombatHealSelf
     {
         None,
+
         SpellHealSelf100,
         SpellHealSelf75,
         SpellHealSelf50,
@@ -267,6 +260,7 @@ namespace Server.Mobiles
     public enum CombatSpecialAction
     {
         None,
+
         ApplyWeaponPoison,
         ThrowShipBomb,
         CauseWounds,
@@ -278,6 +272,7 @@ namespace Server.Mobiles
     public enum CombatEpicAction
     {
         None,
+
         MeleeBleedAoE,
         MassiveFireBreathAttack,
         MassiveIceBreathAttack,
@@ -289,6 +284,7 @@ namespace Server.Mobiles
     public enum GuardAction
     {
         None,
+
         DetectHidden,
         SpellDispelSummon,
         SpellReveal
@@ -297,6 +293,7 @@ namespace Server.Mobiles
     public enum WanderAction
     {
         None,
+
         DetectHidden,
         SpellReveal,
         Tracking,
@@ -322,6 +319,7 @@ namespace Server.Mobiles
     public enum WaypointAction
     {
         None,
+
         DetectHidden,
         Stealth
     }

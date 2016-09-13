@@ -984,8 +984,6 @@ namespace Server.Mobiles
         public override void OnBeforeSpawn(Point3D location, Map m)
         {
             base.OnBeforeSpawn(location, m);
-
-            BossPersistance.PersistanceItem.DestardBossLastStatusChange = DateTime.UtcNow;
         }
 
         public override bool OnBeforeDeath()

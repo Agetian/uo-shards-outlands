@@ -58,16 +58,8 @@ namespace Server.Mobiles
             DictCombatSpell[CombatSpell.SpellDamage6] = 0;
             DictCombatSpell[CombatSpell.SpellDamage7] = 0;
             DictCombatSpell[CombatSpell.SpellDamageAOE7] = 0;
+
             DictCombatSpell[CombatSpell.SpellPoison] = 0;
-            DictCombatSpell[CombatSpell.SpellNegative1to3] = 0;
-            DictCombatSpell[CombatSpell.SpellNegative4to7] = 0;
-            DictCombatSpell[CombatSpell.SpellSummon5] = 0;
-            DictCombatSpell[CombatSpell.SpellSummon8] = 0;
-            DictCombatSpell[CombatSpell.SpellDispelSummon] = 0;
-            DictCombatSpell[CombatSpell.SpellHarmfulField] = 0;
-            DictCombatSpell[CombatSpell.SpellNegativeField] = 0;
-            DictCombatSpell[CombatSpell.SpellBeneficial1to2] = 0;
-            DictCombatSpell[CombatSpell.SpellBeneficial3to5] = 0;
 
             DictCombatHealSelf[CombatHealSelf.SpellHealSelf100] = 0;
             DictCombatHealSelf[CombatHealSelf.SpellHealSelf75] = 0;

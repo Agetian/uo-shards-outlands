@@ -32,17 +32,7 @@ namespace Server.Mobiles
 
         public override void OnSpeech(SpeechEventArgs e)
         {
-            base.OnSpeech(e);
-
-            Mobile mobile = e.Mobile as Mobile;
-
-            if (mobile == null)
-                return;
-
-            string bossResponse = BossPersistance.GetBossStatus(e);
-
-            if (bossResponse != "")
-                Say(bossResponse);
+            base.OnSpeech(e);            
         }
 
 		public override void Serialize( GenericWriter writer ) 
