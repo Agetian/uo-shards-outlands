@@ -18,7 +18,7 @@ namespace Server.Mobiles
             PikeMounted,
             SwordShield,
             Axe,
-            sanguinous
+            Sanguinous
         }
 
         public enum BloodPower
@@ -32,12 +32,6 @@ namespace Server.Mobiles
 
         public DateTime m_NextAIChangeAllowed;
         public TimeSpan NextAIChangeDelay = TimeSpan.FromSeconds(30);
-
-        public DateTime m_NextSpeechAllowed;
-        public TimeSpan NextSpeechDelay = TimeSpan.FromSeconds(30);
-
-        public DateTime m_NextChargeAllowed;
-        public TimeSpan NextChargeDelay = TimeSpan.FromSeconds(15);
 
         public DateTime m_NextAxeThrowAllowed;
         public TimeSpan NextAxeThrowDelay = TimeSpan.FromSeconds(15);
@@ -54,9 +48,12 @@ namespace Server.Mobiles
         public DateTime m_NextBloodBurstAllowed;
         public TimeSpan NextBloodBurstDelay = TimeSpan.FromSeconds(20);
 
-        public DateTime m_NextsanguinousChargeAllowed;
-        public TimeSpan NextsanguinousChargeDelay = TimeSpan.FromSeconds(20);
-        
+        public DateTime m_NextSanguinousChargeAllowed;
+        public TimeSpan NextSanguinousChargeDelay = TimeSpan.FromSeconds(20);
+
+        public DateTime m_NextChargeAllowed;
+        public TimeSpan NextChargeDelay = TimeSpan.FromSeconds(15);
+
         public DateTime m_ChargeTimeout;
         public TimeSpan ChargeTimeoutDelay = TimeSpan.FromSeconds(10);
 
@@ -64,19 +61,6 @@ namespace Server.Mobiles
 
         public bool m_IsCharging = false;
         public Mobile m_ChargeTarget;
-
-        public DateTime m_NextAbilityAllowed;
-        public double NextAbilityDelayMin = 10;
-        public double NextAbilityDelayMax = 5;
-
-        public int damageIntervalThreshold = 500;
-        public int damageProgress = 0;
-
-        public int intervalCount = 0;
-        public int totalIntervals = 50;
-
-        public bool AbilityInProgress = false;
-        public bool DamageIntervalInProgress = false;
 
         public BossPhase m_BossPhase = BossPhase.PikeMounted;
         public BloodPower m_BloodPower = BloodPower.None;
@@ -87,18 +71,12 @@ namespace Server.Mobiles
         public List<Mobile> m_ChargeTargets = new List<Mobile>();
         public List<Mobile> m_AxeTargets = new List<Mobile>();
         
-        public List<Mobile> m_Creatures = new List<Mobile>();
         public List<Item> m_Traps = new List<Item>();
         public List<Item> m_Items = new List<Item>();
 
         public const int SwordShieldInterval = 4;
         public const int AxeInterval = 8;
-        public const int sanguinousTrueFormInterval = 12;
-
-        public string[] idleSpeech { get { return new string[] {"*stirs*"}; } }
-        public string[] combatSpeech { get  { return new string[] {""}; } }
-        
-        public override bool AlwaysRun { get { return true; } }
+        public const int SanguinousTrueFormInterval = 12;
 
         public int ThemeHue = 2118;
 
@@ -193,23 +171,29 @@ namespace Server.Mobiles
                 {
                     case BossPhase.PikeMounted: return 1; break;
                     case BossPhase.SwordShield: return 1; break;
-                    case BossPhase.sanguinous: return 2; break;
+                    case BossPhase.Sanguinous: return 2; break;
                 }
 
                 return 2;
             }
         }
         
-        public override bool AlwaysBoss { get { return true; } }
-        public override string TitleReward { get { return "Slayer of sanguinous"; } }
-        public override string BossSpawnMessage { get { return "sanguinous has arisen and stirs within Wrong Dungeon..."; } }
+        public override bool AlwaysBoss { get { return true; } }      
         public override bool AlwaysMurderer { get { return true; } }
+
+        public override string TitleReward { get { return "Slayer of Sanguinous"; } }
+        public override string BossSpawnMessage { get { return "Sanguinous has arisen and stirs within Wrong Dungeon..."; } }
+
+        public override string[] IdleSpeech { get { return new string[] { "*fumes*" }; } }
+        public override string[] CombatSpeech { get { return new string[] { "" }; } }
+
+        public override bool AlwaysRun { get { return true; } }
 
         public override bool IsHighSeasBodyType 
         {
             get       
             {
-                if (m_BossPhase == BossPhase.sanguinous)
+                if (m_BossPhase == BossPhase.Sanguinous)
                     return true;
 
                 return false;
@@ -223,7 +207,7 @@ namespace Server.Mobiles
                 if (m_BossPhase == BossPhase.PikeMounted)
                     return 28;
 
-                if (m_BossPhase == BossPhase.sanguinous) 
+                if (m_BossPhase == BossPhase.Sanguinous) 
                     return 5;
 
                 return -1; 
@@ -237,19 +221,19 @@ namespace Server.Mobiles
                 if (m_BossPhase == BossPhase.PikeMounted)
                     return 7;
 
-                if (m_BossPhase == BossPhase.sanguinous)
+                if (m_BossPhase == BossPhase.Sanguinous)
                     return 8;
 
                 return 0;
             }
         }
 
-        public override int HurtAnimation { get { if (m_BossPhase == BossPhase.sanguinous) return 28; return -1; } }
-        public override int HurtFrames { get { if (m_BossPhase == BossPhase.sanguinous) return 8; return 0; } }
-        public override bool HurtAnimationPlayForwards { get { if (m_BossPhase == BossPhase.sanguinous) return false; return true; } }
+        public override int HurtAnimation { get { if (m_BossPhase == BossPhase.Sanguinous) return 28; return -1; } }
+        public override int HurtFrames { get { if (m_BossPhase == BossPhase.Sanguinous) return 8; return 0; } }
+        public override bool HurtAnimationPlayForwards { get { if (m_BossPhase == BossPhase.Sanguinous) return false; return true; } }
 
-        public override int IdleAnimation { get { if (m_BossPhase == BossPhase.sanguinous) return 25; return -1; } }
-        public override int IdleFrames { get { if (m_BossPhase == BossPhase.sanguinous) return 12; return 0; } }
+        public override int IdleAnimation { get { if (m_BossPhase == BossPhase.Sanguinous) return 25; return -1; } }
+        public override int IdleFrames { get { if (m_BossPhase == BossPhase.Sanguinous) return 12; return 0; } }
                 
         public override void SetUniqueAI()
         {   
@@ -259,9 +243,6 @@ namespace Server.Mobiles
             UniqueCreatureDifficultyScalar = 1.5;
 
             SetSpeeds(false);
-
-            damageIntervalThreshold = (int)(Math.Round((double)HitsMax / (double)totalIntervals));
-            intervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)totalIntervals));
 
             foreach (Item item in m_Items)
             {
@@ -273,8 +254,6 @@ namespace Server.Mobiles
         public override void OnGaveMeleeAttack(Mobile defender)
         {
             base.OnGaveMeleeAttack(defender);
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
 
             switch (m_BossPhase)
             {
@@ -290,7 +269,7 @@ namespace Server.Mobiles
                     SpecialAbilities.FrenzySpecialAbility(bleedChance, this, defender, .5, 15, -1, true, "", "", "*becomes frenzied*");
                 break;
 
-                case BossPhase.sanguinous:
+                case BossPhase.Sanguinous:
                     bleedChance = .25;
 
                     SpecialAbilities.BleedSpecialAbility(bleedChance, this, defender, DamageMin, 1.0, -1, true, "", "Their strike causes you to bleed!", "-1");
@@ -331,67 +310,33 @@ namespace Server.Mobiles
         }
 
         public override void OnDamage(int amount, Mobile from, bool willKill)
-        {           
-            damageIntervalThreshold = (int)(Math.Round((double)HitsMax / (double)totalIntervals));
-            intervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)totalIntervals));
-
+        {       
             bool transformation = false;
-
-            if (intervalCount >= SwordShieldInterval && intervalCount < AxeInterval && m_BossPhase != BossPhase.SwordShield)
-            {
-                SwordShieldTransform();
-
-                transformation = true;
-            }
-
-            else if (intervalCount >= AxeInterval && intervalCount < sanguinousTrueFormInterval && m_BossPhase != BossPhase.Axe)
-            {
-                AxeTransform();
-
-                transformation = true;
-            }
-
-            else if (intervalCount >= sanguinousTrueFormInterval && m_BossPhase != BossPhase.sanguinous)
-            {
-                TrueFormTransform();
-
-                transformation = true;
-            }
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             if (!willKill)
             {
-                damageProgress += amount;
-
-                if (damageProgress >= damageIntervalThreshold)
+                if (m_HealthIntervalCount >= SwordShieldInterval && m_HealthIntervalCount < AxeInterval && m_BossPhase != BossPhase.SwordShield)
                 {
-                    m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+                    SwordShieldTransform();
 
-                    Effects.PlaySound(Location, Map, GetAngerSound());
-
-                    damageProgress = 0;
-
-                    spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-                    if (m_BossPhase == BossPhase.sanguinous && !transformation)
-                    {
-                        if (intervalCount % 5 == 0)
-                            SummonTheBlood();
-
-                        else
-                        {
-                            switch (Utility.RandomMinMax(1, 3))
-                            {
-                                case 1: BloodBurst(); break;
-                                case 2: BloodStorm(); break;
-                                case 3: IgniteTheBlood(true); break;                                
-                            }
-                        }
-                    }                    
+                    transformation = true;
                 }
 
-                else if (!transformation)
+                else if (m_HealthIntervalCount >= AxeInterval && m_HealthIntervalCount < SanguinousTrueFormInterval && m_BossPhase != BossPhase.Axe)
+                {
+                    AxeTransform();
+
+                    transformation = true;
+                }
+
+                else if (m_HealthIntervalCount >= SanguinousTrueFormInterval && m_BossPhase != BossPhase.Sanguinous)
+                {
+                    TrueFormTransform();
+
+                    transformation = true;
+                }
+
+                if (!transformation)
                 {
                     switch (m_BossPhase)
                     {
@@ -416,13 +361,36 @@ namespace Server.Mobiles
                         case BossPhase.Axe:
                         break;
 
-                        case BossPhase.sanguinous:
+                        case BossPhase.Sanguinous:
                         break;
                     }
                 }
             }            
 
             base.OnDamage(amount, from, willKill);
+        }
+
+        public override void DamageIntervalTriggered()
+        {
+            base.DamageIntervalTriggered();
+
+            Effects.PlaySound(Location, Map, GetAngerSound());
+
+            if (m_BossPhase == BossPhase.Sanguinous && m_HealthIntervalCount != SanguinousTrueFormInterval)
+            {
+                if (m_HealthIntervalCount % 5 == 0)
+                    SummonTheBlood();
+
+                else
+                {
+                    switch (Utility.RandomMinMax(1, 3))
+                    {
+                        case 1: BloodBurst(); break;
+                        case 2: BloodStorm(); break;
+                        case 3: IgniteTheBlood(true); break;
+                    }
+                }
+            }  
         }
 
         #region Transformations
@@ -510,7 +478,7 @@ namespace Server.Mobiles
 
         public void TrueFormTransform()
         {
-            m_BossPhase = BossPhase.sanguinous;
+            m_BossPhase = BossPhase.Sanguinous;
 
             BodyValue = 741;
             Hue = 0;
@@ -526,22 +494,18 @@ namespace Server.Mobiles
 
         #endregion
 
-        public TimeSpan GetNextAbilityDelay()
+        public override TimeSpan GetNextAbilityDelay()
         {
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            return TimeSpan.FromSeconds(NextAbilityDelayMin - ((NextAbilityDelayMin - NextAbilityDelayMax) * spawnPercent));
+            return TimeSpan.FromSeconds(NextAbilityDelayMin - ((NextAbilityDelayMin - NextAbilityDelayMax) * m_SpawnPercent));
         }
 
         public void SetSpeeds(bool charging)
         {
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
             if (charging)
             {
-                ActiveSpeed = 0.25 - (.075 * spawnPercent);
-                PassiveSpeed = 0.25 - (.075 * spawnPercent);
-                CurrentSpeed = 0.25 - (.075 * spawnPercent);
+                ActiveSpeed = 0.25 - (.075 * m_SpawnPercent);
+                PassiveSpeed = 0.25 - (.075 * m_SpawnPercent);
+                CurrentSpeed = 0.25 - (.075 * m_SpawnPercent);
             }
 
             else
@@ -552,7 +516,7 @@ namespace Server.Mobiles
 
                 DictCombatTargetingWeight[CombatTargetingWeight.CurrentCombatant] = 4;
 
-                AbilityInProgress = false;
+                m_AbilityInProgress = false;
             }
         }
 
@@ -660,7 +624,7 @@ namespace Server.Mobiles
             m_NextChargeAllowed = DateTime.UtcNow + NextChargeDelay;
             m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
 
-            AbilityInProgress = true;
+            m_AbilityInProgress = true;
             
             Dictionary<Mobile, int> DictPossibleNewCombatants = new Dictionary<Mobile, int>();
 
@@ -747,7 +711,7 @@ namespace Server.Mobiles
                 if (Combatant == null || m_ChargeTarget == null)
                     chargeFail = true;
 
-                else if (DamageIntervalInProgress)
+                else if (m_HealthIntervalAbilityInProgress)
                     chargeFail = true;
 
                 else if (Combatant != m_ChargeTarget || !Combatant.Alive || Combatant.Hidden || GetDistanceToSqrt(Combatant.Location) > 24 || !InLOS(Combatant) || DateTime.UtcNow > m_ChargeTimeout)
@@ -914,9 +878,7 @@ namespace Server.Mobiles
                 return;
 
             m_AxeTargets.Clear();
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             int range = 20;
 
             List<Mobile> m_PossibleTargets = new List<Mobile>();
@@ -942,7 +904,7 @@ namespace Server.Mobiles
                 return;
 
             double directionDelay = .25;
-            double initialDelay = 1 - (.5 * spawnPercent);
+            double initialDelay = 1 - (.5 * m_SpawnPercent);
             double totalDelay = directionDelay + initialDelay;
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
@@ -1098,15 +1060,20 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            m_NextConfigureTraps = DateTime.UtcNow + NextConfigureTrapsDelay;
-            AbilityInProgress = true;
-
+            m_AbilityInProgress = true;
             m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_NextConfigureTraps = DateTime.UtcNow + NextConfigureTrapsDelay;
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_NextConfigureTraps = DateTime.UtcNow + NextConfigureTrapsDelay;
             });
 
             PublicOverheadMessage(MessageType.Regular, SpeechHue, false, "*readies bloody traps*");
@@ -1133,7 +1100,7 @@ namespace Server.Mobiles
                         PlaySound(GetAngerSound());
                     break;
 
-                    case BossPhase.sanguinous:
+                    case BossPhase.Sanguinous:
                         Animate(11, 10, 1, false, false, 0);
                         PlaySound(GetAngerSound());
                     break;
@@ -1144,9 +1111,7 @@ namespace Server.Mobiles
                     if (!SpecialAbilities.Exists(this))
                         return;
 
-                    double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-                    int trapsToPlace = (int)(Math.Round(10 + (20 * spawnPercent)));
+                    int trapsToPlace = (int)(Math.Round(10 + (20 * m_SpawnPercent)));
 
                     Queue m_Queue = new Queue();
 
@@ -1237,12 +1202,12 @@ namespace Server.Mobiles
                         Point3D adjustedPoint = point;
                         adjustedPoint.Z++;
 
-                        TimedStatic trapTile = new TimedStatic(6179, 1 - (.5 * spawnPercent));
+                        TimedStatic trapTile = new TimedStatic(6179, 1 - (.5 * m_SpawnPercent));
                         trapTile.Name = "sanguinous trap";
                         trapTile.Hue = 2118;
                         trapTile.MoveToWorld(adjustedPoint, Map);
 
-                        TimedStatic trapGlow = new TimedStatic(14202, 1 - (.5 * spawnPercent));
+                        TimedStatic trapGlow = new TimedStatic(14202, 1 - (.5 * m_SpawnPercent));
                         trapGlow.Name = "sanguinous glow";
                         trapGlow.Hue = 2118;
                         trapGlow.MoveToWorld(adjustedPoint, Map);
@@ -1255,19 +1220,19 @@ namespace Server.Mobiles
 
         #endregion
 
-        #region sanguinous Charge
+        #region Sanguinous Charge
 
-        public void sanguinousCharge()
+        public void SanguinousCharge()
         {
             if (!SpecialAbilities.Exists(this))
                 return;
 
             m_ChargeTargets.Clear();
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            m_AbilityInProgress = true;
             m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
-            m_NextsanguinousChargeAllowed = DateTime.UtcNow + NextsanguinousChargeDelay;
+
+            m_NextSanguinousChargeAllowed = DateTime.UtcNow + NextSanguinousChargeDelay;            
 
             int range = 18;
 
@@ -1329,7 +1294,7 @@ namespace Server.Mobiles
                 return;
            
             double directionDelay = .25;
-            double initialDelay = 1 - (.5 * spawnPercent);
+            double initialDelay = 1 - (.5 * m_SpawnPercent);
             double totalDelay = directionDelay + initialDelay;
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
@@ -1524,10 +1489,8 @@ namespace Server.Mobiles
         {
             if (!SpecialAbilities.Exists(this))
                 return;
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            int range = (int)(Math.Round(4 + (8 * spawnPercent)));
+            
+            int range = (int)(Math.Round(4 + (8 * m_SpawnPercent)));
 
             int bloodHarvested = 0;
 
@@ -1563,12 +1526,12 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
            
-            Animate(12, 8, 3, true, false, 0);                    
+            Animate(12, 8, 3, true, false, 0);
 
-            AbilityInProgress = true;
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
 
             m_NextHarvestBlood = DateTime.UtcNow + NextHarvestBloodDelay;
-            m_NextAbilityAllowed = m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
             
             while (m_Queue.Count > 0)
             {
@@ -1624,7 +1587,10 @@ namespace Server.Mobiles
                 if (!SpecialAbilities.Exists(this))
                     return;
 
-                AbilityInProgress = false;
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_NextHarvestBlood = DateTime.UtcNow + NextHarvestBloodDelay;
 
                 ActiveSpeed = 0.25;
                 PassiveSpeed = 0.25;
@@ -1770,9 +1736,7 @@ namespace Server.Mobiles
             if (!SpecialAbilities.Exists(this))
                 return;
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            int range = (int)(Math.Round(8 + (12 * spawnPercent)));
+            int range = (int)(Math.Round(8 + (12 * m_SpawnPercent)));
 
             List<Point3D> m_PossibleLocations = new List<Point3D>();
 
@@ -1793,7 +1757,7 @@ namespace Server.Mobiles
 
             nearbyMobiles.Free();
 
-            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+            m_NextAbilityAllowed = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
             if (m_PossibleLocations.Count == 0)
                 return;
@@ -1809,12 +1773,12 @@ namespace Server.Mobiles
 
             double totalDelay = directionDelay + initialDelay + postDelay;
 
-            SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");            
+            SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            AbilityInProgress = true;
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
 
             m_NextBloodSpray = DateTime.UtcNow + NextBloodSprayDelay;
-            m_NextAbilityAllowed = m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
 
             PlaySound(GetAngerSound());
             Direction = directionToTarget;
@@ -1841,8 +1805,13 @@ namespace Server.Mobiles
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+
+                m_AbilityInProgress = true;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_NextBloodSpray = DateTime.UtcNow + NextBloodSprayDelay;
             });            
         }
 
@@ -1974,9 +1943,7 @@ namespace Server.Mobiles
             }
         }
 
-        #endregion        
-
-        //Epic Abilities
+        #endregion       
 
         #region SummonTheBlood
 
@@ -1984,11 +1951,9 @@ namespace Server.Mobiles
         {
             if (!SpecialAbilities.Exists(this))
                 return;
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             int range = 12;
-            int summons = 2 + (int)(Math.Round(6 * spawnPercent));
+            int summons = 2 + (int)(Math.Round(6 * m_SpawnPercent));
 
             double totalDelay = 3;
 
@@ -2071,9 +2036,10 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
+            m_AbilityInProgress = true;
             m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
 
-            AbilityInProgress = true;
+            m_HealthIntervalAbilityInProgress = true;
 
             Animate(23, 12, 2, true, false, 0);
 
@@ -2113,6 +2079,11 @@ namespace Server.Mobiles
                 if (!SpecialAbilities.Exists(this))
                     return;
 
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false;
+
                 foreach (Point3D point in m_SummonLocations)
                 {
                     Point3D summonLocation = point;
@@ -2129,9 +2100,9 @@ namespace Server.Mobiles
                     int itemId = 14217;
                     int itemHue = 38;
 
-                    double bloodElementalChance = .10 + (.15 * spawnPercent);
+                    double bloodElementalChance = .10 + (.15 * m_SpawnPercent);
 
-                    if (spawnPercent < .5)
+                    if (m_SpawnPercent < .5)
                         bloodElementalChance = 0;
 
                     if (creatureResult <= bloodElementalChance)
@@ -2254,9 +2225,7 @@ namespace Server.Mobiles
 
                         m_Creatures.Add(bc_Summon);
                     });
-                }
-
-                AbilityInProgress = false;
+                }                
             });
         }
 
@@ -2269,22 +2238,26 @@ namespace Server.Mobiles
             if (!SpecialAbilities.Exists(this))
                 return;
 
-            AbilityInProgress = true;
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            int loops = 3 + (int)(Math.Round(5 * spawnPercent));
+            int loops = 3 + (int)(Math.Round(5 * m_SpawnPercent));
 
             double stationaryDelay = loops + 1;
 
-            int radius = 3 + (int)(Math.Ceiling(6 * spawnPercent));
+            int radius = 3 + (int)(Math.Ceiling(6 * m_SpawnPercent));
+
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;
 
             Timer.DelayCall(TimeSpan.FromSeconds(stationaryDelay), delegate
             {
                 if (!SpecialAbilities.Exists(this))
                     return;
 
-                AbilityInProgress = false;
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false;
             });
 
             PlaySound(0x580);
@@ -2443,16 +2416,14 @@ namespace Server.Mobiles
 
             m_LightningTargets.Clear();
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
             Point3D location = Location;
             Map map = Map;
             
             Combatant = null;
 
-            int range = (int)(Math.Round(10 + (10 * spawnPercent)));
+            int range = (int)(Math.Round(10 + (10 * m_SpawnPercent)));
 
-            int bloodRain = 50 + (int)(Math.Ceiling(150 * spawnPercent));
+            int bloodRain = 50 + (int)(Math.Ceiling(150 * m_SpawnPercent));
             int loops = (int)(Math.Ceiling((double)bloodRain / 10));
             int lightningStrikes = loops * 3;
 
@@ -2463,12 +2434,20 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            AbilityInProgress = true;
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+                        
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false;
             });
             
             if (!SpecialAbilities.Exists(this))
@@ -2578,12 +2557,10 @@ namespace Server.Mobiles
         {
             if (!SpecialAbilities.Exists(this))
                 return;
-            
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-            
+                        
             Combatant = null;
 
-            int range = (int)(Math.Round(8 + (12 * spawnPercent)));
+            int range = (int)(Math.Round(8 + (12 * m_SpawnPercent)));
 
             double initialDelay = 1;
             double stationaryDelay = 2;
@@ -2592,12 +2569,20 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            AbilityInProgress = true;
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false;
             });
 
             Animate(27, 7, 1, true, false, 0);
@@ -2781,9 +2766,7 @@ namespace Server.Mobiles
         public override void OnThink()
         {
             base.OnThink();                        
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             if (m_BossPhase == BossPhase.PikeMounted)
                 CheckChargeResolved();
 
@@ -2793,93 +2776,25 @@ namespace Server.Mobiles
                 m_ChargeTarget = null;
             }
 
-            if (Utility.RandomDouble() < 0.01 && !Hidden && DateTime.UtcNow > m_NextSpeechAllowed)
+            if (Combatant != null && !Frozen && !IsHindered() && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress)
             {
-                if (Combatant == null)
-                    Say(idleSpeech[Utility.Random(idleSpeech.Length - 1)]);
-
-                m_NextSpeechAllowed = DateTime.UtcNow + NextSpeechDelay;
-            }
-
-            if (Combatant != null && !m_IsCharging && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !IsHindered() && !AbilityInProgress && !DamageIntervalInProgress)
-            {
-                switch (m_BossPhase)
+                if (m_HealthIntervalAbilityReady)
                 {
-                    case BossPhase.PikeMounted:
-                        switch (Utility.RandomMinMax(1, 2))
-                        {
-                            case 1:
-                                if (DateTime.UtcNow >= m_NextConfigureTraps)
-                                {
-                                    ConfigureTraps();
-                                    return;
-                                }
-                            break;
+                    m_HealthIntervalAbilityReady = false;
 
-                            case 2:
-                                if (DateTime.UtcNow >= m_NextChargeAllowed)
-                                {
-                                    BeginCharge();
-                                    return;
-                                }
-                            break;                            
-                        }
-                    break;
+                    DamageIntervalTriggered();
 
-                    case BossPhase.SwordShield:
-                        switch (Utility.RandomMinMax(1, 1))
-                        {
-                            case 1:
-                                if (DateTime.UtcNow >= m_NextConfigureTraps)
-                                {
-                                    ConfigureTraps();
-                                    return;
-                                }
-                            break;
-                        }
-                    break;
+                    return;
+                }
 
-                    case BossPhase.Axe:
-                        switch (Utility.RandomMinMax(1, 2))
-                        {
-                            case 1:
-                                if (DateTime.UtcNow >= m_NextConfigureTraps)
-                                {
-                                    ConfigureTraps();
-                                    return;
-                                }
-                            break;
-
-                            case 2:
-                                if (DateTime.UtcNow >= m_NextAxeThrowAllowed)
-                                {
-                                    AxeThrow();
-                                    return;
-                                }
-                            break;
-                        }
-                    break;
-
-                    case BossPhase.sanguinous:
-                        if (DateTime.UtcNow >= m_NextHarvestBlood)
-                        {
-                            HarvestBlood();
-                            return;
-                        }
-
-                        else
-                        {
-                            switch (Utility.RandomMinMax(1, 3))
+                else if (DateTime.UtcNow >= m_NextAbilityAllowed)
+                {
+                    switch (m_BossPhase)
+                    {
+                        case BossPhase.PikeMounted:
+                            switch (Utility.RandomMinMax(1, 2))
                             {
                                 case 1:
-                                    if (DateTime.UtcNow >= m_NextBloodSpray)
-                                    {
-                                        BloodSpray();
-                                        return;
-                                    }
-                                break;
-
-                                case 2:
                                     if (DateTime.UtcNow >= m_NextConfigureTraps)
                                     {
                                         ConfigureTraps();
@@ -2887,19 +2802,90 @@ namespace Server.Mobiles
                                     }
                                 break;
 
-                                case 3:
-                                    if (DateTime.UtcNow >= m_NextsanguinousChargeAllowed)
+                                case 2:
+                                    if (DateTime.UtcNow >= m_NextChargeAllowed)
                                     {
-                                        sanguinousCharge();
+                                        BeginCharge();
                                         return;
                                     }
                                 break;
                             }
-                        }
-                        
-                    break;
+                        break;
 
-                break;
+                        case BossPhase.SwordShield:
+                            switch (Utility.RandomMinMax(1, 1))
+                            {
+                                case 1:
+                                    if (DateTime.UtcNow >= m_NextConfigureTraps)
+                                    {
+                                        ConfigureTraps();
+                                        return;
+                                    }
+                                    break;
+                            }
+                        break;
+
+                        case BossPhase.Axe:
+                            switch (Utility.RandomMinMax(1, 2))
+                            {
+                                case 1:
+                                    if (DateTime.UtcNow >= m_NextConfigureTraps)
+                                    {
+                                        ConfigureTraps();
+                                        return;
+                                    }
+                                    break;
+
+                                case 2:
+                                    if (DateTime.UtcNow >= m_NextAxeThrowAllowed)
+                                    {
+                                        AxeThrow();
+                                        return;
+                                    }
+                                    break;
+                            }
+                        break;
+
+                        case BossPhase.Sanguinous:
+                            if (DateTime.UtcNow >= m_NextHarvestBlood)
+                            {
+                                HarvestBlood();
+                                return;
+                            }
+
+                            else
+                            {
+                                switch (Utility.RandomMinMax(1, 3))
+                                {
+                                    case 1:
+                                        if (DateTime.UtcNow >= m_NextBloodSpray)
+                                        {
+                                            BloodSpray();
+                                            return;
+                                        }
+                                    break;
+
+                                    case 2:
+                                        if (DateTime.UtcNow >= m_NextConfigureTraps)
+                                        {
+                                            ConfigureTraps();
+                                            return;
+                                        }
+                                    break;
+
+                                    case 3:
+                                        if (DateTime.UtcNow >= m_NextSanguinousChargeAllowed)
+                                        {
+                                            SanguinousCharge();
+                                            return;
+                                        }
+                                    break;
+                                }
+                            }
+
+                            break;
+                        break;
+                    }
                 }
             }
 
@@ -2961,8 +2947,6 @@ namespace Server.Mobiles
 
         protected override bool OnMove(Direction d)
         {
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
             switch (m_BossPhase)
             {
                 case BossPhase.PikeMounted:
@@ -2980,7 +2964,7 @@ namespace Server.Mobiles
                 case BossPhase.Axe:
                 break;
 
-                case BossPhase.sanguinous:
+                case BossPhase.Sanguinous:
                     Effects.PlaySound(Location, Map, Utility.RandomList(0x11F, 0x120));
                 break;
             }            
@@ -2991,8 +2975,6 @@ namespace Server.Mobiles
         public override void OnBeforeSpawn(Point3D location, Map m)
         {
             base.OnBeforeSpawn(location, m);
-
-            //BossPersistance.PersistanceItem.DestardBossLastStatusChange = DateTime.UtcNow;
         }
 
         public override bool OnBeforeDeath()
@@ -3014,21 +2996,6 @@ namespace Server.Mobiles
         {
             base.OnDeath(c);
 
-            //if (Utility.RandomMinMax(1, 10) == 1)
-                //c.AddItem(new LythTheDestroyerStatue());
-
-            //if (Utility.RandomMinMax(1, 20) == 1)
-                //c.AddItem(new DestroyersSkull());
-
-            for (int a = 0; a < m_Creatures.Count; ++a)
-            {
-                if (m_Creatures[a] != null)
-                {
-                    if (m_Creatures[a].Alive)
-                        m_Creatures[a].Kill();
-                }
-            }
-
             for (int a = 0; a < m_Traps.Count; ++a)
             {
                 if (m_Traps[a] != null)
@@ -3046,15 +3013,6 @@ namespace Server.Mobiles
         {
             base.OnAfterDelete();
             
-            for (int a = 0; a < m_Creatures.Count; ++a)
-            {
-                if (m_Creatures[a] != null)
-                {
-                    if (m_Creatures[a].Alive)
-                        m_Creatures[a].Kill();
-                }
-            }
-
             for (int a = 0; a < m_Traps.Count; ++a)
             {
                 if (m_Traps[a] != null)
@@ -3073,7 +3031,7 @@ namespace Server.Mobiles
             if (m_BossPhase == BossPhase.PikeMounted)
                 return 0x2A9;
 
-            if (m_BossPhase == BossPhase.sanguinous)
+            if (m_BossPhase == BossPhase.Sanguinous)
                 return 0x289;
 
             return 0x572;
@@ -3084,7 +3042,7 @@ namespace Server.Mobiles
             if (m_BossPhase == BossPhase.PikeMounted)
                 return 0x598;
 
-            if (m_BossPhase == BossPhase.sanguinous)
+            if (m_BossPhase == BossPhase.Sanguinous)
                 return 0x2C4;
 
             return 0x572;
@@ -3092,7 +3050,7 @@ namespace Server.Mobiles
 
         public override int GetAttackSound()
         {
-            if (m_BossPhase == BossPhase.sanguinous)
+            if (m_BossPhase == BossPhase.Sanguinous)
                 return 0x28B;
 
             return -1; 
@@ -3103,7 +3061,7 @@ namespace Server.Mobiles
             if (m_BossPhase == BossPhase.PikeMounted)
                 return 0x5FA;
 
-            if (m_BossPhase == BossPhase.sanguinous)
+            if (m_BossPhase == BossPhase.Sanguinous)
                 return 0x28C;
             
             return 0x5FA;
@@ -3111,7 +3069,7 @@ namespace Server.Mobiles
 
         public override int GetDeathSound() 
         {
-            if (m_BossPhase == BossPhase.sanguinous)
+            if (m_BossPhase == BossPhase.Sanguinous)
                 return 0x2C1;
 
             return 0x2AB;
@@ -3124,20 +3082,9 @@ namespace Server.Mobiles
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
-            writer.Write((int)0);
-
-            writer.Write(damageIntervalThreshold);
-            writer.Write(damageProgress);
-            writer.Write(intervalCount);
-            writer.Write(totalIntervals);            
+            writer.Write((int)0);            
 
             //Version 0
-            writer.Write(m_Creatures.Count);
-            for (int a = 0; a < m_Creatures.Count; a++)
-            {
-                writer.Write(m_Creatures[a]);
-            }
-
             writer.Write(m_Traps.Count);
             for (int a = 0; a < m_Traps.Count; a++)
             {
@@ -3158,22 +3105,9 @@ namespace Server.Mobiles
             base.Deserialize(reader);
             int version = reader.ReadInt();
 
-            damageIntervalThreshold = reader.ReadInt();
-            damageProgress = reader.ReadInt();
-            intervalCount = reader.ReadInt();
-            totalIntervals = reader.ReadInt();
-
             //Version 0
             if (version >= 0)
             {
-                int creaturesCount = reader.ReadInt();
-                for (int a = 0; a < creaturesCount; a++)
-                {
-                    Mobile creature = reader.ReadMobile();
-
-                    m_Creatures.Add(creature);
-                }
-
                 int trapCount = reader.ReadInt();
                 for (int a = 0; a < trapCount; a++)
                 {

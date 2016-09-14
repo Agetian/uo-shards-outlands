@@ -14,8 +14,6 @@ namespace Server.Mobiles
     [CorpseName("the deep one's corpse")]
     public class TheDeepOne : BaseCreature
     {
-        public override string TitleReward { get { return "Slayer of The Deep One"; } }
-
         public DateTime m_NextAIChangeAllowed;
         public TimeSpan NextAIChangeDelay = TimeSpan.FromSeconds(20);
 
@@ -40,34 +38,15 @@ namespace Server.Mobiles
         public TimeSpan CombatantTimeout = TimeSpan.FromSeconds(10);
 
         public DateTime m_LastShipCombatantSelected;
-        public TimeSpan ShipCombatantTimeout = TimeSpan.FromSeconds(10);       
+        public TimeSpan ShipCombatantTimeout = TimeSpan.FromSeconds(10);
 
-        public DateTime m_NextSpeechAllowed;
-        public TimeSpan NextSpeechDelay = TimeSpan.FromSeconds(30);
-
-        public bool AbilityInProgress = false;
         public bool DownBelow = false;
 
         public int MaxDistanceAllowedFromHome = 100;
 
-        public int damageIntervalThreshold = 1000;
-        public int damageProgress = 0;
+        public override int TotalHealthIntervals { get { return 40; } }
 
-        public int intervalCount = 0;
-        public int totalIntervals = 25;
-
-        public List<Mobile> m_Creatures = new List<Mobile>();
         public BaseShip m_ShipCombatant;
-
-        public string[] idleSpeech
-        {
-            get { return new string[] {"*wades idly*"}; }
-        }
-
-        public string[] combatSpeech
-        {
-            get { return new string[] {""}; }
-        }
 
         [Constructable]
         public TheDeepOne(): base(AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4)
@@ -100,16 +79,23 @@ namespace Server.Mobiles
 
             CanSwim = true;
         }
-
-        public override int DoubloonValue { get { return 2000; } }
-        public override bool IsOceanCreature { get { return true; } }
-
+        
         public override int AttackRange { get { return 3; } }
 
         public override bool RevealImmune { get { return true; } }
-        public override bool AlwaysBoss { get { return true; } }
+
+        public override bool AlwaysBoss { get { return true; } }       
+        public override bool AlwaysMurderer { get { return true; } }
+
+        public override string TitleReward { get { return "Slayer of The Deep One"; } }
         public override string BossSpawnMessage { get { return "The Deep One has arisen and stirs at sea..."; } }
-        public override bool AlwaysMurderer { get { return true; } }        
+
+        public override string[] IdleSpeech { get { return new string[] { "*wades idly*" }; } }
+        public override string[] CombatSpeech { get { return new string[] { "" }; } }
+
+        public override int DoubloonValue { get { return 2000; } }
+
+        public override bool IsOceanCreature { get { return true; } }
 
         public override void SetUniqueAI()
         {   
@@ -118,71 +104,68 @@ namespace Server.Mobiles
            
             UniqueCreatureDifficultyScalar = 1.5;
 
-            //Has Manually Performed Melees
             LastSwingTime = DateTime.UtcNow + TimeSpan.FromDays(365);
-
-            damageIntervalThreshold = (int)(Math.Round((double)HitsMax / (double)totalIntervals));
-            intervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)totalIntervals));
         }
 
         public override void OnDamage(int amount, Mobile from, bool willKill)
         {
-            damageIntervalThreshold = (int)(Math.Round((double)HitsMax / (double)totalIntervals));
-            intervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)totalIntervals));
-
-            int minWater = 1;
-            int maxWater = 1;
-
-            if (amount > 50)                
-                maxWater += 1;                
-
-            if (amount > 100)            
-                maxWater += 1;
-
-            if (Utility.RandomDouble() <= (double)amount / 100)
+            if (!willKill)
             {
-                int waterCount = Utility.RandomMinMax(minWater, maxWater);
+                int minWater = 1;
+                int maxWater = 1;
 
-                for (int a = 0; a < waterCount; a++)
+                if (amount > 50)
+                    maxWater += 1;
+
+                if (amount > 100)
+                    maxWater += 1;
+
+                if (Utility.RandomDouble() <= (double)amount / 100)
                 {
-                    TimedStatic water = new TimedStatic(Utility.RandomList(4650, 4651, 4653, 4654, 4655), 5);
-                    water.Name = "water";
-                    water.Hue = 2120;
+                    int waterCount = Utility.RandomMinMax(minWater, maxWater);
 
-                    Point3D waterLocation = new Point3D(Location.X + Utility.RandomList(-1, 1), Location.Y + Utility.RandomList(-1, 1), Location.Z);
-                    SpellHelper.AdjustField(ref waterLocation, Map, 12, false);
+                    for (int a = 0; a < waterCount; a++)
+                    {
+                        TimedStatic water = new TimedStatic(Utility.RandomList(4650, 4651, 4653, 4654, 4655), 5);
+                        water.Name = "water";
+                        water.Hue = 2120;
 
-                    water.MoveToWorld(waterLocation);
-                }
-            }
+                        Point3D waterLocation = new Point3D(Location.X + Utility.RandomList(-1, 1), Location.Y + Utility.RandomList(-1, 1), Location.Z);
+                        SpellHelper.AdjustField(ref waterLocation, Map, 12, false);
 
-            damageProgress += amount;
-
-            if (damageProgress >= damageIntervalThreshold)
-            {
-                Effects.PlaySound(Location, Map, 0x656);
-
-                damageProgress = 0;
-
-                if (intervalCount % 5 == 0)
-                    SpawnShipTentacles();
-
-                else
-                {
-                    switch (Utility.RandomMinMax(1, 3))
-                    {                       
-                        case 1: WaveAttack(); break;
-                        case 2: GustAttack(); break;
-                        case 3: StormAttack(); break;
+                        water.MoveToWorld(waterLocation);
                     }
                 }
             }
 
             base.OnDamage(amount, from, willKill);
-        }        
+        }
+
+        public override void DamageIntervalTriggered()
+        {
+            base.DamageIntervalTriggered();
+
+            Effects.PlaySound(Location, Map, 0x656);
+
+            if (m_HealthIntervalCount % 5 == 0)
+                SpawnShipTentacles();
+
+            else
+            {
+                switch (Utility.RandomMinMax(1, 3))
+                {
+                    case 1: WaveAttack(); break;
+                    case 2: GustAttack(); break;
+                    case 3: StormAttack(); break;
+                }
+            }
+        }
 
         public override void OnGotMeleeAttack(Mobile attacker)
         {
+            if (!SpecialAbilities.Exists(this))
+                return;
+
             if (attacker == null) return;
             if (attacker.Deleted) return;
 
@@ -221,12 +204,11 @@ namespace Server.Mobiles
 
             if (weapon != null)
             {
-                //Ranged Weapon
                 if (weapon is BaseRanged)
                 {
                     if (Utility.RandomDouble() <= .06)
                     {
-                        Animate(15, 10, 1, true, false, 0); //Block
+                        Animate(15, 10, 1, true, false, 0);
                         PlaySound(GetAngerSound());
 
                         double creatureChance = Utility.RandomDouble();
@@ -242,7 +224,6 @@ namespace Server.Mobiles
                     }
                 }
 
-                //Melee Weapon
                 else if (weapon is BaseMeleeWeapon || weapon is Fists)
                 {
                     if (Utility.RandomDouble() <= .02)
@@ -269,8 +250,8 @@ namespace Server.Mobiles
 
         public override void OnDamagedBySpell(Mobile from)
         {
-            if (from == null) return;
-            if (from.Deleted) return;
+            if (!SpecialAbilities.Exists(this))
+                return;
 
             BaseCreature bc_Attacker = from as BaseCreature;
             PlayerMobile pm_Attacker = from as PlayerMobile;
@@ -305,7 +286,7 @@ namespace Server.Mobiles
 
             if (Utility.RandomDouble() <= .1)
             {
-                Animate(15, 10, 1, true, false, 0); //Block
+                Animate(15, 10, 1, true, false, 0);
                 PlaySound(GetAngerSound());
 
                 double creatureChance = Utility.RandomDouble();
@@ -325,6 +306,9 @@ namespace Server.Mobiles
 
         public override void OnGotCannonHit(int amount, Mobile from, bool willKill)
         {
+            if (!SpecialAbilities.Exists(this))
+                return;
+
             if (willKill || from == null)
                 return;
 
@@ -363,7 +347,7 @@ namespace Server.Mobiles
             {
                 if (Utility.RandomDouble() <= .06)
                 {
-                    Animate(15, 10, 1, true, false, 0); //Block
+                    Animate(15, 10, 1, true, false, 0);
                     PlaySound(GetAngerSound());
 
                     double creatureChance = Utility.RandomDouble();
@@ -382,7 +366,10 @@ namespace Server.Mobiles
 
         public void SpawnDeepWater(Point3D location, Map map)
         {
-            Animate(15, 10, 1, true, false, 0); //Block
+            if (!SpecialAbilities.Exists(this))
+                return;
+
+            Animate(15, 10, 1, true, false, 0);
 
             DeepWater deepWater = new DeepWater();
 
@@ -397,6 +384,9 @@ namespace Server.Mobiles
 
         public void SpawnDeepCrab(Point3D location, Map map)
         {
+            if (!SpecialAbilities.Exists(this))
+                return;
+
             DeepCrab deepCrab = new DeepCrab();
 
             deepCrab.MoveToWorld(location, map);
@@ -443,6 +433,9 @@ namespace Server.Mobiles
 
         public void SpawnTentacle(Point3D location, Map map)
         {
+            if (!SpecialAbilities.Exists(this))
+                return;
+
             DeepTentacle deepOneTentacle = new DeepTentacle();
 
             deepOneTentacle.MoveToWorld(location, map);
@@ -466,8 +459,8 @@ namespace Server.Mobiles
 
         public void SpawnShipTentacles()
         {
-            if (this == null) return;
-            if (Deleted || !Alive) return;
+            if (!SpecialAbilities.Exists(this))
+                return;
 
             Animate(28, 12, 1, true, false, 0);
 
@@ -475,10 +468,8 @@ namespace Server.Mobiles
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, 3, true, 0, false, "", "", "-1");
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*calls for aid from the deep*");
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            int tentacles = 1 + (int)(Math.Ceiling(5 * spawnPercent));
+            
+            int tentacles = 1 + (int)(Math.Ceiling(5 * m_SpawnPercent));
 
             foreach (BaseShip targetShip in BaseShip.m_Instances)
             {
@@ -507,26 +498,30 @@ namespace Server.Mobiles
 
         public void GustAttack()
         {
-            if (this == null) return;
-            if (Deleted || !Alive) return;
-
-            AbilityInProgress = true;
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            int loops = 1 + (int)(Math.Ceiling(3 * spawnPercent));
+            if (!SpecialAbilities.Exists(this))
+                return;
+            
+            int loops = 1 + (int)(Math.Ceiling(3 * m_SpawnPercent));
 
             double stationaryDelay = loops + 1;            
             
-            int radius = 10 + (int)(Math.Ceiling(20 * spawnPercent));
-            int gustStrength = 10 + (int)(Math.Ceiling(20 * spawnPercent));
+            int radius = 10 + (int)(Math.Ceiling(20 * m_SpawnPercent));
+            int gustStrength = 10 + (int)(Math.Ceiling(20 * m_SpawnPercent));
+
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;     
 
             Timer.DelayCall(TimeSpan.FromSeconds(stationaryDelay), delegate
             {
-                if (this == null) return;
-                if (Deleted || !Alive) return;
+                if (!SpecialAbilities.Exists(this))
+                    return;
 
-                AbilityInProgress = false;
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false; 
             });
 
             PlaySound(0x64F);
@@ -543,15 +538,15 @@ namespace Server.Mobiles
 
             Timer.DelayCall(TimeSpan.FromSeconds(1.0), delegate
             {
-                if (this == null) return;
-                if (this.Deleted) return;
+                if (!SpecialAbilities.Exists(this))
+                    return;
 
                 for (int a = 0; a < loops; a++)
                 {
                     Timer.DelayCall(TimeSpan.FromSeconds(a * 1), delegate
                     {
-                        if (this == null) return;
-                        if (Deleted || !Alive) return;
+                        if (!SpecialAbilities.Exists(this))
+                            return;
 
                         Animate(30, 12, 1, true, false, 0);
 
@@ -581,7 +576,7 @@ namespace Server.Mobiles
                            IEntity startLocation = new Entity(Serial.Zero, new Point3D(location.X, location.Y, location.Z + 10), map);
                            IEntity endLocation = new Entity(Serial.Zero, new Point3D(gustTargetLocation.X, gustTargetLocation.Y, gustTargetLocation.Z + 5), map);
 
-                           int particleSpeed = 5 + (int)(Math.Round(5 * (double)spawnPercent));
+                           int particleSpeed = 5 + (int)(Math.Round(5 * m_SpawnPercent));
 
                            Effects.SendMovingEffect(startLocation, endLocation, 0x1FB7, 5, 0, false, false, 0, 0);
 
@@ -612,12 +607,13 @@ namespace Server.Mobiles
                     //Ship Impact
                     double targetShipDistance = Utility.GetDistanceToSqrt(location, targetShip.Location);
                     double targetShipDelay = (double)distance * .125;
-                    double impactShipnDelay = targetShipDelay - (targetShipDelay * .5 * spawnPercent);
+                    double impactShipnDelay = targetShipDelay - (targetShipDelay * .5 * m_SpawnPercent);
 
                     Timer.DelayCall(TimeSpan.FromSeconds(targetShipDelay), delegate
                     {
-                        if (this == null) return;
-                        if (Deleted || !Alive) return;
+                        if (!SpecialAbilities.Exists(this))
+                            return;
+
                         if (targetShip == null) return;
                         if (targetShip.Deleted || targetShip.m_SinkTimer != null) return;
 
@@ -694,12 +690,13 @@ namespace Server.Mobiles
 
                         double targetMobileDistance = Utility.GetDistanceToSqrt(location, mobile.Location);
                         double targetMobileDelay = (double)distance * .125;
-                        double impactMobileDelay = targetMobileDelay - (targetMobileDelay * .5 * spawnPercent);
+                        double impactMobileDelay = targetMobileDelay - (targetMobileDelay * .5 * m_SpawnPercent);
 
                         Timer.DelayCall(TimeSpan.FromSeconds(impactMobileDelay), delegate
                         {
-                            if (this == null) return;
-                            if (Deleted || !Alive) return;
+                            if (!SpecialAbilities.Exists(this))
+                                return;
+
                             if (mobile == null) return;
                             if (mobile.Deleted || !mobile.Alive) return;
 
@@ -716,26 +713,30 @@ namespace Server.Mobiles
 
         public void WaveAttack()
         {
-            if (this == null) return;
-            if (Deleted || !Alive) return;
+            if (!SpecialAbilities.Exists(this))
+                return;
 
-            AbilityInProgress = true;
+            int loops = 1 + (int)(Math.Ceiling(3 * m_SpawnPercent));
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
+            double stationaryDelay = loops + 1;
 
-            int loops = 1 + (int)(Math.Ceiling(3 * spawnPercent));
+            int radius = 10 + (int)(Math.Ceiling(20 * m_SpawnPercent));
+            int waveStrength = 10 + (int)(Math.Ceiling(20 * m_SpawnPercent));
 
-            double stationaryDelay = loops + 1; 
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
 
-            int radius = 10 + (int)(Math.Ceiling(20 * spawnPercent));
-            int waveStrength = 10 + (int)(Math.Ceiling(20 * spawnPercent));
+            m_HealthIntervalAbilityInProgress = true;
 
             Timer.DelayCall(TimeSpan.FromSeconds(stationaryDelay), delegate
             {
-                if (this == null) return;
-                if (Deleted || !Alive) return;
+                if (!SpecialAbilities.Exists(this))
+                    return;
 
-                AbilityInProgress = false;
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false;
             });
             
             Effects.PlaySound(Location, Map, 0x656);            
@@ -752,15 +753,15 @@ namespace Server.Mobiles
 
             Timer.DelayCall(TimeSpan.FromSeconds(1.0), delegate
             {
-                if (this == null) return;
-                if (this.Deleted) return;
+                if (!SpecialAbilities.Exists(this))
+                    return;
 
                 for (int a = 0; a < loops; a++)
                 {
                     Timer.DelayCall(TimeSpan.FromSeconds(a * 1), delegate
                     {
-                        if (this == null) return;
-                        if (Deleted || !Alive) return;
+                        if (!SpecialAbilities.Exists(this))
+                            return;
 
                         Animate(27, 10, 1, true, false, 0);
 
@@ -779,14 +780,12 @@ namespace Server.Mobiles
 
                         double distance = Utility.GetDistanceToSqrt(location, newLocation);
                         double distanceDelay = (distance * .125);
-                        double impactDelay = distanceDelay - (distanceDelay * .5 * spawnPercent);
+                        double impactDelay = distanceDelay - (distanceDelay * .5 * m_SpawnPercent);
 
                         Timer.DelayCall(TimeSpan.FromSeconds(impactDelay), delegate
                         {
-                            if (Utility.RandomDouble() <= .66)
-                            {
+                            if (Utility.RandomDouble() <= .66)                            
                                 Effects.SendLocationParticles(EffectItem.Create(newLocation, map, TimeSpan.FromSeconds(0.25)), 0x3709, 10, 30, 2121, 0, 5029, 0);
-                            }
                         });
 
                         Timer.DelayCall(TimeSpan.FromSeconds(impactDelay + 1.25), delegate
@@ -835,15 +834,15 @@ namespace Server.Mobiles
                     if (targetShip.MobileControlType != MobileControlType.Player)
                         continue;
 
-                    //Tillerman Announcement
                     double targetTillermanDistance = Utility.GetDistanceToSqrt(location, targetShip.Location);
                     double targetTillermanDelay = (double)distance * .125;
-                    double impactTillermanDelay = targetTillermanDelay - (targetTillermanDelay * .5 * spawnPercent);
+                    double impactTillermanDelay = targetTillermanDelay - (targetTillermanDelay * .5 * m_SpawnPercent);
 
                     Timer.DelayCall(TimeSpan.FromSeconds(impactTillermanDelay), delegate
                     {
-                        if (this == null) return;
-                        if (Deleted || !Alive) return;
+                        if (!SpecialAbilities.Exists(this))
+                            return;
+
                         if (targetShip == null) return;
                         if (targetShip.Deleted || targetShip.m_SinkTimer != null) return;
 
@@ -885,15 +884,13 @@ namespace Server.Mobiles
 
                             double targetMobileDistance = Utility.GetDistanceToSqrt(location, mobile.Location);
                             double targetMobileDelay = (double)distance * .125;
-                            double impactMobileDelay = targetMobileDelay - (targetMobileDelay * .5 * spawnPercent);
+                            double impactMobileDelay = targetMobileDelay - (targetMobileDelay * .5 * m_SpawnPercent);
 
                             Timer.DelayCall(TimeSpan.FromSeconds(impactMobileDelay), delegate
                             {
-                                if (this == null) return;
-                                if (Deleted || !Alive) return;
-                                if (mobile == null) return;
-                                if (mobile.Deleted || !mobile.Alive) return;
-
+                                if (!SpecialAbilities.Exists(this)) return;
+                                if (!SpecialAbilities.Exists(mobile)) return;
+                                
                                 Effects.SendLocationParticles(EffectItem.Create(mobile.Location, mobile.Map, TimeSpan.FromSeconds(5)), 0x3728, 10, 10, 2023);
 
                                 double damage = DamageMin;
@@ -929,30 +926,35 @@ namespace Server.Mobiles
 
         public void StormAttack()
         {
-            if (this == null) return;
-            if (Deleted || !Alive) return;
-
-            AbilityInProgress = true;
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
+            if (!SpecialAbilities.Exists(this))
+                return;
 
             int range = 30;
-            int cycles = 10 + (int)(Math.Ceiling(20 * spawnPercent));
+            int cycles = 10 + (int)(Math.Ceiling(20 * m_SpawnPercent));
             int loops = (int)(Math.Ceiling((double)cycles / 10));
 
             double stationaryDelay = loops + 2.5;
 
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;
+
             Timer.DelayCall(TimeSpan.FromSeconds(stationaryDelay), delegate
             {
-                if (this == null) return;
-                if (Deleted || !Alive) return;
+                if (!SpecialAbilities.Exists(this))
+                    return;
 
-                AbilityInProgress = false;
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false;
             });
 
             PlaySound(0x64F);
 
             AIObject.NextMove = DateTime.UtcNow + TimeSpan.FromSeconds(stationaryDelay);
+
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, stationaryDelay, true, 0, false, "", "", "-1");
 
             Animate(28, 12, 1, true, false, 0);
@@ -964,15 +966,15 @@ namespace Server.Mobiles
 
             Timer.DelayCall(TimeSpan.FromSeconds(1.0), delegate
             {
-                if (this == null) return;
-                if (this.Deleted) return;
+                if (!SpecialAbilities.Exists(this))
+                    return;
 
                 for (int a = 0; a < loops; a++)
                 {
                     Timer.DelayCall(TimeSpan.FromSeconds(a * 1), delegate
                     {
-                        if (this == null) return;
-                        if (Deleted || !Alive) return;
+                        if (!SpecialAbilities.Exists(this))
+                            return;
 
                         Animate(30, 12, 1, true, false, 0);
 
@@ -1002,8 +1004,8 @@ namespace Server.Mobiles
                     {
                         Timer.DelayCall(TimeSpan.FromSeconds(a * .125), delegate
                         {
-                            if (this == null) return;
-                            if (Deleted || !Alive) return;
+                            if (!SpecialAbilities.Exists(this))
+                                return;
 
                             List<Mobile> m_PossibleMobiles = new List<Mobile>();
 
@@ -1058,11 +1060,9 @@ namespace Server.Mobiles
         public override void OnThink()
         {
             base.OnThink();
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             //Outside of Valid Combat Zone
-            if (Utility.GetDistance(Home, Location) > MaxDistanceAllowedFromHome && !DownBelow && !AbilityInProgress)
+            if (Utility.GetDistance(Home, Location) > MaxDistanceAllowedFromHome && !DownBelow && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress)
             {
                 Effects.PlaySound(Location, Map, 0x5A4);
 
@@ -1125,227 +1125,71 @@ namespace Server.Mobiles
                 return;
             }
 
-            //Reveal Hidden)
-            if (m_NextRevealAllowed <= DateTime.UtcNow && !DownBelow && !AbilityInProgress)
+            if (Combatant != null && !Frozen && !IsHindered() && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress && m_HealthIntervalAbilityReady)
+            {                
+                m_HealthIntervalAbilityReady = false;
+
+                DamageIntervalTriggered();
+
+                return;                
+            }
+
+            else
             {
-                IPooledEnumerable nearbyMobiles = Map.GetMobilesInRange(Location, 30);
-
-                bool creatureWasRevealed = false;
-
-                foreach (Mobile mobile in nearbyMobiles)
+                //Reveal Hidden
+                if (m_NextRevealAllowed <= DateTime.UtcNow && !DownBelow && !m_AbilityInProgress && m_HealthIntervalAbilityInProgress)
                 {
-                    if (mobile.Deleted) continue;
-                    if (!mobile.Alive) continue;
-                    if (mobile.AccessLevel > AccessLevel.Player) continue;
+                    IPooledEnumerable nearbyMobiles = Map.GetMobilesInRange(Location, 30);
 
-                    bool validMobile = false;
+                    bool creatureWasRevealed = false;
 
-                    BaseCreature bc_Creature = mobile as BaseCreature;
-                    PlayerMobile pm_Player = mobile as PlayerMobile;
-
-                    if (bc_Creature != null)
+                    foreach (Mobile mobile in nearbyMobiles)
                     {
-                        if (bc_Creature.Controlled && bc_Creature.ControlMaster is PlayerMobile)
-                            validMobile = true;
-                    }
+                        if (!SpecialAbilities.Exists(mobile)) 
+                            continue;
 
-                    if (pm_Player != null)
-                        validMobile = true;
+                        if (mobile.AccessLevel > AccessLevel.Player) continue;
 
-                    if (validMobile)
-                    {
-                        if (mobile.Hidden)
+                        bool validMobile = false;
+
+                        BaseCreature bc_Creature = mobile as BaseCreature;
+                        PlayerMobile pm_Player = mobile as PlayerMobile;
+
+                        if (bc_Creature != null)
                         {
-                            mobile.RevealingAction();
-                            mobile.SendMessage("You have been revealed by The Deep One.");
-                            creatureWasRevealed = true;
+                            if (bc_Creature.Controlled && bc_Creature.ControlMaster is PlayerMobile)
+                                validMobile = true;
+                        }
 
-                            Effects.PlaySound(mobile.Location, mobile.Map, 0x652);
-                            mobile.FixedParticles(0x373A, 10, 15, 5036, 0, 0, EffectLayer.Head);
+                        if (pm_Player != null)
+                            validMobile = true;
+
+                        if (validMobile)
+                        {
+                            if (mobile.Hidden)
+                            {
+                                mobile.RevealingAction();
+                                mobile.SendMessage("You have been revealed by The Deep One.");
+                                creatureWasRevealed = true;
+
+                                Effects.PlaySound(mobile.Location, mobile.Map, 0x652);
+                                mobile.FixedParticles(0x373A, 10, 15, 5036, 0, 0, EffectLayer.Head);
+                            }
                         }
                     }
+
+                    nearbyMobiles.Free();
+
+                    if (creatureWasRevealed)
+                        PublicOverheadMessage(MessageType.Regular, 0x482, false, "NOTHING IN MY DOMAIN ESCAPES MY SIGHT!");
+
+                    m_NextRevealAllowed = DateTime.UtcNow + NextRevealDelay;
                 }
 
-                nearbyMobiles.Free();
-
-                if (creatureWasRevealed)
-                    PublicOverheadMessage(MessageType.Regular, 0x482, false, "NOTHING IN MY DOMAIN ESCAPES MY SIGHT!");
-
-                m_NextRevealAllowed = DateTime.UtcNow + NextRevealDelay;
-
-                return;
-            }
-
-            //Change AI Targeting
-            if (m_NextAIChangeAllowed <= DateTime.UtcNow && !DownBelow && !AbilityInProgress)
-            {
-                Combatant = null;
-
-                Effects.PlaySound(Location, Map, GetAngerSound());
-
-                switch (Utility.RandomMinMax(1, 5))
+                //Sink Below the Waves
+                if (m_NextSinkBelowAllowed <= DateTime.UtcNow && !DownBelow && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress)
                 {
-                    case 1:
-                        PublicOverheadMessage(MessageType.Regular, 0, false, "*groans*");
-
-                        DictCombatTargetingWeight[CombatTargetingWeight.Player] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.Closest] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.HighestHitPoints] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.LowestHitPoints] = 0;
-                    break;
-
-                    case 2:
-                        PublicOverheadMessage(MessageType.Regular, 0, false, "*gurgle*");
-
-                        DictCombatTargetingWeight[CombatTargetingWeight.Player] = 10;
-                        DictCombatTargetingWeight[CombatTargetingWeight.Closest] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.HighestHitPoints] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.LowestHitPoints] = 0;
-                    break;
-
-                    case 3:
-                        PublicOverheadMessage(MessageType.Regular, 0, false, "*bellows*");
-
-                        DictCombatTargetingWeight[CombatTargetingWeight.Player] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.Closest] = 10;
-                        DictCombatTargetingWeight[CombatTargetingWeight.HighestHitPoints] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.LowestHitPoints] = 0;
-                    break;
-
-                    case 4:
-                        PublicOverheadMessage(MessageType.Regular, 0, false, "*agitates nearby waves*");
-
-                        DictCombatTargetingWeight[CombatTargetingWeight.Player] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.Closest] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.HighestHitPoints] = 10;
-                        DictCombatTargetingWeight[CombatTargetingWeight.LowestHitPoints] = 0;
-                    break;
-
-                    case 5:
-                        PublicOverheadMessage(MessageType.Regular, 0, false, "*thrashes about violently*");
-
-                        DictCombatTargetingWeight[CombatTargetingWeight.Player] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.Closest] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.HighestHitPoints] = 0;
-                        DictCombatTargetingWeight[CombatTargetingWeight.LowestHitPoints] = 10;
-                    break;
-                }
-
-                m_NextAIChangeAllowed = DateTime.UtcNow + NextAIChangeDelay;
-
-                return;
-            }
-
-            //Sink Below the Waves
-            if (m_NextSinkBelowAllowed <= DateTime.UtcNow && !DownBelow && !AbilityInProgress)
-            {
-                PublicOverheadMessage(MessageType.Regular, 0, false, "*sinks below the waves*");
-
-                int radius = 2;
-
-                int minRange = -1 * radius;
-                int maxRange = radius + 1;
-
-                Point3D location = Location;
-                Map map = Map;
-
-                for (int a = minRange; a < maxRange; a++)
-                {
-                    for (int b = minRange; b < maxRange; b++)
-                    {
-                        Point3D newLocation = new Point3D(location.X + a, location.Y + b, location.Z);
-
-                        double distance = Utility.GetDistanceToSqrt(location, newLocation);
-                        double distanceDelay = distance * .25;
-
-                        Timer.DelayCall(TimeSpan.FromSeconds(distanceDelay), delegate
-                        {
-                            Effects.SendLocationParticles(EffectItem.Create(newLocation, map, TimeSpan.FromSeconds(0.25)), 0x3709, 10, 30, 2121, 0, 5029, 0);
-                        });
-
-                        Timer.DelayCall(TimeSpan.FromSeconds(distanceDelay + 1.25), delegate
-                        {
-                            if (Utility.RandomDouble() <= .66)
-                            {
-                                BaseShip shipCheck = BaseShip.FindShipAt(newLocation, map);
-
-                                if (shipCheck == null)
-                                {
-                                    if (BaseShip.IsWaterTile(newLocation, map))
-                                        Effects.SendLocationEffect(newLocation, map, 0x352D, 7);
-                                }
-
-                                else
-                                {
-                                    TimedStatic water = new TimedStatic(Utility.RandomList(4650, 4651, 4653, 4654, 4655), 10);
-                                    water.Name = "water";
-                                    water.Hue = 2120;
-
-                                    Effects.PlaySound(newLocation, map, 0x027);
-                                    newLocation.Z = shipCheck.Z + 2;
-
-                                    water.MoveToWorld(newLocation, map);
-                                }
-                            }
-                        });
-                    }
-                }
-
-                DownBelow = true;
-                Blessed = true;
-                Hidden = true;
-
-                double submergeDuration = Math.Round(SinkBelowDurationBase - (SinkBelowDurationMaxReduction * spawnPercent));
-
-                SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, submergeDuration, true, 0, false, "", "", "-1");
-
-                m_NextSinkBelowAllowed = DateTime.UtcNow + NextSinkBelowDelay;
-                m_SinkBelowExpiration = DateTime.UtcNow + TimeSpan.FromSeconds(submergeDuration);
-
-                return;
-            }
-
-            //Rise From The Sea
-            if (DownBelow && m_SinkBelowExpiration <= DateTime.UtcNow && !AbilityInProgress)
-            {
-                Effects.PlaySound(Location, Map, 0x668);
-
-                PublicOverheadMessage(MessageType.Regular, 0, false, "*rises from below the waves*");
-
-                DownBelow = false;
-                Blessed = false;
-                Hidden = false;
-
-                Combatant = null;
-                m_ShipCombatant = null;
-
-                List<BaseShip> m_PossibleShipCombatants = new List<BaseShip>();
-
-                foreach (BaseShip targetShip in BaseShip.m_Instances)
-                {
-                    if (targetShip.Deleted) continue;
-                    if (targetShip.MobileControlType != MobileControlType.Player) continue;
-
-                    if (targetShip.m_SinkTimer != null)
-                    {
-                        if (targetShip.m_SinkTimer.Running)
-                            continue;
-                    }
-
-                    int distance = Utility.GetDistance(Location, targetShip.Location);
-
-                    if (distance > 30)
-                        continue;
-
-                    if (targetShip.MobileControlType != MobileControlType.Player)
-                        continue;
-
-                    m_PossibleShipCombatants.Add(targetShip);
-                }
-
-                if (m_PossibleShipCombatants.Count > 0)
-                {
-                    Location = m_PossibleShipCombatants[Utility.RandomMinMax(0, m_PossibleShipCombatants.Count - 1)].Location;
+                    PublicOverheadMessage(MessageType.Regular, 0, false, "*sinks below the waves*");
 
                     int radius = 2;
 
@@ -1365,7 +1209,7 @@ namespace Server.Mobiles
                             double distanceDelay = distance * .25;
 
                             Timer.DelayCall(TimeSpan.FromSeconds(distanceDelay), delegate
-                            {                               
+                            {
                                 Effects.SendLocationParticles(EffectItem.Create(newLocation, map, TimeSpan.FromSeconds(0.25)), 0x3709, 10, 30, 2121, 0, 5029, 0);
                             });
 
@@ -1396,260 +1240,418 @@ namespace Server.Mobiles
                             });
                         }
                     }
-                }
-            }
 
-            //Valid Mobile Combatant
-            if (Combatant != null && !DownBelow && !AbilityInProgress)
-            {
-                if (Combatant.Hidden || Combatant.Deleted || !Combatant.Alive || Utility.GetDistance(Location, Combatant.Location) > 30)
+                    DownBelow = true;
+                    Blessed = true;
+                    Hidden = true;
+
+                    double submergeDuration = Math.Round(SinkBelowDurationBase - (SinkBelowDurationMaxReduction * m_SpawnPercent));
+
+                    SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, submergeDuration, true, 0, false, "", "", "-1");
+
+                    m_NextSinkBelowAllowed = DateTime.UtcNow + NextSinkBelowDelay;
+                    m_SinkBelowExpiration = DateTime.UtcNow + TimeSpan.FromSeconds(submergeDuration);
+
+                    return;
+                }
+
+                //Rise From The Sea
+                if (DownBelow && m_SinkBelowExpiration <= DateTime.UtcNow && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress)
+                {
+                    Effects.PlaySound(Location, Map, 0x668);
+
+                    PublicOverheadMessage(MessageType.Regular, 0, false, "*rises from below the waves*");
+
+                    DownBelow = false;
+                    Blessed = false;
+                    Hidden = false;
+
                     Combatant = null;
+                    m_ShipCombatant = null;
 
-                BaseCreature bc_Combatant = Combatant as BaseCreature;
-                PlayerMobile pm_Combatant = Combatant as PlayerMobile;
+                    List<BaseShip> m_PossibleShipCombatants = new List<BaseShip>();
 
-                //If Combatant is on Ship, Set Ship to Be Target Ship
-                if (bc_Combatant != null)
-                {
-                    if (bc_Combatant.ShipOccupied != null)
+                    foreach (BaseShip targetShip in BaseShip.m_Instances)
                     {
-                        if (!bc_Combatant.ShipOccupied.Deleted && bc_Combatant.ShipOccupied.m_SinkTimer == null)
-                            m_ShipCombatant = bc_Combatant.ShipOccupied;
+                        if (targetShip.Deleted) continue;
+                        if (targetShip.MobileControlType != MobileControlType.Player) continue;
+
+                        if (targetShip.m_SinkTimer != null)
+                        {
+                            if (targetShip.m_SinkTimer.Running)
+                                continue;
+                        }
+
+                        int distance = Utility.GetDistance(Location, targetShip.Location);
+
+                        if (distance > 30)
+                            continue;
+
+                        if (targetShip.MobileControlType != MobileControlType.Player)
+                            continue;
+
+                        m_PossibleShipCombatants.Add(targetShip);
+                    }
+
+                    if (m_PossibleShipCombatants.Count > 0)
+                    {
+                        Location = m_PossibleShipCombatants[Utility.RandomMinMax(0, m_PossibleShipCombatants.Count - 1)].Location;
+
+                        int radius = 2;
+
+                        int minRange = -1 * radius;
+                        int maxRange = radius + 1;
+
+                        Point3D location = Location;
+                        Map map = Map;
+
+                        for (int a = minRange; a < maxRange; a++)
+                        {
+                            for (int b = minRange; b < maxRange; b++)
+                            {
+                                Point3D newLocation = new Point3D(location.X + a, location.Y + b, location.Z);
+
+                                double distance = Utility.GetDistanceToSqrt(location, newLocation);
+                                double distanceDelay = distance * .25;
+
+                                Timer.DelayCall(TimeSpan.FromSeconds(distanceDelay), delegate
+                                {
+                                    Effects.SendLocationParticles(EffectItem.Create(newLocation, map, TimeSpan.FromSeconds(0.25)), 0x3709, 10, 30, 2121, 0, 5029, 0);
+                                });
+
+                                Timer.DelayCall(TimeSpan.FromSeconds(distanceDelay + 1.25), delegate
+                                {
+                                    if (Utility.RandomDouble() <= .66)
+                                    {
+                                        BaseShip shipCheck = BaseShip.FindShipAt(newLocation, map);
+
+                                        if (shipCheck == null)
+                                        {
+                                            if (BaseShip.IsWaterTile(newLocation, map))
+                                                Effects.SendLocationEffect(newLocation, map, 0x352D, 7);
+                                        }
+
+                                        else
+                                        {
+                                            TimedStatic water = new TimedStatic(Utility.RandomList(4650, 4651, 4653, 4654, 4655), 10);
+                                            water.Name = "water";
+                                            water.Hue = 2120;
+
+                                            Effects.PlaySound(newLocation, map, 0x027);
+                                            newLocation.Z = shipCheck.Z + 2;
+
+                                            water.MoveToWorld(newLocation, map);
+                                        }
+                                    }
+                                });
+                            }
+                        }
                     }
                 }
 
-                if (pm_Combatant != null)
+                //Valid Mobile Combatant
+                if (Combatant != null && !DownBelow && !m_AbilityInProgress && m_HealthIntervalAbilityInProgress)
                 {
-                    if (pm_Combatant.ShipOccupied != null)
+                    if (Combatant.Hidden || Combatant.Deleted || !Combatant.Alive || Utility.GetDistance(Location, Combatant.Location) > 30)
+                        Combatant = null;
+
+                    BaseCreature bc_Combatant = Combatant as BaseCreature;
+                    PlayerMobile pm_Combatant = Combatant as PlayerMobile;
+
+                    //If Combatant is on Ship, Set Ship to Be Target Ship
+                    if (bc_Combatant != null)
                     {
-                        if (!pm_Combatant.ShipOccupied.Deleted && pm_Combatant.ShipOccupied.m_SinkTimer == null)
-                            m_ShipCombatant = pm_Combatant.ShipOccupied;
+                        if (bc_Combatant.ShipOccupied != null)
+                        {
+                            if (!bc_Combatant.ShipOccupied.Deleted && bc_Combatant.ShipOccupied.m_SinkTimer == null)
+                                m_ShipCombatant = bc_Combatant.ShipOccupied;
+                        }
                     }
-                }
 
-                //If in Range of Target Mobile, Don't Move
-                if (Combatant != null)
-                {
-                    if (Utility.GetDistance(Location, Combatant.Location) <= 3)
-                        SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, .5, true, 0, false, "", "", "-1");
-                }
+                    if (pm_Combatant != null)
+                    {
+                        if (pm_Combatant.ShipOccupied != null)
+                        {
+                            if (!pm_Combatant.ShipOccupied.Deleted && pm_Combatant.ShipOccupied.m_SinkTimer == null)
+                                m_ShipCombatant = pm_Combatant.ShipOccupied;
+                        }
+                    }
 
-                //If In Range of ShipCombatant, Don't Move
-                if (m_ShipCombatant != null)
-                {
-                    if (!m_ShipCombatant.Deleted && m_ShipCombatant.m_SinkTimer == null && m_ShipCombatant.GetShipToLocationDistance(m_ShipCombatant, Location) <= 4)
-                        SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, .5, true, 0, false, "", "", "-1");
-                }
-            }
+                    //If in Range of Target Mobile, Don't Move
+                    if (Combatant != null)
+                    {
+                        if (Utility.GetDistance(Location, Combatant.Location) <= 3)
+                            SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, .5, true, 0, false, "", "", "-1");
+                    }
 
-            //No Normal Combatant
-            if (Combatant == null && !DownBelow && !AbilityInProgress)
-            {
-                //Haven't Made an Attack in A While
-                if (LastCombatTime + CombatantTimeout < DateTime.UtcNow)
-                {
-                    //Validate Ship Combatant
+                    //If In Range of ShipCombatant, Don't Move
                     if (m_ShipCombatant != null)
                     {
-                        if (m_ShipCombatant.Deleted || m_ShipCombatant.m_SinkTimer != null || Utility.GetDistance(Location, m_ShipCombatant.Location) > 30)
-                            m_ShipCombatant = null;
-
-                        else if (m_LastShipCombatantSelected + ShipCombatantTimeout > DateTime.UtcNow)                        
-                            m_ShipCombatant = null;
-                    }
-
-                    //Determine Ship Combatant
-                    if (m_ShipCombatant == null)
-                    {
-                        m_LastShipCombatantSelected = DateTime.UtcNow;
-
-                        Dictionary<BaseShip, int> m_PossibleShipCombatants = new Dictionary<BaseShip, int>();
-
-                        foreach (BaseShip targetShip in BaseShip.m_Instances)
-                        {
-                            if (targetShip.Deleted) continue;
-                            if (targetShip.MobileControlType != MobileControlType.Player) continue;
-
-                            if (targetShip.m_SinkTimer != null)
-                            {
-                                if (targetShip.m_SinkTimer.Running)
-                                    continue;
-                            }
-
-                            int distance = Utility.GetDistance(Location, targetShip.Location);
-
-                            if (distance > 30) continue;
-
-                            int weightValue = 0;
-                            int distanceWeight = 0;
-                            double hullPercentLost = 1 - ((double)targetShip.HitPoints / (double)targetShip.MaxHitPoints);
-
-                            weightValue += (int)(hullPercentLost * 10);
-                            weightValue += 11 - (int)(Math.Ceiling((double)distance / 3));
-
-                            m_PossibleShipCombatants.Add(targetShip, weightValue);
-                        }
-
-                        if (m_PossibleShipCombatants.Count > 0)
-                        {
-                            int TotalValues = 0;
-
-                            foreach (KeyValuePair<BaseShip, int> pair in m_PossibleShipCombatants)
-                            {
-                                TotalValues += pair.Value;
-                            }
-
-                            double ActionCheck = Utility.RandomDouble();
-                            double CumulativeAmount = 0.0;
-                            double AdditionalAmount = 0.0;
-
-                            bool foundDirection = true;
-
-                            foreach (KeyValuePair<BaseShip, int> pair in m_PossibleShipCombatants)
-                            {
-                                AdditionalAmount = (double)pair.Value / (double)TotalValues;
-
-                                //Set Ship Target
-                                if (ActionCheck >= CumulativeAmount && ActionCheck < (CumulativeAmount + AdditionalAmount))
-                                {
-                                    m_ShipCombatant = pair.Key;
-                                    break;
-                                }
-
-                                CumulativeAmount += AdditionalAmount;
-                            }
-                        }
+                        if (!m_ShipCombatant.Deleted && m_ShipCombatant.m_SinkTimer == null && m_ShipCombatant.GetShipToLocationDistance(m_ShipCombatant, Location) <= 4)
+                            SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, .5, true, 0, false, "", "", "-1");
                     }
                 }
 
-                //Move Towards Target Ship
-                if (m_ShipCombatant != null && !CantWalk && !Frozen && !IsHindered() && AIObject.NextMove <= DateTime.UtcNow)
+                //No Normal Combatant
+                if (Combatant == null && !DownBelow && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress)
                 {
-                    if (m_ShipCombatant.m_SinkTimer == null && !m_ShipCombatant.Deleted && m_ShipCombatant.GetShipToLocationDistance(m_ShipCombatant, Location) > 4)
+                    //Haven't Made an Attack in A While
+                    if (LastCombatTime + CombatantTimeout < DateTime.UtcNow)
                     {
-                        AIObject.WalkToLocation(m_ShipCombatant.Location, 1, false, 0, 0);
-                        DelayNextMovement(CurrentSpeed);   
-                    }
-
-                    else
-                        SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, .5, true, 0, false, "", "", "-1");   
-                }
-            }
-
-            //Melee Attack: Manually Performed
-            if (m_NextMeleeAttackAllowed <= DateTime.UtcNow && !DownBelow && !AbilityInProgress)
-            {
-                bool validAttackTarget = false;
-                
-                if (Combatant != null)
-                {
-                    if (Utility.GetDistance(Location, Combatant.Location) <= 3)
-                    {
-                        validAttackTarget = true;
-                        MeleeAttackMobile(Combatant);
-                    }
-                }
-
-                if (!validAttackTarget && m_ShipCombatant != null)
-                {
-                    int distance =  m_ShipCombatant.GetShipToLocationDistance(m_ShipCombatant, Location);
-
-                    if (m_ShipCombatant.m_SinkTimer == null && !m_ShipCombatant.Deleted && distance <= 4)
-                    {
-                        validAttackTarget = true;
-                        MeleeAttackShip(m_ShipCombatant);
-                    }
-                }
-
-                if (!validAttackTarget)
-                {
-                    if (m_NextNonCombatantAttackCheckAllowed <= DateTime.UtcNow)
-                    {
-                        validAttackTarget = false;
-
-                        List<Mobile> m_NearbyMobiles = new List<Mobile>();
-
-                        IPooledEnumerable nearbyMobiles = Map.GetMobilesInRange(Location, 3);
-
-                        foreach (Mobile mobile in nearbyMobiles)
+                        //Validate Ship Combatant
+                        if (m_ShipCombatant != null)
                         {
-                            if (!mobile.CanBeDamaged() || !mobile.Alive || mobile.AccessLevel > AccessLevel.Player)
-                                continue;
+                            if (m_ShipCombatant.Deleted || m_ShipCombatant.m_SinkTimer != null || Utility.GetDistance(Location, m_ShipCombatant.Location) > 30)
+                                m_ShipCombatant = null;
 
-                            bool validTarget = false;
-
-                            PlayerMobile pm_Target = mobile as PlayerMobile;
-                            BaseCreature bc_Target = mobile as BaseCreature;
-
-                            if (pm_Target != null)
-                                validTarget = true;
-
-                            if (bc_Target != null)
-                            {
-                                if (bc_Target.Controlled && bc_Target.ControlMaster is PlayerMobile)
-                                    validTarget = true;
-                            }
-
-                            if (validTarget)
-                                m_NearbyMobiles.Add(mobile);
+                            else if (m_LastShipCombatantSelected + ShipCombatantTimeout > DateTime.UtcNow)
+                                m_ShipCombatant = null;
                         }
 
-                        nearbyMobiles.Free();
-
-                        if (m_NearbyMobiles.Count > 0)
+                        //Determine Ship Combatant
+                        if (m_ShipCombatant == null)
                         {
-                            validAttackTarget = true;
-                            Combatant = m_NearbyMobiles[Utility.RandomMinMax(0, m_NearbyMobiles.Count - 1)];
-                            MeleeAttackMobile(Combatant);
+                            m_LastShipCombatantSelected = DateTime.UtcNow;
 
-                            LastCombatTime = DateTime.UtcNow;
-                        }
-
-                        if (!validAttackTarget)
-                        {
-                            List<BaseShip> m_NearbyShips = new List<BaseShip>();
+                            Dictionary<BaseShip, int> m_PossibleShipCombatants = new Dictionary<BaseShip, int>();
 
                             foreach (BaseShip targetShip in BaseShip.m_Instances)
                             {
                                 if (targetShip.Deleted) continue;
                                 if (targetShip.MobileControlType != MobileControlType.Player) continue;
 
-                                int distance = Utility.GetDistance(Location, targetShip.Location);
-                                if (distance > 4) continue;   
-
                                 if (targetShip.m_SinkTimer != null)
                                 {
                                     if (targetShip.m_SinkTimer.Running)
                                         continue;
-                                }                          
+                                }
 
-                                m_NearbyShips.Add(targetShip);
+                                int distance = Utility.GetDistance(Location, targetShip.Location);
+
+                                if (distance > 30) continue;
+
+                                int weightValue = 0;
+                                int distanceWeight = 0;
+                                double hullPercentLost = 1 - ((double)targetShip.HitPoints / (double)targetShip.MaxHitPoints);
+
+                                weightValue += (int)(hullPercentLost * 10);
+                                weightValue += 11 - (int)(Math.Ceiling((double)distance / 3));
+
+                                m_PossibleShipCombatants.Add(targetShip, weightValue);
                             }
 
-                            if (m_NearbyShips.Count > 0)
-                                MeleeAttackShip(m_NearbyShips[Utility.RandomMinMax(0, m_NearbyShips.Count - 1)]);
-                        }                        
+                            if (m_PossibleShipCombatants.Count > 0)
+                            {
+                                int TotalValues = 0;
 
-                        m_NextNonCombatantAttackCheckAllowed = DateTime.UtcNow + NextNonCombatantAttackDelay;
+                                foreach (KeyValuePair<BaseShip, int> pair in m_PossibleShipCombatants)
+                                {
+                                    TotalValues += pair.Value;
+                                }
+
+                                double ActionCheck = Utility.RandomDouble();
+                                double CumulativeAmount = 0.0;
+                                double AdditionalAmount = 0.0;
+
+                                bool foundDirection = true;
+
+                                foreach (KeyValuePair<BaseShip, int> pair in m_PossibleShipCombatants)
+                                {
+                                    AdditionalAmount = (double)pair.Value / (double)TotalValues;
+
+                                    //Set Ship Target
+                                    if (ActionCheck >= CumulativeAmount && ActionCheck < (CumulativeAmount + AdditionalAmount))
+                                    {
+                                        m_ShipCombatant = pair.Key;
+                                        break;
+                                    }
+
+                                    CumulativeAmount += AdditionalAmount;
+                                }
+                            }
+                        }
+                    }
+
+                    //Move Towards Target Ship
+                    if (m_ShipCombatant != null && !CantWalk && !Frozen && !IsHindered() && AIObject.NextMove <= DateTime.UtcNow)
+                    {
+                        if (m_ShipCombatant.m_SinkTimer == null && !m_ShipCombatant.Deleted && m_ShipCombatant.GetShipToLocationDistance(m_ShipCombatant, Location) > 4)
+                        {
+                            AIObject.WalkToLocation(m_ShipCombatant.Location, 1, false, 0, 0);
+                            DelayNextMovement(CurrentSpeed);
+                        }
+
+                        else
+                            SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, .5, true, 0, false, "", "", "-1");
                     }
                 }
+
+                //Melee Attack: Manually Performed
+                if (m_NextMeleeAttackAllowed <= DateTime.UtcNow && !DownBelow && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress)
+                {
+                    bool validAttackTarget = false;
+
+                    if (Combatant != null)
+                    {
+                        if (Utility.GetDistance(Location, Combatant.Location) <= 3)
+                        {
+                            validAttackTarget = true;
+                            MeleeAttackMobile(Combatant);
+                        }
+                    }
+
+                    if (!validAttackTarget && m_ShipCombatant != null)
+                    {
+                        int distance = m_ShipCombatant.GetShipToLocationDistance(m_ShipCombatant, Location);
+
+                        if (m_ShipCombatant.m_SinkTimer == null && !m_ShipCombatant.Deleted && distance <= 4)
+                        {
+                            validAttackTarget = true;
+                            MeleeAttackShip(m_ShipCombatant);
+                        }
+                    }
+
+                    if (!validAttackTarget)
+                    {
+                        if (m_NextNonCombatantAttackCheckAllowed <= DateTime.UtcNow)
+                        {
+                            validAttackTarget = false;
+
+                            List<Mobile> m_NearbyMobiles = new List<Mobile>();
+
+                            IPooledEnumerable nearbyMobiles = Map.GetMobilesInRange(Location, 3);
+
+                            foreach (Mobile mobile in nearbyMobiles)
+                            {
+                                if (!mobile.CanBeDamaged() || !mobile.Alive || mobile.AccessLevel > AccessLevel.Player)
+                                    continue;
+
+                                bool validTarget = false;
+
+                                PlayerMobile pm_Target = mobile as PlayerMobile;
+                                BaseCreature bc_Target = mobile as BaseCreature;
+
+                                if (pm_Target != null)
+                                    validTarget = true;
+
+                                if (bc_Target != null)
+                                {
+                                    if (bc_Target.Controlled && bc_Target.ControlMaster is PlayerMobile)
+                                        validTarget = true;
+                                }
+
+                                if (validTarget)
+                                    m_NearbyMobiles.Add(mobile);
+                            }
+
+                            nearbyMobiles.Free();
+
+                            if (m_NearbyMobiles.Count > 0)
+                            {
+                                validAttackTarget = true;
+                                Combatant = m_NearbyMobiles[Utility.RandomMinMax(0, m_NearbyMobiles.Count - 1)];
+                                MeleeAttackMobile(Combatant);
+
+                                LastCombatTime = DateTime.UtcNow;
+                            }
+
+                            if (!validAttackTarget)
+                            {
+                                List<BaseShip> m_NearbyShips = new List<BaseShip>();
+
+                                foreach (BaseShip targetShip in BaseShip.m_Instances)
+                                {
+                                    if (targetShip.Deleted) continue;
+                                    if (targetShip.MobileControlType != MobileControlType.Player) continue;
+
+                                    int distance = Utility.GetDistance(Location, targetShip.Location);
+                                    if (distance > 4) continue;
+
+                                    if (targetShip.m_SinkTimer != null)
+                                    {
+                                        if (targetShip.m_SinkTimer.Running)
+                                            continue;
+                                    }
+
+                                    m_NearbyShips.Add(targetShip);
+                                }
+
+                                if (m_NearbyShips.Count > 0)
+                                    MeleeAttackShip(m_NearbyShips[Utility.RandomMinMax(0, m_NearbyShips.Count - 1)]);
+                            }
+
+                            m_NextNonCombatantAttackCheckAllowed = DateTime.UtcNow + NextNonCombatantAttackDelay;
+                        }
+                    }
+                }
+
+                if (m_NextAIChangeAllowed <= DateTime.UtcNow && !DownBelow)
+                {
+                    Combatant = null;
+
+                    Effects.PlaySound(Location, Map, GetAngerSound());
+
+                    switch (Utility.RandomMinMax(1, 5))
+                    {
+                        case 1:
+                            PublicOverheadMessage(MessageType.Regular, 0, false, "*groans*");
+
+                            DictCombatTargetingWeight[CombatTargetingWeight.Player] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.Closest] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.HighestHitPoints] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.LowestHitPoints] = 0;
+                            break;
+
+                        case 2:
+                            PublicOverheadMessage(MessageType.Regular, 0, false, "*gurgle*");
+
+                            DictCombatTargetingWeight[CombatTargetingWeight.Player] = 10;
+                            DictCombatTargetingWeight[CombatTargetingWeight.Closest] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.HighestHitPoints] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.LowestHitPoints] = 0;
+                            break;
+
+                        case 3:
+                            PublicOverheadMessage(MessageType.Regular, 0, false, "*bellows*");
+
+                            DictCombatTargetingWeight[CombatTargetingWeight.Player] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.Closest] = 10;
+                            DictCombatTargetingWeight[CombatTargetingWeight.HighestHitPoints] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.LowestHitPoints] = 0;
+                            break;
+
+                        case 4:
+                            PublicOverheadMessage(MessageType.Regular, 0, false, "*agitates nearby waves*");
+
+                            DictCombatTargetingWeight[CombatTargetingWeight.Player] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.Closest] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.HighestHitPoints] = 10;
+                            DictCombatTargetingWeight[CombatTargetingWeight.LowestHitPoints] = 0;
+                            break;
+
+                        case 5:
+                            PublicOverheadMessage(MessageType.Regular, 0, false, "*thrashes about violently*");
+
+                            DictCombatTargetingWeight[CombatTargetingWeight.Player] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.Closest] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.HighestHitPoints] = 0;
+                            DictCombatTargetingWeight[CombatTargetingWeight.LowestHitPoints] = 10;
+                            break;
+                    }
+
+                    m_NextAIChangeAllowed = DateTime.UtcNow + NextAIChangeDelay;
+
+                    return;
+                }
             }
-
-            if (Utility.RandomDouble() < 0.01 && !Hidden && DateTime.UtcNow > m_NextSpeechAllowed && !DownBelow && !AbilityInProgress)
-            {
-                if (Combatant == null)
-                    Say(idleSpeech[Utility.Random(idleSpeech.Length - 1)]);
-
-                m_NextSpeechAllowed = DateTime.UtcNow + NextSpeechDelay;
-            }         
         }
 
         public void MeleeAttackMobile(Mobile target)
         {
+            if (!SpecialAbilities.Exists(this)) return;
             if (target == null) return;
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-            double attackDelay = NextMeleeAttackDelayMax - (AttackMaxReduction * spawnPercent);
+            double attackDelay = NextMeleeAttackDelayMax - (AttackMaxReduction * m_SpawnPercent);
 
             m_NextMeleeAttackAllowed = DateTime.UtcNow + TimeSpan.FromSeconds(attackDelay);
             LastCombatTime = DateTime.UtcNow;
@@ -1663,8 +1665,8 @@ namespace Server.Mobiles
 
             Timer.DelayCall(TimeSpan.FromSeconds(.2), delegate
             {
-                if (this == null) return;
-                if (Deleted || !Alive) return;
+                if (!SpecialAbilities.Exists(this))
+                    return;
 
                 Animate(4, 10, 1, true, false, 0); //Slam                
                 PlaySound(GetAttackSound());
@@ -1672,8 +1674,8 @@ namespace Server.Mobiles
 
             Timer.DelayCall(TimeSpan.FromSeconds(.5), delegate
             {
-                if (this == null) return;
-                if (Deleted || !Alive) return;
+                if (!SpecialAbilities.Exists(this))
+                    return;
 
                 BaseShip shipOccupied = null;
                 
@@ -1834,11 +1836,13 @@ namespace Server.Mobiles
 
         public void MeleeAttackShip(BaseShip ship)
         {
+            if (!SpecialAbilities.Exists(this))
+                return;
+
             if (ship == null) return;
             if (ship.Deleted || ship.m_SinkTimer != null) return;
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-            double attackDelay = NextMeleeAttackDelayMax - (AttackMaxReduction * spawnPercent);
+            double attackDelay = NextMeleeAttackDelayMax - (AttackMaxReduction * m_SpawnPercent);
 
             m_NextMeleeAttackAllowed = DateTime.UtcNow + TimeSpan.FromSeconds(attackDelay);
             LastCombatTime = DateTime.UtcNow;
@@ -1852,8 +1856,8 @@ namespace Server.Mobiles
 
             Timer.DelayCall(TimeSpan.FromSeconds(.2), delegate
             {
-                if (this == null) return;
-                if (Deleted || !Alive) return;
+                if (!SpecialAbilities.Exists(this))
+                    return;
 
                 Animate(29, 12, 1, true, false, 0); //Huge Swing
                 PlaySound(GetAttackSound());
@@ -1861,8 +1865,8 @@ namespace Server.Mobiles
 
             Timer.DelayCall(TimeSpan.FromSeconds(.5), delegate
             {
-                if (this == null) return;
-                if (Deleted || !Alive) return;
+                if (!SpecialAbilities.Exists(this))
+                    return;
 
                 if (ship == null) return;
                 if (ship.Deleted) return;
@@ -1873,7 +1877,7 @@ namespace Server.Mobiles
                         return;
                 }
 
-                int projectiles = Utility.RandomMinMax(3, 5);
+                int projectiles = Utility.RandomMinMax(4, 8);
 
                 int particleSpeed = 8;
 
@@ -1910,7 +1914,7 @@ namespace Server.Mobiles
                 }
 
                 int minDamage = DamageMin;
-                int maxDamage = (int)(Math.Ceiling((double)DamageMax * 1.5));
+                int maxDamage = (int)(Math.Ceiling((double)DamageMax * 2));
 
                 int hullDamage = Utility.RandomMinMax(minDamage, maxDamage);
                 
@@ -1950,39 +1954,12 @@ namespace Server.Mobiles
 
         public override void OnDeath(Container c)
         {
-            base.OnDeath(c);
-
-            c.AddItem(new Gold(10000));
-            c.AddItem(ShipLoot.GetShipRare());
-            
-            if (Utility.RandomMinMax(1, 20) == 1)
-                c.AddItem(new OrbFromTheDeep());
-
-            if (Utility.RandomMinMax(1, 10) == 1)
-                c.AddItem(new TheDeepOneStatue());            
-            
-            for (int a = 0; a < m_Creatures.Count; ++a)
-            {
-                if (m_Creatures[a] != null)
-                {
-                    if (m_Creatures[a].Alive)
-                        m_Creatures[a].Kill();
-                }
-            }            
+            base.OnDeath(c);           
         }
 
         public override void OnAfterDelete()
         {
-            base.OnAfterDelete();
-
-            for (int a = 0; a < m_Creatures.Count; ++a)
-            {
-                if (m_Creatures[a] != null)
-                {
-                    if (m_Creatures[a].Alive)
-                        m_Creatures[a].Kill();
-                }
-            }            
+            base.OnAfterDelete();           
         }
 
         public TheDeepOne(Serial serial): base(serial)
@@ -1992,18 +1969,9 @@ namespace Server.Mobiles
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
-            writer.Write((int)1);
+            writer.Write((int)0);
 
-            writer.Write(damageIntervalThreshold);
-            writer.Write(damageProgress);
-            writer.Write(intervalCount);
-            writer.Write(totalIntervals);
-
-            writer.Write(m_Creatures.Count);
-            for (int a = 0; a < m_Creatures.Count; a++)
-            {
-                writer.Write(m_Creatures[a]);
-            }
+            //Version 0
         }
 
         public override void Deserialize(GenericReader reader)
@@ -2011,22 +1979,9 @@ namespace Server.Mobiles
             base.Deserialize(reader);
             int version = reader.ReadInt();
 
-            damageIntervalThreshold = reader.ReadInt();
-            damageProgress = reader.ReadInt();
-            intervalCount = reader.ReadInt();
-            totalIntervals = reader.ReadInt();
-
-            m_Creatures = new List<Mobile>();
-
-            if (version >= 1)
+            //Version 0
+            if (version >= 0)
             {
-                int creaturesCount = reader.ReadInt();
-                for (int a = 0; a < creaturesCount; a++)
-                {
-                    Mobile creature = reader.ReadMobile();
-
-                    m_Creatures.Add(creature);
-                }
             }
 
             Blessed = false;
@@ -2034,13 +1989,3 @@ namespace Server.Mobiles
         }
     }
 }
-
-//Animate(4, 10, 1, true, false, 0); //Slam
-//Animate(11, 10, 1, true, false, 0); //Grab
-//Animate(12, 12, 1, true, false, 0); //Push
-//Animate(15, 10, 1, true, false, 0); //Block
-//Animate(23, 10, 1, true, false, 0); //Sink Below*
-//Animate(27, 10, 1, true, false, 0); //Bellow
-//Animate(28, 12, 1, true, false, 0); //Wave
-//Animate(29, 12, 1, true, false, 0); //Huge Swing
-//Animate(30, 12, 1, true, false, 0); //Taunt 

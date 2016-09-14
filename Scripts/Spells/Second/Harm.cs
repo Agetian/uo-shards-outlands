@@ -20,6 +20,11 @@ namespace Server.Spells.Second
 
 		public override SpellCircle Circle { get { return SpellCircle.Second; } }
 
+        public static int DamageMin { get { return 6; } }
+        public static int DamageMax { get { return 8; } }
+
+        public static double SpellSpecificCreatureDamageBonus { get { return 0.0; } }
+
 		public HarmSpell( Mobile caster, Item scroll ) : base( caster, scroll, m_Info )
 		{
 		}
@@ -57,7 +62,10 @@ namespace Server.Spells.Second
                 Boolean chargedSpellcast = SpellHelper.IsChargedSpell(Caster, mobile, true, Scroll != null);
                 Boolean isTamedTarget = SpellHelper.IsTamedTarget(Caster, mobile);
 
-                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Harm);      
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Harm);
+
+                if (Caster is PlayerMobile && mobile is BaseCreature)
+                    damageBonus += SpellSpecificCreatureDamageBonus;
 
                 if (enhancedSpellcast)
                 {

@@ -19,6 +19,11 @@ namespace Server.Spells.Seventh
 
 		public override SpellCircle Circle { get { return SpellCircle.Seventh; } }
 
+        public static int DamageMin { get { return 36; } }
+        public static int DamageMax { get { return 48; } }
+
+        public static double SpellSpecificCreatureDamageBonus { get { return 0.75; } }
+
 		public FlameStrikeSpell( Mobile caster, Item scroll ) : base( caster, scroll, m_Info )
 		{
 		}
@@ -47,11 +52,8 @@ namespace Server.Spells.Seventh
 				SpellHelper.Turn( Caster, mobile );
 				SpellHelper.CheckReflect( (int)this.Circle, Caster, ref mobile );
 
-                double damage = (double)Utility.RandomMinMax(30, 45);
+                double damage = (double)Utility.RandomMinMax(DamageMin, DamageMax);
                 double damageBonus = 0;
-
-                if (mobile is BaseCreature)                
-                    damageBonus += .5;                
 
                 CheckMagicResist(mobile);	
 		
@@ -59,7 +61,10 @@ namespace Server.Spells.Seventh
                 Boolean chargedSpellcast = SpellHelper.IsChargedSpell(Caster, mobile, true, Scroll != null);
                 Boolean isTamedTarget = SpellHelper.IsTamedTarget(Caster, mobile);
 
-                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Flamestrike);      
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Flamestrike);
+
+                if (Caster is PlayerMobile && mobile is BaseCreature)
+                    damageBonus += SpellSpecificCreatureDamageBonus;
 
                 if (enhancedSpellcast)
                 {

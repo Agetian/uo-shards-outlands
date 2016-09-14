@@ -21,6 +21,11 @@ namespace Server.Spells.Fifth
 
 		public override SpellCircle Circle { get { return SpellCircle.Fifth; } }
 
+        public static int DamageMin { get { return 16; } }
+        public static int DamageMax { get { return 24; } }
+
+        public static double SpellSpecificCreatureDamageBonus { get { return 0.0; } }
+
 		public MindBlastSpell( Mobile caster, Item scroll ) : base( caster, scroll, m_Info )
 		{			
 		}
@@ -59,7 +64,10 @@ namespace Server.Spells.Fifth
                 Boolean chargedSpellcast = SpellHelper.IsChargedSpell(Caster, mobile, true, Scroll != null);
                 Boolean isTamedTarget = SpellHelper.IsTamedTarget(Caster, mobile);
 
-                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.MindBlast);      
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.MindBlast);
+
+                if (Caster is PlayerMobile && mobile is BaseCreature)
+                    damageBonus += SpellSpecificCreatureDamageBonus;
 
                 if (enhancedSpellcast)
                 {

@@ -24,6 +24,11 @@ namespace Server.Spells.Sixth
 
         public override SpellCircle Circle { get { return SpellCircle.Sixth; } }
 
+        public static int DamageMin { get { return 24; } }
+        public static int DamageMax { get { return 36; } }
+
+        public static double SpellSpecificCreatureDamageBonus { get { return 0.0; } }
+
 		public ExplosionSpell( Mobile caster, Item scroll ) : base( caster, scroll, m_Info )
 		{
 		}
@@ -53,7 +58,7 @@ namespace Server.Spells.Sixth
                 SpellHelper.Turn(Caster, mobile);
                 SpellHelper.CheckReflect((int)this.Circle, ref source, ref mobile);
 
-                double damage = (double)Utility.RandomMinMax(20, 35);
+                double damage = (double)Utility.RandomMinMax(DamageMin, DamageMax);
                 double damageBonus = 0;
 
                 CheckMagicResist(mobile);
@@ -62,7 +67,10 @@ namespace Server.Spells.Sixth
                 Boolean chargedSpellcast = SpellHelper.IsChargedSpell(Caster, mobile, true, Scroll != null);
                 Boolean isTamedTarget = SpellHelper.IsTamedTarget(Caster, mobile);
 
-                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Explosion);      
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Explosion);
+
+                if (Caster is PlayerMobile && mobile is BaseCreature)
+                    damageBonus += SpellSpecificCreatureDamageBonus;
 
                 if (enhancedSpellcast)
                 {

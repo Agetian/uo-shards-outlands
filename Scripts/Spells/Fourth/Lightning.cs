@@ -21,6 +21,11 @@ namespace Server.Spells.Fourth
 
 		public override SpellCircle Circle { get { return SpellCircle.Fourth; } }
 
+        public static int DamageMin { get { return 12; } }
+        public static int DamageMax { get { return 18; } }
+
+        public static double SpellSpecificCreatureDamageBonus { get { return 0.0; } }
+
 		public LightningSpell( Mobile caster, Item scroll ) : base( caster, scroll, m_Info )
 		{
 		}
@@ -57,6 +62,9 @@ namespace Server.Spells.Fourth
                 bool enhancedSpellcast = SpellHelper.IsEnhancedSpell(Caster, mobile, EnhancedSpellbookType.Energy, true, true);
                 Boolean chargedSpellcast = SpellHelper.IsChargedSpell(Caster, mobile, true, Scroll != null);
                 Boolean isTamedTarget = SpellHelper.IsTamedTarget(Caster, mobile);
+
+                if (Caster is PlayerMobile && mobile is BaseCreature)
+                    damageBonus += SpellSpecificCreatureDamageBonus;
                 
                 if (enhancedSpellcast)
                 {

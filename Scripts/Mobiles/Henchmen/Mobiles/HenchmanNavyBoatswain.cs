@@ -17,13 +17,13 @@ namespace Server.Custom
             }
         }
 
-        public override string[] idleSpeech { get { return new string[] {       "See that sail is secured! I will not suffer the loss of a moment of wind due to lack of discipline.",
+        public override string[] IdleSpeech { get { return new string[] {       "See that sail is secured! I will not suffer the loss of a moment of wind due to lack of discipline.",
                                                                                 "I'll have this ship in shape if it means the death of one of ye.",
                                                                                 "*surveys crew*",
                                                                                 "*looks disapprovingly*" 
                                                                                 };}}
 
-        public override string[] combatSpeech { get { return new string[] {     "Remember your training and you may very well live to see tomorrow!",
+        public override string[] CombatSpeech { get { return new string[] {     "Remember your training and you may very well live to see tomorrow!",
                                                                                 "We do not die here today! Not to them!",
                                                                                 "Let's show them our mettle!",
                                                                                 "Let no man say we abide cowards amongst us!" 

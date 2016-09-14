@@ -3,8 +3,8 @@ using Server.Items;
 using Server.Network;
 using Server.Targeting;
 using Server.Mobiles;
-using Server.Spells.Second;
 using System.Collections.Generic;
+using Server.Spells.Second;
 
 namespace Server.Spells
 {
@@ -33,7 +33,21 @@ namespace Server.Spells
 
         public virtual bool RevealOnCast { get { return true; } }
         public virtual bool ClearHandsOnCast { get { return true; } }
-        public virtual bool ShowHandMovement { get { return true; } }         
+        public virtual bool ShowHandMovement { get { return true; } }
+
+        public static double BaseDamageScalar = .50;       
+        public static double BaseEvalIntDamageBonus = .5;
+        public static double BaseSpiritSpeakDamageBonus = .2;
+        public static double BaseInscriptionDamageBonus = .1;
+        public static double PlayerVsPlayerSkillDamageBonusScalar = .5;
+
+        public static double MagicResistMinDamageReductionScalar = .125;
+        public static double MagicResistMaxDamageReductionScalar = .25;
+
+        public static int DamageMin { get { return 0; } }
+        public static int DamageMax { get { return 0; } }
+
+        public static double SpellSpecificCreatureDamageBonus { get { return 0.0; } }
 
         private static Dictionary<Type, DelayedDamageContextWrapper> m_ContextTable = new Dictionary<Type, DelayedDamageContextWrapper>();
 
@@ -243,12 +257,12 @@ namespace Server.Spells
 
             AspectGear.AspectArmorProfile casterAspectArmor = new AspectGear.AspectArmorProfile(m_Caster, null);
             AspectGear.AspectArmorProfile defenderAspectArmor = new AspectGear.AspectArmorProfile(target, null);
+            
+            double damageScalar = Spell.BaseDamageScalar;
 
-            double damageScalar = .75;
-
-            double evalIntBonus = (m_Caster.Skills[SkillName.EvalInt].Value / 100) * .5;
-            double spiritSpeakBonus = (m_Caster.Skills[SkillName.SpiritSpeak].Value / 100) * .2;
-            double inscriptionBonus = (m_Caster.Skills[SkillName.Inscribe].Value / 100) * .1;
+            double evalIntBonus = (m_Caster.Skills[SkillName.EvalInt].Value / 100) * Spell.BaseEvalIntDamageBonus;
+            double spiritSpeakBonus = (m_Caster.Skills[SkillName.SpiritSpeak].Value / 100) * Spell.BaseSpiritSpeakDamageBonus;
+            double inscriptionBonus = (m_Caster.Skills[SkillName.Inscribe].Value / 100) * Spell.BaseInscriptionDamageBonus;
             double slayerBonus = GetSlayerDamageBonus(target); 
             double spellDamageInflictedBonus = 0;
             double spellDamageReceivedBonus = 0;
@@ -271,9 +285,9 @@ namespace Server.Spells
             //Player vs Player
             if (m_Caster is PlayerMobile && target is PlayerMobile)
             {
-                evalIntBonus *= .5;
-                spiritSpeakBonus *= .5;
-                inscriptionBonus *= .5;
+                evalIntBonus *= Spell.PlayerVsPlayerSkillDamageBonusScalar;
+                spiritSpeakBonus *= Spell.PlayerVsPlayerSkillDamageBonusScalar;
+                inscriptionBonus *= Spell.PlayerVsPlayerSkillDamageBonusScalar;
 
                 slayerBonus = 0;     
                 spellDamageInflictedBonus = 0;
@@ -344,8 +358,8 @@ namespace Server.Spells
             target.Region.SpellDamageScalar(m_Caster, target, ref damageScalar);
 
             //Magic Resist
-            double minDamageReduction = (targetMagicResist * .125) / 100;
-            double maxDamageReduction = (targetMagicResist * .25) / 100;
+            double minDamageReduction = (targetMagicResist / 100) * Spell.MagicResistMinDamageReductionScalar;
+            double maxDamageReduction = (targetMagicResist / 100) * Spell.MagicResistMaxDamageReductionScalar;
 
             double magicResistScalar = 1 - (minDamageReduction + ((maxDamageReduction - minDamageReduction) * Utility.RandomDouble()));
             
@@ -402,7 +416,7 @@ namespace Server.Spells
 
             return slayerBonus;
         }
-
+        
         public virtual void DoFizzle()
         {
             m_Caster.LocalOverheadMessage(MessageType.Regular, 0x3B2, 502632); // The spell fizzles.

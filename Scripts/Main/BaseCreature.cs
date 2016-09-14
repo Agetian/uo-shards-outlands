@@ -10,7 +10,6 @@ using Server.Regions;
 using Server.Targeting;
 using Server.Network;
 using Server.Multis;
-using Server.Spells;
 using Server.Misc;
 using Server.Items;
 using Server.Mobiles;
@@ -20,6 +19,15 @@ using Server.SkillHandlers;
 using Server.Commands;
 using System.Linq;
 using Server.Engines.Craft;
+using Server.Spells;
+using Server.Spells.First;
+using Server.Spells.Second;
+using Server.Spells.Third;
+using Server.Spells.Fourth;
+using Server.Spells.Fifth;
+using Server.Spells.Sixth;
+using Server.Spells.Seventh;
+using Server.Spells.Eighth;
 
 namespace Server.Mobiles
 {
@@ -135,63 +143,7 @@ namespace Server.Mobiles
         Sausage,        
         Bird,
         Fillet        
-    }
-
-    public class DamageStore : IComparable
-    {
-        public Mobile m_Mobile;
-        public int m_Damage;
-        public bool m_HasRight;
-
-        public DamageStore(Mobile m, int damage)
-        {
-            m_Mobile = m;
-            m_Damage = damage;
-        }
-
-        public int CompareTo(object obj)
-        {
-            DamageStore ds = (DamageStore)obj;
-
-            return ds.m_Damage - m_Damage;
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class FriendlyNameAttribute : Attribute
-    {
-        private TextDefinition m_FriendlyName;
-
-        public TextDefinition FriendlyName
-        {
-            get
-            {
-                return m_FriendlyName;
-            }
-        }
-
-        public FriendlyNameAttribute(TextDefinition friendlyName)
-        {
-            m_FriendlyName = friendlyName;
-        }
-
-        public static TextDefinition GetFriendlyNameFor(Type t)
-        {
-            if (t.IsDefined(typeof(FriendlyNameAttribute), false))
-            {
-                object[] objs = t.GetCustomAttributes(typeof(FriendlyNameAttribute), false);
-
-                if (objs != null && objs.Length > 0)
-                {
-                    FriendlyNameAttribute friendly = objs[0] as FriendlyNameAttribute;
-
-                    return friendly.FriendlyName;
-                }
-            }
-
-            return t.Name;
-        }
-    }
+    }    
 
     public partial class BaseCreature : Mobile
     {
@@ -290,7 +242,7 @@ namespace Server.Mobiles
             }
         }
         
-        #region Var declarations
+        #region Properties
 
         private BaseAI m_AI;                    // THE AI
 
@@ -501,7 +453,48 @@ namespace Server.Mobiles
 
         public virtual bool AlwaysFreelyLootable { get { return false; } }
 
+        //-----
+
+        public DateTime m_NextAbilityAllowed = DateTime.UtcNow;
+
+        public virtual double NextAbilityDelayMin { get { return 20; } }
+        public virtual double NextAbilityDelayMax { get { return 30; } }
+
+        public bool m_AbilityInProgress = false;
+        public bool m_HealthIntervalAbilityInProgress = false;
+
+        public double m_SpawnPercent = 0;
+        public int m_DamagePerHealthInterval = 100;
+
+        public virtual int TotalHealthIntervals { get { return 40; } }        
+
+        public int m_HealthIntervalDamageProgress = 0;
+        public int m_HealthIntervalCount = 0;
+        public bool m_HealthIntervalAbilityReady = false;
+       
+        public virtual string[] IdleSpeech { get { return new string[] { "*" }; } }
+        public virtual string[] CombatSpeech { get { return new string[] { "" }; } }
+        
+        public virtual double SpeechChance { get { return .01; } }
+
+        public DateTime m_NextSpeechAllowed = DateTime.UtcNow;
+
+        public virtual int NextIdleSpeechDelayMin { get { return 45; } }
+        public virtual int NextIdleSpeechDelayMax { get { return 75; } }
+        
+        public virtual int NextCombatSpeechDelayMin { get { return 30; } }
+        public virtual int NextCombatSpeechDelayMax { get { return 60; } }
+
+        public List<Mobile> m_Creatures = new List<Mobile>();
+
+        //-------
+
         public List<AspectGearExperienceEntry> m_AspectGearExperienceEntries = new List<AspectGearExperienceEntry>();
+
+        public virtual TimeSpan GetNextAbilityDelay()
+        {
+            return TimeSpan.FromSeconds(NextAbilityDelayMin - ((NextAbilityDelayMin - NextAbilityDelayMax)));
+        }
 
         public virtual void SetRare()
         {
@@ -1462,6 +1455,15 @@ namespace Server.Mobiles
             else
                 InitialDifficulty = Difficulty;
 
+            m_DamagePerHealthInterval = (int)(Math.Round((double)HitsMax / (double)TotalHealthIntervals));
+
+            if (m_DamagePerHealthInterval < 1)
+                m_DamagePerHealthInterval = 1;
+
+            m_HealthIntervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)TotalHealthIntervals));
+
+            m_SpawnPercent = (double)m_HealthIntervalCount / (double)TotalHealthIntervals;
+
             m_AI.WanderMode();
         }
 
@@ -1787,38 +1789,91 @@ namespace Server.Mobiles
                 if (bc_Target != null)
                     bc_Target.CalculateDifficulty(from, true, true);
             }
-        }
-
+        }    
+    
         public double DetermineAverageSpellDamage()
         {
             double averageDamage = 0;
             double spellDamageScalar = 1.0;
 
-            //TEST: Adjust spellDamageScalar based on Eval Int
+            double baseDamageScalar = MagerySpell.BaseDamageScalar;
+            double evalIntBonus = (Skills[SkillName.EvalInt].Value / 100) * MagerySpell.BaseEvalIntDamageBonus;
+            double spiritSpeakBonus = (Skills[SkillName.SpiritSpeak].Value / 100) * MagerySpell.BaseSpiritSpeakDamageBonus;
+            double inscriptionBonus = (Skills[SkillName.Inscribe].Value / 100) * MagerySpell.BaseInscriptionDamageBonus;
+
+            spellDamageScalar = baseDamageScalar + evalIntBonus + spiritSpeakBonus + inscriptionBonus;
 
             int totalFrequency = 0;
 
-            Dictionary<int, double> spellSelections = new Dictionary<int, double>();
+            Dictionary<CombatSpell, double> spellSelections = new Dictionary<CombatSpell, double>();
 
-            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage1], 5.0);
-            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage2], 10.0);
-            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage3], 15.0);
-            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage4], 20.0);
-            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage5], 25.0);
-            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage6], 30.0);
-            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamage7], 40.0);
-            spellSelections.Add(DictCombatSpell[CombatSpell.SpellDamageAOE7], 80.0);
+            double circle1AverageDamage = 0;
+            double circle2AverageDamage = 0;
+            double circle3AverageDamage = 0;
+            double circle4AverageDamage = 0;
+            double circle5AverageDamage = 0;
+            double circle6AverageDamage = 0;
+            double circle7AverageDamage = 0;
+            double circle7AoEAverageDamage = 0;
+            double poisonAverageDamage = 0;
 
-            spellSelections.Add(DictCombatSpell[CombatSpell.SpellPoison], 25.0);
+            double expectedMeteorSwarmTargets = 2.5;
+            double expectedChainLightningTargets = 2;
+            
+            circle1AverageDamage += ((double)MagicArrowSpell.DamageMin + (double)MagicArrowSpell.DamageMax) / 2;
+            circle2AverageDamage += ((double)HarmSpell.DamageMin + (double)HarmSpell.DamageMax) / 2;
+            circle3AverageDamage += ((double)FireballSpell.DamageMin + (double)FireballSpell.DamageMax) / 2;
+            circle4AverageDamage += ((double)LightningSpell.DamageMin + (double)LightningSpell.DamageMax) / 2;
+            circle5AverageDamage += ((double)MindBlastSpell.DamageMin + (double)MindBlastSpell.DamageMax) / 2;
+            circle6AverageDamage += (((((double)EnergyBoltSpell.DamageMin + (double)EnergyBoltSpell.DamageMax) / 2) + (((double)ExplosionSpell.DamageMin + (double)ExplosionSpell.DamageMax) / 2) / 2));
+            circle7AverageDamage += ((double)FlameStrikeSpell.DamageMin + (double)FlameStrikeSpell.DamageMax) / 2;
+            circle7AoEAverageDamage += (((((double)MeteorSwarmSpell.DamageMin + (double)MeteorSwarmSpell.DamageMax) / 2 * expectedMeteorSwarmTargets) + (((double)ChainLightningSpell.DamageMin + (double)ChainLightningSpell.DamageMax)) / 2 * expectedChainLightningTargets));
+            poisonAverageDamage += ((double)PoisonSpell.DamageMin + (double)PoisonSpell.DamageMax) / 2;
 
-            foreach (KeyValuePair<int, double> pair in spellSelections)
+            spellSelections.Add(CombatSpell.SpellDamage1, circle1AverageDamage);
+            spellSelections.Add(CombatSpell.SpellDamage2, circle2AverageDamage);
+            spellSelections.Add(CombatSpell.SpellDamage3, circle3AverageDamage);
+            spellSelections.Add(CombatSpell.SpellDamage4, circle4AverageDamage);
+            spellSelections.Add(CombatSpell.SpellDamage5, circle5AverageDamage);
+            spellSelections.Add(CombatSpell.SpellDamage6, circle6AverageDamage);
+            spellSelections.Add(CombatSpell.SpellDamage7, circle7AverageDamage);
+            spellSelections.Add(CombatSpell.SpellDamageAOE7, circle7AoEAverageDamage);
+            spellSelections.Add(CombatSpell.SpellPoison, poisonAverageDamage);
+
+            foreach (KeyValuePair<CombatSpell, double> pair in spellSelections)
             {
-                totalFrequency += pair.Key;
+                switch (pair.Key)
+                {
+                    case CombatSpell.SpellDamage1: totalFrequency += DictCombatSpell[CombatSpell.SpellDamage1]; break;
+                    case CombatSpell.SpellDamage2: totalFrequency += DictCombatSpell[CombatSpell.SpellDamage2]; break;
+                    case CombatSpell.SpellDamage3: totalFrequency += DictCombatSpell[CombatSpell.SpellDamage3]; break;
+                    case CombatSpell.SpellDamage4: totalFrequency += DictCombatSpell[CombatSpell.SpellDamage4]; break;
+                    case CombatSpell.SpellDamage5: totalFrequency += DictCombatSpell[CombatSpell.SpellDamage5]; break;
+                    case CombatSpell.SpellDamage6: totalFrequency += DictCombatSpell[CombatSpell.SpellDamage6]; break;
+                    case CombatSpell.SpellDamage7: totalFrequency += DictCombatSpell[CombatSpell.SpellDamage7]; break;
+                    case CombatSpell.SpellDamageAOE7: totalFrequency += DictCombatSpell[CombatSpell.SpellDamageAOE7]; break;
+                    case CombatSpell.SpellPoison: totalFrequency += DictCombatSpell[CombatSpell.SpellPoison]; break;
+                }
             }
 
-            foreach (KeyValuePair<int, double> pair in spellSelections)
+            foreach (KeyValuePair<CombatSpell, double> pair in spellSelections)
             {
-                double spellChance = ((double)pair.Key / (double)totalFrequency);
+                double spellFrequency = 0;
+
+                switch (pair.Key)
+                {
+                    case CombatSpell.SpellDamage1: spellFrequency = DictCombatSpell[CombatSpell.SpellDamage1]; break;
+                    case CombatSpell.SpellDamage2: spellFrequency = DictCombatSpell[CombatSpell.SpellDamage2]; break;
+                    case CombatSpell.SpellDamage3: spellFrequency = DictCombatSpell[CombatSpell.SpellDamage3]; break;
+                    case CombatSpell.SpellDamage4: spellFrequency = DictCombatSpell[CombatSpell.SpellDamage4]; break;
+                    case CombatSpell.SpellDamage5: spellFrequency = DictCombatSpell[CombatSpell.SpellDamage5]; break;
+                    case CombatSpell.SpellDamage6: spellFrequency = DictCombatSpell[CombatSpell.SpellDamage6]; break;
+                    case CombatSpell.SpellDamage7: spellFrequency = DictCombatSpell[CombatSpell.SpellDamage7]; break;
+                    case CombatSpell.SpellDamageAOE7: spellFrequency = DictCombatSpell[CombatSpell.SpellDamageAOE7]; break;
+                    case CombatSpell.SpellPoison: spellFrequency = DictCombatSpell[CombatSpell.SpellPoison]; break;
+                }
+
+                double spellChance = (spellFrequency / (double)totalFrequency);
                 double spellDamage = pair.Value * spellDamageScalar;
 
                 double expectedDamage = spellChance * spellDamage;
@@ -1889,21 +1944,25 @@ namespace Server.Mobiles
 
             /*              
              SpellHealSelf100,
-        SpellHealSelf75,
-        SpellHealSelf50,
-        SpellHealSelf25,
-        SpellCureSelf,
+            SpellHealSelf75,
+            SpellHealSelf50,
+            SpellHealSelf25,
+            SpellCureSelf,
              
-             SpellHealOther100,
-        SpellHealOther75,
-        SpellHealOther50,
-        SpellHealOther25,
-        SpellCureOther,
+            SpellHealOther100,
+            SpellHealOther75,
+            SpellHealOther50,
+            SpellHealOther25,
+            SpellCureOther,
             */
 
             #endregion
 
             #region Poison
+            #endregion
+
+            #region Abilities
+
             #endregion
 
             #region Defense
@@ -4092,12 +4151,11 @@ namespace Server.Mobiles
                 bc_From.CheckAutoDispel(this);
             }
 
-            if (!willKill)
-            {
-            }
+            m_DamagePerHealthInterval = (int)(Math.Round((double)HitsMax / (double)TotalHealthIntervals));
+            m_HealthIntervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)TotalHealthIntervals));
 
-            base.OnDamage(amount, from, willKill);
-
+            m_SpawnPercent = (double)m_HealthIntervalCount / (double)TotalHealthIntervals;
+            
             if (!willKill)
             {
                 if (Alive && !Deleted && Combatant == null && from != null)
@@ -4114,7 +4172,26 @@ namespace Server.Mobiles
                             Combatant = from;
                     }
                 }
+
+                m_HealthIntervalDamageProgress += amount;
+
+                if (m_HealthIntervalDamageProgress >= m_DamagePerHealthInterval)
+                {
+                    m_SpawnPercent = (double)m_HealthIntervalCount / (double)TotalHealthIntervals;
+
+                    m_HealthIntervalDamageProgress = m_HealthIntervalDamageProgress - m_DamagePerHealthInterval;
+
+                    if (!(ControlMaster is PlayerMobile))
+                        m_HealthIntervalAbilityReady = true;
+                }               
             }
+
+            base.OnDamage(amount, from, willKill);
+        }
+
+        public virtual void DamageIntervalTriggered()
+        {
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
         }
 
         public bool InPassiveTamingSkillGainRange(PlayerMobile player)
@@ -4809,7 +4886,15 @@ namespace Server.Mobiles
             writer.Write(m_InitialName);
             writer.Write(m_RessPenaltyCount);
             writer.Write(m_RessPenaltyExpiration);
+            writer.Write(m_HealthIntervalDamageProgress);
+            writer.Write(m_HealthIntervalCount);
 
+            writer.Write(m_Creatures.Count);
+            for (int a = 0; a < m_Creatures.Count; a++)
+            {
+                writer.Write(m_Creatures[a]);
+            }
+            
             writer.Write(m_SelectedTraits.Count);
             for (int a = 0; a < m_SelectedTraits.Count; a++)
             {
@@ -4955,6 +5040,16 @@ namespace Server.Mobiles
                 m_InitialName = reader.ReadString();
                 m_RessPenaltyCount = reader.ReadInt();
                 m_RessPenaltyExpiration = reader.ReadDateTime();
+                m_HealthIntervalDamageProgress = reader.ReadInt();
+                m_HealthIntervalCount = reader.ReadInt();
+
+                int creaturesCount = reader.ReadInt();
+                for (int a = 0; a < creaturesCount; a++)
+                {
+                    Mobile creature = reader.ReadMobile();
+
+                    m_Creatures.Add(creature);
+                }
 
                 int followerTraitSelectionCount = reader.ReadInt();
                 for (int a = 0; a < followerTraitSelectionCount; a++)
@@ -5058,6 +5153,11 @@ namespace Server.Mobiles
             Hits = m_StoredHits;
             Stam = m_StoredStam;
             Mana = m_StoredMana;
+
+            m_DamagePerHealthInterval = (int)(Math.Round((double)HitsMax / (double)TotalHealthIntervals));
+            m_HealthIntervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)TotalHealthIntervals));
+
+            m_SpawnPercent = (double)m_HealthIntervalCount / (double)TotalHealthIntervals;
         }
 
         public virtual bool IsHumanInTown()
@@ -5945,6 +6045,15 @@ namespace Server.Mobiles
                 m_RemoveSpecialAbilityEffectTimer.Stop();
                 m_RemoveSpecialAbilityEffectTimer = null;
             }
+
+            for (int a = 0; a < m_Creatures.Count; ++a)
+            {
+                if (m_Creatures[a] != null)
+                {
+                    if (m_Creatures[a].Alive)
+                        m_Creatures[a].Kill();
+                }
+            }  
 
             FocusMob = null;
 
@@ -7221,7 +7330,7 @@ namespace Server.Mobiles
                     else if (discordedMessage != "")
                         PrivateOverheadMessage(MessageType.Regular, BaseInstrument.DiscordedTextHue, false, "*" + discordedMessage + "*", from.NetState);
                 }
-
+                
                 if (IsHenchman)
                 {
                     PrivateOverheadMessage(MessageType.Regular, 0x3B2, false, "(follower)", from.NetState);
@@ -7261,6 +7370,15 @@ namespace Server.Mobiles
                         PrivateOverheadMessage(MessageType.Regular, BaseInstrument.DiscordedTextHue, false, "*" + discordedMessage + "*", from.NetState);
                 }
             }
+
+            if (Rare)
+                PrivateOverheadMessage(MessageType.Regular, 1102, false, "[Rare]", from.NetState);
+
+            else if (IsChamp())
+                PrivateOverheadMessage(MessageType.Regular, 1256, false, "[Champion]", from.NetState);
+
+            else if (IsBoss())
+                PrivateOverheadMessage(MessageType.Regular, 2117, false, "[Boss]", from.NetState);
 
             base.OnSingleClick(from);
         }
@@ -7984,6 +8102,15 @@ namespace Server.Mobiles
                     m_StamFreeMoveAuraTimer = null;
                 }
 
+                for (int a = 0; a < m_Creatures.Count; ++a)
+                {
+                    if (m_Creatures[a] != null)
+                    {
+                        if (m_Creatures[a].Alive)
+                            m_Creatures[a].Kill();
+                    }
+                }
+
                 base.OnDeath(c);
 
                 if (DeleteCorpseOnDeath)                
@@ -8471,6 +8598,29 @@ namespace Server.Mobiles
 
         public virtual void OnThink()
         {
+            if (Utility.RandomDouble() < SpeechChance && !Hidden && DateTime.UtcNow > m_NextSpeechAllowed)
+            {
+                if (LastCombatTime + TimeSpan.FromSeconds(10) <= DateTime.UtcNow && IdleSpeech != null)
+                {
+                    string idleString = IdleSpeech[Utility.Random(IdleSpeech.Length - 1)];
+                    
+                    if (idleString != "")
+                        Say(idleString);
+
+                    m_NextSpeechAllowed = DateTime.UtcNow + TimeSpan.FromSeconds(Utility.RandomMinMax(NextCombatSpeechDelayMin, NextCombatSpeechDelayMax));
+                }
+
+                else if (Combatant != null && CombatSpeech != null)
+                {
+                    string combatString = CombatSpeech[Utility.Random(CombatSpeech.Length - 1)];
+
+                    if (combatString != "")
+                        Say(combatString);
+
+                    m_NextSpeechAllowed = DateTime.UtcNow + TimeSpan.FromSeconds(Utility.RandomMinMax(NextIdleSpeechDelayMin, NextIdleSpeechDelayMax));
+                }                
+            }
+
             long tc = Core.TickCount;
 
             if (Hits == HitsMax)
@@ -9396,4 +9546,67 @@ namespace Server.Mobiles
             }
         }
     }
+
+    #region Damage Store
+
+    public class DamageStore : IComparable
+    {
+        public Mobile m_Mobile;
+        public int m_Damage;
+        public bool m_HasRight;
+
+        public DamageStore(Mobile m, int damage)
+        {
+            m_Mobile = m;
+            m_Damage = damage;
+        }
+
+        public int CompareTo(object obj)
+        {
+            DamageStore ds = (DamageStore)obj;
+
+            return ds.m_Damage - m_Damage;
+        }
+    }
+
+    #endregion
+
+    #region Friendly Name
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class FriendlyNameAttribute : Attribute
+    {
+        private TextDefinition m_FriendlyName;
+        public TextDefinition FriendlyName
+        {
+            get
+            {
+                return m_FriendlyName;
+            }
+        }
+
+        public FriendlyNameAttribute(TextDefinition friendlyName)
+        {
+            m_FriendlyName = friendlyName;
+        }
+
+        public static TextDefinition GetFriendlyNameFor(Type t)
+        {
+            if (t.IsDefined(typeof(FriendlyNameAttribute), false))
+            {
+                object[] objs = t.GetCustomAttributes(typeof(FriendlyNameAttribute), false);
+
+                if (objs != null && objs.Length > 0)
+                {
+                    FriendlyNameAttribute friendly = objs[0] as FriendlyNameAttribute;
+
+                    return friendly.FriendlyName;
+                }
+            }
+
+            return t.Name;
+        }
+    }
+
+    #endregion
 }

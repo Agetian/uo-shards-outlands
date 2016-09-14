@@ -1539,7 +1539,13 @@ namespace Server.Items
         {
             PlayerMobile pm_Attacker = attacker as PlayerMobile;
 
+            if (attacker == null)
+                return 0;
+
             BaseWeapon atkWeapon = attacker.Weapon as BaseWeapon;
+
+            if (atkWeapon == null)
+                return 0;
 
             double atkValue = atkWeapon.GetAttackSkillValue(attacker, null);
             double defValue = defenderSkill;
@@ -1558,7 +1564,7 @@ namespace Server.Items
 
             double chance = ourValue / (theirValue * 2.0);
 
-            chance += GetHitChanceBonus(pm_Attacker != null, defenderPlayer);
+            chance += GetHitChanceBonus(attacker != null, defenderPlayer);
 
             return chance;
         }

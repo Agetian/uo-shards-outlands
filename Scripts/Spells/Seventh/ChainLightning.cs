@@ -24,6 +24,11 @@ namespace Server.Spells.Seventh
 
         public override SpellCircle Circle { get { return SpellCircle.Seventh; } }
 
+        public static int DamageMin { get { return 15; } }
+        public static int DamageMax { get { return 25; } }
+
+        public static double SpellSpecificCreatureDamageBonus { get { return 0.0; } }
+
         public ChainLightningSpell(Mobile caster, Item scroll): base(caster, scroll, m_Info)
         {
         }
@@ -113,12 +118,15 @@ namespace Server.Spells.Seventh
                 {
                     Mobile mobile = (Mobile)m_Queue.Dequeue();
 
-                    double damage = (double)Utility.RandomMinMax(20, 25);
+                    double damage = (double)Utility.RandomMinMax(DamageMin, DamageMax);
                     double damageBonus = 0;
                     
                     CheckMagicResist(mobile);	
 
                     Boolean isTamedTarget = SpellHelper.IsTamedTarget(Caster, mobile);
+
+                    if (Caster is PlayerMobile && mobile is BaseCreature)
+                        damageBonus += SpellSpecificCreatureDamageBonus;
 
                     if (enhancedSpellcast && mobile is BaseCreature)
                     {

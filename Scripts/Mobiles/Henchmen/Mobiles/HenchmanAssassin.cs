@@ -17,13 +17,13 @@ namespace Server.Custom
             }
         }
 
-        public override string[] idleSpeech { get { return new string[] {       "What shall I eliminate next?",
+        public override string[] IdleSpeech { get { return new string[] {       "What shall I eliminate next?",
                                                                                 "Give me something challenging to kill.",
                                                                                 "*sharpens blade*",
                                                                                 "*eyes narrow*" 
                                                                                 };}}
 
-        public override string[] combatSpeech { get { return new string[] {     "This is going to hurt. Alot.",
+        public override string[] CombatSpeech { get { return new string[] {     "This is going to hurt. Alot.",
                                                                                 "Resist. Surrender. I care not.",
                                                                                 "No one will escape my blade.",
                                                                                 "Your death will line my pockets." 

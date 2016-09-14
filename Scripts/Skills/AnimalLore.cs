@@ -42,7 +42,13 @@ namespace Server
 
                 else if (targeted is BaseCreature)
                 {
-                    BaseCreature bc_Creature = (BaseCreature)targeted;                    
+                    BaseCreature bc_Creature = (BaseCreature)targeted;
+
+                    if (bc_Creature.Blessed)
+                    {
+                        from.SendMessage("They would appear to be invincible.");
+                        return;
+                    }
 
                     if (bc_Creature.IsHenchman)
                     {

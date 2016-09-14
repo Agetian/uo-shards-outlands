@@ -13,14 +13,9 @@ namespace Server.Mobiles
     [CorpseName("ancient necromancer's corpse")]
     public class AncientNecromancer : BaseCreature
     {
-        public override string TitleReward { get { return "Slayer of the Necromancer"; } }
-
         public DateTime m_NextAIChangeAllowed;
         public TimeSpan NextAIChangeDelay = TimeSpan.FromSeconds(30);
-
-        public DateTime m_NextSpeechAllowed;
-        public TimeSpan NextSpeechDelay = TimeSpan.FromSeconds(30);
-
+        
         public DateTime m_NextRevealAllowed;
         public TimeSpan NextRevealDelay = TimeSpan.FromSeconds(5);
 
@@ -29,32 +24,17 @@ namespace Server.Mobiles
 
         public DateTime m_NextMassiveBreathAllowed;
         public TimeSpan NextMassiveBreathDelay = TimeSpan.FromSeconds(30);
-
-        public DateTime m_NextAbilityAllowed;
-        public double NextAbilityDelayMin = 10;
-        public double NextAbilityDelayMax = 5;
-
+        
         public static int RaiseDeadRange = 18;
-
-        public int damageIntervalThreshold = 500;
-        public int damageProgress = 0;
-
-        public int intervalCount = 0;
-        public int totalIntervals = 30;
-
+                
         public int m_OrbMainHue = 0;
         public int m_OrbRevealHue = 2515;
         public int m_OrbAttackHue = 2608;
         public int m_OrbIntervalAttackHue = 2608;
+        
+        public Item m_SkullOrb;
 
-        public bool AbilityInProgress = false;
-        public bool DamageIntervalInProgress = false;
-
-        public List<Mobile> m_Creatures = new List<Mobile>();
-        public Item m_Item;
-
-        public string[] idleSpeech { get { return new string[] { "*chants*" }; } }
-        public string[] combatSpeech { get { return new string[] { "" }; } }
+        public override int TotalHealthIntervals { get { return 40; } }  
 
         [Constructable]
         public AncientNecromancer(): base(AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4)
@@ -97,9 +77,9 @@ namespace Server.Mobiles
 
             Static item = new Static(7960);
 
-            m_Item = item;
-            m_Item.Hue = m_OrbMainHue;
-            m_Item.Name = "Orb of Omnipresence";
+            m_SkullOrb = item;
+            m_SkullOrb.Hue = m_OrbMainHue;
+            m_SkullOrb.Name = "Orb of Omnipresence";
 
             item.MoveToWorld(skullLocation, Map);
         }
@@ -125,23 +105,23 @@ namespace Server.Mobiles
 
             SpellHue = 2586;
 
-            damageIntervalThreshold = (int)(Math.Round((double)HitsMax / (double)totalIntervals));
-            intervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)totalIntervals));
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
             double minLength = 6;
             double maxLength = 18;
 
-            MassiveBreathRange = (int)(minLength + ((maxLength - minLength) * spawnPercent));
+            MassiveBreathRange = (int)(minLength + ((maxLength - minLength) * m_SpawnPercent));
         }
 
-        public override int PoisonResistance { get { return 5; } }
+        public override int PoisonResistance { get { return 4; } }
 
         public override bool AlwaysBoss { get { return true; } }
-        public override string BossSpawnMessage { get { return "The Ancient Necromancer has arisen and stirs within Deceit Dungeon..."; } }
-        public override bool AlwaysMurderer { get { return true; } } 
+        public override bool AlwaysMurderer { get { return true; } }
 
+        public override string TitleReward { get { return "Slayer of the Necromancer"; } }
+        public override string BossSpawnMessage { get { return "The Ancient Necromancer has arisen and stirs within Deceit Dungeon..."; } }
+
+        public override string[] IdleSpeech { get { return new string[] { "*chants*" }; } }
+        public override string[] CombatSpeech { get { return new string[] { "" }; } }
+        
         public override void OnGaveMeleeAttack(Mobile defender)
         {
             base.OnGaveMeleeAttack(defender);
@@ -149,85 +129,38 @@ namespace Server.Mobiles
 
         public override void OnDamage(int amount, Mobile from, bool willKill)
         {
-            damageIntervalThreshold = (int)(Math.Round((double)HitsMax / (double)totalIntervals));
-            intervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)totalIntervals));
+            base.OnDamage(amount, from, willKill);
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            if (!willKill)
+            if (!willKill && from != null && amount > 10 && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress)
             {
-                damageProgress += amount;
+                BaseWeapon weapon = from.Weapon as BaseWeapon;
 
-                if (damageProgress >= damageIntervalThreshold)
+                if (weapon != null)
                 {
-                    m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
-
-                    Effects.PlaySound(Location, Map, GetAngerSound());
-
-                    damageProgress = 0;
-
-                    double minLength = 6;
-                    double maxLength = 18;
-
-                    MassiveBreathRange = (int)(minLength + ((maxLength - minLength) * spawnPercent));
-
-                    if (intervalCount % 4 == 0)
-                        BreathOfTheDead();
-
-                    else
+                    if (weapon is BaseRanged)
                     {
-                        switch (Utility.RandomMinMax(1, 3))
-                        {
-                            case 1: ShockBarrage(); break;
-                            case 2: ForbiddenLore(); break;
-                            case 3: Doom(); break;
-                        }
+                        if (Utility.RandomDouble() < .1)
+                            RandomDamageEffect(from);
+                    }
+
+                    else if (weapon is BaseMeleeWeapon || weapon is Fists)
+                    {
+                        if (Utility.RandomDouble() < .05)
+                            RandomDamageEffect(from);
                     }
                 }
 
-                if (from != null && amount > 10 && !AbilityInProgress && !DamageIntervalInProgress)
+                else
                 {
-                    BaseWeapon weapon = from.Weapon as BaseWeapon;
-
-                    if (weapon != null)
-                    {
-                        //Ranged Weapon
-                        if (weapon is BaseRanged)
-                        {
-                            if (Utility.RandomDouble() < .1)
-                                DamageEffect(from);
-                        }
-
-                        //Melee Weapon
-                        else if (weapon is BaseMeleeWeapon || weapon is Fists)
-                        {
-                            if (Utility.RandomDouble() < .05)
-                                DamageEffect(from);
-                        }
-                    }
-
-                    else
-                    {
-                        //Spell or Special Effect
-                        if (Utility.RandomDouble() < .15)
-                            DamageEffect(from);
-                    }
+                    if (Utility.RandomDouble() < .15)
+                        RandomDamageEffect(from);
                 }
             }
-
-            base.OnDamage(amount, from, willKill);
         }
 
-        public TimeSpan GetNextAbilityDelay()
+        public void RandomDamageEffect(Mobile from)
         {
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            return TimeSpan.FromSeconds(NextAbilityDelayMin - ((NextAbilityDelayMin - NextAbilityDelayMax) * spawnPercent));
-        }
-
-        public void DamageEffect(Mobile from)
-        {
-            if (AbilityInProgress || DamageIntervalInProgress)
+            if (m_AbilityInProgress || m_HealthIntervalAbilityInProgress)
                 return;
 
             switch (Utility.RandomMinMax(1, 3))
@@ -238,20 +171,48 @@ namespace Server.Mobiles
             }
         }
 
+        public override void DamageIntervalTriggered()
+        {
+            base.DamageIntervalTriggered();
+
+            Effects.PlaySound(Location, Map, GetAngerSound());
+            
+            double minLength = 6;
+            double maxLength = 18;
+
+            MassiveBreathRange = (int)(minLength + ((maxLength - minLength) * m_SpawnPercent));
+
+            if (m_HealthIntervalCount % 4 == 0)
+                BreathOfTheDead();
+
+            else
+            {
+                switch (Utility.RandomMinMax(1, 3))
+                {
+                    case 1: ShockBarrage(); break;
+                    case 2: ForbiddenLore(); break;
+                    case 3: Doom(); break;
+                }
+            }
+        }
+
+        public override TimeSpan GetNextAbilityDelay()
+        {
+            return TimeSpan.FromSeconds(NextAbilityDelayMin - ((NextAbilityDelayMin - NextAbilityDelayMax) * m_SpawnPercent));
+        }        
+
         public void Shock(Mobile from)
         {
             if (!SpecialAbilities.Exists(this)) return;
             if (!SpecialAbilities.Exists(from)) return;
-            if (m_Item == null) return;
-            if (m_Item.Deleted) return;
+            if (m_SkullOrb == null) return;
+            if (m_SkullOrb.Deleted) return;
             if (Utility.GetDistance(Location, from.Location) > 30) return;
+            
+            Point3D location = m_SkullOrb.Location;
+            Map map = m_SkullOrb.Map;
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            Point3D location = m_Item.Location;
-            Map map = m_Item.Map;
-
-            int bolts = 1 + (int)(Math.Ceiling(5 * spawnPercent));
+            int bolts = 1 + (int)(Math.Ceiling(5 * m_SpawnPercent));
             double boltDuration = .25;
 
             int boltMinDamage = 5;
@@ -265,20 +226,23 @@ namespace Server.Mobiles
                 {
                     if (!SpecialAbilities.Exists(this)) return;
                     if (!SpecialAbilities.Exists(from)) return;
-                    if (m_Item == null) return;
-                    if (m_Item.Deleted) return;
+                    if (m_SkullOrb == null) return;
+                    if (m_SkullOrb.Deleted) return;
                     if (Utility.GetDistance(location, from.Location) > 30) return;
 
-                    m_Item.Hue = m_OrbAttackHue;
+                    if (m_AbilityInProgress || m_HealthIntervalAbilityInProgress)
+                        return;
 
-                    Effects.PlaySound(m_Item.Location, m_Item.Map, 0x5C3);
+                    m_SkullOrb.Hue = m_OrbAttackHue;
+
+                    Effects.PlaySound(m_SkullOrb.Location, m_SkullOrb.Map, 0x5C3);
 
                     TimedStatic discharge = new TimedStatic(0x3779, .5);
                     discharge.Hue = m_OrbAttackHue;
                     discharge.Name = "dissipated energy";
-                    discharge.MoveToWorld(m_Item.Location, m_Item.Map);
+                    discharge.MoveToWorld(m_SkullOrb.Location, m_SkullOrb.Map);
 
-                    IEntity startLocation = new Entity(Serial.Zero, new Point3D(m_Item.X, m_Item.Y, m_Item.Z), m_Item.Map);
+                    IEntity startLocation = new Entity(Serial.Zero, new Point3D(m_SkullOrb.X, m_SkullOrb.Y, m_SkullOrb.Z), m_SkullOrb.Map);
                     IEntity endLocation = new Entity(Serial.Zero, new Point3D(from.X, from.Y, from.Z + 5), from.Map);
 
                     int particleSpeed = 5;
@@ -292,8 +256,8 @@ namespace Server.Mobiles
                     {
                         if (!SpecialAbilities.Exists(this)) return;
                         if (!SpecialAbilities.Exists(from)) return;
-                        if (m_Item == null) return;
-                        if (m_Item.Deleted) return;
+                        if (m_SkullOrb == null) return;
+                        if (m_SkullOrb.Deleted) return;
                         if (Utility.GetDistance(location, from.Location) > 30) return;
 
                         int damage = Utility.RandomMinMax(boltMinDamage, boltMaxDamage);
@@ -319,10 +283,10 @@ namespace Server.Mobiles
             Timer.DelayCall(TimeSpan.FromSeconds(bolts * boltDuration), delegate
             {
                 if (!SpecialAbilities.Exists(this)) return;
-                if (m_Item == null) return;
-                if (m_Item.Deleted) return;
+                if (m_SkullOrb == null) return;
+                if (m_SkullOrb.Deleted) return;
 
-                m_Item.Hue = m_OrbMainHue;
+                m_SkullOrb.Hue = m_OrbMainHue;
             });
         }
 
@@ -335,9 +299,7 @@ namespace Server.Mobiles
             Map map = Map;
 
             int effectHue = 2613;
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             Animate(15, 8, 1, true, false, 0); //Staff
 
             Combatant = null;
@@ -353,6 +315,9 @@ namespace Server.Mobiles
                 if (Hidden)
                     RevealingAction();
 
+                if (m_AbilityInProgress || m_HealthIntervalAbilityInProgress)
+                    return;
+
                 int maxExtraArmor = 50;
                 int baseArmor = 50;                
 
@@ -366,9 +331,12 @@ namespace Server.Mobiles
                     if (!SpecialAbilities.Exists(this))
                         return;
 
+                    if (m_AbilityInProgress || m_HealthIntervalAbilityInProgress)
+                        return;
+
                     PublicOverheadMessage(MessageType.Regular, 0, false, "*shielded*");
 
-                    MeleeDamageAbsorb = baseArmor + (int)(Math.Ceiling((double)maxExtraArmor * spawnPercent));
+                    MeleeDamageAbsorb = baseArmor + (int)(Math.Ceiling((double)maxExtraArmor * m_SpawnPercent));
                     FixedParticles(0x376A, 9, 64, 5008, effectHue, 0, EffectLayer.Waist);
                 });
             });
@@ -414,24 +382,27 @@ namespace Server.Mobiles
             PublicOverheadMessage(MessageType.Regular, 0, false, "*raises dead*");
 
             Mobile mobileTarget = m_Mobiles[Utility.RandomMinMax(0, m_Mobiles.Count - 1)];
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             double directionDelay = .25;
             double initialDelay = 1.5;
             double totalDelay = 2 + directionDelay + initialDelay;
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            m_NextRaiseDeadAllowed = DateTime.UtcNow + NextRaiseDeadDelay + TimeSpan.FromSeconds(totalDelay);
+            m_AbilityInProgress = true;
             m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
 
-            AbilityInProgress = true;
+            m_NextRaiseDeadAllowed = DateTime.UtcNow + NextRaiseDeadDelay;
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_NextRaiseDeadAllowed = DateTime.UtcNow + NextRaiseDeadDelay;
             });
 
             int effectHue = 1153;
@@ -478,7 +449,7 @@ namespace Server.Mobiles
                         if (mobileTarget is BaseCreature)
                             damage = (int)((double)damage * 2);
 
-                        int knockbackDistance = 4 + (int)(Math.Ceiling(8 * spawnPercent));
+                        int knockbackDistance = 4 + (int)(Math.Ceiling(8 * m_SpawnPercent));
                         
                         SpecialAbilities.KnockbackSpecialAbility(1.0, Location, this, mobileTarget, damage, knockbackDistance, -1, "", "You are knocked back!");
 
@@ -515,7 +486,7 @@ namespace Server.Mobiles
 
                                     BaseCreature monsterToSpawn = null;
 
-                                    int maxCreatureValue = 1 + (int)(Math.Ceiling(10 * spawnPercent));
+                                    int maxCreatureValue = 1 + (int)(Math.Ceiling(10 * m_SpawnPercent));
 
                                     if (maxCreatureValue > 9)
                                         maxCreatureValue = 9;
@@ -558,15 +529,20 @@ namespace Server.Mobiles
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*gathers nearby bones*");
 
-            m_NextMassiveBreathAllowed = DateTime.UtcNow + NextMassiveBreathDelay + TimeSpan.FromSeconds(totalDelay);
+            m_AbilityInProgress = true;
             m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
 
-            AbilityInProgress = true;
+            m_NextMassiveBreathAllowed = DateTime.UtcNow + NextMassiveBreathDelay;            
 
             Timer.DelayCall(TimeSpan.FromSeconds(3), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_NextMassiveBreathAllowed = DateTime.UtcNow + NextMassiveBreathDelay;
             });
 
             SpecialAbilities.DoMassiveBreathAttack(this, Location, direction, MassiveBreathRange, true, BreathType.Bone, false);
@@ -577,16 +553,10 @@ namespace Server.Mobiles
             if (!SpecialAbilities.Exists(this)) 
                 return;
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            AbilityInProgress = true;
-            DamageIntervalInProgress = true;
-            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
-
-            int summonMotions = 5 - (int)(Math.Ceiling(4 * spawnPercent));
+            int summonMotions = 5 - (int)(Math.Ceiling(4 * m_SpawnPercent));
             double summonDuration = 1;
 
-            int creaturesToSummon = 1 + (int)(Math.Ceiling(7 * spawnPercent));
+            int creaturesToSummon = 1 + (int)(Math.Ceiling(7 * m_SpawnPercent));
 
             double stationaryDelay = summonMotions * summonDuration + 1;
             
@@ -594,7 +564,7 @@ namespace Server.Mobiles
             Map map = Map;
 
             int maxExtraRange = 10;
-            int range = 10 + (int)(Math.Ceiling((double)maxExtraRange * spawnPercent));
+            int range = 10 + (int)(Math.Ceiling((double)maxExtraRange * m_SpawnPercent));
             int effectHue = 1153;
 
             Combatant = null;
@@ -602,6 +572,11 @@ namespace Server.Mobiles
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1, stationaryDelay, true, 0, false, "", "", "-1");
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*draws upon the breath of the living*");
+
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;
 
             for (int a = 0; a < summonMotions; a++)
             {
@@ -682,10 +657,10 @@ namespace Server.Mobiles
                     if (!SpecialAbilities.Exists(this))
                         return;
 
-                    AbilityInProgress = false;
-                    DamageIntervalInProgress = false;
-
+                    m_AbilityInProgress = false;
                     m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                    m_HealthIntervalAbilityInProgress = false;
 
                     for (int a = 0; a < creaturesToSummon; a++)
                     {
@@ -724,7 +699,7 @@ namespace Server.Mobiles
 
                                 BaseCreature monsterToSpawn = null;
 
-                                int maxCreatureValue = 1 + (int)(Math.Ceiling(10 * spawnPercent));
+                                int maxCreatureValue = 1 + (int)(Math.Ceiling(10 * m_SpawnPercent));
 
                                 if (maxCreatureValue > 9)
                                     maxCreatureValue = 9;
@@ -757,17 +732,11 @@ namespace Server.Mobiles
         public void ShockBarrage()
         {
             if (!SpecialAbilities.Exists(this)) return;
-            if (m_Item == null) return;
-            if (m_Item.Deleted) return;
-
-            AbilityInProgress = true;
-            DamageIntervalInProgress = true;
-            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
+            if (m_SkullOrb == null) return;
+            if (m_SkullOrb.Deleted) return;
 
             int range = 24;
-            int cycles = 10 + (int)(Math.Ceiling(50 * spawnPercent));
+            int cycles = 10 + (int)(Math.Ceiling(50 * m_SpawnPercent));
             int loops = (int)(Math.Ceiling((double)cycles / 10));
 
             double stationaryDelay = 1 + loops;
@@ -775,13 +744,18 @@ namespace Server.Mobiles
             int boltMinDamage = 5;
             int boltMaxDamage = 15;
 
-            m_Item.Hue = m_OrbIntervalAttackHue;
+            m_SkullOrb.Hue = m_OrbIntervalAttackHue;
 
             Combatant = null;
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*discharges giant surge of energy*");
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1, stationaryDelay, true, 0, false, "", "", "-1");
+
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;           
 
             Point3D location = Location;
             Map map = Map;
@@ -791,8 +765,8 @@ namespace Server.Mobiles
                 Timer.DelayCall(TimeSpan.FromSeconds(a * 1), delegate
                 {
                     if (!SpecialAbilities.Exists(this)) return;
-                    if (m_Item == null) return;
-                    if (m_Item.Deleted) return;
+                    if (m_SkullOrb == null) return;
+                    if (m_SkullOrb.Deleted) return;
 
                     Animate(12, 12, 1, true, false, 0);
 
@@ -803,16 +777,17 @@ namespace Server.Mobiles
             Timer.DelayCall(TimeSpan.FromSeconds(stationaryDelay), delegate
             {
                 if (!SpecialAbilities.Exists(this)) return;
-                if (m_Item == null) return;
-                if (m_Item.Deleted) return;
+                if (m_SkullOrb == null) return;
+                if (m_SkullOrb.Deleted) return;
 
-                m_Item.Hue = m_OrbMainHue;
-
-                AbilityInProgress = false;
-                DamageIntervalInProgress = false;
-                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+                m_SkullOrb.Hue = m_OrbMainHue;
 
                 PlaySound(0x211);
+
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false;  
             });
 
             for (int a = 0; a < cycles; a++)
@@ -820,8 +795,8 @@ namespace Server.Mobiles
                 Timer.DelayCall(TimeSpan.FromSeconds(a * .06), delegate
                 {
                     if (!SpecialAbilities.Exists(this)) return;
-                    if (m_Item == null) return;
-                    if (m_Item.Deleted) return;
+                    if (m_SkullOrb == null) return;
+                    if (m_SkullOrb.Deleted) return;
 
                     List<Mobile> m_ValidMobiles = new List<Mobile>();
 
@@ -841,16 +816,17 @@ namespace Server.Mobiles
                     {
                         Mobile target = m_ValidMobiles[Utility.RandomMinMax(0, m_ValidMobiles.Count - 1)];
 
-                        m_Item.Hue = m_OrbIntervalAttackHue;
+                        m_SkullOrb.Hue = m_OrbIntervalAttackHue;
 
-                        Effects.PlaySound(m_Item.Location, m_Item.Map, 0x211);
+                        Effects.PlaySound(m_SkullOrb.Location, m_SkullOrb.Map, 0x211);
 
                         TimedStatic discharge = new TimedStatic(0x3779, .5);
+
                         discharge.Hue = m_OrbIntervalAttackHue;
                         discharge.Name = "dissipated energy";
-                        discharge.MoveToWorld(m_Item.Location, m_Item.Map);
+                        discharge.MoveToWorld(m_SkullOrb.Location, m_SkullOrb.Map);
 
-                        IEntity startLocation = new Entity(Serial.Zero, new Point3D(m_Item.X, m_Item.Y, m_Item.Z), m_Item.Map);
+                        IEntity startLocation = new Entity(Serial.Zero, new Point3D(m_SkullOrb.X, m_SkullOrb.Y, m_SkullOrb.Z), m_SkullOrb.Map);
                         IEntity endLocation = new Entity(Serial.Zero, new Point3D(target.X, target.Y, target.Z + 5), target.Map);
 
                         int particleSpeed = 5;
@@ -864,8 +840,8 @@ namespace Server.Mobiles
                         {
                             if (!SpecialAbilities.Exists(this)) return;
                             if (!SpecialAbilities.Exists(target)) return;
-                            if (m_Item == null) return;
-                            if (m_Item.Deleted) return;                         
+                            if (m_SkullOrb == null) return;
+                            if (m_SkullOrb.Deleted) return;                         
                             if (Utility.GetDistance(location, target.Location) > 30) return;
 
                             int damage = Utility.RandomMinMax(boltMinDamage, boltMaxDamage);
@@ -898,18 +874,18 @@ namespace Server.Mobiles
             Map map = Map;
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*draws upon forbidden lore*");
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            int loreStatues = 2 + (int)(Math.Ceiling(6 * spawnPercent));
+            
+            int loreStatues = 2 + (int)(Math.Ceiling(6 * m_SpawnPercent));
 
             int effectHue = Hue - 1;
 
             int loops = 3;
             double stationaryDelay = 3;
 
-            AbilityInProgress = true;
-            DamageIntervalInProgress = true;
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;  
 
             Combatant = null;
 
@@ -932,8 +908,10 @@ namespace Server.Mobiles
                 if (!SpecialAbilities.Exists(this))
                     return;
 
-                AbilityInProgress = false;
-                DamageIntervalInProgress = false;
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false;  
             });
 
             for (int a = 0; a < 4; a++)
@@ -1023,13 +1001,8 @@ namespace Server.Mobiles
             if (!SpecialAbilities.Exists(this))
                 return;
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
             PublicOverheadMessage(MessageType.Regular, 0, false, "*draws energy from the abyss*");
             PlaySound(0x456);
-
-            AbilityInProgress = true;
-            DamageIntervalInProgress = true;
 
             int castingMotions = 3;
             double castingDuration = 1;
@@ -1043,6 +1016,11 @@ namespace Server.Mobiles
             int effectHue = Hue - 1;
 
             Combatant = null;
+
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;  
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1, stationaryDelay, true, 0, false, "", "", "-1");
 
@@ -1064,8 +1042,10 @@ namespace Server.Mobiles
                 if (!SpecialAbilities.Exists(this))
                     return;
 
-                AbilityInProgress = false;
-                DamageIntervalInProgress = false;
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false;  
 
                 PublicOverheadMessage(MessageType.Regular, 0, false, "Behold mortals, your doom.");
                 PlaySound(0x246);
@@ -1092,7 +1072,7 @@ namespace Server.Mobiles
                     Effects.PlaySound(mobileLocation, map, 0x246);
 
                     int maxExtraProjectiles = 8;
-                    int projectiles = 4 + (int)(Math.Ceiling((double)maxExtraProjectiles * spawnPercent)); 
+                    int projectiles = 4 + (int)(Math.Ceiling((double)maxExtraProjectiles * m_SpawnPercent)); 
                     int particleSpeed = 4;
 
                     for (int a = 0; a < projectiles; a++)
@@ -1119,7 +1099,7 @@ namespace Server.Mobiles
                             Effects.SendMovingEffect(effectStartLocation, effectEndLocation, 8707, particleSpeed, 0, false, false, 0, 0);
                     }
                     
-                    double damage = DamageMin + (int)(Math.Ceiling((double)DamageMin * spawnPercent)); 
+                    double damage = DamageMin + (int)(Math.Ceiling((double)DamageMin * m_SpawnPercent)); 
 
                     if (mobile is BaseCreature)
                         damage *= 3.0;
@@ -1158,8 +1138,8 @@ namespace Server.Mobiles
 
                         Effects.PlaySound(mobile.Location, mobile.Map, 0x653);
 
-                        projectiles = 4 + (int)(Math.Ceiling((double)maxExtraProjectiles * spawnPercent));
-                        int blood = 4 + (int)(Math.Ceiling((double)maxExtraProjectiles * spawnPercent)); 
+                        projectiles = 4 + (int)(Math.Ceiling((double)maxExtraProjectiles * m_SpawnPercent));
+                        int blood = 4 + (int)(Math.Ceiling((double)maxExtraProjectiles * m_SpawnPercent)); 
 
                         particleSpeed = 4;
 
@@ -1207,33 +1187,37 @@ namespace Server.Mobiles
         {
             base.OnThink();
 
-            if (Utility.RandomDouble() < 0.01 && !Hidden && DateTime.UtcNow > m_NextSpeechAllowed)
+            if (Combatant != null && !Frozen && !IsHindered() && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress)
             {
-                if (Combatant == null)
-                    Say(idleSpeech[Utility.Random(idleSpeech.Length - 1)]);
-
-                m_NextSpeechAllowed = DateTime.UtcNow + NextSpeechDelay;
-            }
-
-            if (SpecialAbilities.MonsterCanDamage(this, Combatant) && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !IsHindered() && !AbilityInProgress && !DamageIntervalInProgress)
-            {
-                switch (Utility.RandomMinMax(1, 2))
+                if (m_HealthIntervalAbilityReady)
                 {
-                    case 1:
-                        if (DateTime.UtcNow >= m_NextRaiseDeadAllowed)
-                        {
-                            RaiseDead();
-                            return;
-                        }
-                    break;
+                    m_HealthIntervalAbilityReady = false;
 
-                    case 2:
-                        if (DateTime.UtcNow >= m_NextMassiveBreathAllowed)
-                        {
-                            MassiveBoneBreath();
-                            return;
-                        }
-                    break;
+                    DamageIntervalTriggered();
+
+                    return;
+                }
+
+                else if (DateTime.UtcNow >= m_NextAbilityAllowed)
+                {
+                    switch (Utility.RandomMinMax(1, 2))
+                    {
+                        case 1:
+                            if (DateTime.UtcNow >= m_NextRaiseDeadAllowed)
+                            {
+                                RaiseDead();
+                                return;
+                            }
+                        break;
+
+                        case 2:
+                            if (DateTime.UtcNow >= m_NextMassiveBreathAllowed)
+                            {
+                                MassiveBoneBreath();
+                                return;
+                            }
+                        break;
+                    }
                 }
             }
 
@@ -1280,24 +1264,24 @@ namespace Server.Mobiles
 
                 if (creatureWasRevealed)
                 {
-                    if (m_Item != null)
+                    if (m_SkullOrb != null)
                     {
-                        if (!m_Item.Deleted)
+                        if (!m_SkullOrb.Deleted)
                         {
                             TimedStatic discharge = new TimedStatic(0x3779, .5);
                             discharge.Hue = m_OrbRevealHue;
                             discharge.Name = "dissipated energy";
-                            discharge.MoveToWorld(m_Item.Location, m_Item.Map);
+                            discharge.MoveToWorld(m_SkullOrb.Location, m_SkullOrb.Map);
 
-                            m_Item.PublicOverheadMessage(MessageType.Regular, 0x482, false, "None escapes my gaze.");
-                            m_Item.Hue = m_OrbRevealHue;
+                            m_SkullOrb.PublicOverheadMessage(MessageType.Regular, 0x482, false, "None escapes my gaze.");
+                            m_SkullOrb.Hue = m_OrbRevealHue;
 
                             Timer.DelayCall(TimeSpan.FromSeconds(1.0), delegate
                             {
-                                if (m_Item == null) return;
-                                if (m_Item.Deleted) return;
+                                if (m_SkullOrb == null) return;
+                                if (m_SkullOrb.Deleted) return;
 
-                                m_Item.Hue = m_OrbMainHue;
+                                m_SkullOrb.Hue = m_OrbMainHue;
                             });
                         }
                     }
@@ -1421,34 +1405,16 @@ namespace Server.Mobiles
             if (Utility.RandomMinMax(1, 20) == 1)
                 c.AddItem(new NecromancersGravestone());
             
-            for (int a = 0; a < m_Creatures.Count; ++a)
-            {
-                if (m_Creatures[a] != null)
-                {
-                    if (m_Creatures[a].Alive)
-                        m_Creatures[a].Kill();
-                }
-            }
-
-            if (m_Item != null)
-                m_Item.Delete();
+            if (m_SkullOrb != null)
+                m_SkullOrb.Delete();
         }
 
         public override void OnAfterDelete()
         {
             base.OnAfterDelete();
-
-            for (int a = 0; a < m_Creatures.Count; ++a)
-            {
-                if (m_Creatures[a] != null)
-                {
-                    if (!m_Creatures[a].Deleted)
-                        m_Creatures[a].Delete();
-                }
-            }
-
-            if (m_Item != null)
-                m_Item.Delete();
+            
+            if (m_SkullOrb != null)
+                m_SkullOrb.Delete();
         }
 
         public override bool IsHighSeasBodyType { get { return true; } }
@@ -1479,10 +1445,10 @@ namespace Server.Mobiles
         {
             base.OnLocationChange(oldLocation);
 
-            if (m_Item != null)
+            if (m_SkullOrb != null)
             {
                 Point3D skullLocation = new Point3D(Location.X, Location.Y, Z + 35);
-                m_Item.Location = skullLocation;
+                m_SkullOrb.Location = skullLocation;
             }
         }
 
@@ -1495,18 +1461,8 @@ namespace Server.Mobiles
             base.Serialize(writer);
             writer.Write((int)0);
 
-            writer.Write(damageIntervalThreshold);
-            writer.Write(damageProgress);
-            writer.Write(intervalCount);
-            writer.Write(totalIntervals);
-
-            writer.Write(m_Creatures.Count);
-            for (int a = 0; a < m_Creatures.Count; a++)
-            {
-                writer.Write(m_Creatures[a]);
-            }
-
-            writer.Write(m_Item);
+            //Version 0
+            writer.Write(m_SkullOrb);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -1514,23 +1470,11 @@ namespace Server.Mobiles
             base.Deserialize(reader);
             int version = reader.ReadInt();
 
-            damageIntervalThreshold = reader.ReadInt();
-            damageProgress = reader.ReadInt();
-            intervalCount = reader.ReadInt();
-            totalIntervals = reader.ReadInt();
-
-            m_Creatures = new List<Mobile>();
-
-            int creaturesCount = reader.ReadInt();
-            for (int a = 0; a < creaturesCount; a++)
+            //Version 0
+            if (version >= 0)
             {
-                Mobile creature = reader.ReadMobile();
-
-                if (creature != null)
-                    m_Creatures.Add(creature);
+                m_SkullOrb = reader.ReadItem();
             }
-
-            m_Item = reader.ReadItem();
         }
     }
 }

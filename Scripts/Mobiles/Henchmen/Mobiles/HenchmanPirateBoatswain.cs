@@ -17,13 +17,13 @@ namespace Server.Custom
             }
         }
 
-        public override string[] idleSpeech { get { return new string[] {       "I'll keelhaul any man er woman I see dozin' off!",
+        public override string[] IdleSpeech { get { return new string[] {       "I'll keelhaul any man er woman I see dozin' off!",
                                                                                 "Get off yer' bones ye lazy maggots and get to work!",
                                                                                 "*adjusts hook*",
                                                                                 "*sneers*" 
                                                                                 };}}
 
-        public override string[] combatSpeech { get { return new string[] {     "Any man that runs get's a blade 'imself!",
+        public override string[] CombatSpeech { get { return new string[] {     "Any man that runs get's a blade 'imself!",
                                                                                 "Give'em hell and take all they 'ave!",
                                                                                 "Don't just stand there, stab somethin'!",
                                                                                 "I'll be damned if I'll die here today among ye sorry lot!" 

@@ -17,13 +17,13 @@ namespace Server.Custom
             }
         }
 
-        public override string[] idleSpeech { get { return new string[] {       "Death. Darkness. Despair.",
+        public override string[] IdleSpeech { get { return new string[] {       "Death. Darkness. Despair.",
                                                                                 "Come with me into darkness.",
                                                                                 "*whispers*",
                                                                                 "*peers into the shadows*" 
                                                                                 };}}
 
-        public override string[] combatSpeech { get { return new string[] {     "Sleep, friend.",
+        public override string[] CombatSpeech { get { return new string[] {     "Sleep, friend.",
                                                                                 "Night has come for you.",
                                                                                 "All things must return to darkness.",
                                                                                 "Light will not save you." 

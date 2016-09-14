@@ -17,13 +17,13 @@ namespace Server.Custom
             }
         }
 
-        public override string[] idleSpeech { get { return new string[] {       "I got this scar from a kraken's claw, I did. Or was it a sea serpent?",
+        public override string[] IdleSpeech { get { return new string[] {       "I got this scar from a kraken's claw, I did. Or was it a sea serpent?",
                                                                                 "Gold be nice, but blood and guts be the real treasure.",
                                                                                 "*picks teeth*",
                                                                                 "*itches head*" 
                                                                                 };}}
 
-        public override string[] combatSpeech { get { return new string[] {     "Show'em what it means to be a real pirate!",
+        public override string[] CombatSpeech { get { return new string[] {     "Show'em what it means to be a real pirate!",
                                                                                 "Paint they'r decks with they'r insides!",
                                                                                 "Gods, I've been spoilin' for a fight!",
                                                                                 "I be makin' a necklace out o' yer teeth." 

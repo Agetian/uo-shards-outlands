@@ -7,7 +7,7 @@ namespace Server.Spells
 {
     public abstract class MagerySpell : Spell
     {
-        private static int[] m_ManaTable = new int[] { 4, 6, 9, 11, 14, 20, 40, 50 };
+        private static int[] m_ManaTable = new int[] { 4, 6, 9, 11, 14, 20, 40, 50 };        
 
         public MagerySpell(Mobile caster, Item scroll, SpellInfo info): base(caster, scroll, info)
         {

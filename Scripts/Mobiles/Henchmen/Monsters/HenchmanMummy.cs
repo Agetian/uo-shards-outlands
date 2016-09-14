@@ -18,13 +18,13 @@ namespace Server.Custom
             }
         }
 
-        public override string[] idleSpeech { get { return new string[] {       "",
+        public override string[] IdleSpeech { get { return new string[] {       "",
                                                                                 "",
                                                                                 "",
                                                                                 "" 
                                                                                 };}}
 
-        public override string[] combatSpeech { get { return new string[] {     "",
+        public override string[] CombatSpeech { get { return new string[] {     "",
                                                                                 "",
                                                                                 "",
                                                                                 "" 

@@ -17,7 +17,7 @@ namespace Server.Custom
             }
         }
 
-        public override string[] idleSpeech
+        public override string[] IdleSpeech
         {
             get
             {
@@ -29,7 +29,7 @@ namespace Server.Custom
             }
         }
 
-        public override string[] combatSpeech
+        public override string[] CombatSpeech
         {
             get
             {

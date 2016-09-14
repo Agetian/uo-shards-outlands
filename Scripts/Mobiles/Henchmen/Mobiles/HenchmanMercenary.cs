@@ -17,13 +17,13 @@ namespace Server.Custom
             }
         }
 
-        public override string[] idleSpeech { get { return new string[] {       "I remember my first contract...",
+        public override string[] IdleSpeech { get { return new string[] {       "I remember my first contract...",
                                                                                 "What's next, boss?",
                                                                                 "*kicks dirt off boots*",
                                                                                 "*gazes off in the distance*" 
                                                                                 };}}
 
-        public override string[] combatSpeech { get { return new string[] {     "You picked the wrong side, friend.",
+        public override string[] CombatSpeech { get { return new string[] {     "You picked the wrong side, friend.",
                                                                                 "You remind me of someone I killed once.",
                                                                                 "Nothing personal.",
                                                                                 "A job's a job." 

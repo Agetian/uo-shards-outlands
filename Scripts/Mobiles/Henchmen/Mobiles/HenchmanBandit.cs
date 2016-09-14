@@ -17,13 +17,13 @@ namespace Server.Custom
             }
         }
 
-        public override string[] idleSpeech { get { return new string[] {       "I hope you have a big score in mind...",
+        public override string[] IdleSpeech { get { return new string[] {       "I hope you have a big score in mind...",
                                                                                 "My coin purse is a bit light lately..",
                                                                                 "*spins dagger*",
                                                                                 "*figdgets angrily*" 
                                                                                 };}}
 
-        public override string[] combatSpeech { get { return new string[] {     "Your money or yer life! Nah, both!",
+        public override string[] CombatSpeech { get { return new string[] {     "Your money or yer life! Nah, both!",
                                                                                 "Die! Die! Die!",
                                                                                 "Leave nothing behind!",
                                                                                 "I smell gold on them!" 

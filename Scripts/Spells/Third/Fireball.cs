@@ -18,6 +18,11 @@ namespace Server.Spells.Third
 
 		public override SpellCircle Circle { get { return SpellCircle.Third; } }
 
+        public static int DamageMin { get { return 8; } }
+        public static int DamageMax { get { return 15; } }
+
+        public static double SpellSpecificCreatureDamageBonus { get { return 0.0; } }
+
 		public FireballSpell( Mobile caster, Item scroll ) : base( caster, scroll, m_Info )
 		{
 		}
@@ -56,7 +61,10 @@ namespace Server.Spells.Third
                 Boolean chargedSpellcast = SpellHelper.IsChargedSpell(Caster, mobile, true, Scroll != null);
                 Boolean isTamedTarget = SpellHelper.IsTamedTarget(Caster, mobile);
 
-                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Fireball);      
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.Fireball);
+
+                if (Caster is PlayerMobile && mobile is BaseCreature)
+                    damageBonus += SpellSpecificCreatureDamageBonus;
 
                 if (enhancedSpellcast)
                 {

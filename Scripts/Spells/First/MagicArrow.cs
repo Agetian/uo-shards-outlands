@@ -18,6 +18,11 @@ namespace Server.Spells.First
 
 		public override SpellCircle Circle { get { return SpellCircle.First; } }
 
+        public static int DamageMin { get { return 3; } }
+        public static int DamageMax { get { return 5; } }
+
+        public static double SpellSpecificCreatureDamageBonus { get { return 0.0; } }
+
 		public MagicArrowSpell( Mobile caster, Item scroll ) : base( caster, scroll, m_Info )
 		{
 		}
@@ -57,7 +62,10 @@ namespace Server.Spells.First
                 Boolean chargedSpellcast = SpellHelper.IsChargedSpell(Caster, mobile, true, Scroll != null);
                 Boolean isTamedTarget = SpellHelper.IsTamedTarget(Caster, mobile);
 
-                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.MagicArrow);                  
+                int spellHue = Enhancements.GetMobileSpellHue(Caster, Enhancements.SpellType.MagicArrow);
+
+                if (Caster is PlayerMobile && mobile is BaseCreature)
+                    damageBonus += SpellSpecificCreatureDamageBonus;
 
                 if (enhancedSpellcast)
                 {

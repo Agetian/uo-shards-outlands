@@ -13,14 +13,9 @@ namespace Server.Mobiles
     [CorpseName("lodestone's corpse")]
     public class Lodestone : BaseCreature
     {
-        public override string TitleReward { get { return "Slayer of Lodestone"; } }
-
         public DateTime m_NextAIChangeAllowed;
         public TimeSpan NextAIChangeDelay = TimeSpan.FromSeconds(30);
-
-        public DateTime m_NextSpeechAllowed;
-        public TimeSpan NextSpeechDelay = TimeSpan.FromSeconds(30);
-
+        
         public DateTime m_NextRockWaveAllowed;
         public TimeSpan NextRockWaveDelay = TimeSpan.FromSeconds(20);
 
@@ -32,30 +27,18 @@ namespace Server.Mobiles
 
         public DateTime m_NextHarmonicRefractorAllowed;
         public TimeSpan NextHarmonicRefractorDelay = TimeSpan.FromSeconds(120);
-
-        public DateTime m_NextAbilityAllowed;
-        public double NextAbilityDelayMin = 10;
-        public double NextAbilityDelayMax = 5;
-
-        public int damageIntervalThreshold = 500;
-        public int damageProgress = 0;
-
-        public int intervalCount = 0;
-        public int totalIntervals = 50;
-
-        public bool AbilityInProgress = false;
-        public bool DamageIntervalInProgress = false;
-
+        
         public List<Mobile> m_RockWaveTargets = new List<Mobile>();
         public List<Mobile> m_RockslideTargets = new List<Mobile>();
 
-        public List<Mobile> m_Creatures = new List<Mobile>();
         public List<Item> m_Items = new List<Item>();
 
-        public string[] idleSpeech { get { return new string[] {"*lumbers*"}; } }
-        public string[] combatSpeech { get  { return new string[] {""}; } }
+        public static int HarmonicRefractorHits = 150;
+        public static int MaxHarmonicRefractors = 4;
 
-        public int ThemeHue = 2590; //2709;
+        public override int TotalHealthIntervals { get { return 40; } }
+
+        public static int ThemeHue = 2590;
 
         [Constructable]
         public Lodestone(): base(AIType.AI_Melee, FightMode.Closest, 10, 1, 0.2, 0.4)
@@ -79,7 +62,7 @@ namespace Server.Mobiles
             SetSkill(SkillName.Wrestling, 80);
             SetSkill(SkillName.Tactics, 100);
 
-            SetSkill(SkillName.MagicResist, 100);
+            SetSkill(SkillName.MagicResist, 0);
 
             Fame = 20000;
             Karma = -20000;
@@ -89,9 +72,14 @@ namespace Server.Mobiles
 
         public virtual int AttackRange { get { return 2; } }
 
-        public override bool AlwaysBoss { get { return true; } }
-        public override string BossSpawnMessage { get { return "Lodestone has arisen and stirs within Shame Dungeon..."; } }
+        public override bool AlwaysBoss { get { return true; } }       
         public override bool AlwaysMurderer { get { return true; } }
+
+        public override string TitleReward { get { return "Slayer of Lodestone"; } }
+        public override string BossSpawnMessage { get { return "Lodestone has arisen and stirs within Shame Dungeon..."; } }
+
+        public override string[] IdleSpeech { get { return new string[] { "*lumbers*" }; } }
+        public override string[] CombatSpeech { get { return new string[] { "" }; } }
 
         public override bool IsHighSeasBodyType { get { return true; } }
 
@@ -109,10 +97,7 @@ namespace Server.Mobiles
             ResolveAcquireTargetDelay = 0.5;
             RangePerception = 24;
            
-            UniqueCreatureDifficultyScalar = 1.5;
-
-            damageIntervalThreshold = (int)(Math.Round((double)HitsMax / (double)totalIntervals));
-            intervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)totalIntervals));            
+            UniqueCreatureDifficultyScalar = 1.5;         
         }
 
         public override void OnGaveMeleeAttack(Mobile defender)
@@ -123,6 +108,7 @@ namespace Server.Mobiles
         public override bool OnBeforeHarmfulSpell()
         {
             HarmonicRefractor harmonicRefractor = null;
+
             int closestDistance = 100000;
 
             foreach (HarmonicRefractor refractor in HarmonicRefractor.m_Instances)
@@ -145,11 +131,14 @@ namespace Server.Mobiles
             if (harmonicRefractor != null)
             {
                 TimedStatic reflection = new TimedStatic(0x375A, 2);
+
                 reflection.Name = "spell refraction";
                 reflection.Hue = ThemeHue;
+
                 Point3D refractionLocation = harmonicRefractor.Location;
                 refractionLocation.Z += 10;
                 reflection.MoveToWorld(refractionLocation, Map);
+
                 Effects.PlaySound(Location, Map, 0x1E9);
 
                 harmonicRefractor.PublicOverheadMessage(MessageType.Regular, 0, false, "*captures harmonic frequency*");
@@ -174,142 +163,120 @@ namespace Server.Mobiles
         }
 
         public override void OnDamage(int amount, Mobile from, bool willKill)
-        {           
-            damageIntervalThreshold = (int)(Math.Round((double)HitsMax / (double)totalIntervals));
-            intervalCount = (int)(Math.Floor((1 - (double)Hits / (double)HitsMax) * (double)totalIntervals));
+        {
+            base.OnDamage(amount, from, willKill);
 
-            if (!willKill)
+            if (!willKill && from != null && amount > 10 && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress)
             {
-                damageProgress += amount;
+                BaseWeapon weapon = from.Weapon as BaseWeapon;
 
-                if (damageProgress >= damageIntervalThreshold)
+                double rockfallChance = 0;
+                double rockfallScalar = .001;
+
+                if (from is PlayerMobile)
                 {
-                    m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
-
-                    Effects.PlaySound(Location, Map, GetAngerSound());
-
-                    damageProgress = 0;
-
-                    double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-                    if (intervalCount % 8 == 0)
+                    if (weapon != null)
                     {
-                        SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, 2, true, 0, false, "", "", "-1");
+                        if (weapon is BaseRanged)
+                            rockfallScalar = .006;
 
-                        Animate(15, 12, 1, true, false, 0);
-                        PlaySound(GetAngerSound());
-
-                        List<Type> m_CreatureTypes = new List<Type>();
-
-                        int creaturePower = (int)(Math.Round(10 + (20 * spawnPercent)));
-                        int creaturePowerRemaining = creaturePower;
-
-                        int maxCreatureStrength = (int)(Math.Round(2 + (10 * spawnPercent)));
-
-                        if (maxCreatureStrength > 10)
-                            maxCreatureStrength = 10;
-
-                        for (int a = 0; a < 100; a++)
-                        {
-                            Type type = null;
-
-                            switch (Utility.RandomMinMax(1, maxCreatureStrength))
-                            {
-                                case 1: type = typeof(EarthElemental); creaturePowerRemaining -= 3; break;
-                                case 2: type = typeof(DullCopperElemental); creaturePowerRemaining -= 4; break;
-                                case 3: type = typeof(CopperElemental); creaturePowerRemaining -= 5; break;
-                                case 4: type = typeof(BronzeElemental); creaturePowerRemaining -= 6; break;
-                                case 5: type = typeof(ShadowIronElemental); creaturePowerRemaining -= 7; break;
-                                case 6: type = typeof(GoldenElemental); creaturePowerRemaining -= 8; break;
-                                case 7: type = typeof(AgapiteElemental); creaturePowerRemaining -= 9; break;
-                                case 8: type = typeof(VeriteElemental); creaturePowerRemaining -= 10; break;
-                                case 9: type = typeof(ValoriteElemental); creaturePowerRemaining -= 11; break;
-                                case 10: type = typeof(LuniteElemental); creaturePowerRemaining -= 12; break;
-                            }
-
-                            if (creaturePowerRemaining <= 0)
-                                break;
-
-                            if (type != null)
-                                m_CreatureTypes.Add(type);
-                        }
-
-                        foreach (Type type in m_CreatureTypes)
-                        {
-                            SpawnCreatures(type, 1);
-                        }
+                        else if (weapon is BaseMeleeWeapon || weapon is Fists)
+                            rockfallScalar = .001;
                     }
 
                     else
-                    {
-                        int abilities = 3;
-
-                        if (HarmonicRefractor.m_Instances.Count < 5)
-                            abilities++;
-
-                        switch (Utility.RandomMinMax(1, abilities))
-                        {                           
-                            case 1: GroundSlam(); break;                            
-                            case 2: BoulderStorm(); break;
-                            case 3: Rockalanche(); break;
-                            case 4: GoBelow(); break;
-                        }
-                    }                   
+                        rockfallScalar = .004;
                 }
 
                 else
+                    rockfallScalar = .001;
+
+                rockfallChance = (double)amount * rockfallScalar;
+
+                if (Utility.RandomDouble() <= rockfallChance)
                 {
-                    if (from != null && !AbilityInProgress && !DamageIntervalInProgress)
-                    {
-                        BaseWeapon weapon = from.Weapon as BaseWeapon;
-
-                        double rockfallChance = 0;
-                        double rockfallScalar = .001;
-
-                        if (from is PlayerMobile)
-                        {
-                            if (weapon != null)
-                            {
-                                //Ranged Weapon
-                                if (weapon is BaseRanged)
-                                    rockfallScalar = .006;
-
-                                //Melee Weapon
-                                else if (weapon is BaseMeleeWeapon || weapon is Fists)
-                                    rockfallScalar = .001;
-                            }
-
-                            //Other: Spell or Item
-                            else
-                                rockfallScalar = .004;
-                        }
-
-                        //Monster Damage
-                        else
-                             rockfallScalar = .001;
-
-                        rockfallChance = (double)amount * rockfallScalar;
-
-                        if (Utility.RandomDouble() <= rockfallChance)
-                        {
-                            if (SpecialAbilities.MonsterCanDamage(this, from) && Utility.GetDistance(Location, from.Location) <= 30)
-                                RockFall(from.Location, from.Map);
-                        }
-                    }
+                    if (SpecialAbilities.MonsterCanDamage(this, from) && Utility.GetDistance(Location, from.Location) <= 30)
+                        RockFall(from.Location, from.Map);
                 }
-            }            
-
-            base.OnDamage(amount, from, willKill);
+            }
         }
 
-        public TimeSpan GetNextAbilityDelay()
+        public override void DamageIntervalTriggered()
         {
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
+            base.DamageIntervalTriggered();
 
-            return TimeSpan.FromSeconds(NextAbilityDelayMin - ((NextAbilityDelayMin - NextAbilityDelayMax) * spawnPercent));
+            Effects.PlaySound(Location, Map, GetAngerSound());
+
+            if (m_HealthIntervalCount % 8 == 0)
+            {
+                SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, 2, true, 0, false, "", "", "-1");
+
+                Animate(15, 12, 1, true, false, 0);
+                PlaySound(GetAngerSound());
+
+                List<Type> m_CreatureTypes = new List<Type>();
+
+                int creaturePower = (int)(Math.Round(10 + (20 * m_SpawnPercent)));
+                int creaturePowerRemaining = creaturePower;
+
+                int maxCreatureStrength = (int)(Math.Round(2 + (10 * m_SpawnPercent)));
+
+                if (maxCreatureStrength > 10)
+                    maxCreatureStrength = 10;
+
+                for (int a = 0; a < 100; a++)
+                {
+                    Type type = null;
+
+                    switch (Utility.RandomMinMax(1, maxCreatureStrength))
+                    {
+                        case 1: type = typeof(EarthElemental); creaturePowerRemaining -= 3; break;
+                        case 2: type = typeof(DullCopperElemental); creaturePowerRemaining -= 4; break;
+                        case 3: type = typeof(CopperElemental); creaturePowerRemaining -= 5; break;
+                        case 4: type = typeof(BronzeElemental); creaturePowerRemaining -= 6; break;
+                        case 5: type = typeof(ShadowIronElemental); creaturePowerRemaining -= 7; break;
+                        case 6: type = typeof(GoldenElemental); creaturePowerRemaining -= 8; break;
+                        case 7: type = typeof(AgapiteElemental); creaturePowerRemaining -= 9; break;
+                        case 8: type = typeof(VeriteElemental); creaturePowerRemaining -= 10; break;
+                        case 9: type = typeof(ValoriteElemental); creaturePowerRemaining -= 11; break;
+                        case 10: type = typeof(LuniteElemental); creaturePowerRemaining -= 12; break;
+                    }
+
+                    if (creaturePowerRemaining <= 0)
+                        break;
+
+                    if (type != null)
+                        m_CreatureTypes.Add(type);
+                }
+
+                foreach (Type type in m_CreatureTypes)
+                {
+                    SpawnCreatures(type, 1);
+                }
+            }
+
+            else
+            {
+                int abilities = 3;
+
+                if (HarmonicRefractor.m_Instances.Count < 5)
+                    abilities++;
+
+                switch (Utility.RandomMinMax(1, abilities))
+                {
+                    case 1: GroundSlam(); break;
+                    case 2: BoulderStorm(); break;
+                    case 3: Rockalanche(); break;
+                    case 4: GoBelow(); break;
+                }
+            } 
         }
 
-        //Normal Abilities
+        public override TimeSpan GetNextAbilityDelay()
+        {
+            return TimeSpan.FromSeconds(NextAbilityDelayMin - ((NextAbilityDelayMin - NextAbilityDelayMax) * m_SpawnPercent));
+        }
+
         #region Rock Fall
 
         public void RockFall(Point3D location, Map map)
@@ -319,15 +286,13 @@ namespace Server.Mobiles
 
             IEntity startLocation = new Entity(Serial.Zero, new Point3D(location.X - 1, location.Y - 1, location.Z + 100), map);
             IEntity endLocation = new Entity(Serial.Zero, new Point3D(location.X, location.Y, location.Z + 5), map);
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             int rockType = 1;
 
-            if (spawnPercent >= .40)
+            if (m_SpawnPercent >= .40)
                 rockType = 2;
 
-            if (spawnPercent >= .80)
+            if (m_SpawnPercent >= .80)
                 rockType = 3;
 
             double damage = 15 + (5 * (double)rockType);
@@ -414,9 +379,7 @@ namespace Server.Mobiles
                 return;
 
             m_RockWaveTargets.Clear();
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             Point3D location = Location;
             Map map = Map;
 
@@ -440,7 +403,7 @@ namespace Server.Mobiles
 
             nearbyMobiles.Free();
 
-            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+            m_NextAbilityAllowed = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
             if (m_ValidMobiles.Count == 0)
                 return;
@@ -449,8 +412,8 @@ namespace Server.Mobiles
             Map targetMap = map;
 
             double directionDelay = .25;
-            double initialDelay = 1 - (.5 * spawnPercent);
-            double intervalDelay = .12 - (.06 * spawnPercent);
+            double initialDelay = 1 - (.5 * m_SpawnPercent);
+            double intervalDelay = .12 - (.06 * m_SpawnPercent);
 
             int distance = Utility.GetDistance(location, targetLocation);
             double distanceDelay = (double)distance * intervalDelay;
@@ -459,13 +422,20 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            m_NextRockWaveAllowed = DateTime.UtcNow + NextRockWaveDelay + TimeSpan.FromSeconds(totalDelay);
-            AbilityInProgress = true;            
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_NextRockWaveAllowed = DateTime.UtcNow + NextRockWaveDelay;                    
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_NextRockWaveAllowed = DateTime.UtcNow + NextRockWaveDelay;
             });
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*unleashes rock wave*");
@@ -519,10 +489,10 @@ namespace Server.Mobiles
 
                         int radius = 1;
 
-                        if (spawnPercent >= .25)
+                        if (m_SpawnPercent >= .25)
                             radius = 2;
 
-                        if (spawnPercent >= .75)
+                        if (m_SpawnPercent >= .75)
                             radius = 3;
 
                         int minRadius = radius * -1;
@@ -534,7 +504,7 @@ namespace Server.Mobiles
                             {
                                 Point3D rockLocation =  new Point3D(currentLocation.X + b, currentLocation.Y + c, currentLocation.Z);
 
-                                double rockChance = .33 + (.33 * spawnPercent);
+                                double rockChance = .33 + (.33 * m_SpawnPercent);
 
                                 bool rock = Utility.RandomDouble() <= rockChance;
                                 
@@ -653,9 +623,7 @@ namespace Server.Mobiles
                 return;
 
             m_RockslideTargets.Clear();
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             Point3D location = Location;
             Map map = Map;
 
@@ -678,7 +646,7 @@ namespace Server.Mobiles
 
             nearbyMobiles.Free();
 
-            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+            m_NextAbilityAllowed = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
             if (m_ValidMobiles.Count == 0)
                 return;
@@ -687,22 +655,29 @@ namespace Server.Mobiles
             Map targetMap = map;
             
             double directionDelay = .25;
-            double initialDelay = 1 - (.5 * spawnPercent);
+            double initialDelay = 1 - (.5 * m_SpawnPercent);
             double durationDelay = 1;
 
             double totalDelay = directionDelay + initialDelay + durationDelay;
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
+            
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
 
-            m_NextRockslideAllowed = DateTime.UtcNow + NextRockslideDelay + TimeSpan.FromSeconds(totalDelay);
-            AbilityInProgress = true;
+            m_NextRockslideAllowed = DateTime.UtcNow + NextRockslideDelay;
 
             Direction = Utility.GetDirection(location, targetLocation);
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_NextRockslideAllowed = DateTime.UtcNow + NextRockslideDelay;
             });
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*begins a rockslide*");
@@ -722,16 +697,16 @@ namespace Server.Mobiles
 
                     Effects.PlaySound(location, map, 0x21F);
 
-                    int effectCount = (int)Math.Round(10 + (40 * spawnPercent));
+                    int effectCount = (int)Math.Round(10 + (40 * m_SpawnPercent));
                     int effectRadius = 1;
 
-                    if (spawnPercent >= .25)
+                    if (m_SpawnPercent >= .25)
                         effectRadius = 2;
 
-                    if (spawnPercent >= .5)
+                    if (m_SpawnPercent >= .5)
                         effectRadius = 3;
 
-                    if (spawnPercent >= .75)
+                    if (m_SpawnPercent >= .75)
                         effectRadius = 4;
                     
                     int rows = (effectRadius * 2) + 1;
@@ -856,9 +831,7 @@ namespace Server.Mobiles
         {
             if (!SpecialAbilities.Exists(this))
                 return;
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             Point3D location = Location;
             Map map = Map;
 
@@ -882,7 +855,7 @@ namespace Server.Mobiles
 
             nearbyMobiles.Free();
 
-            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+            m_NextAbilityAllowed = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
             if (m_ValidMobiles.Count == 0)
                 return;
@@ -897,13 +870,20 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            m_NextBoulderAllowed = DateTime.UtcNow + NextBoulderDelay + TimeSpan.FromSeconds(totalDelay);
-            AbilityInProgress = true;
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_NextBoulderAllowed = DateTime.UtcNow + NextBoulderDelay;           
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_NextBoulderAllowed = DateTime.UtcNow + NextBoulderDelay; 
             });
 
             Direction = Utility.GetDirection(location, targetLocation);
@@ -1044,15 +1024,20 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            m_NextHarmonicRefractorAllowed = DateTime.UtcNow + NextHarmonicRefractorDelay;
-            AbilityInProgress = true;
-
+            m_AbilityInProgress = true;
             m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_NextHarmonicRefractorAllowed = DateTime.UtcNow + NextHarmonicRefractorDelay;
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_NextHarmonicRefractorAllowed = DateTime.UtcNow + NextHarmonicRefractorDelay;
             });
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*reaches into the earth*");
@@ -1082,8 +1067,8 @@ namespace Server.Mobiles
                     refractor.LightlyDamagedItemId = itemStyle;
                     refractor.HeavilyDamagedItemId = itemStyle;
 
-                    refractor.MaxHitPoints = 250;
-                    refractor.HitPoints = 250;
+                    refractor.MaxHitPoints = HarmonicRefractorHits;
+                    refractor.HitPoints = HarmonicRefractorHits;
 
                     m_Items.Add(refractor);
 
@@ -1131,6 +1116,7 @@ namespace Server.Mobiles
                         TimedStatic reflection = new TimedStatic(0x375A, 2);
                         reflection.Name = "spell refraction";
                         reflection.Hue = ThemeHue;
+
                         Point3D refractionLocation = refractor.Location;
                         refractionLocation.Z += 10;
                         reflection.MoveToWorld(refractionLocation, Map);
@@ -1145,27 +1131,23 @@ namespace Server.Mobiles
 
         #endregion
 
-        //Epic Abilities
-
         #region Boulderstorm
 
         public void BoulderStorm()
         {
             if (!SpecialAbilities.Exists(this))
                 return;
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             Point3D location = Location;
             Map map = Map;
 
             int range = 20;
             int boulderCount = 2;
 
-            if (spawnPercent >= .40)
+            if (m_SpawnPercent >= .40)
                 boulderCount = 3;
 
-            if (spawnPercent >= .80)
+            if (m_SpawnPercent >= .80)
                 boulderCount = 4;
 
             Combatant = null;
@@ -1189,7 +1171,7 @@ namespace Server.Mobiles
 
             nearbyMobiles.Free();
 
-            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+            m_NextAbilityAllowed = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
             if (m_PossibleLocations.Count == 0)
                 return;
@@ -1201,13 +1183,20 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            m_NextBoulderAllowed = DateTime.UtcNow + NextBoulderDelay + TimeSpan.FromSeconds(totalDelay);
-            AbilityInProgress = true;
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();            
+
+            m_HealthIntervalAbilityInProgress = true;
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+                
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = false;
             });
 
             Timer.DelayCall(TimeSpan.FromSeconds(directionDelay), delegate
@@ -1335,9 +1324,7 @@ namespace Server.Mobiles
                 return;
 
             m_RockslideTargets.Clear();
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             Point3D location = Location;
             Map map = Map;
 
@@ -1362,12 +1349,12 @@ namespace Server.Mobiles
 
             nearbyMobiles.Free();
 
-            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+            m_NextAbilityAllowed = DateTime.UtcNow + TimeSpan.FromSeconds(1);
 
             if (m_PossibleLocations.Count == 0)
                 return;
 
-            int targets = (int)Math.Round(2 + (4 * spawnPercent));
+            int targets = (int)Math.Round(2 + (4 * m_SpawnPercent));
 
             for (int a = 0; a < targets; a++)
             {
@@ -1381,20 +1368,27 @@ namespace Server.Mobiles
             }
 
             double directionDelay = .25;
-            double initialDelay = 1 - (.5 * spawnPercent);
+            double initialDelay = 1 - (.5 * m_SpawnPercent);
             double durationDelay = 1;
 
             double totalDelay = directionDelay + initialDelay + durationDelay;
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            m_NextRockslideAllowed = DateTime.UtcNow + NextRockslideDelay + TimeSpan.FromSeconds(totalDelay);
-            AbilityInProgress = true;            
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;     
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
-                if (SpecialAbilities.Exists(this))
-                    AbilityInProgress = false;
+                if (!SpecialAbilities.Exists(this))
+                    return;
+
+                m_AbilityInProgress = false;
+                m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = true;
             });
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*summons a rockalanche*");
@@ -1414,16 +1408,16 @@ namespace Server.Mobiles
 
                     Effects.PlaySound(location, map, 0x21F);
 
-                    int effectCount = (int)Math.Round(10 + (40 * spawnPercent));
+                    int effectCount = (int)Math.Round(10 + (40 * m_SpawnPercent));
                     int effectRadius = 1;
 
-                    if (spawnPercent >= .25)
+                    if (m_SpawnPercent >= .25)
                         effectRadius = 2;
 
-                    if (spawnPercent >= .5)
+                    if (m_SpawnPercent >= .5)
                         effectRadius = 3;
 
-                    if (spawnPercent >= .75)
+                    if (m_SpawnPercent >= .75)
                         effectRadius = 4;
 
                     foreach (Point3D point in m_TargetLocations)
@@ -1552,8 +1546,6 @@ namespace Server.Mobiles
             if (!SpecialAbilities.Exists(this))
                 return;
             
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
             Point3D location = Location;
             Map map = Map;
 
@@ -1565,18 +1557,20 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            AbilityInProgress = true;
-            DamageIntervalInProgress = true;
-            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay() + TimeSpan.FromSeconds(.5);        
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+            m_HealthIntervalAbilityInProgress = true;            
 
             Timer.DelayCall(TimeSpan.FromSeconds(totalDelay), delegate
             {
                 if (!SpecialAbilities.Exists(this))
                     return;
 
-                AbilityInProgress = false;
-                DamageIntervalInProgress = false;
+                m_AbilityInProgress = false;
                 m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                m_HealthIntervalAbilityInProgress = true;      
             });
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*shakes the earth*");
@@ -1596,7 +1590,7 @@ namespace Server.Mobiles
 
                     Effects.PlaySound(location, map, 0x220);
 
-                    int radius = (int)(Math.Round(6 + (6 * spawnPercent)));
+                    int radius = (int)(Math.Round(6 + (6 * m_SpawnPercent)));
                     
                     int minRadius = radius * -1;
                     int maxRadius = radius;
@@ -1665,7 +1659,7 @@ namespace Server.Mobiles
 
                         DoHarmful(mobile);
 
-                        int knockbackDistance = (int)(Math.Round(8 + (8 * spawnPercent)));
+                        int knockbackDistance = (int)(Math.Round(8 + (8 * m_SpawnPercent)));
 
                         SpecialAbilities.KnockbackSpecialAbility(1.0, location, this, mobile, finalKnockbackDamage, knockbackDistance, -1, "", "The ground shakes and you are knocked off your feet!");
                                 
@@ -1684,9 +1678,7 @@ namespace Server.Mobiles
         {
             if (!SpecialAbilities.Exists(this))
                 return;
-
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
+            
             double initialDelay = 1.5;
             double totalDelay = 8;
 
@@ -1694,9 +1686,10 @@ namespace Server.Mobiles
 
             SpecialAbilities.HinderSpecialAbility(1.0, null, this, 1.0, totalDelay, true, 0, false, "", "", "-1");
 
-            AbilityInProgress = true;
-            DamageIntervalInProgress = true;
-            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay() + TimeSpan.FromSeconds(.5);            
+            m_AbilityInProgress = true;
+            m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+ 
+            m_HealthIntervalAbilityInProgress = true;
 
             PublicOverheadMessage(MessageType.Regular, 0, false, "*returns to the earth*");
 
@@ -1758,6 +1751,7 @@ namespace Server.Mobiles
                     TimedStatic reflection = new TimedStatic(0x375A, 2);
                     reflection.Name = "spell refraction";
                     reflection.Hue = ThemeHue;
+
                     Point3D refractionLocation = refractor.Location;
                     refractionLocation.Z += 10;
                     reflection.MoveToWorld(refractionLocation, Map);
@@ -1799,9 +1793,10 @@ namespace Server.Mobiles
 
                     Blessed = false;
 
-                    AbilityInProgress = false;
-                    DamageIntervalInProgress = false;
+                    m_AbilityInProgress = false;
                     m_NextAbilityAllowed = DateTime.UtcNow + GetNextAbilityDelay();
+
+                    m_HealthIntervalAbilityInProgress = false;
 
                 });
             });
@@ -1878,61 +1873,63 @@ namespace Server.Mobiles
         public override void OnThink()
         {
             base.OnThink();
+            
+            ActiveSpeed = .5 - (.2 * m_SpawnPercent);
+            PassiveSpeed = .6 - (.2 * m_SpawnPercent);
 
-            double spawnPercent = (double)intervalCount / (double)totalIntervals;
-
-            ActiveSpeed = .5 - (.2 * spawnPercent);
-            PassiveSpeed = .6 - (.2 * spawnPercent);
-
-            if (Utility.RandomDouble() < 0.01 && !Hidden && DateTime.UtcNow > m_NextSpeechAllowed)
+            if (Combatant != null && !Frozen && !IsHindered() && !m_AbilityInProgress && !m_HealthIntervalAbilityInProgress)
             {
-                if (Combatant == null)
-                    Say(idleSpeech[Utility.Random(idleSpeech.Length - 1)]);
+                if (m_HealthIntervalAbilityReady)
+                {
+                    m_HealthIntervalAbilityReady = false;
 
-                m_NextSpeechAllowed = DateTime.UtcNow + NextSpeechDelay;
-            }
+                    DamageIntervalTriggered();
 
-            if (Combatant != null && DateTime.UtcNow >= m_NextAbilityAllowed && !Frozen && !IsHindered() && !AbilityInProgress && !DamageIntervalInProgress)
-            {
-                int abilities = 3;
+                    return;
+                }
 
-                if (HarmonicRefractor.m_Instances.Count < 5)
-                    abilities++;
+                else if (DateTime.UtcNow >= m_NextAbilityAllowed)
+                {
+                    int abilities = 3;
 
-                switch (Utility.RandomMinMax(1, abilities))
-                {       
-                    case 1:
-                        if (DateTime.UtcNow >= m_NextRockWaveAllowed)
-                        {                           
-                            RockWave();
-                            return;
-                        }
-                    break;
+                    if (HarmonicRefractor.m_Instances.Count < MaxHarmonicRefractors)
+                        abilities++;
 
-                    case 2:
-                        if (DateTime.UtcNow >= m_NextRockslideAllowed)
-                        {
-                            Rockslide();
-                            return;
-                        }
-                    break;
+                    switch (Utility.RandomMinMax(1, abilities))
+                    {
+                        case 1:
+                            if (DateTime.UtcNow >= m_NextRockWaveAllowed)
+                            {
+                                RockWave();
+                                return;
+                            }
+                        break;
 
-                    case 3:
-                        if (DateTime.UtcNow >= m_NextBoulderAllowed)
-                        {
-                            Boulder();
-                            return;
-                        }                        
-                    break;
+                        case 2:
+                            if (DateTime.UtcNow >= m_NextRockslideAllowed)
+                            {
+                                Rockslide();
+                                return;
+                            }
+                        break;
 
-                    case 4:
-                        if (DateTime.UtcNow >= m_NextHarmonicRefractorAllowed)
-                        {
-                            CreateHarmonicRefractor();
-                            return;
-                        }
-                    break;                    
-                }                
+                        case 3:
+                            if (DateTime.UtcNow >= m_NextBoulderAllowed)
+                            {
+                                Boulder();
+                                return;
+                            }
+                        break;
+
+                        case 4:
+                            if (DateTime.UtcNow >= m_NextHarmonicRefractorAllowed)
+                            {
+                                CreateHarmonicRefractor();
+                                return;
+                            }
+                        break;
+                    }
+                }
             }
 
             if (Utility.RandomDouble() < .01 && DateTime.UtcNow > m_NextAIChangeAllowed)
@@ -2008,8 +2005,6 @@ namespace Server.Mobiles
         public override void OnBeforeSpawn(Point3D location, Map m)
         {
             base.OnBeforeSpawn(location, m);
-
-            //BossPersistance.PersistanceItem.DestardBossLastStatusChange = DateTime.UtcNow;
         }
 
         public override bool OnBeforeDeath()
@@ -2020,22 +2015,7 @@ namespace Server.Mobiles
         public override void OnDeath(Container c)
         {
             base.OnDeath(c);
-
-            //if (Utility.RandomMinMax(1, 10) == 1)
-                //c.AddItem(new LythTheDestroyerStatue());
-
-            //if (Utility.RandomMinMax(1, 20) == 1)
-                //c.AddItem(new DestroyersSkull());
-
-            for (int a = 0; a < m_Creatures.Count; ++a)
-            {
-                if (m_Creatures[a] != null)
-                {
-                    if (m_Creatures[a].Alive)
-                        m_Creatures[a].Kill();
-                }
-            }
-
+            
             for (int a = 0; a < m_Items.Count; ++a)
             {
                 if (m_Items[a] != null)
@@ -2046,15 +2026,6 @@ namespace Server.Mobiles
         public override void OnAfterDelete()
         {
             base.OnAfterDelete();
-            
-            for (int a = 0; a < m_Creatures.Count; ++a)
-            {
-                if (m_Creatures[a] != null)
-                {
-                    if (m_Creatures[a].Alive)
-                        m_Creatures[a].Kill();
-                }
-            }
 
             for (int a = 0; a < m_Items.Count; ++a)
             {
@@ -2072,17 +2043,7 @@ namespace Server.Mobiles
             base.Serialize(writer);
             writer.Write((int)0);
 
-            writer.Write(damageIntervalThreshold);
-            writer.Write(damageProgress);
-            writer.Write(intervalCount);
-            writer.Write(totalIntervals);
-
             //Version 0
-            writer.Write(m_Creatures.Count);
-            for (int a = 0; a < m_Creatures.Count; a++)
-            {
-                writer.Write(m_Creatures[a]);
-            }
 
             writer.Write(m_Items.Count);
             for (int a = 0; a < m_Items.Count; a++)
@@ -2096,22 +2057,9 @@ namespace Server.Mobiles
             base.Deserialize(reader);
             int version = reader.ReadInt();
 
-            damageIntervalThreshold = reader.ReadInt();
-            damageProgress = reader.ReadInt();
-            intervalCount = reader.ReadInt();
-            totalIntervals = reader.ReadInt();
-
             //Version 0
             if (version >= 0)
             {
-                int creaturesCount = reader.ReadInt();
-                for (int a = 0; a < creaturesCount; a++)
-                {
-                    Mobile creature = reader.ReadMobile();
-
-                    m_Creatures.Add(creature);
-                }
-
                 int itemCount = reader.ReadInt();
                 for (int a = 0; a < itemCount; a++)
                 {
@@ -2128,22 +2076,6 @@ namespace Server.Mobiles
         }
     }
 }
-
-//Animations
-//Body = 829;
-
-//1 15 Idle
-//4 10 Swing Up
-//5 15 Slam Down
-//10 8 Get Hit
-//11 15 Kneel Grab
-//15 12 Summon
-//17 12 Idle
-//23 15 Forwards: Rise From Ground
-//23 15 Backwards: Sink into From Ground
-//25 Basic Idle
-//27 15 Taunt
-//28 6 Basic Get Hit
 
 
 

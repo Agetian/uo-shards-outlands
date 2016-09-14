@@ -19,7 +19,7 @@ namespace Server.Items
         public virtual int AltHue { get { return 2589; } }
 
         public TimeSpan HueChangeDelay = TimeSpan.FromSeconds(.33);
-
+        
         public static List<HarmonicRefractor> m_Instances = new List<HarmonicRefractor>();
 
         [Constructable]

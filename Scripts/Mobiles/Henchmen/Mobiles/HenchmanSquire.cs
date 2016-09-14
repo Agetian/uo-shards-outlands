@@ -17,13 +17,13 @@ namespace Server.Custom
             }
         }
 
-        public override string[] idleSpeech { get { return new string[] {       "Someday, I'll be a knight myself!",
+        public override string[] IdleSpeech { get { return new string[] {       "Someday, I'll be a knight myself!",
                                                                                 "I hope they'll tell stories about me some day...",
                                                                                 "*looks around nervously*",
                                                                                 "*fumbles with belt buckle*" 
                                                                                 };}}
 
-        public override string[] combatSpeech { get { return new string[] {     "Pivot...step...thrust...Riposte?",
+        public override string[] CombatSpeech { get { return new string[] {     "Pivot...step...thrust...Riposte?",
                                                                                 "I...I...could use some more training, me thinks!",
                                                                                 "Gods protect me!",
                                                                                 "Better part of valor, better part of valor!" 

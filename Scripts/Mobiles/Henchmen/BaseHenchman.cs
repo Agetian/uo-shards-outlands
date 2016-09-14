@@ -33,8 +33,8 @@ namespace Server.Custom
         public override bool CanRummageCorpses { get { return false; } }
 
         public virtual string[] recruitSpeech { get { return new string[0]; } }
-        public virtual string[] idleSpeech { get{ return new string[0];} }
-        public virtual string[] combatSpeech { get { return new string[0]; } }
+        public virtual string[] IdleSpeech { get{ return new string[0];} }
+        public virtual string[] CombatSpeech { get { return new string[0]; } }
 
         public override bool IsRangedPrimary { get { return false; } }
 
@@ -155,7 +155,7 @@ namespace Server.Custom
                         frequency = infrequentValue;
 
                     if (Utility.RandomDouble() <= frequency)
-                        Say(combatSpeech[Utility.Random(combatSpeech.Length - 1)]);
+                        Say(CombatSpeech[Utility.Random(CombatSpeech.Length - 1)]);
                 }
 
                 else
@@ -176,7 +176,7 @@ namespace Server.Custom
                         frequency = infrequentValue;
 
                     if (Utility.RandomDouble() <= frequency)
-                        Say(idleSpeech[Utility.Random(idleSpeech.Length - 1)]);
+                        Say(IdleSpeech[Utility.Random(IdleSpeech.Length - 1)]);
                 }
             }
         }
