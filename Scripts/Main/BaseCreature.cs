@@ -472,7 +472,7 @@ namespace Server.Mobiles
         public int m_HealthIntervalCount = 0;
         public bool m_HealthIntervalAbilityReady = false;
        
-        public virtual string[] IdleSpeech { get { return new string[] { "*" }; } }
+        public virtual string[] IdleSpeech { get { return new string[] { "" }; } }
         public virtual string[] CombatSpeech { get { return new string[] { "" }; } }
         
         public virtual double SpeechChance { get { return .01; } }
