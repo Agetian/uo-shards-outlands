@@ -167,6 +167,7 @@ namespace Server.Mobiles
             CommandSystem.Register("DamageTracker", AccessLevel.Player, new CommandEventHandler(ShowDamageTracker));
 
             CommandSystem.Register("GetDifficulty", AccessLevel.Counselor, new CommandEventHandler(BaseCreature.GetDifficulty));
+            CommandSystem.Register("GetDifficultyFull", AccessLevel.Counselor, new CommandEventHandler(BaseCreature.GetDifficultyFull));
             CommandSystem.Register("Provoke", AccessLevel.Counselor, new CommandEventHandler(BaseCreature.AdminProvoke));
             CommandSystem.Register("Tame", AccessLevel.Counselor, new CommandEventHandler(BaseCreature.AdminTame));
             CommandSystem.Register("GotoCurrentWaypoint", AccessLevel.Counselor, new CommandEventHandler(BaseCreature.GotoCurrentWaypoint));
@@ -652,6 +653,8 @@ namespace Server.Mobiles
                     pm_Target.AddItem(new Cloak(aspectHue));
 
                     AspectGear.CheckForAndUpdateAspectArmorProperties(pm_Target);
+
+                    pm_Target.Backpack.DropItem(new StaffBracelet());
                 }
 
                 else

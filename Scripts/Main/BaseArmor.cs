@@ -56,6 +56,9 @@ namespace Server.Items
         public virtual int OldDexReq { get { return 0; } }
         public virtual int OldIntReq { get { return 0; } }
 
+        public static double ArmorRatingMinDamageReductionScalar = .25;
+        public static double ArmorRatingMaxDamageReductionScalar = .50;
+
         public override CraftResource DefaultResource { get { return CraftResource.Iron; } }
 
         public virtual string BlessedInRegionName { get { return ""; } }
@@ -1293,8 +1296,8 @@ namespace Server.Items
             if (adjustedArmorRating < 0)
                 adjustedArmorRating = 0;
 
-            double minDamageReduction = (adjustedArmorRating * .25) / 100;
-            double maxDamageReduction = (adjustedArmorRating * .50) / 100;
+            double minDamageReduction = (adjustedArmorRating * ArmorRatingMinDamageReductionScalar) / 100;
+            double maxDamageReduction = (adjustedArmorRating * ArmorRatingMaxDamageReductionScalar) / 100;
 
             double damageScalar = 1 - (minDamageReduction + ((maxDamageReduction - minDamageReduction) * Utility.RandomDouble()));
 

@@ -18,8 +18,8 @@ namespace Server.Spells.Third
 
         public override SpellCircle Circle { get { return SpellCircle.Third; } }
 
-        public static int DamageMin { get { return 30; } }
-        public static int DamageMax { get { return 30; } }
+        public static int DamageMin { get { return 5; } }
+        public static int DamageMax { get { return 15; } }
 
         public static double SpellSpecificCreatureDamageBonus { get { return 0.0; } }
 

@@ -92,6 +92,17 @@ namespace Server.Spells
             CommandSystem.Register("ToggleDistanceDelay",  AccessLevel.Developer, new CommandEventHandler(ToggleDistanceDelay_OnCommand));
         }
 
+        public static double BaseDamageScalar = .5;
+
+        public static double BaseEvalIntDamageBonus = .5;
+        public static double BaseSpiritSpeakDamageBonus = .2;
+        public static double BaseInscriptionDamageBonus = .1;
+
+        public static double PlayerVsPlayerSkillDamageBonusScalar = .5;
+
+        public static double MagicResistMinDamageReductionScalar = .125;
+        public static double MagicResistMaxDamageReductionScalar = .25;
+
         public const double EnhancedSummonDamageMultiplier = 1.25;
         public const double EnhancedSummonHitPointsMultiplier = 1.25;
         public const double EnhancedSummonDurationMultiplier = 1.25;
@@ -99,7 +110,7 @@ namespace Server.Spells
         public const double EnhancedSpellBonus = .25;
         public const double EnhancedSpellTamedCreatureBonus = .25;
 
-        public const double BaseChargedSpellChance = .10;
+        public const double BaseChargedSpellChance = .10;        
         public const double SpiritSpeakChargedSpellExtraChance = .10;
         public const double InscriptionScrollChargedSpellExtraChance = .20;
         public const double CreatureChargedSpellChanceScalar = .5;

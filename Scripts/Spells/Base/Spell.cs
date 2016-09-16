@@ -33,16 +33,7 @@ namespace Server.Spells
 
         public virtual bool RevealOnCast { get { return true; } }
         public virtual bool ClearHandsOnCast { get { return true; } }
-        public virtual bool ShowHandMovement { get { return true; } }
-
-        public static double BaseDamageScalar = .50;       
-        public static double BaseEvalIntDamageBonus = .5;
-        public static double BaseSpiritSpeakDamageBonus = .2;
-        public static double BaseInscriptionDamageBonus = .1;
-        public static double PlayerVsPlayerSkillDamageBonusScalar = .5;
-
-        public static double MagicResistMinDamageReductionScalar = .125;
-        public static double MagicResistMaxDamageReductionScalar = .25;
+        public virtual bool ShowHandMovement { get { return true; } }       
 
         public static int DamageMin { get { return 0; } }
         public static int DamageMax { get { return 0; } }
@@ -257,12 +248,12 @@ namespace Server.Spells
 
             AspectGear.AspectArmorProfile casterAspectArmor = new AspectGear.AspectArmorProfile(m_Caster, null);
             AspectGear.AspectArmorProfile defenderAspectArmor = new AspectGear.AspectArmorProfile(target, null);
-            
-            double damageScalar = Spell.BaseDamageScalar;
 
-            double evalIntBonus = (m_Caster.Skills[SkillName.EvalInt].Value / 100) * Spell.BaseEvalIntDamageBonus;
-            double spiritSpeakBonus = (m_Caster.Skills[SkillName.SpiritSpeak].Value / 100) * Spell.BaseSpiritSpeakDamageBonus;
-            double inscriptionBonus = (m_Caster.Skills[SkillName.Inscribe].Value / 100) * Spell.BaseInscriptionDamageBonus;
+            double damageScalar = SpellHelper.BaseDamageScalar;
+
+            double evalIntBonus = (m_Caster.Skills[SkillName.EvalInt].Value / 100) * SpellHelper.BaseEvalIntDamageBonus;
+            double spiritSpeakBonus = (m_Caster.Skills[SkillName.SpiritSpeak].Value / 100) * SpellHelper.BaseSpiritSpeakDamageBonus;
+            double inscriptionBonus = (m_Caster.Skills[SkillName.Inscribe].Value / 100) * SpellHelper.BaseInscriptionDamageBonus;
             double slayerBonus = GetSlayerDamageBonus(target); 
             double spellDamageInflictedBonus = 0;
             double spellDamageReceivedBonus = 0;
@@ -285,9 +276,9 @@ namespace Server.Spells
             //Player vs Player
             if (m_Caster is PlayerMobile && target is PlayerMobile)
             {
-                evalIntBonus *= Spell.PlayerVsPlayerSkillDamageBonusScalar;
-                spiritSpeakBonus *= Spell.PlayerVsPlayerSkillDamageBonusScalar;
-                inscriptionBonus *= Spell.PlayerVsPlayerSkillDamageBonusScalar;
+                evalIntBonus *= SpellHelper.PlayerVsPlayerSkillDamageBonusScalar;
+                spiritSpeakBonus *= SpellHelper.PlayerVsPlayerSkillDamageBonusScalar;
+                inscriptionBonus *= SpellHelper.PlayerVsPlayerSkillDamageBonusScalar;
 
                 slayerBonus = 0;     
                 spellDamageInflictedBonus = 0;
@@ -358,8 +349,8 @@ namespace Server.Spells
             target.Region.SpellDamageScalar(m_Caster, target, ref damageScalar);
 
             //Magic Resist
-            double minDamageReduction = (targetMagicResist / 100) * Spell.MagicResistMinDamageReductionScalar;
-            double maxDamageReduction = (targetMagicResist / 100) * Spell.MagicResistMaxDamageReductionScalar;
+            double minDamageReduction = (targetMagicResist / 100) * SpellHelper.MagicResistMinDamageReductionScalar;
+            double maxDamageReduction = (targetMagicResist / 100) * SpellHelper.MagicResistMaxDamageReductionScalar;
 
             double magicResistScalar = 1 - (minDamageReduction + ((maxDamageReduction - minDamageReduction) * Utility.RandomDouble()));
             
