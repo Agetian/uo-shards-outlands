@@ -16,6 +16,9 @@ namespace Server
     {
         public static double GoldCostPerControlSlotPerDay = 10;
 
+        public static int RetrieveFollowerMinimumDistance = 50;
+        public static int RetireveFollowerDaysAdded = 14;
+
         public static int GetUsedStableSlots(PlayerMobile player)
         {
             int stableSlotsUsed = 0;
@@ -127,14 +130,9 @@ namespace Server
 
             protected override void OnTarget(Mobile from, object target)
             {
-                if (m_Player == null)
-                    return;
-
-                if (m_Vendor == null)
-                    return;                
-
-                if (m_Vendor.Deleted || !m_Vendor.Alive)
-                    return;
+                if (m_Player == null) return;
+                if (m_Vendor == null) return;     
+                if (m_Vendor.Deleted || !m_Vendor.Alive) return;
 
                 if (!m_Player.Alive)
                 {
@@ -243,7 +241,7 @@ namespace Server
 
                 if (bc_Target.ControlSlots + Stables.GetUsedStableSlots(m_Player) > Stables.GetMaxStableSlots(m_Player))
                 {
-                    m_Player.SendMessage("You have too many followers stabled already.");
+                    m_Player.SendMessage("You have exceeded your maximum stable control slot allotment.");
 
                     m_Player.CloseGump(typeof(StableGump));
                     m_Player.SendGump(new StableGump(m_Vendor, m_Player, m_Page));
@@ -251,11 +249,11 @@ namespace Server
                     return;
                 }
 
-                StableFollower(m_Vendor, m_Player, bc_Target, m_Page);
+                StableFollower(m_Vendor, m_Player, bc_Target, m_Page, true, false);
             }
         }
 
-        public static void StableFollower(Mobile vendor, PlayerMobile player, BaseCreature creature, int page)
+        public static void StableFollower(Mobile vendor, PlayerMobile player, BaseCreature creature, int page, bool launchGump, bool retrieved)
         {
             if (player == null || creature == null) return;
             if (creature.Deleted) return;
@@ -275,12 +273,18 @@ namespace Server
             creature.IsStabled = true;
             creature.TimeStabled = DateTime.UtcNow;
 
+            if (retrieved)
+                creature.TimeStabled -= TimeSpan.FromDays(Stables.RetireveFollowerDaysAdded);
+
             creature.OwnerAbandonTime = DateTime.UtcNow + TimeSpan.FromDays(1000);
 
             player.Stabled.Add(creature);
-            
-            player.CloseGump(typeof(StableGump));
-            player.SendGump(new StableGump(vendor, player, page));            
+
+            if (launchGump)
+            {
+                player.CloseGump(typeof(StableGump));
+                player.SendGump(new StableGump(vendor, player, page));
+            }
         }
 
         public static void ClaimFollower(Mobile vendor, PlayerMobile player, BaseCreature creature, int page)
@@ -497,9 +501,13 @@ namespace Server
                 AddLabel(61, 409, WhiteTextHue, "Previous Page");
             }
 
-            //Stable New Folloer
-            AddButton(276, 408, 4002, 4004, 3, GumpButtonType.Reply, 0);
-            AddLabel(313, 409, 0x3F, "Stable New Follower");
+            //Stable Follower
+            AddButton(180, 408, 4002, 4004, 3, GumpButtonType.Reply, 0);
+            AddLabel(217, 409, 63, "Stable Follower");
+
+            //Retrieve Lost Followers
+            AddButton(343, 408, 4029, 4031, 5, GumpButtonType.Reply, 0);
+            AddLabel(380, 409, 2606, "Retrieve Lost Followers");
 
             //Next Page
             if (m_Page < totalPages - 1)
@@ -508,8 +516,11 @@ namespace Server
                 AddButton(616, 409, 4005, 4007, 4, GumpButtonType.Reply, 0);
             }
             
-            AddLabel(212, 433, 149, "Claim Cost:");
-            AddLabel(294, 433, 2550, "Days Housed  X  Control Slots  X  " + Stables.GoldCostPerControlSlotPerDay.ToString());
+            AddLabel(19, 433, 149, "Claim Cost:");
+            AddLabel(96, 433, 2550, "Days Housed X Control Slots X " + Stables.GoldCostPerControlSlotPerDay.ToString());
+
+            AddLabel(358, 433, 149, "Retrieval Cost:");
+            AddLabel(457, 433, 2550, "Adds " + Stables.RetireveFollowerDaysAdded.ToString() + " Days Worth of Housing");
         }
         
         public override void OnResponse(NetState sender, RelayInfo info)
@@ -587,6 +598,93 @@ namespace Server
                         m_Player.SendSound(changeGumpSound);
                     }
 
+                    closeGump = false;
+                break;
+
+                //Retrieve Lost Followers
+                case 5:
+                    int stableSlotsRemaining = Stables.GetMaxStableSlots(m_Player) - Stables.GetUsedStableSlots(m_Player);
+
+                    int stabledCreatures = 0;
+                    int unableToStableCount = 0;
+                    int packsDropped = 0;
+                    
+                    Queue m_Queue = new Queue();
+                    Queue m_BackpackQueue = new Queue();
+                    
+                    for (int a = 0; a < m_Player.AllFollowers.Count; a++)
+                    {
+                        BaseCreature bc_Follower = m_Player.AllFollowers[a] as BaseCreature;
+
+                        if (bc_Follower == null)
+                            continue;
+
+                        if (bc_Follower.Summoned) continue;
+                        if (bc_Follower.IsStabled) continue;
+                        if (!(bc_Follower.Controlled && bc_Follower.ControlMaster == m_Player)) continue;
+                        if (bc_Follower.GetDistanceToSqrt(m_Player.Location) < Stables.RetrieveFollowerMinimumDistance) continue;
+
+                        if (bc_Follower.ControlSlots <= stableSlotsRemaining)
+                        {
+                            stabledCreatures++;
+                            stableSlotsRemaining -= bc_Follower.ControlSlots;
+
+                            m_Queue.Enqueue(bc_Follower);
+                        }
+
+                        else                        
+                            unableToStableCount++;
+                    }
+
+                    while (m_Queue.Count > 0)
+                    {
+                        BaseCreature bc_Follower = (BaseCreature)m_Queue.Dequeue();
+
+                        if (bc_Follower == null)
+                            continue;
+
+                        if (bc_Follower.Backpack is StrongBackpack)
+                        {
+                            if (bc_Follower.Backpack.TotalItems > 0)
+                            {
+                                packsDropped++;
+
+                                DropBackpack dropBackpack = new DropBackpack();
+
+                                foreach (Item item in bc_Follower.Backpack.Items)
+                                {
+                                    m_BackpackQueue.Enqueue(item);
+                                }
+
+                                while (m_BackpackQueue.Count > 0)
+                                {
+                                    Item item = (Item)m_BackpackQueue.Dequeue();
+
+                                    dropBackpack.DropItem(item);
+                                }
+
+                                dropBackpack.MoveToWorld(bc_Follower.Location, bc_Follower.Map);
+                            }
+                        }
+
+                        Stables.StableFollower(m_Vendor, m_Player, bc_Follower, 0, false, true);
+                    }
+
+                    if (stabledCreatures > 0 && unableToStableCount == 0)
+                        m_Player.SendMessage("Your lost followers have been successfully stabled.");
+
+                    else if (stabledCreatures == 0 && unableToStableCount > 0)
+                        m_Player.SendMessage("None of your lost followers were stabled as you have exceeded your maximum stable control slot allotment.");
+
+                    else if (stabledCreatures > 0 && unableToStableCount > 0)
+                        m_Player.SendMessage("Some of your lostfollowers were unable to be stabled as you have exceeded your maximum stable control slot allotment.");
+
+                    else if (stabledCreatures == 0 && unableToStableCount == 0)
+                        m_Player.SendMessage("You do not currently have any lost followers at the moment.");
+
+                    if (packsDropped > 0)
+                        m_Player.SendMessage(2550, "One or more of your lost pack creatures have left their pack's contents at their previous location.");
+                                           
                     closeGump = false;
                 break;
             }

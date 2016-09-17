@@ -267,6 +267,7 @@ namespace Server.Items
                 Weight = 13.0;
         }
     }
+
 	public class StrongBackpack : Backpack	//Used on Pack animals
 	{
 		[Constructable]
@@ -314,6 +315,34 @@ namespace Server.Items
 				Weight = 13.0;
 		}
 	}
+
+    public class DropBackpack : Backpack
+    {
+        public static int GetSBPurchaseValue() { return 0; }
+        public static int GetSBSellValue() { return 0; }
+
+        [Constructable]
+		public DropBackpack()
+		{
+            Name = "backpack";
+		}
+
+        public DropBackpack(Serial serial): base(serial)
+		{
+		}
+
+		public override void Serialize( GenericWriter writer )
+		{
+			base.Serialize( writer );
+			writer.Write( (int) 0 );
+		}
+
+		public override void Deserialize( GenericReader reader )
+		{
+			base.Deserialize( reader );
+			int version = reader.ReadInt();
+		}
+    }
 
 	public class Backpack : BaseContainer, IDyable
 	{
