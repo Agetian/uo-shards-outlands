@@ -9,6 +9,10 @@ using Server.Multis;
 using Server.Regions;
 using System.Collections;
 using System.Collections.Generic;
+using Server.Spells;
+using Server.Spells.Fourth;
+using Server.Spells.Seventh;
+using Server.Prompts;
 
 namespace Server
 {
@@ -23,10 +27,7 @@ namespace Server
         public PlayerMobile m_Player;
         public RuneTomeGumpObject m_RuneTomeGumpObject;
 
-        public static int MaxRecallCharges = 100;
-        public static int MaxGateCharges = 25;
-
-        public static int EntriesPerSide = 14;
+        public static int MaxRuneDescriptionLength = 40;
 
         public int WhiteTextHue = 2499;
 
@@ -76,7 +77,13 @@ namespace Server
 
             #endregion
             
-            RuneTome runeTome = m_RuneTomeGumpObject.m_RuneTome;           
+            RuneTome runeTome = m_RuneTomeGumpObject.m_RuneTome;
+
+            if (!runeTome.CanAccess(m_Player))
+            {
+                m_Player.SendMessage("That is no longer accessible.");
+                return;
+            }
 
             string displayName = runeTome.DisplayName;
 
@@ -90,9 +97,7 @@ namespace Server
                 case RuneTome.LockedDownAccessLevelType.Anyone: accessLevelText = "Anyone"; break;
             }
 
-            //TEST
-            bool hasChargeAccess = true;
-            bool hasAdminAccess = true;
+            bool hasChargeAccess = runeTome.HasChargeAccess(m_Player);     
 
             //Guide           
             AddButton(29, 6, 2094, 2095, 1, GumpButtonType.Reply, 0);
@@ -100,7 +105,7 @@ namespace Server
 
             //Header
             AddImage(168, 2, 1143, 2499);
-            AddLabel(Utility.CenteredTextOffset(310, displayName), 3, 149, displayName);
+            AddLabel(Utility.CenteredTextOffset(315, displayName), 3, 149, displayName);
 
             if (m_RuneTomeGumpObject.m_RuneTomePageType == PageType.EntryDetail)
             {
@@ -114,11 +119,17 @@ namespace Server
                     m_RuneTomeGumpObject.m_SelectedRuneEntry = runeTome.m_RecallRuneEntries[0];
 
                 else
-                { 
-                    if (runeTome.m_RecallRuneEntries.IndexOf(m_RuneTomeGumpObject.m_SelectedRuneEntry) == -1)
-                        m_RuneTomeGumpObject.m_SelectedRuneEntry = runeTome.m_RecallRuneEntries[0];
+                {
+                    if (runeTome.m_RecallRuneEntries.IndexOf(m_RuneTomeGumpObject.m_SelectedRuneEntry) == -1)                    
+                        m_RuneTomeGumpObject.m_SelectedRuneEntry = runeTome.m_RecallRuneEntries[0];                    
                 }
-            } 
+            }
+
+            if (m_RuneTomeGumpObject.m_SelectedRuneEntry == null)
+            {
+                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+            }
 
             switch (m_RuneTomeGumpObject.m_RuneTomePageType)
             {
@@ -128,18 +139,18 @@ namespace Server
                     AddLabel(85, 30, 2603, "Recall Charges");
                     AddItem(174, 30, 8012);
                     if (runeTome.RecallCharges > 0)
-                        AddLabel(215, 30, WhiteTextHue, runeTome.RecallCharges.ToString() + "/" + MaxRecallCharges.ToString());
+                        AddLabel(215, 30, WhiteTextHue, runeTome.RecallCharges.ToString() + "/" + RuneTome.MaxRecallCharges.ToString());
                     else
-                        AddLabel(215, 30, WhiteTextHue, runeTome.RecallCharges.ToString() + "/" + MaxRecallCharges.ToString());
+                        AddLabel(215, 30, WhiteTextHue, runeTome.RecallCharges.ToString() + "/" + RuneTome.MaxRecallCharges.ToString());
 
                     AddLabel(93, 55, 2629, "Gate Charges");
                     AddItem(174, 55, 8032);
                     if (runeTome.GateCharges > 0)
-                        AddLabel(215, 55, WhiteTextHue, runeTome.GateCharges.ToString() + "/" + MaxGateCharges.ToString());
+                        AddLabel(215, 55, WhiteTextHue, runeTome.GateCharges.ToString() + "/" + RuneTome.MaxGateCharges.ToString());
                     else
-                        AddLabel(215, 55, WhiteTextHue, runeTome.GateCharges.ToString() + "/" + MaxGateCharges.ToString());
+                        AddLabel(215, 55, WhiteTextHue, runeTome.GateCharges.ToString() + "/" + RuneTome.MaxGateCharges.ToString());
 
-                    if (hasAdminAccess)
+                    if (hasChargeAccess)
                     {
                         AddLabel(322, 35, 90, "Charge Use Allowed For");
                         AddLabel(Utility.CenteredTextOffset(395, accessLevelText), 55, 2562, accessLevelText);
@@ -163,42 +174,6 @@ namespace Server
                         AddLabel(Utility.CenteredTextOffset(440, accessLevelText), 55, 2562, accessLevelText);
                     }
 
-                    //--------------
-
-                    //TEST
-                    if (runeTome.m_RecallRuneEntries.Count == 0)
-                    {
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(true, "West Prevalia Bank", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "East Prevalia Bank", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Town Square", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Sewers", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Arena", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Stables", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Shipyard", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Alchemist", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Tailor", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Smith", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Tanner", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Healer", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Provisioner", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Prevalia Jeweler", new Point3D(0, 0, 0), Map.Felucca, null));
-
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "West Cambria Bank", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "East Cambria Bank", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Town Square", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Bazaar", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Arena", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Stables", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Shipyard", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Alchemist", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Tailor", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Smith", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Tanner", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Healer", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Provisioner", new Point3D(0, 0, 0), Map.Felucca, null));
-                        runeTome.m_RecallRuneEntries.Add(new RecallRuneEntry(false, "Cambria Jeweler", new Point3D(0, 0, 0), Map.Felucca, null));
-                    }
-
                     int leftStartX = 105;
                     int leftStartY = 92;
 
@@ -209,18 +184,23 @@ namespace Server
 
                     for (int a = 0; a < runeTome.m_RecallRuneEntries.Count; a++)
                     {
-                        RecallRuneEntry recallRuneEntry = runeTome.m_RecallRuneEntries[a];
+                        RuneTomeRuneEntry recallRuneEntry = runeTome.m_RecallRuneEntries[a];
 
                         //Left
-                        if (a < EntriesPerSide)
+                        if (a < RuneTome.EntriesPerSide)
                         {
                             AddButton(leftStartX - 48, leftStartY + 2, 2117, 2118, 10 + (a * 10), GumpButtonType.Reply, 0);
                             AddButton(leftStartX - 25, leftStartY, 210, 211, 10 + (a * 10) + 1, GumpButtonType.Reply, 0);
 
+                            string runeName = recallRuneEntry.m_Description;
+
+                            if (runeName.Length > MaxRuneDescriptionLength)
+                                runeName = runeName.Substring(0, MaxRuneDescriptionLength);
+
                             if (recallRuneEntry.m_IsDefaultRune)
-                                AddLabel(leftStartX, leftStartY, 63, recallRuneEntry.m_Description);
+                                AddLabel(leftStartX, leftStartY, 63, runeName);
                             else
-                                AddLabel(leftStartX, leftStartY, WhiteTextHue, recallRuneEntry.m_Description);
+                                AddLabel(leftStartX, leftStartY, WhiteTextHue, runeName);
 
                             if (m_RuneTomeGumpObject.m_ToggleRearrangeRuneOrder)
                             {
@@ -240,10 +220,15 @@ namespace Server
                             AddButton(rightStartX - 48, rightStartY + 2, 2117, 2118, 10 + (a * 10), GumpButtonType.Reply, 0);
                             AddButton(rightStartX - 25, rightStartY, 210, 211, 10 + (a * 10) + 1, GumpButtonType.Reply, 0);
 
+                            string runeName = recallRuneEntry.m_Description;
+
+                            if (runeName.Length > MaxRuneDescriptionLength)
+                                runeName = runeName.Substring(0, MaxRuneDescriptionLength);
+
                             if (recallRuneEntry.m_IsDefaultRune)
-                                AddLabel(rightStartX, rightStartY, 63, recallRuneEntry.m_Description);
+                                AddLabel(rightStartX, rightStartY, 63, runeName);
                             else
-                                AddLabel(rightStartX, rightStartY, WhiteTextHue, recallRuneEntry.m_Description);
+                                AddLabel(rightStartX, rightStartY, WhiteTextHue, runeName);
 
                             if (m_RuneTomeGumpObject.m_ToggleRearrangeRuneOrder)
                             {
@@ -264,26 +249,26 @@ namespace Server
                 #region Entry Detail
 
                 case PageType.EntryDetail:
-                    RecallRuneEntry leftRecallRuneEntry = null;
-                    RecallRuneEntry rightRecallRuneEntry = null;
+                    RuneTomeRuneEntry leftRecallRuneEntry = null;
+                    RuneTomeRuneEntry rightRecallRuneEntry = null;
 
                     int selectedEntryIndex = runeTome.m_RecallRuneEntries.IndexOf(m_RuneTomeGumpObject.m_SelectedRuneEntry);
                     int pageIndex = (int)(Math.Floor(((double)selectedEntryIndex / 2)));
-                    int totalPages = (int)(Math.Floor((double)runeTome.m_RecallRuneEntries.Count / 2)) + 1;
+                    int totalPages = (int)(Math.Ceiling((double)runeTome.m_RecallRuneEntries.Count / 2));
                     
                     //Selected is on Left
                     if (selectedEntryIndex % 2 == 0)
                     {
                         leftRecallRuneEntry = m_RuneTomeGumpObject.m_SelectedRuneEntry;
 
-                        if (selectedEntryIndex < runeTome.m_RecallRuneEntries.Count - 2)
+                        if (runeTome.m_RecallRuneEntries.Count > selectedEntryIndex + 1)
                             rightRecallRuneEntry = runeTome.m_RecallRuneEntries[selectedEntryIndex + 1];
                     }
 
                     //Selected is on Right
                     else
-                    {
-                        if (selectedEntryIndex > 0)
+                    {                       
+                        if (runeTome.m_RecallRuneEntries.Count > 1)
                             leftRecallRuneEntry = runeTome.m_RecallRuneEntries[selectedEntryIndex - 1];
 
                         rightRecallRuneEntry = m_RuneTomeGumpObject.m_SelectedRuneEntry;
@@ -292,25 +277,40 @@ namespace Server
                     //Top
                     AddLabel(85, 30, 2603, "Recall Charges");
 			        AddItem(174, 30, 8012);
-			        AddLabel(215, 30, WhiteTextHue, runeTome.RecallCharges.ToString() + "/" + MaxRecallCharges.ToString());
+                    AddLabel(215, 30, WhiteTextHue, runeTome.RecallCharges.ToString() + "/" + RuneTome.MaxRecallCharges.ToString());
                     AddLabel(101, 55, 2603, "(Requires 20 Magery)");
 
                     AddLabel(370, 30, 2629, "Gate Charges");
 			        AddItem(451, 30, 8032);
-                    AddLabel(492, 30, WhiteTextHue, runeTome.GateCharges.ToString() + "/" + MaxGateCharges.ToString());
+                    AddLabel(492, 30, WhiteTextHue, runeTome.GateCharges.ToString() + "/" + RuneTome.MaxGateCharges.ToString());
                     AddLabel(378, 55, 2629, "(Requires 50 Magery)");
 
                     //Left
                     if (leftRecallRuneEntry != null)
                     {
-                        string coordinatesText = "9° 18' N     24° 49' E";
+                        string coordinatesText = ""; 
+
+                        int xLong = 0, yLat = 0;
+                        int xMins = 0, yMins = 0;
+                        bool xEast = false, ySouth = false;
+
+                        if (Sextant.Format(leftRecallRuneEntry.m_Target, leftRecallRuneEntry.m_TargetMap, ref xLong, ref yLat, ref xMins, ref yMins, ref xEast, ref ySouth))
+                        {
+                            coordinatesText = String.Format("{0}° {1}'{2}, {3}° {4}'{5}", yLat, yMins, ySouth ? "S" : "N", xLong, xMins, xEast ? "E" : "W");
+                            coordinatesText += "  (" + leftRecallRuneEntry.m_Target.X.ToString() + ", " + leftRecallRuneEntry.m_Target.Y.ToString() + ")";
+                        }
+
+                        string runeName = leftRecallRuneEntry.m_Description;
+
+                        if (runeName.Length > MaxRuneDescriptionLength)
+                            runeName = runeName.Substring(0, MaxRuneDescriptionLength);
 
                         if (leftRecallRuneEntry.m_IsDefaultRune)
-                            AddLabel(Utility.CenteredTextOffset(170, leftRecallRuneEntry.m_Description), 92, 63, leftRecallRuneEntry.m_Description);
+                            AddLabel(Utility.CenteredTextOffset(190, runeName), 92, 63, runeName);
                         else
-                            AddLabel(Utility.CenteredTextOffset(170, leftRecallRuneEntry.m_Description), 92, 2550, leftRecallRuneEntry.m_Description);
+                            AddLabel(Utility.CenteredTextOffset(190, runeName), 92, 2550, runeName);
 
-                        AddLabel(Utility.CenteredTextOffset(170, coordinatesText), 112, WhiteTextHue, coordinatesText);
+                        AddLabel(Utility.CenteredTextOffset(190, coordinatesText), 112, WhiteTextHue, coordinatesText);
 
                         //Recall
                         AddButton(68, 151, 2271, 2271, 5, GumpButtonType.Reply, 0);
@@ -330,7 +330,7 @@ namespace Server
                             AddButton(231, 207, 2291, 2291, 8, GumpButtonType.Reply, 0);
                         }
 
-                        if (hasAdminAccess)
+                        if (hasChargeAccess)
                         {
                             AddItem(65, 267, 7956);
                             AddButton(116, 260, 9721, 9724, 9, GumpButtonType.Reply, 0);
@@ -349,14 +349,29 @@ namespace Server
                     //Right
                     if (rightRecallRuneEntry != null)
                     {
-                        string coordinatesText = "9° 18' N     20° 45' E";
+                        string coordinatesText = "";
+
+                        int xLong = 0, yLat = 0;
+                        int xMins = 0, yMins = 0;
+                        bool xEast = false, ySouth = false;
+
+                        if (Sextant.Format(rightRecallRuneEntry.m_Target, rightRecallRuneEntry.m_TargetMap, ref xLong, ref yLat, ref xMins, ref yMins, ref xEast, ref ySouth))
+                        {
+                            coordinatesText = String.Format("{0}° {1}'{2}, {3}° {4}'{5}", yLat, yMins, ySouth ? "S" : "N", xLong, xMins, xEast ? "E" : "W");
+                            coordinatesText += "  (" + rightRecallRuneEntry.m_Target.X.ToString() + ", " + rightRecallRuneEntry.m_Target.Y.ToString() + ")";
+                        }
+
+                        string runeName = rightRecallRuneEntry.m_Description;
+
+                        if (runeName.Length > MaxRuneDescriptionLength)
+                            runeName = runeName.Substring(0, MaxRuneDescriptionLength);
 
                         if (rightRecallRuneEntry.m_IsDefaultRune)
-                            AddLabel(Utility.CenteredTextOffset(440, rightRecallRuneEntry.m_Description), 92, 63, rightRecallRuneEntry.m_Description);
+                            AddLabel(Utility.CenteredTextOffset(450, runeName), 92, 63, runeName);
                         else
-                            AddLabel(Utility.CenteredTextOffset(440, rightRecallRuneEntry.m_Description), 92, 2550, rightRecallRuneEntry.m_Description);
+                            AddLabel(Utility.CenteredTextOffset(450, runeName), 92, 2550, runeName);
 
-                        AddLabel(Utility.CenteredTextOffset(440, coordinatesText), 112, WhiteTextHue, coordinatesText);
+                        AddLabel(Utility.CenteredTextOffset(450, coordinatesText), 112, WhiteTextHue, coordinatesText);
                         
                         AddButton(329, 151, 2271, 2271, 12, GumpButtonType.Reply, 0);
                         if (hasChargeAccess)
@@ -371,10 +386,10 @@ namespace Server
                         {
                             AddItem(432, 219, 8032, 0);
                             AddLabel(469, 219, 2629, "->");
-                            AddButton(494, 207, 2291, 2291, 17, GumpButtonType.Reply, 0);
+                            AddButton(494, 207, 2291, 2291, 15, GumpButtonType.Reply, 0);
                         }
 
-                        if (hasAdminAccess)
+                        if (hasChargeAccess)
                         {
                             AddItem(326, 267, 7956);
                             AddButton(377, 260, 9721, 9724, 16, GumpButtonType.Reply, 0);
@@ -422,11 +437,15 @@ namespace Server
 
             RuneTome runeTome = m_RuneTomeGumpObject.m_RuneTome;
 
+            if (!runeTome.CanAccess(m_Player))
+            {
+                m_Player.SendMessage("That is no longer accessible.");
+                return;
+            }
+
             bool closeGump = true;
 
-            //TEST
-            bool hasChargeAccess = true;
-            bool hasAdminAccess = true;    
+            bool hasChargeAccess = runeTome.HasChargeAccess(m_Player);     
 
             switch (m_RuneTomeGumpObject.m_RuneTomePageType)
             {
@@ -442,28 +461,38 @@ namespace Server
 
                         //Toggle Rearrange Rune Order
                         case 2:
-                            if (hasAdminAccess)                              
+                            if (hasChargeAccess)
+                            {
                                 m_RuneTomeGumpObject.m_ToggleRearrangeRuneOrder = !m_RuneTomeGumpObject.m_ToggleRearrangeRuneOrder;
 
-                            m_Player.SendSound(LargeSelectionSound);
+                                m_Player.SendSound(SelectionSound);
+                            }
+
+                            else
+                                m_Player.SendMessage("You do not have the neccessary access rights required to reorder runes in this rune tome.");
 
                             closeGump = false;
                         break;
 
                         //Rename Runebook
                         case 3:
-                            if (hasAdminAccess)
+                            if (hasChargeAccess)
                             {
+                                m_Player.SendMessage("What do you wish to rename this rune tome to?");
+                                m_Player.Prompt = new RuneTomeRenamePrompt(m_Player, m_RuneTomeGumpObject);
+
+                                m_Player.SendSound(SelectionSound);
                             }
 
-                            m_Player.SendSound(LargeSelectionSound);
+                            else
+                                m_Player.SendMessage("You do not have the neccessary access rights to rename this rune tome.");
 
                             closeGump = false;
                         break;                        
 
                         //Previous Access Level
                         case 4:
-                            if (hasAdminAccess)
+                            if (runeTome.IsChildOf(m_Player.Backpack))
                             {
                                 switch (runeTome.LockedDownAccessLevel)
                                 {
@@ -472,16 +501,19 @@ namespace Server
                                     case RuneTome.LockedDownAccessLevelType.Friend: runeTome.LockedDownAccessLevel = RuneTome.LockedDownAccessLevelType.CoOwner; break;
                                     case RuneTome.LockedDownAccessLevelType.Anyone: runeTome.LockedDownAccessLevel = RuneTome.LockedDownAccessLevelType.Friend; break;
                                 }
+
+                                m_Player.SendSound(SelectionSound);
                             }
 
-                            m_Player.SendSound(SelectionSound);
+                            else
+                                m_Player.SendMessage("A rune tome must be in your backpack if you wish to change it's access level.");
 
                             closeGump = false;
                         break;
 
                         //Next Access Level
                         case 5:
-                            if (hasAdminAccess)
+                            if (runeTome.IsChildOf(m_Player.Backpack))
                             {
                                 switch (runeTome.LockedDownAccessLevel)
                                 {
@@ -490,9 +522,12 @@ namespace Server
                                     case RuneTome.LockedDownAccessLevelType.Friend: runeTome.LockedDownAccessLevel = RuneTome.LockedDownAccessLevelType.Anyone; break;
                                     case RuneTome.LockedDownAccessLevelType.Anyone: runeTome.LockedDownAccessLevel = RuneTome.LockedDownAccessLevelType.Owner; break;
                                 }
+
+                                m_Player.SendSound(SelectionSound);
                             }
 
-                            m_Player.SendSound(SelectionSound);
+                            else
+                                m_Player.SendMessage("A rune tome must be in your backpack if you wish to change it's access level.");
 
                             closeGump = false;
                         break;
@@ -504,16 +539,36 @@ namespace Server
                         int buttonIndex = info.ButtonID % 10;
 
                         if (runeSelectionIndex < runeTome.m_RecallRuneEntries.Count)
-                        {
-                            bool leftSide = true;
-
-                            if (runeSelectionIndex % 2 == 1)
-                                leftSide = false;
-
+                        {                            
                             switch (buttonIndex)
                             {
                                 //Recall
                                 case 0:
+                                    RuneTomeRuneEntry runeEntry = runeTome.m_RecallRuneEntries[runeSelectionIndex];
+
+                                    if (hasChargeAccess)
+                                    {
+                                        if (!hasChargeAccess)
+                                            m_Player.SendMessage("You do not have the neccessary access rights required to use recall charges from this rune tome.");
+
+                                        else if (runeTome.RecallCharges == 0)
+                                            m_Player.SendMessage("This rune tome is out of recall charges.");
+
+                                        else
+                                        {
+                                            new RecallSpell(m_Player, runeTome, null, null, runeEntry, runeTome).Cast();
+
+                                            runeTome.Openers.Remove(m_Player);
+
+                                            m_Player.CloseGump(typeof(RuneTomeGump));
+                                            m_Player.CloseRunebookGump = true;
+
+                                            return;
+                                        }
+                                    }
+
+                                    else
+                                        m_Player.SendMessage("You do not have the neccessary access rights required to use recall charges from this rune tome.");
                                 break;
 
                                 //Open Detail View
@@ -526,33 +581,45 @@ namespace Server
 
                                 //Move Up
                                 case 2:
-                                    if (runeSelectionIndex > 0)
+                                    if (hasChargeAccess && m_RuneTomeGumpObject.m_ToggleRearrangeRuneOrder)
                                     {
-                                        RecallRuneEntry runeEntry = runeTome.m_RecallRuneEntries[runeSelectionIndex];
+                                        if (runeSelectionIndex > 0)
+                                        {
+                                            runeEntry = runeTome.m_RecallRuneEntries[runeSelectionIndex];
 
-                                        runeTome.m_RecallRuneEntries.Remove(runeEntry);
-                                        runeTome.m_RecallRuneEntries.Insert(runeSelectionIndex - 1, runeEntry);
+                                            runeTome.m_RecallRuneEntries.Remove(runeEntry);
+                                            runeTome.m_RecallRuneEntries.Insert(runeSelectionIndex - 1, runeEntry);
 
-                                        m_Player.SendSound(SelectionSound);
+                                            m_Player.SendSound(SelectionSound);
+                                        }
                                     }
+
+                                    else
+                                        m_Player.SendMessage("You do not have the neccessary access rights required to do that.");
                                 break;
 
                                 //Move Down
                                 case 3:
-                                    if (runeSelectionIndex < runeTome.m_RecallRuneEntries.Count - 1)
+                                    if (hasChargeAccess && m_RuneTomeGumpObject.m_ToggleRearrangeRuneOrder)
                                     {
-                                        RecallRuneEntry runeEntry = runeTome.m_RecallRuneEntries[runeSelectionIndex];
+                                        if (runeSelectionIndex < runeTome.m_RecallRuneEntries.Count - 1)
+                                        {
+                                            runeEntry = runeTome.m_RecallRuneEntries[runeSelectionIndex];
 
-                                        runeTome.m_RecallRuneEntries.Remove(runeEntry);
+                                            runeTome.m_RecallRuneEntries.Remove(runeEntry);
 
-                                        if (runeSelectionIndex == runeTome.m_RecallRuneEntries.Count - 1)
-                                            runeTome.m_RecallRuneEntries.Add(runeEntry);
+                                            if (runeSelectionIndex == runeTome.m_RecallRuneEntries.Count - 1)
+                                                runeTome.m_RecallRuneEntries.Add(runeEntry);
 
-                                        else
-                                            runeTome.m_RecallRuneEntries.Insert(runeSelectionIndex + 1, runeEntry);
+                                            else
+                                                runeTome.m_RecallRuneEntries.Insert(runeSelectionIndex + 1, runeEntry);
 
-                                        m_Player.SendSound(SelectionSound);
+                                            m_Player.SendSound(SelectionSound);
+                                        }
                                     }
+
+                                    else
+                                        m_Player.SendMessage("You do not have the neccessary access rights required to do that.");
                                 break;
                             }
                         }
@@ -565,7 +632,34 @@ namespace Server
 
                 #region Entry Detail
 
-                case PageType.EntryDetail:                    
+                case PageType.EntryDetail: 
+                    RuneTomeRuneEntry leftRecallRuneEntry = null;
+                    RuneTomeRuneEntry rightRecallRuneEntry = null;
+
+                    if (m_RuneTomeGumpObject.m_SelectedRuneEntry != null)
+                    {
+                        int selectedEntryIndex = runeTome.m_RecallRuneEntries.IndexOf(m_RuneTomeGumpObject.m_SelectedRuneEntry);
+                        int pageIndex = (int)(Math.Floor(((double)selectedEntryIndex / 2)));
+                        int totalPages = (int)(Math.Ceiling((double)runeTome.m_RecallRuneEntries.Count / 2));
+
+                        //Selected is on Left
+                        if (selectedEntryIndex % 2 == 0)
+                        {
+                            leftRecallRuneEntry = m_RuneTomeGumpObject.m_SelectedRuneEntry;
+
+                            if (runeTome.m_RecallRuneEntries.Count > selectedEntryIndex + 1)
+                                rightRecallRuneEntry = runeTome.m_RecallRuneEntries[selectedEntryIndex + 1];
+                        }
+
+                        //Selected is on Right
+                        else
+                        {
+                            if (runeTome.m_RecallRuneEntries.Count > 1)
+                                leftRecallRuneEntry = runeTome.m_RecallRuneEntries[selectedEntryIndex - 1];
+
+                            rightRecallRuneEntry = m_RuneTomeGumpObject.m_SelectedRuneEntry;
+                        } 
+                    }
 
                     switch (info.ButtonID)
                     {
@@ -685,13 +779,54 @@ namespace Server
 
                         //Recall
                         case 5:
+                            if (leftRecallRuneEntry != null)
+                            {
+                                new RecallSpell(m_Player, null, null, null, leftRecallRuneEntry, null).Cast();
+
+                                runeTome.Openers.Remove(m_Player);
+
+                                m_Player.CloseGump(typeof(RuneTomeGump));
+                                m_Player.CloseRunebookGump = true;
+
+                                return;
+                            }
+
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+                            }
+
                             closeGump = false;
                         break;                       
 
                         //Recall Via Charge
                         case 6:
-                            if (hasChargeAccess)
+                            if (leftRecallRuneEntry != null)
                             {
+                                if (!hasChargeAccess)
+                                    m_Player.SendMessage("You do not have the neccessary access rights required to use recall charges from this rune tome.");
+
+                                else if (runeTome.RecallCharges == 0)
+                                    m_Player.SendMessage("This rune tome is out of recall charges.");
+
+                                else
+                                {
+                                    new RecallSpell(m_Player, runeTome, null, null, leftRecallRuneEntry, runeTome).Cast();
+
+                                    runeTome.Openers.Remove(m_Player);
+
+                                    m_Player.CloseGump(typeof(RuneTomeGump));
+                                    m_Player.CloseRunebookGump = true;
+
+                                    return;
+                                }
+                            }
+
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
                             }
                             
                             closeGump = false;
@@ -699,13 +834,54 @@ namespace Server
 
                         //Gate
                         case 7:
+                            if (leftRecallRuneEntry != null)
+                            {
+                                new GateTravelSpell(m_Player, null, null, null, leftRecallRuneEntry, null).Cast();
+
+                                runeTome.Openers.Remove(m_Player);
+
+                                m_Player.CloseGump(typeof(RuneTomeGump));
+                                m_Player.CloseRunebookGump = true;
+
+                                return;
+                            }
+
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+                            }
+
                             closeGump = false;
                         break;
 
                         //Gate via Charge
                         case 8:
-                            if (hasChargeAccess)
+                            if (leftRecallRuneEntry != null)
                             {
+                                if (!hasChargeAccess)
+                                    m_Player.SendMessage("You do not have the neccessary access rights required to use gate charges from this rune tome.");
+
+                                else if (runeTome.GateCharges == 0)
+                                    m_Player.SendMessage("This rune tome is out of gate charges.");
+
+                                else
+                                {
+                                    new GateTravelSpell(m_Player, runeTome, null, null, leftRecallRuneEntry, runeTome).Cast();
+
+                                    runeTome.Openers.Remove(m_Player);
+
+                                    m_Player.CloseGump(typeof(RuneTomeGump));
+                                    m_Player.CloseRunebookGump = true;
+
+                                    return;
+                                }
+                            }
+
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
                             }
 
                             closeGump = false;
@@ -713,33 +889,117 @@ namespace Server
 
                         //Drop Rune
                         case 9:
-                            if (hasAdminAccess)
+                            if (leftRecallRuneEntry != null)
                             {
+                                if (hasChargeAccess)
+                                {
+                                    if (m_Player.Backpack.TotalItems >= m_Player.Backpack.MaxItems)
+                                        m_Player.SendMessage("You do not have enough space in your backpack for this item. Remove some items and try again.");
+
+                                    else
+                                    {
+                                        bool wasDefaultRune = false;
+
+                                        if (leftRecallRuneEntry.m_IsDefaultRune)                                        
+                                            wasDefaultRune = true;                                        
+
+                                        RecallRune recallRune = new RecallRune();
+
+                                        recallRune.Description = leftRecallRuneEntry.m_Description;
+                                        recallRune.House = leftRecallRuneEntry.m_House;
+                                        recallRune.Target = leftRecallRuneEntry.m_Target;
+                                        recallRune.TargetMap = leftRecallRuneEntry.m_TargetMap;
+                                        recallRune.Marked = true;
+
+                                        m_Player.AddToBackpack(recallRune);
+                                        m_Player.SendMessage("You remove the rune from the runebook.");
+
+                                        if (m_RuneTomeGumpObject.m_SelectedRuneEntry == leftRecallRuneEntry)
+                                            m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+
+                                        if (runeTome.m_RecallRuneEntries.Contains(leftRecallRuneEntry))
+                                            runeTome.m_RecallRuneEntries.Remove(leftRecallRuneEntry);
+
+                                        if (wasDefaultRune && runeTome.m_RecallRuneEntries.Count > 0)
+                                        {
+                                            if (runeTome.m_RecallRuneEntries[0] != null)
+                                                runeTome.m_RecallRuneEntries[0].m_IsDefaultRune = true;
+                                        }
+
+                                        m_Player.SendSound(0x42);
+                                    }                                    
+                                }
+
+                                else                                
+                                    m_Player.SendMessage("You do not have the neccessary access rights required to remove this rune.");
                             }
 
-                            m_Player.SendSound(SelectionSound);
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+                            }
 
                             closeGump = false;
                         break;
 
                         //Set Rune as Default
                         case 10:
-                            if (hasAdminAccess)
+                            if (leftRecallRuneEntry != null)
                             {
+                                if (hasChargeAccess)
+                                {
+                                    foreach (RuneTomeRuneEntry runeEntry in runeTome.m_RecallRuneEntries)
+                                    {
+                                        if (runeEntry == null) 
+                                            continue;
+
+                                        if (runeEntry == leftRecallRuneEntry)
+                                            runeEntry.m_IsDefaultRune = true;
+
+                                        else
+                                            runeEntry.m_IsDefaultRune = false;
+                                    }
+
+                                    m_Player.SendMessage("You set the rune as the new default for this rune tome.");
+
+                                    m_Player.SendSound(SelectionSound);
+                                }     
+
+                                else
+                                    m_Player.SendMessage("You do not have the neccessary access rights required to set this rune as the default for this rune tome.");
                             }
 
-                            m_Player.SendSound(SelectionSound);
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+                            }
 
                             closeGump = false;
                         break;
 
                         //Rename Rune
                         case 11:
-                            if (hasAdminAccess)
+                            if (leftRecallRuneEntry != null)
                             {
+                                if (hasChargeAccess)
+                                {
+                                    m_Player.SendMessage("What do you wish to rename this recall rune to?");
+                                    m_Player.Prompt = new RuneTomeRuneEntryRenamePrompt(m_Player, m_RuneTomeGumpObject, leftRecallRuneEntry);
+                                    
+                                    m_Player.SendSound(SelectionSound);
+                                }
+
+                                else
+                                    m_Player.SendMessage("You do not have the neccessary access rights required to rename this rune.");
                             }
 
-                            m_Player.SendSound(SelectionSound);
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+                            }
 
                             closeGump = false;
                         break;
@@ -750,13 +1010,54 @@ namespace Server
 
                         //Recall
                         case 12:
+                            if (rightRecallRuneEntry != null)
+                            {
+                                new RecallSpell(m_Player, null, null, null, rightRecallRuneEntry, null).Cast();
+
+                                runeTome.Openers.Remove(m_Player);
+
+                                m_Player.CloseGump(typeof(RuneTomeGump));
+                                m_Player.CloseRunebookGump = true;
+
+                                return;
+                            }
+
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+                            }
+
                             closeGump = false;
                         break;
 
                         //Recall Via Charge
                         case 13:
-                            if (hasChargeAccess)
+                            if (rightRecallRuneEntry != null)
+                            {                                
+                                if (!hasChargeAccess)
+                                    m_Player.SendMessage("You do not have the neccessary access rights required to use recall charges from this rune tome.");
+
+                                else if (runeTome.RecallCharges == 0)
+                                    m_Player.SendMessage("This rune tome is out of recall charges.");
+
+                                else
+                                {
+                                    new RecallSpell(m_Player, runeTome, null, null, rightRecallRuneEntry, runeTome).Cast();
+
+                                    runeTome.Openers.Remove(m_Player);
+
+                                    m_Player.CloseGump(typeof(RuneTomeGump));
+                                    m_Player.CloseRunebookGump = true;
+
+                                    return;
+                                }                                
+                            }
+
+                            else
                             {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
                             }
                             
                             closeGump = false;
@@ -764,13 +1065,52 @@ namespace Server
 
                         //Gate:
                         case 14:
+                            if (rightRecallRuneEntry != null)
+                            {
+                                new GateTravelSpell(m_Player, null, null, null, rightRecallRuneEntry, null).Cast();
+
+                                runeTome.Openers.Remove(m_Player);
+
+                                m_Player.CloseGump(typeof(RuneTomeGump));
+                                m_Player.CloseRunebookGump = true;
+                            }
+
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+                            }
+
                             closeGump = false;
                         break;                      
 
                         //Gate Via Charge
                         case 15:
-                            if (hasChargeAccess)
+                            if (rightRecallRuneEntry != null)
                             {
+                                if (!hasChargeAccess)
+                                    m_Player.SendMessage("You do not have the neccessary access rights required to use gate charges from this rune tome.");
+
+                                else if (runeTome.GateCharges == 0)
+                                    m_Player.SendMessage("This rune tome is out of gate charges.");
+
+                                else
+                                {
+                                    new GateTravelSpell(m_Player, runeTome, null, null, rightRecallRuneEntry, runeTome).Cast();
+
+                                    runeTome.Openers.Remove(m_Player);
+
+                                    m_Player.CloseGump(typeof(RuneTomeGump));
+                                    m_Player.CloseRunebookGump = true;
+
+                                    return;
+                                }
+                            }
+
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
                             }
                             
                             closeGump = false;
@@ -778,30 +1118,108 @@ namespace Server
 
                         //Drop Rune
                         case 16:
-                            if (hasAdminAccess)
+                            if (rightRecallRuneEntry != null)
                             {
+                                if (hasChargeAccess)
+                                {
+                                    bool wasDefaultRune = false;
+
+                                    if (rightRecallRuneEntry.m_IsDefaultRune)
+                                        wasDefaultRune = true;   
+
+                                    RecallRune recallRune = new RecallRune();
+
+                                    recallRune.Description = rightRecallRuneEntry.m_Description;
+                                    recallRune.House = rightRecallRuneEntry.m_House;
+                                    recallRune.Target = rightRecallRuneEntry.m_Target;
+                                    recallRune.TargetMap = rightRecallRuneEntry.m_TargetMap;
+                                    recallRune.Marked = true;
+
+                                    m_Player.AddToBackpack(recallRune);
+                                    m_Player.SendMessage("You remove the rune from the runebook.");
+
+                                    if (m_RuneTomeGumpObject.m_SelectedRuneEntry == rightRecallRuneEntry)
+                                        m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+
+                                    if (runeTome.m_RecallRuneEntries.Contains(rightRecallRuneEntry))
+                                        runeTome.m_RecallRuneEntries.Remove(rightRecallRuneEntry);
+
+                                    if (wasDefaultRune && runeTome.m_RecallRuneEntries.Count > 0)
+                                    {
+                                        if (runeTome.m_RecallRuneEntries[0] != null)
+                                            runeTome.m_RecallRuneEntries[0].m_IsDefaultRune = true;
+                                    }
+
+                                    m_Player.SendSound(0x42);
+                                }
+
+                                else
+                                    m_Player.SendMessage("You do not have the neccessary access rights required to use recall charges from this rune tome.");
                             }
 
-                            m_Player.SendSound(SelectionSound);
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+                            }
 
                             closeGump = false;
                         break;
 
                         //Set Rune as Default
                         case 17:
-                            if (hasAdminAccess)
+                            if (rightRecallRuneEntry != null)
                             {
+                                if (hasChargeAccess)
+                                {
+                                    foreach (RuneTomeRuneEntry runeEntry in runeTome.m_RecallRuneEntries)
+                                    {
+                                        if (runeEntry == null)
+                                            continue;
+
+                                        if (runeEntry == rightRecallRuneEntry)
+                                            runeEntry.m_IsDefaultRune = true;
+
+                                        else
+                                            runeEntry.m_IsDefaultRune = false;
+                                    }
+
+                                    m_Player.SendMessage("You set the rune as the new default for this rune tome.");
+
+                                    m_Player.SendSound(SelectionSound);
+                                }
+
+                                else
+                                    m_Player.SendMessage("You do not have the neccessary access rights required to set this rune as the rune tome default.");
                             }
 
-                            m_Player.SendSound(SelectionSound);
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
+                            }
 
                             closeGump = false;
                         break;
 
                         //Rename Rune
                         case 18:
-                            if (hasAdminAccess)
+                            if (rightRecallRuneEntry != null)
                             {
+                                if (hasChargeAccess)
+                                {
+                                    m_Player.SendMessage("What do you wish to rename this recall rune to?");
+                                    m_Player.Prompt = new RuneTomeRuneEntryRenamePrompt(m_Player, m_RuneTomeGumpObject, rightRecallRuneEntry);
+                                }
+
+                                else
+                                    m_Player.SendMessage("You do not have the neccessary access rights required to rename this rune.");
+                            }
+
+                            else
+                            {
+                                m_RuneTomeGumpObject.m_RuneTomePageType = PageType.Overview;
+                                m_RuneTomeGumpObject.m_SelectedRuneEntry = null;
                             }
 
                             m_Player.SendSound(SelectionSound);
@@ -825,6 +1243,164 @@ namespace Server
             else
                 m_Player.SendSound(CloseGumpSound);
         }
+
+        private class RuneTomeRenamePrompt : Prompt
+        {
+            private PlayerMobile m_Player;
+            private RuneTomeGumpObject m_RuneTomeGumpObject;
+
+            public RuneTomeRenamePrompt(PlayerMobile player, RuneTomeGumpObject runeTomeGumpObject)
+            {
+                m_Player = player;
+                m_RuneTomeGumpObject = runeTomeGumpObject;
+            }
+
+            public override void OnResponse(Mobile from, string text)
+            {
+                if (m_Player == null) return;
+                if (m_Player.Deleted) return;
+                if (m_RuneTomeGumpObject == null) return;
+                if (m_RuneTomeGumpObject.m_RuneTome == null) return;
+                if (m_RuneTomeGumpObject.m_RuneTome.Deleted) return;
+
+                RuneTome runeTome = m_RuneTomeGumpObject.m_RuneTome;
+
+                if (!runeTome.CanAccess(m_Player))
+                {
+                    m_Player.SendMessage("That is no longer accessible.");
+                    return;
+                }
+
+                if (!runeTome.HasChargeAccess(m_Player))
+                {
+                    m_Player.SendMessage("You no longer have the neccessary access rights required to rename this rune tome.");
+                    return;
+                }
+
+                string newName = Utility.FixHtml(text.Trim());
+
+                int maxNameLength = 35;
+
+                if (newName.Length == 0)                                              
+                        m_Player.SendMessage("Rune tome names must be at least 1 character.");
+
+                else if (newName.Length > maxNameLength)
+                    m_Player.SendMessage("Rune tome names may be no longer than " + maxNameLength.ToString() + " characters.");
+
+                //else if (!Guilds.CheckProfanity(newName))
+                    //m_Player.SendMessage("That is an unnacceptable name for that rune tome.");
+
+                else
+                {
+                    runeTome.DisplayName = newName;
+                    m_Player.SendMessage("The rune tome's name has changed.");
+                }
+
+                from.CloseGump(typeof(RuneTomeGump));
+                from.SendGump(new RuneTomeGump(m_Player, m_RuneTomeGumpObject));
+            }
+
+            public override void OnCancel(Mobile from)
+            {
+                from.SendLocalizedMessage(502415); // Request cancelled.
+
+                if (m_RuneTomeGumpObject != null)
+                {
+                    from.CloseGump(typeof(RuneTomeGump));
+                    from.SendGump(new RuneTomeGump(m_Player, m_RuneTomeGumpObject));
+                }
+            }
+        }
+
+        private class RuneTomeRuneEntryRenamePrompt : Prompt
+        {
+            private PlayerMobile m_Player;
+            private RuneTomeGumpObject m_RuneTomeGumpObject;
+            private RuneTomeRuneEntry m_RuneEntry;
+
+            public RuneTomeRuneEntryRenamePrompt(PlayerMobile player, RuneTomeGumpObject runeTomeGumpObject, RuneTomeRuneEntry runeEntry)
+            {
+                m_Player = player;
+                m_RuneTomeGumpObject = runeTomeGumpObject;
+                m_RuneEntry = runeEntry;
+            }
+
+            public override void OnResponse(Mobile from, string text)
+            {
+                if (m_Player == null) return;
+                if (m_Player.Deleted) return;
+                if (m_RuneTomeGumpObject == null) return;
+                if (m_RuneTomeGumpObject.m_RuneTome == null) return;
+                if (m_RuneTomeGumpObject.m_RuneTome.Deleted) return;
+
+                RuneTome runeTome = m_RuneTomeGumpObject.m_RuneTome;
+
+                if (!runeTome.CanAccess(m_Player))
+                {
+                    m_Player.SendMessage("That is no longer accessible.");
+                    return;
+                }
+
+                if (!runeTome.HasChargeAccess(m_Player))
+                {
+                    m_Player.SendMessage("You no longer have the neccessary access rights required to rename this rune tome.");
+                    return;
+                }
+
+                bool foundMatch = false;
+
+                foreach (RuneTomeRuneEntry runeEntryInstance in runeTome.m_RecallRuneEntries)
+                {
+                    if (runeEntryInstance == null)
+                        continue;
+
+                    if (runeEntryInstance == m_RuneEntry)
+                    {
+                        foundMatch = true;
+                        break;
+                    }
+                }
+
+                if (!foundMatch)
+                {                    
+                    m_Player.SendMessage("That recall rune is no longer accessible.");
+                    return;                    
+                }
+
+                string newName = Utility.FixHtml(text.Trim());
+
+                int maxNameLength = 35;
+
+                if (newName.Length == 0)
+                    m_Player.SendMessage("Recall rune names must be at least 1 character.");
+
+                else if (newName.Length > maxNameLength)
+                    m_Player.SendMessage("Recall rune names may be no longer than " + maxNameLength.ToString() + " characters.");
+
+                //else if (!Guilds.CheckProfanity(newName))
+                //m_Player.SendMessage("That is an unnacceptable name for that recall rune.");
+
+                else
+                {
+                    m_RuneEntry.m_Description = newName;
+                    m_Player.SendMessage("The recall rune's name has changed.");
+                }
+
+                from.CloseGump(typeof(RuneTomeGump));
+                from.SendGump(new RuneTomeGump(m_Player, m_RuneTomeGumpObject));
+            }
+
+            public override void OnCancel(Mobile from)
+            {
+                from.SendLocalizedMessage(502415); // Request cancelled.
+
+                if (m_RuneTomeGumpObject != null)
+                {
+                    from.CloseGump(typeof(RuneTomeGump));
+                    from.SendGump(new RuneTomeGump(m_Player, m_RuneTomeGumpObject));
+                }
+            }
+        }
     }
 
     public class RuneTomeGumpObject
@@ -835,7 +1411,7 @@ namespace Server
 
         public bool m_ToggleRearrangeRuneOrder = false;
 
-        public RecallRuneEntry m_SelectedRuneEntry = null;
+        public RuneTomeRuneEntry m_SelectedRuneEntry = null;
 
         public RuneTomeGumpObject(RuneTome runeTome)
         {

@@ -350,9 +350,9 @@ namespace Server.Items
 				from.CloseGump( typeof( RunebookGump ) );
 				from.SendGump( new RunebookGump( from, this ) );
                 if (from.Player && from.BankBox.Items.Contains(this))
-                    ((PlayerMobile)from).CloseBankRunebookGump = true;
+                    ((PlayerMobile)from).CloseRunebookGump = true;
                 else if (from.Player)
-                    ((PlayerMobile)from).CloseBankRunebookGump = false;
+                    ((PlayerMobile)from).CloseRunebookGump = false;
 
 				m_Openers.Add( from );
 			}

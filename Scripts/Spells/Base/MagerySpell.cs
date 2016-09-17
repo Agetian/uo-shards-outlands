@@ -26,7 +26,7 @@ namespace Server.Spells
         public override void GetCastSkills(out double min, out double max)
         {
             min = GetCastMinSkills((int)Circle, Scroll != null);
-            max = GetCastMaxSkills((int)Circle, Scroll != null);
+            max = GetCastMaxSkills((int)Circle, Scroll != null);       
 
             //1st: 0-30
             //2nd: 20-40

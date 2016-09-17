@@ -1916,7 +1916,7 @@
     <Compile Include="Gumps\ReclaimVendorGump.cs" />
     <Compile Include="Gumps\ResurrectGump.cs" />
     <Compile Include="Gumps\RewardGump.cs" />
-    <Compile Include="Gumps\RunebookGump.cs" />
+    <Compile Include="Items\Runebooks\RunebookGump.cs" />
     <Compile Include="Gumps\SetSecureLevelGump.cs" />
     <Compile Include="Gumps\SkillsGump.cs" />
     <Compile Include="Gumps\TithingGump.cs" />

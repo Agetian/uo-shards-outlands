@@ -5,7 +5,6 @@ using Server.Mobiles;
 using Server.Network;
 using Server.Targeting;
 using Server.Regions;
-
 using Server.Custom.Items;
 using System.Collections;
 using System.Linq;
@@ -29,37 +28,50 @@ namespace Server.Spells.Fourth
 
 		private RunebookEntry m_Entry;
 		private Runebook m_Book;
+
+        private RuneTomeRuneEntry m_RunebookRuneEntry;
+        private RuneTome m_RuneTome;
 		
 		public override TimeSpan GetCastDelay() 
 		{
             return TimeSpan.FromSeconds(1.75);
 		}
 
-		public RecallSpell( Mobile caster, Item scroll ) : this( caster, scroll, null, null )
+		public RecallSpell( Mobile caster, Item scroll ) : this( caster, scroll, null, null, null, null )
 		{
 		}
 
-		public RecallSpell( Mobile caster, Item scroll, RunebookEntry entry, Runebook book ) : base( caster, scroll, m_Info )
+		public RecallSpell( Mobile caster, Item scroll, RunebookEntry entry, Runebook book, RuneTomeRuneEntry recallRuneEntry, RuneTome runeTome ) : base( caster, scroll, m_Info )
 		{
 			m_Entry = entry;
 			m_Book = book;
+
+            m_RunebookRuneEntry = recallRuneEntry;
+            m_RuneTome = runeTome;
 		}
 
 		public override void GetCastSkills( out double min, out double max )
 		{
-			if( m_Book != null )	//recall using Runebook charge
-				min = max = 0;
+            if (m_Book != null || m_RuneTome != null)
+            {
+                min = 20;
+                max = 20;
+            }
 
-			else
-				base.GetCastSkills( out min, out max );
+            else
+                base.GetCastSkills(out min, out max);
 		}
 
 		public override void OnCast()
 		{
-			if ( m_Entry == null )
-				Caster.Target = new InternalTarget( this );
-			else
-				Effect( m_Entry.Location, m_Entry.Map, true );
+            if (m_Entry != null)
+                Effect( m_Entry.Location, m_Entry.Map, true );
+
+            else if (m_RunebookRuneEntry != null)
+                Effect( m_RunebookRuneEntry.m_Target, m_RunebookRuneEntry.m_TargetMap, true );
+
+            else
+				Caster.Target = new InternalTarget( this );				
 		}
         
 		public override bool CheckCast()
@@ -72,6 +84,7 @@ namespace Server.Spells.Fourth
             {
                 if (recallBlocker.PreventRecallOutResponse != "")
                     Caster.SendMessage(recallBlocker.PreventRecallOutResponse);
+
                 else
                     Caster.SendMessage(WarpBlockerTotem.DefaultRecallOutResponse);
 
@@ -100,27 +113,9 @@ namespace Server.Spells.Fourth
             {
                 if (pm_Caster.RecallRestrictionExpiration > DateTime.UtcNow)
                 {   
-                    int minutes = pm_Caster.RecallRestrictionExpiration.Subtract(DateTime.UtcNow).Minutes;
-                    int seconds = pm_Caster.RecallRestrictionExpiration.Subtract(DateTime.UtcNow).Seconds;
+                    string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, pm_Caster.RecallRestrictionExpiration, false, true, true, true, true);
 
-                    string sTime = "";
-
-                    if (minutes > 1)
-                        sTime += minutes.ToString() + " minutes ";
-
-                    else if (minutes == 1)
-                        sTime += minutes.ToString() + " minute ";
-
-                    if (seconds > 1)
-                        sTime += seconds.ToString() + " seconds ";
-
-                    else if (seconds == 1)
-                        sTime += seconds.ToString() + " second ";
-
-                    sTime = sTime.Trim();
-
-                    if (sTime != "")
-                        pm_Caster.SendMessage("You are unable to cast this spell for another " + sTime + ".");
+                    pm_Caster.SendMessage("You are unable to cast this spell for another " + timeRemaining + ".");
 
                     return false;
                 }
@@ -141,78 +136,58 @@ namespace Server.Spells.Fourth
             {
                 if (recallBlocker.PreventRecallInResponse != "")
                     Caster.SendMessage(recallBlocker.PreventRecallInResponse);
+
                 else
-                    Caster.SendMessage(WarpBlockerTotem.DefaultRecallInResponse);               
+                    Caster.SendMessage(WarpBlockerTotem.DefaultRecallInResponse);
             }
-            
-            else if ( map == null || (!Core.AOS && Caster.Map != map) )
-			{
-				Caster.SendLocalizedMessage( 1005569 ); // You can not recall to another facet.
-			}
+
+            else if (map == null || (!Core.AOS && Caster.Map != map))
+                Caster.SendLocalizedMessage(1005569); // You can not recall to another facet.			
 
             else if (!SpellHelper.CheckTravel(Caster, map, loc, TravelCheckType.RecallTo))
-            {
-                Caster.SendLocalizedMessage(501802); // Thy spell doth not appear to work...
-            }
+                Caster.SendLocalizedMessage(501802); // Thy spell doth not appear to work...            
 
             else if (SpellHelper.IsAnyT2A(map, loc) && pm != null)
             {
             }
 
             else if (Server.Misc.WeightOverloading.IsOverloaded(Caster))
-            {
-                Caster.SendLocalizedMessage(502359, "", 0x22); // Thou art too encumbered to move.
-            }
+                Caster.SendLocalizedMessage(502359, "", 0x22); // Thou art too encumbered to move.            
 
             else if (map != Map.Felucca)
-            {
                 Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.
-            }
 
             else if (Caster.ShortTermMurders >= 5 && map != Map.Felucca)
-            {
-                Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.
-            }
+                Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.            
 
-            else if (!SpellHelper.CheckIfOK(Caster.Map, loc.X, loc.Y, loc.Z))
-            {
-                Caster.SendLocalizedMessage(501942); // That location is blocked.
-            }
+            else if (!SpellHelper.CheckIfOK(Caster.Map, loc.X, loc.Y, loc.Z))            
+                Caster.SendLocalizedMessage(501942); // That location is blocked.               
 
-            else if ((checkMulti && SpellHelper.CheckMulti(loc, map)))
-            {
-                Caster.SendLocalizedMessage(501942); // That location is blocked.
-            }
+            else if ((checkMulti && SpellHelper.CheckMulti(loc, map)))     
+                Caster.SendLocalizedMessage(501942); // That location is blocked.  
 
             else if (SpellHelper.IsSolenHiveLoc(loc))
-            {
-                Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.
-            }
+                Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.            
 
             else if (SpellHelper.IsStarRoom(loc))
-            {
-                Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.
-            }
+                Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.            
 
             else if (SpellHelper.IsWindLoc(loc))
-            {
-                Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.
-            }
+                Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.            
 
             else if (ship != null && ship.Owner != Caster)
-            {
-                Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.
-            }
+                Caster.SendLocalizedMessage(1019004); // You are not allowed to travel there.            
 
-            else if (m_Book != null && m_Book.CurCharges <= 0)
-            {
-                Caster.SendLocalizedMessage(502412); // There are no charges left on that item.
-            }
+            else if ((m_Book != null && m_Book.CurCharges <= 0) || (m_RuneTome != null && m_RuneTome.RecallCharges <= 0))
+                Caster.SendMessage("There are no recall charges left on that item.");
 
             else if (CheckSequence())
             {
                 if (m_Book != null)
                     --m_Book.CurCharges;
+
+                if (m_RuneTome != null)
+                    --m_RuneTome.RecallCharges;
 
                 Point3D sourceLocation = Caster.Location;
                 Map sourceMap = Caster.Map;
@@ -231,7 +206,7 @@ namespace Server.Spells.Fourth
                     Effects.SendLocationEffect(sourceLocation, sourceMap, 0x3967, 30, 15, 2499, 0);
 
                     Effects.PlaySound(targetLocation, targetMap, 0x1FC);
-                    Effects.SendLocationEffect(targetLocation, targetMap, 0x3967, 30, 15, 2499, 0);                    
+                    Effects.SendLocationEffect(targetLocation, targetMap, 0x3967, 30, 15, 2499, 0);
                 }
 
                 else
@@ -264,6 +239,7 @@ namespace Server.Spells.Fourth
 
 					if ( rune.Marked )
 						m_Owner.Effect( rune.Target, rune.TargetMap, true );
+
 					else
 						from.SendLocalizedMessage( 501805 ); // That rune is not yet marked.
 				}
@@ -274,9 +250,44 @@ namespace Server.Spells.Fourth
 
 					if ( e != null )
 						m_Owner.Effect( e.Location, e.Map, true );
+
 					else
 						from.SendLocalizedMessage( 502354 ); // Target is not marked.
 				}
+
+                else if (o is RuneTome)
+                {
+                    RuneTome runeTome = o as RuneTome;
+
+                    RuneTomeRuneEntry defaultRuneEntry = null;
+
+                    foreach (RuneTomeRuneEntry entry in runeTome.m_RecallRuneEntries)
+                    {
+                        if (entry == null)
+                            continue;
+
+                        if (entry.m_IsDefaultRune)
+                        {
+                            defaultRuneEntry = entry;
+                            break;
+                        }
+                    }
+
+                    if (defaultRuneEntry == null)
+                    {
+                        if (runeTome.m_RecallRuneEntries.Count > 0)
+                            defaultRuneEntry = runeTome.m_RecallRuneEntries[0];
+
+                        else
+                        {
+                            from.SendMessage("There are no recall runes stored within this rune tome.");
+                            return;
+                        }
+                    }
+
+                    if (defaultRuneEntry != null)
+                        m_Owner.Effect(defaultRuneEntry.m_Target, defaultRuneEntry.m_TargetMap, true);
+                }
 
                 else if (o is ShipRune)
                 {
@@ -289,7 +300,7 @@ namespace Server.Spells.Fourth
 
                         if (m_Ship.Deleted)
                         {
-                            from.SendMessage("The ship bound to this rune no longer exists.");     
+                            from.SendMessage("The ship bound to this rune no longer exists.");
                             return;
                         }
 
@@ -302,21 +313,19 @@ namespace Server.Spells.Fourth
                             from.SendMessage("You must be the owner of that ship to use this rune.");
                     }
 
-                    else                    
-                        from.SendMessage("The ship bound to this rune no longer exists.");                                   
+                    else
+                        from.SendMessage("The ship bound to this rune no longer exists.");
                 }
 
-				else if ( o is HouseRaffleDeed && ((HouseRaffleDeed)o).ValidLocation() )
-				{
-					HouseRaffleDeed deed = (HouseRaffleDeed)o;
+                else if (o is HouseRaffleDeed && ((HouseRaffleDeed)o).ValidLocation())
+                {
+                    HouseRaffleDeed deed = (HouseRaffleDeed)o;
 
-					m_Owner.Effect( deed.PlotLocation, deed.PlotFacet, true );
-				}
+                    m_Owner.Effect(deed.PlotLocation, deed.PlotFacet, true);
+                }
 
-				else
-				{
-					from.Send( new MessageLocalized( from.Serial, from.Body, MessageType.Regular, 0x3B2, 3, 502357, from.Name, "" ) ); // I can not recall from that object.
-				}
+                else
+                    from.Send(new MessageLocalized(from.Serial, from.Body, MessageType.Regular, 0x3B2, 3, 502357, from.Name, "")); // I can not recall from that object.				
 			}
 			
 			protected override void OnNonlocalTarget( Mobile from, object o )

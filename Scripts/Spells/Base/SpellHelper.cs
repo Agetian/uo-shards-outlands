@@ -220,8 +220,8 @@ namespace Server.Spells
         {
             Point3D location = new Point3D(x, y, z);
 
-            if (!Region.Find(location, map).AllowSpawn())
-                return false;
+            if (!Region.Find(location, map).AllowSpawn())            
+                return false;            
 
             bool foundOceanStatic = false;
 
@@ -239,7 +239,7 @@ namespace Server.Spells
             nearbyItems.Free();
 
             if (foundOceanStatic)
-                return false;
+                return false;  
 
             return CanFit(map, x, y, z, 16, false, true, true);
         }
@@ -258,10 +258,12 @@ namespace Server.Spells
             int lowZ = 0, avgZ = 0, topZ = 0;
 
             m.GetAverageZ(x, y, ref lowZ, ref avgZ, ref topZ);
+
             TileFlag landFlags = TileData.LandTable[lt.ID & TileData.MaxLandValue].Flags;
 
             if ((landFlags & TileFlag.Impassable) != 0 && avgZ > z && (z + height) > lowZ)
                 return false;
+
             else if ((landFlags & TileFlag.Impassable) == 0 && z == avgZ && !lt.Ignored)
                 hasSurface = true;
 
@@ -277,6 +279,7 @@ namespace Server.Spells
 
                 if ((surface || impassable) && (staticTiles[i].Z + id.CalcHeight) > z && (z + height) > staticTiles[i].Z)
                     return false;
+
                 else if (surface && !impassable && z == (staticTiles[i].Z + id.CalcHeight))
                     hasSurface = true;
             }
@@ -292,11 +295,13 @@ namespace Server.Spells
                 if (!(item is BaseMulti) && item.ItemID <= TileData.MaxItemValue && item.AtWorldPoint(x, y))
                 {
                     ItemData id = item.ItemData;
+
                     surface = id.Surface;
                     impassable = id.Impassable;
 
                     if ((surface || impassable || (checkBlocksFit && item.BlocksFit)) && (item.Z + id.CalcHeight) > z && (z + height) > item.Z)
                         return false;
+
                     else if (surface && !impassable && !item.Movable && z == (item.Z + id.CalcHeight))
                         hasSurface = true;
                 }

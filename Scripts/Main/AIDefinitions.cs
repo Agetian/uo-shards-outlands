@@ -20,101 +20,60 @@ namespace Server
                     bc_Creature.DictCombatRange[CombatRange.SpellRange] = 0;
                     bc_Creature.DictCombatRange[CombatRange.Withdraw] = 0;
 
-                    bc_Creature.DictCombatAction[CombatAction.None] = 1;
-                    bc_Creature.DictCombatAction[CombatAction.AttackOnly] = 10;
+                    bc_Creature.DictCombatAction[CombatAction.None] = 0;
+                    bc_Creature.DictCombatAction[CombatAction.AttackOnly] = 1;
                     bc_Creature.DictCombatAction[CombatAction.CombatSpell] = 0;
                     bc_Creature.DictCombatAction[CombatAction.CombatHealSelf] = 0;
                     bc_Creature.DictCombatAction[CombatAction.CombatHealOther] = 0;
                     bc_Creature.DictCombatAction[CombatAction.CombatSpecialAction] = 0;
                     bc_Creature.DictCombatAction[CombatAction.CombatEpicAction] = 0;
-                    break;
+                break;
 
                 case AIGroupType.EvilMonster:
                     bc_Creature.DictCombatTargeting[CombatTargeting.PlayerAny] = 1;
 
                     bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 1;
                     bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 2;
-                    break;
+                break;
 
                 case AIGroupType.NeutralMonster:
 
                     bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 1;
                     bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 2;
-                    break;
+                break;
 
                 case AIGroupType.GoodMonster:
                     bc_Creature.DictCombatTargeting[CombatTargeting.Evil] = 1;
 
                     bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 1;
                     bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 2;
-                    break;
-
-                case AIGroupType.Undead:
-                    bc_Creature.DictCombatTargeting[CombatTargeting.PlayerAny] = 1;
-
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee50] = 0;
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee25] = 0;
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 0;
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 0;
-                    break;
-
-                case AIGroupType.EvilHuman:
-                    bc_Creature.DictCombatTargeting[CombatTargeting.PlayerAny] = 1;
-
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 1;
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 2;
-                    break;
-
-                case AIGroupType.NeutralHuman:
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 1;
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 2;
-                    break;
-
-                case AIGroupType.GoodHuman:
-                    bc_Creature.DictCombatTargeting[CombatTargeting.Evil] = 1;
-
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 1;
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 2;
-                    break;
+                break;
 
                 case AIGroupType.EvilAnimal:
                     bc_Creature.DictCombatTargeting[CombatTargeting.PlayerAny] = 1;
 
                     bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 1;
                     bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 2;
-                    break;
+                break;
 
                 case AIGroupType.NeutralAnimal:
                     bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 2;
                     bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 3;
-                    break;
+                break;
 
                 case AIGroupType.GoodAnimal:
                     bc_Creature.DictCombatTargeting[CombatTargeting.Evil] = 1;
 
                     bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 1;
                     bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 2;
-                    break;
-
-                case AIGroupType.FactionMonster:
-                    break;
-
-                case AIGroupType.FactionHuman:
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee50] = 0;
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee25] = 0;
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee10] = 0;
-                    bc_Creature.DictCombatFlee[CombatFlee.Flee5] = 0;
-                    break;
-
-                case AIGroupType.FactionAnimal:
-                    break;
+                break;
 
                 case AIGroupType.Summoned:
-                    break;
+                break;
 
                 case AIGroupType.Boss:
                     bc_Creature.DictCombatTargeting[CombatTargeting.PlayerAny] = 1;
-                    break;
+                break;
             }
 
             //AI SubGroup

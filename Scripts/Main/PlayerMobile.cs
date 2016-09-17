@@ -1558,7 +1558,7 @@ namespace Server.Mobiles
 
         private DateTime m_Created = DateTime.UtcNow;
         public DateTime CreatedOn { set { m_Created = value; } get { return m_Created; } }
-        public Boolean CloseBankRunebookGump;
+        public Boolean CloseRunebookGump;
 
         public TimeSpan m_ShortTermElapse;
         public TimeSpan m_LongTermElapse;       
@@ -2635,10 +2635,12 @@ namespace Server.Mobiles
                 }
             }
 
-            if (CloseBankRunebookGump)
+            if (CloseRunebookGump)
             {
                 CloseGump(typeof(RunebookGump));
-                CloseBankRunebookGump = false;
+                CloseGump(typeof(RuneTomeGump));
+
+                CloseRunebookGump = false;
             }
 
             int speed = ComputeMovementSpeed(d);
@@ -2722,10 +2724,10 @@ namespace Server.Mobiles
         {
             base.MoveToWorld(loc, map);
 
-            if (CloseBankRunebookGump)
+            if (CloseRunebookGump)
             {
                 CloseGump(typeof(RunebookGump));
-                CloseBankRunebookGump = false;
+                CloseRunebookGump = false;
             }
 
             RecheckTownProtection();
@@ -2733,10 +2735,10 @@ namespace Server.Mobiles
 
         public override void SetLocation(Point3D loc, bool isTeleport)
         {
-            if (CloseBankRunebookGump)
+            if (CloseRunebookGump)
             {
                 CloseGump(typeof(RunebookGump));
-                CloseBankRunebookGump = false;
+                CloseRunebookGump = false;
             }
 
             if (!isTeleport && AccessLevel == AccessLevel.Player)
@@ -3256,10 +3258,10 @@ namespace Server.Mobiles
         {
             m_TimeSpanResurrected = this.GameTime;
 
-            if (CloseBankRunebookGump)
+            if (CloseRunebookGump)
             {
                 CloseGump(typeof(RunebookGump));
-                CloseBankRunebookGump = false;
+                CloseRunebookGump = false;
             }
 
             bool wasAlive = this.Alive;
@@ -3402,10 +3404,10 @@ namespace Server.Mobiles
 
             SpecialAbilities.ClearSpecialEffects(this);
 
-            if (CloseBankRunebookGump)
+            if (CloseRunebookGump)
             {
                 CloseGump(typeof(RunebookGump));
-                CloseBankRunebookGump = false;
+                CloseRunebookGump = false;
             }
 
             BandageContext bandageContext = BandageContext.GetContext(this);

@@ -32,22 +32,54 @@ namespace Server.Spells.Seventh
 		}
 
 		private RunebookEntry m_Entry;
+        private Runebook m_Book;
 
-		public GateTravelSpell( Mobile caster, Item scroll ) : this( caster, scroll, null )
+        private RuneTomeRuneEntry m_RunebookRuneEntry;
+        private RuneTome m_RuneTome;
+
+        public GateTravelSpell(Mobile caster, Item scroll): this(caster, scroll, null, null, null, null)
 		{
 		}
 
-		public GateTravelSpell( Mobile caster, Item scroll, RunebookEntry entry ) : base( caster, scroll, m_Info )
+        public GateTravelSpell(Mobile caster, Item scroll, RunebookEntry entry, Runebook book, RuneTomeRuneEntry recallRuneEntry, RuneTome runeTome): base(caster, scroll, m_Info)
 		{
-			m_Entry = entry;
+            m_Entry = entry;
+            m_Book = book;
+
+            m_RunebookRuneEntry = recallRuneEntry;
+            m_RuneTome = runeTome;
 		}
+
+        public override void GetCastSkills(out double min, out double max)
+        {
+            if (m_Book != null || m_RuneTome != null)
+            {
+                min = 50;
+                max = 50;
+            }
+
+            else
+                base.GetCastSkills(out min, out max);
+        }
 
 		public override void OnCast()
 		{
+            if (m_Entry != null)
+                Effect(m_Entry.Location, m_Entry.Map, true);
+
+            else if (m_RunebookRuneEntry != null)
+                Effect(m_RunebookRuneEntry.m_Target, m_RunebookRuneEntry.m_TargetMap, true);
+
+            else
+                Caster.Target = new InternalTarget(this);		
+
+            /*
 			if ( m_Entry == null )
 				Caster.Target = new InternalTarget( this );
+
 			else
 				Effect( m_Entry.Location, m_Entry.Map, true );
+             * */
 		}
 		
         public override bool CheckCast()
@@ -60,6 +92,7 @@ namespace Server.Spells.Seventh
             {
                 if (recallBlocker.PreventGateInResponse != "")
                     Caster.SendMessage(recallBlocker.PreventGateInResponse);
+
                 else
                     Caster.SendMessage(WarpBlockerTotem.DefaultGateInResponse);
 
@@ -88,27 +121,9 @@ namespace Server.Spells.Seventh
             {
                 if (pm_Caster.RecallRestrictionExpiration > DateTime.UtcNow)
                 {
-                    int minutes = pm_Caster.RecallRestrictionExpiration.Subtract(DateTime.UtcNow).Minutes;
-                    int seconds = pm_Caster.RecallRestrictionExpiration.Subtract(DateTime.UtcNow).Seconds;
+                    string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, pm_Caster.RecallRestrictionExpiration, false, true, true, true, true);
 
-                    string sTime = "";
-
-                    if (minutes > 1)
-                        sTime += minutes.ToString() + " minutes ";
-
-                    else if (minutes == 1)
-                        sTime += minutes.ToString() + " minute ";
-
-                    if (seconds > 1)
-                        sTime += seconds.ToString() + " seconds ";
-
-                    else if (seconds == 1)
-                        sTime += seconds.ToString() + " second ";
-
-                    sTime = sTime.Trim();
-
-                    if (sTime != "")
-                        pm_Caster.SendMessage("You are unable to cast this spell for another " + sTime + ".");
+                    pm_Caster.SendMessage("You are unable to cast this spell for another " + timeRemaining + ".");
 
                     return false;
                 }
@@ -125,6 +140,7 @@ namespace Server.Spells.Seventh
             {
                 if (recallBlocker.PreventGateOutResponse != "")
                     Caster.SendMessage(recallBlocker.PreventGateOutResponse);
+
                 else
                     Caster.SendMessage(WarpBlockerTotem.DefaultGateOutResponse);               
             }
@@ -160,10 +176,16 @@ namespace Server.Spells.Seventh
 				Caster.SendLocalizedMessage( 501802 ); // Thy spell doth not appear to work...			
 
             else if (BaseShip.FindShipAt(loc, map) != null)            
-                Caster.SendLocalizedMessage(501802); // Thy spell doth not appear to work...            
+                Caster.SendLocalizedMessage(501802); // Thy spell doth not appear to work...     
+
+            else if (m_RuneTome != null && m_RuneTome.GateCharges <= 0)
+                Caster.SendMessage("There are no gate charges left on that item.");
 
 			else if ( CheckSequence() && CheckCast() )
 			{
+                if (m_RuneTome != null)
+                    --m_RuneTome.GateCharges;
+
 				Caster.SendLocalizedMessage( 501024 ); // You open a magical gate to another location
 
                 //Player Enhancement Customization: Traveler
@@ -294,6 +316,7 @@ namespace Server.Spells.Seventh
 
 					if ( rune.Marked )
 						m_Owner.Effect( rune.Target, rune.TargetMap, true );
+
 					else
 						from.SendLocalizedMessage( 501803 ); // That rune is not yet marked.
 				}
@@ -304,6 +327,7 @@ namespace Server.Spells.Seventh
 
 					if ( e != null )
 						m_Owner.Effect( e.Location, e.Map, true );
+
 					else
 						from.SendLocalizedMessage( 502354 ); // Target is not marked.
 				}
@@ -318,6 +342,40 @@ namespace Server.Spells.Seventh
 
 					from.Send( new MessageLocalized( from.Serial, from.Body, MessageType.Regular, 0x3B2, 3, 501030, from.Name, "" ) ); // I can not gate travel from that object.
 				}
+
+                else if (o is RuneTome)
+                {
+                    RuneTome runeTome = o as RuneTome;
+
+                    RuneTomeRuneEntry defaultRuneEntry = null;
+
+                    foreach (RuneTomeRuneEntry entry in runeTome.m_RecallRuneEntries)
+                    {
+                        if (entry == null)
+                            continue;
+
+                        if (entry.m_IsDefaultRune)
+                        {
+                            defaultRuneEntry = entry;
+                            break;
+                        }
+                    }
+
+                    if (defaultRuneEntry == null)
+                    {
+                        if (runeTome.m_RecallRuneEntries.Count > 0)
+                            defaultRuneEntry = runeTome.m_RecallRuneEntries[0];
+
+                        else
+                        {
+                            from.SendMessage("There are no recall runes stored within this rune tome.");
+                            return;
+                        }
+                    }
+
+                    if (defaultRuneEntry != null)
+                        m_Owner.Effect(defaultRuneEntry.m_Target, defaultRuneEntry.m_TargetMap, true);
+                }
 
 				else if ( o is HouseRaffleDeed && ((HouseRaffleDeed)o).ValidLocation() )
 				{

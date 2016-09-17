@@ -51,19 +51,15 @@ namespace Server.Mobiles
         Unspecified,
 
         None,
+
         EvilMonster,
         NeutralMonster,
         GoodMonster,
-        Undead,
-        EvilHuman,
-        NeutralHuman,
-        GoodHuman,
+
         EvilAnimal,
         NeutralAnimal,
         GoodAnimal,
-        FactionMonster,
-        FactionHuman,
-        FactionAnimal,
+
         Summoned,
         Boss
     }
@@ -106,18 +102,20 @@ namespace Server.Mobiles
         GroupMedicMelee,
         GroupMedicRanged,
 
+        Hunter,
         SuperPredator,
         Predator,
         Prey,
-        Hunter,
+       
         Berserk,
+
         Swarm,
         Duelist,
-        MeleePotion,
-        Ranged,
-        Scout,
         Assassin,
         Stealther,
+        Scout,
+        Ranged,
+        MeleePotion,
         Poisoner,
         WanderingHealer,
         Sailor,
@@ -136,17 +134,21 @@ namespace Server.Mobiles
 
     public enum CombatTargeting
     {
-        OpposingFaction,
+        Aggressor,
+
         PlayerGood, //Includes ControlledMobiles
         PlayerCriminal, //Includes ControlledMobiles
         PlayerAny, //Includes ControlledMobiles
-        SuperPredator,
-        Predator,
-        Prey,
+
         Good,
         Neutral,
         Evil,
-        Aggressor,
+
+        OpposingFaction,
+        SuperPredator,
+        Predator,
+        Prey,
+              
         Any,
         None,        
     }
@@ -230,11 +232,13 @@ namespace Server.Mobiles
         SpellHealSelf50,
         SpellHealSelf25,
         SpellCureSelf,
+
         PotionHealSelf100,
         PotionHealSelf75,
         PotionHealSelf50,
         PotionHealSelf25,
         PotionCureSelf,
+
         BandageHealSelf100,
         BandageHealSelf75,
         BandageHealSelf50,
@@ -245,11 +249,13 @@ namespace Server.Mobiles
     public enum CombatHealOther
     {
         None,
+
         SpellHealOther100,
         SpellHealOther75,
         SpellHealOther50,
         SpellHealOther25,
         SpellCureOther,
+
         BandageHealOther100,
         BandageHealOther75,
         BandageHealOther50,
@@ -274,6 +280,7 @@ namespace Server.Mobiles
         None,
 
         MeleeBleedAoE,
+
         MassiveFireBreathAttack,
         MassiveIceBreathAttack,
         MassivePoisonBreathAttack,
@@ -299,16 +306,21 @@ namespace Server.Mobiles
         Tracking,
         Stealth,
         Stealing,
+
         SpellHealSelf100,
         BandageHealSelf100,
         PotionHealSelf100,
+
         SpellHealOther100,
         BandageHealOther100,
+
         SpellHealSelf50,
         BandageHealSelf50,
         PotionHealSelf50,
+
         SpellHealOther50,
         BandageHealOther50,
+
         SpellCureSelf,
         BandageCureSelf,
         PotionCureSelf,
@@ -328,16 +340,6 @@ namespace Server.Mobiles
     {
         None,
         Greeting
-    }
-
-
-    public enum CreatureSpecialAttackType
-    {
-        Paralyze,
-        Slow,
-        Pierce,
-        Bleed,
-        Stun
     }
 
     public abstract class BaseAI
@@ -376,8 +378,10 @@ namespace Server.Mobiles
 
             if (!m.PlayerRangeSensitive)
                 activate = true;
+
             else if (World.Loading)
                 activate = false;
+
             else if (m.Map == null || m.Map == Map.Internal || !m.Map.GetSector(m).Active)
                 activate = false;
             else
@@ -398,8 +402,7 @@ namespace Server.Mobiles
         {
             private BaseAI m_Owner;
 
-            public AITimer(BaseAI owner)
-                : base(TimeSpan.FromSeconds(Utility.RandomDouble()), TimeSpan.FromSeconds(Math.Max(0.0, owner.bc_Creature.CurrentSpeed)))
+            public AITimer(BaseAI owner): base(TimeSpan.FromSeconds(Utility.RandomDouble()), TimeSpan.FromSeconds(Math.Max(0.0, owner.bc_Creature.CurrentSpeed)))
             {
                 m_Owner = owner;
 
