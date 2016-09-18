@@ -5,12 +5,13 @@ using Server.Network;
 using Server.Mobiles;
 using Server.Multis;
 using Server.Gumps;
+using Server.Engines.Craft;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace Server.Items
 {
-    public class RuneTome : Item
+    public class RuneTome : Item, ICraftable
     {
         public enum LockedDownAccessLevelType
         {
@@ -28,7 +29,7 @@ namespace Server.Items
             set { m_LockedDownAccessLevel = value; }
         }
 
-        private string m_DisplayName = "Rune Tome";
+        private string m_DisplayName = "";
         [CommandProperty(AccessLevel.GameMaster)]
         public string DisplayName
         {
@@ -75,7 +76,7 @@ namespace Server.Items
         {
             Name = "a rune tome";
 
-            Hue = 2418;
+            Hue = 1121;
         }
 
         public RuneTome(Serial serial): base(serial)
@@ -84,9 +85,10 @@ namespace Server.Items
 
         public override void OnSingleClick(Mobile from)
         {
-            base.OnSingleClick(from);
+            if (m_DisplayName != null && m_DisplayName.Length > 0)
+                LabelTo(from, m_DisplayName);
 
-            LabelTo(from, "(" + m_DisplayName + ")");
+            base.OnSingleClick(from);            
 
             /*
             if (IsLockedDown)
@@ -360,24 +362,44 @@ namespace Server.Items
 
         public override void OnAfterDuped(Item newItem)
         {
-            //TEST: FINISH
+            RuneTome newRuneTome = newItem as RuneTome;
 
-            /*
-            Runebook book = newItem as Runebook;
-
-            if (book == null)
+            if (newRuneTome == null)
                 return;
 
-            book.m_Entries = new List<RunebookEntry>();
-
-            for (int i = 0; i < m_Entries.Count; i++)
+            foreach (RuneTomeRuneEntry runeTomeEntry in m_RecallRuneEntries)
             {
-                RunebookEntry entry = m_Entries[i];
+                if (runeTomeEntry == null)
+                    continue;
 
-                book.m_Entries.Add(new RunebookEntry(entry.Location, entry.Map, entry.Description, entry.House));
+                newRuneTome.m_RecallRuneEntries.Add(new RuneTomeRuneEntry(runeTomeEntry.m_IsDefaultRune, runeTomeEntry.m_Description, runeTomeEntry.m_Target, runeTomeEntry.m_TargetMap, runeTomeEntry.m_House));
             }
+
+            newRuneTome.LockedDownAccessLevel = LockedDownAccessLevel;
+            newRuneTome.DisplayName = DisplayName;
+            newRuneTome.RecallCharges = 0;
+            newRuneTome.GateCharges = 0;
+
+        }
+
+        public int OnCraft(int quality, bool makersMark, Mobile from, CraftSystem craftSystem, Type typeRes, BaseTool tool, CraftItem craftItem, int resHue)
+        {
+            /*
+            int charges = 5 + quality + (int)(from.Skills[SkillName.Inscribe].Value / 30);
+
+            if (charges > 10)
+                charges = 10;
+
+            MaxCharges = (Core.SE ? charges * 2 : charges);
+
+            if (makersMark)
+                Crafter = from;
+
+            m_Quality = (BookQuality)(quality - 1);
             */
-        }         
+
+            return quality;
+        }
 
         public override void Serialize(GenericWriter writer)
         {

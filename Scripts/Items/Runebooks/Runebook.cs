@@ -116,13 +116,12 @@ namespace Server.Items
         }
 
 		[Constructable]
-		public Runebook( int maxCharges ) : base( 3834 )
+		public Runebook( int maxCharges ) : base( 3643 )
 		{
             Name = "runebook";
 
             Weight = 1;
-			LootType = LootType.Blessed;
-			Hue = 0x461;
+			Hue = 1121;
 
 			Layer = (Layer.OneHanded);
 

@@ -92,13 +92,13 @@ namespace Server.Items
         public static string GetAspectName(AspectEnum aspect)
         {
             switch (aspect)
-            {
-                case AspectEnum.Affinity: return "Affinity";
+            {              
                 case AspectEnum.Air: return "Air";
                 case AspectEnum.Command: return "Command";
                 case AspectEnum.Earth: return "Earth";
                 case AspectEnum.Eldritch: return "Eldritch";
-                case AspectEnum.Fire: return "Fire";               
+                case AspectEnum.Fire: return "Fire";
+                case AspectEnum.Lyric: return "Lyric";
                 case AspectEnum.Poison: return "Poison";
                 case AspectEnum.Shadow: return "Shadow";
                 case AspectEnum.Void: return "Void";
@@ -113,17 +113,17 @@ namespace Server.Items
             switch (aspect)
             {
                 case AspectEnum.None: return 0;
-
-                case AspectEnum.Affinity: return 2423;
-                case AspectEnum.Air: return 2653; 
-                case AspectEnum.Command: return 1401;
-                case AspectEnum.Earth: return 1440;
-                case AspectEnum.Eldritch: return 2612;
-                case AspectEnum.Fire: return 2635;                       
+                                   
+                case AspectEnum.Air: return 2657;
+                case AspectEnum.Command: return 1428;
+                case AspectEnum.Earth: return 2653;
+                case AspectEnum.Eldritch: return 2660;
+                case AspectEnum.Fire: return 2635;
+                case AspectEnum.Lyric: return 2241; 
                 case AspectEnum.Poison: return 2127;
-                case AspectEnum.Shadow: return 2412;
+                case AspectEnum.Shadow: return 1757;
                 case AspectEnum.Void: return 2599;
-                case AspectEnum.Water: return 2592;
+                case AspectEnum.Water: return 2592;                
             }
 
             return 2658;
@@ -134,17 +134,17 @@ namespace Server.Items
             switch (aspect)
             {
                 case AspectEnum.None: return 2499;
-
-                case AspectEnum.Affinity: return 2423;
-                case AspectEnum.Air: return 2653;
-                case AspectEnum.Command: return 1401;   
-                case AspectEnum.Earth: return 1440;
-                case AspectEnum.Eldritch: return 2605;
-                case AspectEnum.Fire: return 1257;                             
+                                   
+                case AspectEnum.Air: return 90;
+                case AspectEnum.Command: return 1427;   
+                case AspectEnum.Earth: return 2550;
+                case AspectEnum.Eldritch: return 2606;
+                case AspectEnum.Fire: return 2116;
+                case AspectEnum.Lyric: return 2240;   
                 case AspectEnum.Poison: return 2126;
-                case AspectEnum.Shadow: return 2403;
-                case AspectEnum.Void: return 2592;
-                case AspectEnum.Water: return 2603;
+                case AspectEnum.Shadow: return 1756;
+                case AspectEnum.Void: return 2629;
+                case AspectEnum.Water: return 2591;
             }
 
             return 1154;
@@ -154,7 +154,7 @@ namespace Server.Items
         {
             List<Item> m_Items = player.Backpack.FindItemsByType<Item>();
 
-            bool issueArcaneChargesCaution = false;
+            bool issueArcaneChargesCaution = false;            
             bool issueArcaneChargesWarning = false;
 
             int previousArcaneCharges = 0;
@@ -362,7 +362,7 @@ namespace Server.Items
             
             switch (aspect)
             {
-                case AspectEnum.Affinity:
+                case AspectEnum.Lyric:
                     detail.m_SpecialEffect = WeaponSpecialEffectType.Inspiration;
                     detail.m_EffectDisplayName = "Inspiration";
                     detail.m_EffectDescription = "";
@@ -701,7 +701,7 @@ namespace Server.Items
 
             switch (aspectType)
             {
-                case AspectEnum.Affinity:
+                case AspectEnum.Lyric:
                 break;
 
                 case AspectEnum.Air:

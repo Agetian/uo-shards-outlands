@@ -20,7 +20,7 @@ namespace Server.Gumps
 
         public static int OpenGumpSound = 0x055;    
         public static int ChangePageSound = 0x057;
-        public static int SelectionSound = 0x3E6;
+        public static int SelectionSound = 0x4D2; //0x3E6 
         public static int PurchaseSound = 0x2E6;
         public static int CloseGumpSound = 0x058;
 
@@ -294,7 +294,10 @@ namespace Server.Gumps
 
                 #endregion
 
-                AddItem(startX + 15 + item.ItemIconOffsetX, startY + 30 + item.ItemIconOffsetY, item.ItemIconItemId, item.ItemIconHue);
+                //-32, 6
+
+                //AddItem(startX + 15 + item.ItemIconOffsetX, startY + 30 + item.ItemIconOffsetY, item.ItemIconItemId, item.ItemIconHue);
+                AddItem(startX - 26 + item.ItemIconOffsetX, startY + 6 + item.ItemIconOffsetY, item.ItemIconItemId, item.ItemIconHue);
                 AddLabel(Utility.CenteredTextOffset(startX + 185, item.ItemName), startY + 8, 149, item.ItemName);
 
                 if (item.ItemDescription != null)

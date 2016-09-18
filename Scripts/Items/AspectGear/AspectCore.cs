@@ -76,49 +76,7 @@ namespace Server.Items
         }
     }
 
-    #region Specific Cores
-
-    public class AffinityCore : AspectCore
-    {
-        [Constructable]
-        public AffinityCore(): base()
-        {
-            Name = "affinity Core";
-
-            Aspect = AspectEnum.Affinity;
-        }
-
-        [Constructable]
-        public AffinityCore(int amount): base(amount)
-        {
-            Name = "affinity Core";
-
-            Amount = amount;
-
-            Aspect = AspectEnum.Affinity;
-        }
-
-        public AffinityCore(Serial serial): base(serial)
-        {
-        }
-
-        public override void Serialize(GenericWriter writer)
-        {
-            base.Serialize(writer);
-            writer.Write((int)0); //version   
-        }
-
-        public override void Deserialize(GenericReader reader)
-        {
-            base.Deserialize(reader);
-            int version = reader.ReadInt();
-
-            //Version 0
-            if (version >= 0)
-            {
-            }
-        }
-    }
+    #region Specific Cores    
 
     public class AirCore : AspectCore
     {
@@ -328,7 +286,51 @@ namespace Server.Items
             {
             }
         }
-    }    
+    }
+
+    public class LyricCore : AspectCore
+    {
+        [Constructable]
+        public LyricCore()
+            : base()
+        {
+            Name = "lyric Core";
+
+            Aspect = AspectEnum.Lyric;
+        }
+
+        [Constructable]
+        public LyricCore(int amount)
+            : base(amount)
+        {
+            Name = "lyric Core";
+
+            Amount = amount;
+
+            Aspect = AspectEnum.Lyric;
+        }
+
+        public LyricCore(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
 
     public class PoisonCore : AspectCore
     {

@@ -300,7 +300,7 @@ namespace Server.Items
                     m_Player.SendSound(0x055);
 
                     m_Player.CloseGump(typeof(AspectGearGump));
-                    m_Player.SendGump(new AspectGearGump(m_Player, m_AspectMould, targetItem, AspectEnum.Affinity));
+                    m_Player.SendGump(new AspectGearGump(m_Player, m_AspectMould, targetItem, AspectEnum.Air));
 
                     return;
                 }
@@ -316,7 +316,7 @@ namespace Server.Items
                     m_Player.SendSound(0x055);
 
                     m_Player.CloseGump(typeof(AspectGearGump));
-                    m_Player.SendGump(new AspectGearGump(m_Player, m_AspectMould, targetItem, AspectEnum.Affinity));
+                    m_Player.SendGump(new AspectGearGump(m_Player, m_AspectMould, targetItem, AspectEnum.Air));
 
                     return;
                 }

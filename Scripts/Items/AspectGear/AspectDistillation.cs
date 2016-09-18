@@ -77,50 +77,7 @@ namespace Server.Items
         }
     }
 
-    #region Specific Distillations
-
-    public class AffinityDistillation : AspectDistillation
-    {
-        [Constructable]
-        public AffinityDistillation(): base()
-        {
-            Name = "affinity distillation";
-
-            Aspect = AspectEnum.Affinity;
-        }
-
-        [Constructable]
-        public AffinityDistillation(int amount)
-            : base(amount)
-        {
-            Name = "affinity distillation";
-
-            Amount = amount;
-
-            Aspect = AspectEnum.Affinity;
-        }
-
-        public AffinityDistillation(Serial serial): base(serial)
-        {
-        }
-
-        public override void Serialize(GenericWriter writer)
-        {
-            base.Serialize(writer);
-            writer.Write((int)0); //version   
-        }
-
-        public override void Deserialize(GenericReader reader)
-        {
-            base.Deserialize(reader);
-            int version = reader.ReadInt();
-
-            //Version 0
-            if (version >= 0)
-            {
-            }
-        }
-    }
+    #region Specific Distillations    
 
     public class AirDistillation : AspectDistillation
     {
@@ -311,6 +268,50 @@ namespace Server.Items
         }
 
         public FireDistillation(Serial serial): base(serial)
+        {
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0); //version   
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+            }
+        }
+    }
+
+    public class LyricDistillation : AspectDistillation
+    {
+        [Constructable]
+        public LyricDistillation()
+            : base()
+        {
+            Name = "lyric distillation";
+
+            Aspect = AspectEnum.Lyric;
+        }
+
+        [Constructable]
+        public LyricDistillation(int amount)
+            : base(amount)
+        {
+            Name = "lyric distillation";
+
+            Amount = amount;
+
+            Aspect = AspectEnum.Lyric;
+        }
+
+        public LyricDistillation(Serial serial): base(serial)
         {
         }
 

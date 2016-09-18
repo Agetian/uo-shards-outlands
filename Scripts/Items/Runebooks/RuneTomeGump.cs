@@ -87,6 +87,9 @@ namespace Server
 
             string displayName = runeTome.DisplayName;
 
+            if (displayName == "")
+                displayName = "Rune Tome";
+
             string accessLevelText = "Owner";
 
             switch (runeTome.LockedDownAccessLevel)

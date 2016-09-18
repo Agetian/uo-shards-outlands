@@ -399,6 +399,7 @@
     <Compile Include="Items\Minor Artifacts\WrathOfTheDryad.cs" />
     <Compile Include="Items\DonationShop\Convenience\DiamondHatchet.cs" />
     <Compile Include="Items\DonationShop\Convenience\DiamondPickaxe.cs" />
+    <Compile Include="Items\Runebooks\RunebookBlessDeed.cs" />
     <Compile Include="Items\Runebooks\RuneTome.cs" />
     <Compile Include="Items\Runebooks\RuneTomeGump.cs" />
     <Compile Include="Items\SkillItems\Magical\Potions\MagicResist Potions\MagicResistPotion.cs" />

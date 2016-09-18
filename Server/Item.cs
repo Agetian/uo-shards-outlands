@@ -109,13 +109,13 @@ namespace Server
     public enum AspectEnum
     {
         None,
-
-        Affinity,
+               
         Air,
         Command,       
         Earth,
-        Eldritch,
+        Eldritch,        
         Fire,
+        Lyric,
         Poison,
         Shadow,
         Void,
