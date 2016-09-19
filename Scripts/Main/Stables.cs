@@ -663,7 +663,7 @@ namespace Server
                                     dropBackpack.DropItem(item);
                                 }
 
-                                dropBackpack.MoveToWorld(bc_Follower.Location, bc_Follower.Map);
+                                dropBackpack.MoveToWorld(m_Player.Location, m_Player.Map);
                             }
                         }
 
@@ -677,13 +677,13 @@ namespace Server
                         m_Player.SendMessage("None of your lost followers were stabled as you have exceeded your maximum stable control slot allotment.");
 
                     else if (stabledCreatures > 0 && unableToStableCount > 0)
-                        m_Player.SendMessage("Some of your lostfollowers were unable to be stabled as you have exceeded your maximum stable control slot allotment.");
+                        m_Player.SendMessage("Some of your lost followers were unable to be stabled as you have exceeded your maximum stable control slot allotment.");
 
                     else if (stabledCreatures == 0 && unableToStableCount == 0)
                         m_Player.SendMessage("You do not currently have any lost followers at the moment.");
 
                     if (packsDropped > 0)
-                        m_Player.SendMessage(2550, "One or more of your lost pack creatures have left their pack's contents at their previous location.");
+                        m_Player.SendMessage(2550, "One or more of your lost pack creatures have left their pack's contents at your feet.");
                                            
                     closeGump = false;
                 break;
