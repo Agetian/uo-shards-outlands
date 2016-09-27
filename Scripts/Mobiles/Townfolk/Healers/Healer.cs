@@ -52,7 +52,7 @@ namespace Server.Mobiles
                 return false;
             }
 
-            else if (player.ShortTermMurders >= 5)
+            else if (player.MurderCounts >= Mobile.MurderCountsRequiredForMurderer)
             {
                 Say(501223); // Thou'rt not a decent and good person. I shall not resurrect thee.
                 return false;

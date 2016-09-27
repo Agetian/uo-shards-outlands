@@ -131,7 +131,7 @@ namespace Server.Items
                     return;
                 }
 
-                TimeSpan repairCooldownRequired = TimeSpan.FromSeconds(ship.RepairCooldownDuration);
+                TimeSpan repairCooldownRequired = TimeSpan.FromSeconds(ship.m_ShipStatsProfile.RepairCooldownDuration);
 
                 if (ship.LastCombatTime + ship.TimeNeededToBeOutOfCombat <= DateTime.UtcNow)
                     repairCooldownRequired = BaseShip.RepairDuration;
@@ -745,7 +745,7 @@ namespace Server.Items
             if (ship == null || from == null)
                 return;
 
-            TimeSpan repairCooldownRequired = TimeSpan.FromSeconds(ship.RepairCooldownDuration);
+            TimeSpan repairCooldownRequired = TimeSpan.FromSeconds(ship.m_ShipStatsProfile.RepairCooldownDuration);
 
             if (ship.LastCombatTime + ship.TimeNeededToBeOutOfCombat <= DateTime.UtcNow)
                 repairCooldownRequired = BaseShip.RepairDuration;

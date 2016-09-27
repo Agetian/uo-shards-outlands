@@ -371,7 +371,7 @@ namespace Server.Items
             //TEST: GUILD
             //Guild = owner.Guild as Guild;
 
-            Kills = owner.ShortTermMurders;
+            Kills = owner.MurderCounts;
             Criminal = owner.Criminal;
 
             Hair = hair;

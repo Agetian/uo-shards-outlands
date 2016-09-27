@@ -2968,7 +2968,7 @@ namespace Server.Mobiles
         //Murderer
         public bool IsMurderer()
         {
-            if (AlwaysMurderer || Murderer || ShortTermMurders >= 5)
+            if (AlwaysMurderer || Murderer || MurderCounts >= Mobile.MurderCountsRequiredForMurderer)
                 return true;
 
             return false;
@@ -7089,7 +7089,7 @@ namespace Server.Mobiles
             if (m_NoDupeGuards == m)
                 return;
 
-            if (!Body.IsHuman || IsMurderer() || AlwaysAttackable || m.ShortTermMurders < 5 || !m.InRange(Location, 12) || !m.Alive)
+            if (!Body.IsHuman || IsMurderer() || AlwaysAttackable || m.MurderCounts < Mobile.MurderCountsRequiredForMurderer || !m.InRange(Location, 12) || !m.Alive)
                 return;
 
             GuardedRegion guardedRegion = (GuardedRegion)this.Region.GetRegion(typeof(GuardedRegion));

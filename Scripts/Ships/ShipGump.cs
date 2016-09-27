@@ -282,11 +282,11 @@ namespace Server
 
                         if (ship != null)
                         {
-                            if (ship.m_MinorAbilityLastActivated + TimeSpan.FromSeconds(ship.MinorAbilityCooldownDuration) <= DateTime.UtcNow)
+                            if (ship.m_MinorAbilityLastActivated + TimeSpan.FromSeconds(ship.m_ShipStatsProfile.MinorAbilityCooldownDuration) <= DateTime.UtcNow)
                                 minorAbilityCooldownText = "Ready";
 
                             else
-                                minorAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.m_MinorAbilityLastActivated + TimeSpan.FromSeconds(ship.MinorAbilityCooldownDuration), true, false, false, true, true);   
+                                minorAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.m_MinorAbilityLastActivated + TimeSpan.FromSeconds(ship.m_ShipStatsProfile.MinorAbilityCooldownDuration), true, false, false, true, true);   
                         }
 
                         if (shipDeed != null)                        
@@ -310,11 +310,11 @@ namespace Server
 
                         if (ship != null)
                         {
-                            if (ship.m_MajorAbilityLastActivated + TimeSpan.FromSeconds(ship.MajorAbilityCooldownDuration) <= DateTime.UtcNow)
+                            if (ship.m_MajorAbilityLastActivated + TimeSpan.FromSeconds(ship.m_ShipStatsProfile.MajorAbilityCooldownDuration) <= DateTime.UtcNow)
                                 majorAbilityCooldownText = "Ready";
 
                             else
-                                majorAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.m_MajorAbilityLastActivated + TimeSpan.FromSeconds(ship.MajorAbilityCooldownDuration), true, false, false, true, true);
+                                majorAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.m_MajorAbilityLastActivated + TimeSpan.FromSeconds(ship.m_ShipStatsProfile.MajorAbilityCooldownDuration), true, false, false, true, true);
                         }
 
                         if (shipDeed != null)
@@ -338,11 +338,11 @@ namespace Server
 
                         if (ship != null)
                         {
-                            if (ship.m_EpicAbilityLastActivated + TimeSpan.FromSeconds(ship.EpicAbilityCooldownDuration) <= DateTime.UtcNow)
+                            if (ship.m_EpicAbilityLastActivated + TimeSpan.FromSeconds(ship.m_ShipStatsProfile.EpicAbilityCooldownDuration) <= DateTime.UtcNow)
                                 epicAbilityCooldownText = "Ready";
 
                             else
-                                epicAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.m_EpicAbilityLastActivated + TimeSpan.FromSeconds(ship.EpicAbilityCooldownDuration), true, false, false, true, true);
+                                epicAbilityCooldownText = Utility.CreateTimeRemainingString(DateTime.UtcNow, ship.m_EpicAbilityLastActivated + TimeSpan.FromSeconds(ship.m_ShipStatsProfile.EpicAbilityCooldownDuration), true, false, false, true, true);
                         }
 
                         if (shipDeed != null)

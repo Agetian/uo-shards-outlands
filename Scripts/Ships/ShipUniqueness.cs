@@ -12,18 +12,130 @@ namespace Server
 {
     public static class ShipUniqueness
     {
-        public static void GenerateShipUniqueness(BaseShip ship)
+        public static void GenerateCreationModifiers(BaseShipDeed shipDeed, BaseShip ship, Mobile from, Quality quality)
         {
-            if (ship == null) return;
-            if (ship.Deleted) return;            
+            double lowRange = 0.0;
+            double highRange = 0.2;
 
-            if (ship.MobileFactionType != MobileFactionType.None)
-                ConfigureNPCShip(ship);
+            double statMutationChance = .33;
+
+            if (from != null)
+            {
+                if (from.Skills.Carpentry.Value > 100.0)
+                    lowRange += .1 * ((from.Skills.Carpentry.Value - 100) / 20);
+            }
 
             else
             {
-                ShipStatsProfile shipStatsProfile = GetShipStatsProfile(null, ship, true, true);
+                highRange = 0.1;
+                statMutationChance = .66;
             }
+
+            #region Determine and Set Creation Modifiers
+
+            if (shipDeed != null)
+            {
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.HoldSizeCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.MaxHitPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.MaxSailPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.MaxGunPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.ForwardSpeedCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.DriftSpeedCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.SlowdownModePenaltyCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.CannonAccuracyCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.CannonDamageCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.CannonRangeCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.CannonReloadDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.MinorAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.MajorAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.EpicAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.RepairCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    shipDeed.BoardingChanceCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+            }
+
+            if (ship != null)
+            {
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.HoldSizeCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.MaxHitPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.MaxSailPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.MaxGunPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.ForwardSpeedCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.DriftSpeedCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.SlowdownModePenaltyCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.CannonAccuracyCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.CannonDamageCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.CannonRangeCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.CannonReloadDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.MinorAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.MajorAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.EpicAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.RepairCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+
+                if (Utility.RandomDouble() <= statMutationChance)
+                    ship.BoardingChanceCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
+            }
+
+            #endregion
         }
 
         public static ShipStatsProfile GetShipStatsProfile(BaseShipDeed shipDeed, BaseShip ship, bool applyCreationModifiers, bool applyUpgradeModifiers)
@@ -52,6 +164,17 @@ namespace Server
 
                 if (type == typeof(SmallDragonShip))
                     shipStatsProfile.ShipTypeName = "small dragon ship";
+
+                if (ship != null)
+                {
+                    if (ship.MobileControlType == MobileControlType.Player)
+                    {
+                    }
+
+                    else
+                    {
+                    }
+                }
             }
 
             #endregion
@@ -71,15 +194,28 @@ namespace Server
 
                 shipStatsProfile.HoldSize = 75;
 
-                shipStatsProfile.MaxHitPoints = 1250;
-                shipStatsProfile.MaxSailPoints = 625;
-                shipStatsProfile.MaxGunPoints = 625;
-
                 shipStatsProfile.ForwardSpeed = 0.25;
                 shipStatsProfile.DriftSpeed = 0.5;
 
                 shipStatsProfile.CannonsPerSide = 4;
-                shipStatsProfile.CannonReloadDuration = 8;                
+                shipStatsProfile.CannonReloadDuration = 8;
+
+                if (ship != null)
+                {
+                    if (ship.MobileControlType == MobileControlType.Player)
+                    {
+                        shipStatsProfile.MaxHitPoints = 1250;
+                        shipStatsProfile.MaxSailPoints = 625;
+                        shipStatsProfile.MaxGunPoints = 625;
+                    }
+
+                    else
+                    {
+                        shipStatsProfile.MaxHitPoints = 1250;
+                        shipStatsProfile.MaxSailPoints = 625;
+                        shipStatsProfile.MaxGunPoints = 625;
+                    }
+                }
             }
 
             #endregion
@@ -97,17 +233,27 @@ namespace Server
                 shipStatsProfile.RegistrationDoubloonCost = 1500;
                 shipStatsProfile.UpgradeDoubloonMultiplier = 2.0;
 
-                shipStatsProfile.HoldSize = 100;
-
-                shipStatsProfile.MaxHitPoints = 1500;
-                shipStatsProfile.MaxSailPoints = 750;
-                shipStatsProfile.MaxGunPoints = 750;
+                shipStatsProfile.HoldSize = 100;                
 
                 shipStatsProfile.ForwardSpeed = 0.3;
                 shipStatsProfile.DriftSpeed = 0.6;
 
                 shipStatsProfile.CannonsPerSide = 5;
-                shipStatsProfile.CannonReloadDuration = 10;  
+                shipStatsProfile.CannonReloadDuration = 10;
+
+                if (ship.MobileControlType == MobileControlType.Player)
+                {
+                    shipStatsProfile.MaxHitPoints = 1500;
+                    shipStatsProfile.MaxSailPoints = 750;
+                    shipStatsProfile.MaxGunPoints = 750;
+                }
+
+                else
+                {
+                    shipStatsProfile.MaxHitPoints = 1500;
+                    shipStatsProfile.MaxSailPoints = 750;
+                    shipStatsProfile.MaxGunPoints = 750;
+                }
             }
 
             #endregion
@@ -123,15 +269,25 @@ namespace Server
 
                 shipStatsProfile.HoldSize = 125;
 
-                shipStatsProfile.MaxHitPoints = 2000;
-                shipStatsProfile.MaxSailPoints = 1000;
-                shipStatsProfile.MaxGunPoints = 1000;
-
                 shipStatsProfile.ForwardSpeed = 0.35;
                 shipStatsProfile.DriftSpeed = 0.7;
 
                 shipStatsProfile.CannonsPerSide = 6;
-                shipStatsProfile.CannonReloadDuration = 12;                
+                shipStatsProfile.CannonReloadDuration = 12;
+
+                if (ship.MobileControlType == MobileControlType.Player)
+                {
+                    shipStatsProfile.MaxHitPoints = 2000;
+                    shipStatsProfile.MaxSailPoints = 1000;
+                    shipStatsProfile.MaxGunPoints = 1000;
+                }
+
+                else
+                {
+                    shipStatsProfile.MaxHitPoints = 2000;
+                    shipStatsProfile.MaxSailPoints = 1000;
+                    shipStatsProfile.MaxGunPoints = 1000;
+                }
             }
 
             #endregion
@@ -147,15 +303,25 @@ namespace Server
 
                 shipStatsProfile.HoldSize = 150;
 
-                shipStatsProfile.MaxHitPoints = 3000;
-                shipStatsProfile.MaxSailPoints = 1500;
-                shipStatsProfile.MaxGunPoints = 1500;
-
                 shipStatsProfile.ForwardSpeed = 0.4;
                 shipStatsProfile.DriftSpeed = 0.8;
 
                 shipStatsProfile.CannonsPerSide = 7;
                 shipStatsProfile.CannonReloadDuration = 14;
+
+                if (ship.MobileControlType == MobileControlType.Player)
+                {
+                    shipStatsProfile.MaxHitPoints = 3000;
+                    shipStatsProfile.MaxSailPoints = 1500;
+                    shipStatsProfile.MaxGunPoints = 1500;
+                }
+
+                else
+                {
+                    shipStatsProfile.MaxHitPoints = 3000;
+                    shipStatsProfile.MaxSailPoints = 1500;
+                    shipStatsProfile.MaxGunPoints = 1500;
+                }
             }
 
             #endregion
@@ -171,15 +337,25 @@ namespace Server
 
                 shipStatsProfile.HoldSize = 200;
 
-                shipStatsProfile.MaxHitPoints = 4000;
-                shipStatsProfile.MaxSailPoints = 2000;
-                shipStatsProfile.MaxGunPoints = 2000;
-
                 shipStatsProfile.ForwardSpeed = 0.45;
                 shipStatsProfile.DriftSpeed = 0.9;
 
                 shipStatsProfile.CannonsPerSide = 8;
                 shipStatsProfile.CannonReloadDuration = 16;
+
+                if (ship.MobileControlType == MobileControlType.Player)
+                {
+                    shipStatsProfile.MaxHitPoints = 4000;
+                    shipStatsProfile.MaxSailPoints = 2000;
+                    shipStatsProfile.MaxGunPoints = 2000;
+                }
+
+                else
+                {
+                    shipStatsProfile.MaxHitPoints = 4000;
+                    shipStatsProfile.MaxSailPoints = 2000;
+                    shipStatsProfile.MaxGunPoints = 2000;
+                }
             }
 
             #endregion
@@ -262,6 +438,8 @@ namespace Server
             if (shipStatsProfile == null)
                 return shipStatsProfile;
 
+            List<ShipUpgradeDetail> m_UpgradeDetails = new List<ShipUpgradeDetail>();
+
             ShipUpgrades.ThemeType m_ThemeUpgrade = ShipUpgrades.ThemeType.None;
             ShipUpgrades.PaintType m_PaintUpgrade = ShipUpgrades.PaintType.None;
             ShipUpgrades.CannonMetalType m_CannonMetalUpgrade = ShipUpgrades.CannonMetalType.None;
@@ -308,24 +486,76 @@ namespace Server
 
             #endregion
 
-            #region Apply Upgrades
+            #region Apply Upgrades 
+           
+            m_UpgradeDetails.Add(ShipUpgrades.GetThemeDetail(m_ThemeUpgrade));
+            m_UpgradeDetails.Add(ShipUpgrades.GetPaintDetail(m_PaintUpgrade));
+            m_UpgradeDetails.Add(ShipUpgrades.GetCannonMetalDetail(m_CannonMetalUpgrade));
 
-            switch (m_OutfittingUpgrade)
-            {
-                case ShipUpgrades.OutfittingType.Hunter: 
-                break;
-            }
+            m_UpgradeDetails.Add(ShipUpgrades.GetOutfittingDetail(m_OutfittingUpgrade));
+            m_UpgradeDetails.Add(ShipUpgrades.GetBannerDetail(m_BannerUpgrade));
+            m_UpgradeDetails.Add(ShipUpgrades.GetCharmDetail(m_CharmUpgrade));
 
-            switch (m_BannerUpgrade)
-            {
-                case ShipUpgrades.BannerType.Corsairs:
-                break;
-            }
+            m_UpgradeDetails.Add(ShipUpgrades.GetMinorAbilityDetail(m_MinorAbilityUpgrade));
+            m_UpgradeDetails.Add(ShipUpgrades.GetMajorAbilityDetail(m_MajorAbilityUpgrade));
+            m_UpgradeDetails.Add(ShipUpgrades.GetEpicAbilityDetail(m_EpicAbilityUpgrade));
 
-            switch (m_CharmUpgrade)
+            foreach (ShipUpgradeDetail shipUpgradeDetail in m_UpgradeDetails)
             {
-                case ShipUpgrades.CharmType.BarrelOfLimes:
-                break;
+                if (shipUpgradeDetail == null)
+                    continue;
+
+                shipStatsProfile.HoldSizeUpgradeModifier += shipUpgradeDetail.HoldCapacity;
+
+                shipStatsProfile.MaxHitPointsUpgradeModifier += shipUpgradeDetail.MaxHitPoints;
+                shipStatsProfile.MaxSailPointsUpgradeModifier += shipUpgradeDetail.MaxSailPoints;
+                shipStatsProfile.MaxGunPointsUpgradeModifier += shipUpgradeDetail.MaxGunPoints;
+
+                shipStatsProfile.ForwardSpeedUpgradeModifier += shipUpgradeDetail.ForwardSpeed;
+                shipStatsProfile.DriftSpeedUpgradeModifier += shipUpgradeDetail.DriftSpeed;
+                shipStatsProfile.SlowdownModePenaltyUpgradeModifier += shipUpgradeDetail.SlowdownModePenalty;
+
+                shipStatsProfile.CannonAccuracyUpgradeModifier += shipUpgradeDetail.CannonAccuracy;
+                shipStatsProfile.CannonDamageUpgradeModifier += shipUpgradeDetail.CannonDamage;
+                shipStatsProfile.CannonRangeUpgradeModifier += shipUpgradeDetail.CannonRange;
+                shipStatsProfile.CannonReloadDurationUpgradeModifier += shipUpgradeDetail.CannonReloadTime;
+
+                shipStatsProfile.MinorAbilityCooldownDurationUpgradeModifier += shipUpgradeDetail.MinorAbilityCooldown;
+                shipStatsProfile.MajorAbilityCooldownDurationUpgradeModifier += shipUpgradeDetail.MajorAbilityCooldown;
+                shipStatsProfile.EpicAbilityCooldownDurationUpgradeModifier += shipUpgradeDetail.EpicAbilityCooldown;
+
+                shipStatsProfile.RepairCooldownDurationUpgradeModifier += shipUpgradeDetail.RepairCooldown;
+                shipStatsProfile.BoardingChanceUpgradeModifier += shipUpgradeDetail.BoardingChance;
+
+                shipStatsProfile.CannonEnemyCrewDamageUpgradeModifier += shipUpgradeDetail.CannonEnemyCrewDamage;
+                shipStatsProfile.CannonHitPointsDamageUpgradeModifier += shipUpgradeDetail.CannonHitPointsDamage;
+                shipStatsProfile.CannonSailPointsDamageUpgradeModifier += shipUpgradeDetail.CannonSailPointsDamage;
+                shipStatsProfile.CannonGunPointsDamageUpgradeModifier += shipUpgradeDetail.CannonGunPointsDamage;
+
+                shipStatsProfile.CrewDamageMeleeDamageDealtUpgradeModifier += shipUpgradeDetail.CrewDamageMeleeDamageDealt;
+                shipStatsProfile.CrewDamageSpellDamageDealtUpgradeModifier += shipUpgradeDetail.CrewDamageSpellDamageDealt;
+
+                shipStatsProfile.CrewDamageMeleeDamageReceivedUpgradeModifier += shipUpgradeDetail.CrewDamageMeleeDamageReceived;
+                shipStatsProfile.CrewDamageSpellDamageReceivedUpgradeModifier += shipUpgradeDetail.CrewDamageSpellDamageReceived;
+                shipStatsProfile.CrewDamageCannonDamageReceivedUpgradeModifier += shipUpgradeDetail.CrewDamageCannonDamageReceived;
+
+                shipStatsProfile.RepairHitPointsBonusUpgradeModifier += shipUpgradeDetail.RepairHitPointsBonus;
+                shipStatsProfile.RepairSailPointsBonusUpgradeModifier += shipUpgradeDetail.RepairSailPointsBonus;
+                shipStatsProfile.RepairGunPointsBonusUpgradeModifier += shipUpgradeDetail.RepairGunPointsBonus;
+                shipStatsProfile.RepairMaterialsReductionUpgradeModifier += shipUpgradeDetail.RepairMaterialsReduction;
+
+                shipStatsProfile.MinorAbilityEffectivenessUpgradeModifier += shipUpgradeDetail.MinorAbilityEffectiveness;
+                shipStatsProfile.MajorAbilityEffectivenessUpgradeModifier += shipUpgradeDetail.MajorAbilityEffectiveness;
+                shipStatsProfile.EpicAbilityEffectivenessUpgradeModifier += shipUpgradeDetail.EpicAbilityEffectiveness;
+
+                shipStatsProfile.CrewHealingReceivedUpgradeModifier += shipUpgradeDetail.CrewHealingReceived;
+
+                shipStatsProfile.DoubloonsEarnedFromEnemyCrewUpgradeModifier += shipUpgradeDetail.DoubloonsEarnedFromEnemyCrew;
+                shipStatsProfile.DoubloonsEarnedFromEnemyShipsUpgradeModifier += shipUpgradeDetail.DoubloonsEarnedFromEnemyShips;
+
+                shipStatsProfile.FishingSuccessUpgradeModifier += shipUpgradeDetail.FishingSuccess;
+
+                shipStatsProfile.SpyglassAccuracyUpgradeModifier += shipUpgradeDetail.SpyglassAccuracy;
             }
 
             #endregion
@@ -344,83 +574,6 @@ namespace Server
             ship.MaxHitPoints = shipStatsProfile.MaxHitPointsAdjusted;
             ship.MaxSailPoints = shipStatsProfile.MaxSailPointsAdjusted;
             ship.MaxGunPoints = shipStatsProfile.MaxGunPointsAdjusted;
-
-            ship.ForwardSpeed = shipStatsProfile.ForwardSpeedAdjusted;
-            ship.DriftSpeed = shipStatsProfile.DriftSpeedAdjusted;
-            ship.SlowdownModePenalty = shipStatsProfile.SlowdownModePenaltyAdjusted;
-
-            ship.CannonAccuracy = shipStatsProfile.CannonAccuracyAdjusted;
-            ship.CannonMinDamage = shipStatsProfile.CannonMinDamage;
-            ship.CannonMaxDamage = shipStatsProfile.CannonMaxDamage;
-            ship.CannonRange = shipStatsProfile.CannonRange;
-            ship.CannonReloadDuration = shipStatsProfile.CannonReloadDuration;
-
-            ship.MinorAbilityCooldownDuration = shipStatsProfile.MinorAbilityCooldownDuration;
-            ship.MajorAbilityCooldownDuration = shipStatsProfile.MajorAbilityCooldownDuration;
-            ship.EpicAbilityCooldownDuration = shipStatsProfile.EpicAbilityCooldownDuration;
-
-            ship.RepairCooldownDuration = shipStatsProfile.RepairCooldownDuration;
-            ship.BoardingChance = shipStatsProfile.BoardingChance;
-        }
-
-        public static void ConfigureNPCShip(BaseShip ship)
-        {
-            Type type = ship.GetType();
-
-            if (type == null)
-                return;
-
-            ShipStatsProfile shipStatsProfile = new ShipStatsProfile();
-
-            shipStatsProfile.shipType = type;
-            
-            #region Small Ship
-
-            if (type == typeof(SmallShip) || type == typeof(SmallDragonShip))
-            {
-            }
-
-            #endregion
-
-            #region Medium Ship
-
-            if (type == typeof(MediumShip) || type == typeof(MediumDragonShip))
-            {
-            }
-
-            #endregion
-
-            #region Large Ship
-
-            if (type == typeof(LargeShip) || type == typeof(LargeDragonShip))
-            {
-            }
-
-            #endregion
-
-            #region Carrack
-
-            if (type == typeof(Carrack))
-            {
-            }
-
-            #endregion
-
-            #region Galleon
-
-            if (type == typeof(Galleon))
-            {
-            }
-
-            #endregion
-
-            #region Ship of the Line
-
-            if (type == typeof(ShipOfTheLineShip))
-            {
-            }
-
-            #endregion
         }
 
         public static int GetShipUpgradeBaseDoubloonCost(ShipUpgrades.UpgradeType upgradeType)
@@ -479,7 +632,7 @@ namespace Server
         public double EpicAbilityCooldownDuration = BaseShip.BaseEpicAbilityCooldown;
 
         public double RepairCooldownDuration = BaseShip.BaseRepairCooldown;
-        public double BoardingChance = BaseShip.BaseBoardingChance;
+        public double BoardingChance = BaseShip.BaseBoardingChance;        
 
         //Creation Modifiers
         public double HoldSizeCreationModifier = 0;
@@ -526,6 +679,36 @@ namespace Server
 
         public double RepairCooldownDurationUpgradeModifier = 0;
         public double BoardingChanceUpgradeModifier = 0;
+
+        public double CannonEnemyCrewDamageUpgradeModifier = 0.0;
+        public double CannonHitPointsDamageUpgradeModifier = 0.0;
+        public double CannonSailPointsDamageUpgradeModifier = 0.0;
+        public double CannonGunPointsDamageUpgradeModifier = 0.0;
+
+        public double CrewDamageMeleeDamageDealtUpgradeModifier = 0.0;
+        public double CrewDamageSpellDamageDealtUpgradeModifier = 0.0;
+
+        public double CrewDamageMeleeDamageReceivedUpgradeModifier = 0.0;
+        public double CrewDamageSpellDamageReceivedUpgradeModifier = 0.0;
+        public double CrewDamageCannonDamageReceivedUpgradeModifier = 0.0;
+
+        public double RepairHitPointsBonusUpgradeModifier = 0.0;
+        public double RepairSailPointsBonusUpgradeModifier = 0.0;
+        public double RepairGunPointsBonusUpgradeModifier = 0.0;
+        public double RepairMaterialsReductionUpgradeModifier = 0.0;
+
+        public double MinorAbilityEffectivenessUpgradeModifier = 0.0;
+        public double MajorAbilityEffectivenessUpgradeModifier = 0.0;       
+        public double EpicAbilityEffectivenessUpgradeModifier = 0.0;
+
+        public double CrewHealingReceivedUpgradeModifier = 0.0;
+
+        public double DoubloonsEarnedFromEnemyCrewUpgradeModifier = 0.0;
+        public double DoubloonsEarnedFromEnemyShipsUpgradeModifier = 0.0;
+
+        public double FishingSuccessUpgradeModifier = 0.0;
+
+        public double SpyglassAccuracyUpgradeModifier = 0.0;
 
         //Total Values
         public int HoldSizeAdjusted = 0;

@@ -141,18 +141,21 @@ namespace Server
 
             Facing = Direction.North;
 
-            Movable = false;
-
-            HitPoints = MaxHitPoints;
-            SailPoints = MaxSailPoints;
-            GunPoints = MaxGunPoints;
+            Movable = false;            
 
             m_LastCombatTime = DateTime.UtcNow - TimeSpan.FromMinutes(5);
             m_TimeLastMoved = DateTime.UtcNow;
             m_TimeLastRepaired = DateTime.UtcNow;
             m_NextTimeRepairable = DateTime.UtcNow;
 
-            ShipUniqueness.GenerateShipUniqueness(this);
+            if (m_MobileControlType != MobileControlType.Player)
+                ShipUniqueness.GenerateCreationModifiers(null, this, null, Quality.Regular);
+
+            m_ShipStatsProfile = ShipUniqueness.GetShipStatsProfile(null, this, true, true);
+
+            HitPoints = MaxHitPoints;
+            SailPoints = MaxSailPoints;
+            GunPoints = MaxGunPoints;
 
             m_ConfigureShipTimer = Timer.DelayCall(TimeSpan.FromMilliseconds(100), delegate { ConfigureShip(); });
 
@@ -962,6 +965,8 @@ namespace Server
         public abstract List<Point3D> m_ShipFireLocations();
 
         private static readonly TimeSpan m_TillermanHoldTime = TimeSpan.FromSeconds(15);
+
+        public ShipStatsProfile m_ShipStatsProfile = new ShipStatsProfile();
         
         private int m_PerceptionRange = 24;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -997,7 +1002,9 @@ namespace Server
                 if (m_DamageFromPlayerShipScalar < 0)
                     m_DamageFromPlayerShipScalar = 0;
             }
-        }  
+        }
+
+        #region Core Stats
 
         private int m_HitPoints;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -1022,11 +1029,7 @@ namespace Server
         [CommandProperty(AccessLevel.GameMaster)]
         public int MaxHitPoints
         {
-            get
-            {
-                return m_MaxHitPoints;
-            }
-
+            get{return m_MaxHitPoints;}
             set
             {
                 m_MaxHitPoints = value;
@@ -1060,11 +1063,7 @@ namespace Server
         [CommandProperty(AccessLevel.GameMaster)]
         public int MaxSailPoints
         {
-            get
-            {
-                return m_MaxSailPoints;
-            }
-
+            get{return m_MaxSailPoints;}
             set
             {
                 m_MaxSailPoints = value;
@@ -1098,11 +1097,7 @@ namespace Server
         [CommandProperty(AccessLevel.GameMaster)]
         public int MaxGunPoints
         {
-            get
-            {
-                return m_MaxGunPoints;
-            }
-
+            get{return m_MaxGunPoints;}
             set
             {
                 m_MaxGunPoints = value;
@@ -1115,239 +1110,9 @@ namespace Server
             }
         }
 
-        private double m_ForwardSpeed;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double ForwardSpeed
-        {
-            get
-            {
-                return m_ForwardSpeed;
-            }
+        #endregion
 
-            set
-            {
-                m_ForwardSpeed = value;
-
-                if (m_ForwardSpeed < 0)
-                    m_ForwardSpeed = 0;
-            }
-        }
-
-        private double m_DriftSpeed;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double DriftSpeed
-        {
-            get
-            {
-                return m_DriftSpeed;
-            }
-
-            set
-            {
-                m_DriftSpeed = value;
-
-                if (m_DriftSpeed < 0)
-                    m_DriftSpeed = 0;
-            }
-        }
-
-        private double m_SlowdownModePenalty;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double SlowdownModePenalty
-        {
-            get
-            {
-                return m_SlowdownModePenalty;
-            }
-
-            set
-            {
-                m_SlowdownModePenalty = value;
-
-                if (m_SlowdownModePenalty < 0)
-                    m_SlowdownModePenalty = 0;
-            }
-        }
-
-        private double m_CannonAccuracy;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double CannonAccuracy
-        {
-            get
-            {
-                return m_CannonAccuracy;
-            }
-
-            set
-            {
-                m_CannonAccuracy = value;
-
-                if (m_CannonAccuracy < 0)
-                    m_CannonAccuracy = 0;
-            }
-        }
-
-        private double m_CannonMinDamage;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double CannonMinDamage
-        {
-            get
-            {
-                return m_CannonMinDamage;
-            }
-
-            set
-            {
-                m_CannonMinDamage = value;
-
-                if (m_CannonMinDamage < 0)
-                    m_CannonMinDamage = 0;
-            }
-        }
-
-        private double m_CannonMaxDamage;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double CannonMaxDamage
-        {
-            get
-            {
-                return m_CannonMaxDamage;
-            }
-
-            set
-            {
-                m_CannonMaxDamage = value;
-
-                if (m_CannonMaxDamage < 0)
-                    m_CannonMaxDamage = 0;
-            }
-        }
-
-        private double m_CannonRange;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double CannonRange
-        {
-            get
-            {
-                return m_CannonRange;
-            }
-
-            set
-            {
-                m_CannonRange = value;
-
-                if (m_CannonRange < 0)
-                    m_CannonRange = 0;
-            }
-        }
-
-        private double m_CannonReloadDuration;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double CannonReloadDuration
-        {
-            get
-            {
-                return m_CannonReloadDuration;
-            }
-
-            set
-            {
-                m_CannonReloadDuration = value;
-
-                if (m_CannonReloadDuration < 0)
-                    m_CannonReloadDuration = 0;
-            }
-        }        
-
-        private double m_MinorAbilityCooldownDuration;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double MinorAbilityCooldownDuration
-        {
-            get
-            {
-                return m_MinorAbilityCooldownDuration;
-            }
-
-            set
-            {
-                m_MinorAbilityCooldownDuration = value;
-
-                if (m_MinorAbilityCooldownDuration < 0)
-                    m_MinorAbilityCooldownDuration = 0;
-            }
-        }
-
-        private double m_MajorAbilityCooldownDuration;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double MajorAbilityCooldownDuration
-        {
-            get
-            {
-                return m_MajorAbilityCooldownDuration;
-            }
-
-            set
-            {
-                m_MajorAbilityCooldownDuration = value;
-
-                if (m_MajorAbilityCooldownDuration < 0)
-                    m_MajorAbilityCooldownDuration = 0;
-            }
-        }
-
-        private double m_EpicAbilityCooldownDuration;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double EpicAbilityCooldownDuration
-        {
-            get
-            {
-                return m_EpicAbilityCooldownDuration;
-            }
-
-            set
-            {
-                m_EpicAbilityCooldownDuration = value;
-
-                if (m_EpicAbilityCooldownDuration < 0)
-                    m_EpicAbilityCooldownDuration = 0;
-            }
-        }
-
-        private double m_RepairCooldownDuration;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double RepairCooldownDuration
-        {
-            get
-            {
-                return m_RepairCooldownDuration;
-            }
-
-            set
-            {
-                m_RepairCooldownDuration = value;
-
-                if (m_RepairCooldownDuration < 0)
-                    m_RepairCooldownDuration = 0;
-            }
-        }
-
-        private double m_BoardingChance;
-        [CommandProperty(AccessLevel.GameMaster)]
-        public double BoardingChance
-        {
-            get
-            {
-                return m_BoardingChance;
-            }
-
-            set
-            {
-                m_BoardingChance = value;
-
-                if (m_BoardingChance < 0)
-                    m_BoardingChance = 0;
-            }
-        }
+        #region Creation Modifiers
 
         public double HoldSizeCreationModifier = 1.0;
 
@@ -1370,6 +1135,8 @@ namespace Server
 
         public double RepairCooldownDurationCreationModifier = 1.0;
         public double BoardingChanceCreationModifier = 1.0;
+
+        #endregion
 
         private MobileControlType m_MobileControlType = MobileControlType.Null;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -2912,7 +2679,7 @@ namespace Server
                 fast = false;
 
             bool drift = (dir != Forward && dir != ForwardLeft && dir != ForwardRight);
-            TimeSpan interval = (fast ? (drift ? TimeSpan.FromSeconds(DriftSpeed) : TimeSpan.FromSeconds(ForwardSpeed)) : (drift ? TimeSpan.FromSeconds(DriftSpeed * SlowdownModePenalty) : TimeSpan.FromSeconds(ForwardSpeed * SlowdownModePenalty)));
+            TimeSpan interval = (fast ? (drift ? TimeSpan.FromSeconds(m_ShipStatsProfile.DriftSpeed) : TimeSpan.FromSeconds(m_ShipStatsProfile.ForwardSpeed)) : (drift ? TimeSpan.FromSeconds(m_ShipStatsProfile.DriftSpeed * m_ShipStatsProfile.SlowdownModePenalty) : TimeSpan.FromSeconds(m_ShipStatsProfile.ForwardSpeed * m_ShipStatsProfile.SlowdownModePenalty)));
             int speed = (fast ? (drift ? FastDriftSpeed : FastSpeed) : (drift ? SlowDriftSpeed : SlowSpeed));
             int clientSpeed = fast ? 0x4 : 0x3;
             double intervalSeconds = interval.TotalSeconds;
@@ -2980,7 +2747,7 @@ namespace Server
 
             bool drift = (dir != Forward);
 
-            TimeSpan interval = drift ? TimeSpan.FromSeconds(DriftSpeed) : TimeSpan.FromSeconds(ForwardSpeed);
+            TimeSpan interval = drift ? TimeSpan.FromSeconds(m_ShipStatsProfile.DriftSpeed) : TimeSpan.FromSeconds(m_ShipStatsProfile.ForwardSpeed);
             int speed = drift ? FastDriftSpeed : FastSpeed;
 
             if (StartMove(dir, speed, 0x1, interval, true, true))            
@@ -3004,7 +2771,7 @@ namespace Server
                 bool drift = (m_Ship.Moving != Forward && m_Ship.Moving != ForwardLeft && m_Ship.Moving != ForwardRight);
                 bool fast = !m_Ship.SlowdownMode;
 
-                TimeSpan interval = (fast ? (drift ? TimeSpan.FromSeconds(m_Ship.DriftSpeed) : TimeSpan.FromSeconds(m_Ship.ForwardSpeed)) : (drift ? TimeSpan.FromSeconds(m_Ship.DriftSpeed * m_Ship.SlowdownModePenalty) : TimeSpan.FromSeconds(m_Ship.ForwardSpeed * m_Ship.SlowdownModePenalty)));
+                TimeSpan interval = (fast ? (drift ? TimeSpan.FromSeconds(m_Ship.m_ShipStatsProfile.DriftSpeed) : TimeSpan.FromSeconds(m_Ship.m_ShipStatsProfile.ForwardSpeed)) : (drift ? TimeSpan.FromSeconds(m_Ship.m_ShipStatsProfile.DriftSpeed * m_Ship.m_ShipStatsProfile.SlowdownModePenalty) : TimeSpan.FromSeconds(m_Ship.m_ShipStatsProfile.ForwardSpeed * m_Ship.m_ShipStatsProfile.SlowdownModePenalty)));
                 double intervalSeconds = interval.TotalSeconds;               
                
                 if (m_Ship.TempSpeedScalarExpiration > DateTime.UtcNow)
@@ -6165,7 +5932,7 @@ namespace Server
             if (targetShip == null) return false;
             if (targetShip.Deleted) return false;
 
-            int adjustedCannonRange = (int)(Math.Round(CannonRange));
+            int adjustedCannonRange = (int)(Math.Round(m_ShipStatsProfile.CannonRange));
 
             foreach (ShipCannon shipCannon in m_Cannons)
             {
@@ -6309,20 +6076,11 @@ namespace Server
 
             if (needReload)
             {
-                foreach (ShipCannon shipCannon in m_Cannons)
-                {
-                    if (shipCannon.Ammunition < shipCannon.GetMaxAmmunition())
-                    {
-                        shipCannon.Ammunition = shipCannon.GetMaxAmmunition();
-                        totalReloadTime += CannonReloadDuration;
-                    }
-                }
-
-                if (CannonCooldown < DateTime.UtcNow)
-                    CannonCooldown = DateTime.UtcNow + TimeSpan.FromSeconds(totalReloadTime);
+                if (CannonCooldown <= DateTime.UtcNow)
+                    CannonCooldown = DateTime.UtcNow + TimeSpan.FromSeconds(m_ShipStatsProfile.CannonReloadDuration);
 
                 else
-                    CannonCooldown += TimeSpan.FromSeconds(totalReloadTime);
+                    CannonCooldown += TimeSpan.FromSeconds(m_ShipStatsProfile.CannonReloadDuration);
 
                 Effects.PlaySound(Location, Map, 0x3e4);
 
@@ -6335,7 +6093,7 @@ namespace Server
 
             ShipCannon cannonToFire = null;
 
-            int adjustedCannonRange = (int)(Math.Round(CannonRange));
+            int adjustedCannonRange = (int)(Math.Round(m_ShipStatsProfile.CannonRange));
 
             //Fire Cannons
             if (DateTime.UtcNow >= CannonCooldown && m_ShipCombatant != null)
@@ -6513,24 +6271,8 @@ namespace Server
             writer.Write(m_Owner);
 
             writer.Write(HitPoints);
-            writer.Write(MaxHitPoints);
             writer.Write(SailPoints);
-            writer.Write(MaxSailPoints);
             writer.Write(GunPoints);
-            writer.Write(MaxGunPoints);
-            writer.Write(ForwardSpeed);
-            writer.Write(DriftSpeed);
-            writer.Write(SlowdownModePenalty);
-            writer.Write(CannonAccuracy);
-            writer.Write(CannonMinDamage);
-            writer.Write(CannonMaxDamage);
-            writer.Write(CannonRange);
-            writer.Write(CannonReloadDuration);
-            writer.Write(MinorAbilityCooldownDuration);
-            writer.Write(MajorAbilityCooldownDuration);
-            writer.Write(EpicAbilityCooldownDuration);
-            writer.Write(RepairCooldownDuration);
-            writer.Write(BoardingChance);
 
             writer.Write(HoldSizeCreationModifier);
             writer.Write(MaxHitPointsCreationModifier);
@@ -6657,25 +6399,9 @@ namespace Server
                 m_ShipName = reader.ReadString();
                 m_Owner = (PlayerMobile)reader.ReadMobile();
 
-                HitPoints = reader.ReadInt();
-                MaxHitPoints = reader.ReadInt();
-                SailPoints = reader.ReadInt();
-                MaxSailPoints = reader.ReadInt();
-                GunPoints = reader.ReadInt();
-                MaxGunPoints = reader.ReadInt();
-                ForwardSpeed = reader.ReadDouble();
-                DriftSpeed = reader.ReadDouble();
-                SlowdownModePenalty = reader.ReadDouble();
-                CannonAccuracy = reader.ReadDouble();
-                CannonMinDamage = reader.ReadDouble();
-                CannonMaxDamage = reader.ReadDouble();
-                CannonRange = reader.ReadDouble();
-                CannonReloadDuration = reader.ReadDouble();
-                MinorAbilityCooldownDuration = reader.ReadDouble();
-                MajorAbilityCooldownDuration = reader.ReadDouble();
-                EpicAbilityCooldownDuration = reader.ReadDouble();
-                RepairCooldownDuration = reader.ReadDouble();
-                BoardingChance = reader.ReadDouble();
+                int StoredHitPoints = reader.ReadInt();
+                int StoredSailPoints = reader.ReadInt();
+                int StoredGunPoints = reader.ReadInt();                
 
                 HoldSizeCreationModifier = reader.ReadDouble();
                 MaxHitPointsCreationModifier = reader.ReadDouble();
@@ -6730,6 +6456,12 @@ namespace Server
                 }
 
                 //-----
+
+                m_ShipStatsProfile = ShipUniqueness.GetShipStatsProfile(null, this, true, true);
+
+                HitPoints = StoredHitPoints;
+                SailPoints = StoredSailPoints;
+                GunPoints = StoredGunPoints;
 
                 Movable = false;
 

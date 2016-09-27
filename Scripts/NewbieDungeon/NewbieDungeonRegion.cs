@@ -33,7 +33,8 @@ namespace Server.Regions
                 // allow players to defend themselves
                 bool attackedBy = from.Aggressors.Any(a => a.Attacker == target || a.Defender == target);
                 bool attacked = from.Aggressed.Any(a => a.Attacker == target || a.Defender == target);
-                if (target.Criminal || target.ShortTermMurders >= 5 || attackedBy || attacked)
+
+                if (target.Criminal || target.MurderCounts >= Mobile.MurderCountsRequiredForMurderer || attackedBy || attacked)
                 {
                     return true;
                 }

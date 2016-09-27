@@ -972,6 +972,9 @@
     <Compile Include="Items\ExplodingAnimals\ExplodingSheep.cs" />
     <Compile Include="Items\ExplodingAnimals\ExplodingAnimal.cs" />
     <Compile Include="Items\ParagonWand.cs" />
+    <Compile Include="Notoriety\ConsiderSinsGump.cs" />
+    <Compile Include="Notoriety\ResurrectionGump.cs" />
+    <Compile Include="Notoriety\ReportMurderer.cs" />
     <Compile Include="PlantSystem\Plant.cs" />
     <Compile Include="PlantSystem\PlantBowl.cs" />
     <Compile Include="PlantSystem\PlantGump.cs" />
@@ -2847,7 +2850,7 @@
     <Compile Include="Misc\MondainsLegacy.cs" />
     <Compile Include="Misc\NameList.cs" />
     <Compile Include="Misc\NameVerification.cs" />
-    <Compile Include="Misc\Notoriety.cs" />
+    <Compile Include="Notoriety\Notoriety.cs" />
     <Compile Include="Misc\Paperdoll.cs" />
     <Compile Include="Misc\Poison.cs" />
     <Compile Include="Misc\ProfanityProtection.cs" />

@@ -514,7 +514,7 @@ namespace Server
             double cannonDelayTotal = 0;
             int cannonsFiring = 0;
 
-            double adjustedRange = m_Ship.CannonRange;
+            double adjustedRange = m_Ship.m_ShipStatsProfile.CannonRange;
 
             //Need At Least One Cannon With LOS to Target and In Range of Target For Volley To Be Valid
             foreach (ShipCannon shipCannon in m_Ship.m_Cannons)
@@ -622,7 +622,7 @@ namespace Server
 
                         movementAccuracyPenalty = 1 - (BaseShip.CannonMovementMaxAccuracyPenalty * (1 - (secondsStationary / BaseShip.CannonMovementAccuracyCooldown)));
 
-                        double finalAccuracy = m_Ship.CannonAccuracy * movementAccuracyPenalty * opponentMovementPenalty;
+                        double finalAccuracy = m_Ship.m_ShipStatsProfile.CannonAccuracy * movementAccuracyPenalty * opponentMovementPenalty;
 
                         double chance = Utility.RandomDouble();
 
@@ -841,7 +841,7 @@ namespace Server
 
             else
             {
-                baseCannonDamage = m_Ship.CannonMinDamage + (Utility.RandomDouble() * (m_Ship.CannonMaxDamage - m_Ship.CannonMinDamage));
+                baseCannonDamage = m_Ship.m_ShipStatsProfile.CannonMinDamage + (Utility.RandomDouble() * (m_Ship.m_ShipStatsProfile.CannonMaxDamage - m_Ship.m_ShipStatsProfile.CannonMinDamage));
                 
                 m_MobilesOnSourceShip = m_Ship.GetMobilesOnShip(false, false);
             }

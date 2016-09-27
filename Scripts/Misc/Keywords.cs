@@ -36,9 +36,14 @@ namespace Server.Misc
 					case 0x0032: // *i must consider my sins*
 					{
                         PlayerMobile pm_From = from as PlayerMobile;
-                        
+
                         if (pm_From != null)
-                            pm_From.ConsiderSins();
+                        {
+                            pm_From.SendSound(0x055);
+
+                            pm_From.CloseGump(typeof(ConsiderSinsGump));
+                            pm_From.SendGump(new ConsiderSinsGump(pm_From));
+                        }
 
 						break;
 					}

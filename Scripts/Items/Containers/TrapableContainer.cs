@@ -116,13 +116,15 @@ namespace Server.Items
                 {
                     case TrapType.ExplosionTrap:
                         {
+                            /*
                             //PK Override for Player-Made Trapped Container
-                            if (from.ShortTermMurders >= 5)
+                            if (from.MurderCounts >= Mobile.MurderCountsRequiredForMurderer)
                             {
                                 from.SendMessage("That is trapped, however after careful consideration, you determine suicide would not be an end befitting a murderer such as yourself");
 
                                 return true;
                             }
+                            */
 
                             SendMessageTo(from, 502999, 0x3B2); // You set off a trap!
 

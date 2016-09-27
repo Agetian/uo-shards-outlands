@@ -30,6 +30,8 @@ namespace Server
         public string m_ShipName;
         public PlayerMobile m_Owner;
 
+        public ShipStatsProfile m_ShipStatsProfile = new ShipStatsProfile();
+
         public int HitPoints = 0;
         public int SailPoints = 0;
         public int GunPoints = 0;
@@ -111,67 +113,13 @@ namespace Server
         {
             Quality = (Quality)quality;
 
-            double lowRange = 0.0;
-            double highRange = 0.2;
+            ShipUniqueness.GenerateCreationModifiers(this, null, from, Quality);
 
-            if (from.Skills.Carpentry.Value > 100.0)
-                lowRange += .1 * ((from.Skills.Carpentry.Value - 100) / 20);
+            m_ShipStatsProfile = ShipUniqueness.GetShipStatsProfile(this, null, true, true);
 
-            double statMutationChance = .33;
-                        
-            if (Utility.RandomDouble() <= statMutationChance)
-                HoldSizeCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                MaxHitPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                MaxSailPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                MaxGunPointsCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                ForwardSpeedCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                DriftSpeedCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                SlowdownModePenaltyCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                CannonAccuracyCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                CannonDamageCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                CannonRangeCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                CannonReloadDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                MinorAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                MajorAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                EpicAbilityCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                RepairCooldownDurationCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            if (Utility.RandomDouble() <= statMutationChance)
-                BoardingChanceCreationModifier = -.1 + (lowRange + (Utility.RandomDouble() * (highRange - lowRange)));
-
-            ShipStatsProfile shipStatsProfile = ShipUniqueness.GetShipStatsProfile(this, null, true, true);
-
-            HitPoints = shipStatsProfile.MaxHitPointsAdjusted;
-            SailPoints = shipStatsProfile.MaxSailPointsAdjusted;
-            GunPoints = shipStatsProfile.MaxGunPointsAdjusted;
+            HitPoints = m_ShipStatsProfile.MaxHitPointsAdjusted;
+            SailPoints = m_ShipStatsProfile.MaxSailPointsAdjusted;
+            GunPoints = m_ShipStatsProfile.MaxGunPointsAdjusted;
 
             m_ShipName = "an unnamed ship";
             m_Owner = from as PlayerMobile;
@@ -448,8 +396,6 @@ namespace Server
                 {
                     ship.Owner = player;
 
-                    ShipUniqueness.GenerateShipUniqueness(ship);
-
                     BaseShip.PushDeedStoredPropertiesToShip(this, ship);
 
                     ship.DecayTime = DateTime.UtcNow + ship.ShipDecayDelay;
@@ -607,9 +553,9 @@ namespace Server
                 m_ShipName = reader.ReadString();
                 m_Owner = (PlayerMobile)reader.ReadMobile();
 
-                HitPoints = reader.ReadInt();
-                SailPoints = reader.ReadInt();
-                GunPoints = reader.ReadInt();
+                int StoredHitPoints = reader.ReadInt();
+                int StoredSailPoints = reader.ReadInt();
+                int StoredGunPoints = reader.ReadInt();
 
                 MaxHitPointsCreationModifier = reader.ReadDouble();
                 MaxSailPointsCreationModifier = reader.ReadDouble();
@@ -665,6 +611,14 @@ namespace Server
                 {
                     m_Friends.Add(reader.ReadMobile());
                 }
+
+                //-----
+
+                m_ShipStatsProfile = ShipUniqueness.GetShipStatsProfile(this, null, true, true);
+
+                HitPoints = StoredHitPoints;
+                SailPoints = StoredSailPoints;
+                GunPoints = StoredGunPoints;
             }
         }
     }

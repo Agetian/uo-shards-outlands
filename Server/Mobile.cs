@@ -757,7 +757,7 @@ namespace Server
         private string m_GuildTitle;
         private bool m_Criminal;
         private string m_Name;
-        private int m_Kills, m_ShortTermMurders;
+        private int m_MurderCounts;
         private int m_SpeechHue, m_EmoteHue, m_WhisperHue, m_YellHue;
         private string m_Language;
         private NetState m_NetState;
@@ -843,6 +843,8 @@ namespace Server
         public DateTime NextIntGainAllowed = DateTime.UtcNow;
 
         public Dictionary<Skill, DateTime> NextSkillGainAllowed = new Dictionary<Skill, DateTime>();
+
+        public static int MurderCountsRequiredForMurderer = 5;
 
         #endregion
 
@@ -6155,7 +6157,7 @@ namespace Server
                     }
                 case 16:
                     {
-                        m_ShortTermMurders = reader.ReadInt();
+                        m_MurderCounts = reader.ReadInt();
 
                         if (version <= 24)
                         {
@@ -6278,7 +6280,6 @@ namespace Server
                         m_Name = reader.ReadString();
                         m_GuildTitle = reader.ReadString();
                         m_Criminal = reader.ReadBool();
-                        m_Kills = reader.ReadInt();
                         m_SpeechHue = reader.ReadInt();
                         m_EmoteHue = reader.ReadInt();
                         m_WhisperHue = reader.ReadInt();
@@ -6569,7 +6570,7 @@ namespace Server
             writer.Write(m_Thirst);
             writer.Write(m_BAC);
 
-            writer.Write(m_ShortTermMurders);
+            writer.Write(m_MurderCounts);
             //writer.Write( m_ShortTermElapse );
             //writer.Write( m_LongTermElapse );
 
@@ -6604,7 +6605,6 @@ namespace Server
             writer.Write(m_Name);
             writer.Write(m_GuildTitle);
             writer.Write(m_Criminal);
-            writer.Write(m_Kills);
             writer.Write(m_SpeechHue);
             writer.Write(m_EmoteHue);
             writer.Write(m_WhisperHue);
@@ -11125,55 +11125,29 @@ namespace Server
         }
 
         [CommandProperty(AccessLevel.Counselor, AccessLevel.GameMaster)]
-        public int ShortTermMurders
+        public int MurderCounts
         {
             get
             {
-                return m_ShortTermMurders;
+                return m_MurderCounts;
             }
 
             set
             {
-                int oldValue = m_ShortTermMurders;
+                int oldValue = m_MurderCounts;
 
-                if (m_ShortTermMurders != value)
+                if (m_MurderCounts != value)
                 {
-                    m_ShortTermMurders = value;
+                    m_MurderCounts = value;
 
-                    if (m_ShortTermMurders < 0)
-                        m_ShortTermMurders = 0;
+                    if (m_MurderCounts < 0)
+                        m_MurderCounts = 0;
 
-                    if ((oldValue >= 5) != (m_ShortTermMurders >= 5))
+                    if ((oldValue >= MurderCountsRequiredForMurderer) != (m_MurderCounts >= MurderCountsRequiredForMurderer))
                     {
                         Delta(MobileDelta.Noto);
                         InvalidateProperties();
                     }
-
-                    OnKillsChange(oldValue);
-                }
-            }
-        }
-
-        public virtual void OnKillsChange(int oldValue)
-        {
-        }
-
-        [CommandProperty(AccessLevel.GameMaster)]
-        public int Kills
-        {
-            get
-            {
-                return m_Kills;
-            }
-
-            set
-            {
-                if (m_Kills != value)
-                {
-                    m_Kills = value;
-
-                    if (m_Kills < 0)
-                        m_Kills = 0;
                 }
             }
         }

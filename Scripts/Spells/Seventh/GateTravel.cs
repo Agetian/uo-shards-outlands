@@ -154,7 +154,7 @@ namespace Server.Spells.Seventh
 			else if ( map != Map.Felucca )			
 				Caster.SendLocalizedMessage( 1019004 ); // You are not allowed to travel there.			
 
-			else if ( Caster.ShortTermMurders >= 5 && map != Map.Felucca )			
+            else if (Caster.MurderCounts >= Mobile.MurderCountsRequiredForMurderer && map != Map.Felucca)			
 				Caster.SendLocalizedMessage( 1019004 ); // You are not allowed to travel there.			
 
 			else if (!SpellHelper.CheckIfOK(Caster.Map, loc.X, loc.Y, loc.Z))

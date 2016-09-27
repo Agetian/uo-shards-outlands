@@ -270,9 +270,9 @@ namespace Server
             startY = 65;
             int rowSpacing = 20;
 
-            for (int a = 0; a < upgradeDetail.m_Effects.Count; a++)
+            for (int a = 0; a < upgradeDetail.m_SpecialEffects.Count; a++)
             {
-                KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType> descriptionLine = upgradeDetail.m_Effects[a];
+                KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType> descriptionLine = upgradeDetail.m_SpecialEffects[a];
 
                 AddLabel(125, startY, upgradeDetail.GetHue(descriptionLine.Value), descriptionLine.Key);
                 startY += rowSpacing;

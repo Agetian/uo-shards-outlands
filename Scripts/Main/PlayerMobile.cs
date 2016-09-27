@@ -165,6 +165,7 @@ namespace Server.Mobiles
 
             CommandSystem.Register("AutoStealth", AccessLevel.Player, new CommandEventHandler(ToggleAutoStealth));
             CommandSystem.Register("DamageTracker", AccessLevel.Player, new CommandEventHandler(ShowDamageTracker));
+            CommandSystem.Register("ConsiderSins", AccessLevel.Player, new CommandEventHandler(ConsiderSins));
 
             CommandSystem.Register("GetDifficulty", AccessLevel.Counselor, new CommandEventHandler(BaseCreature.GetDifficulty));
             CommandSystem.Register("GetDifficultyFull", AccessLevel.Counselor, new CommandEventHandler(BaseCreature.GetDifficultyFull));
@@ -562,6 +563,21 @@ namespace Server.Mobiles
 
             player.CloseGump(typeof(DamageTrackerGump));
             player.SendGump(new DamageTrackerGump(player));
+        }
+
+        [Usage("ConsiderSins")]
+        [Description("Displays the 'I Must Consider My Sins' window")]
+        public static void ConsiderSins(CommandEventArgs e)
+        {
+            PlayerMobile player = e.Mobile as PlayerMobile;
+
+            if (player == null)
+                return;
+
+            player.SendSound(0x055);
+
+            player.CloseGump(typeof(ConsiderSinsGump));
+            player.SendGump(new ConsiderSinsGump(player));
         }
 
         [Usage("CreateTestLoadout")]
@@ -1299,7 +1315,7 @@ namespace Server.Mobiles
             }
         }
 
-        public int MurderCountDecayHours = 48;
+        public static int MurderCountDecayHours = 72;
 
         public static int DamageEntryClaimExpiration = 120;
 
@@ -1525,7 +1541,7 @@ namespace Server.Mobiles
         {
             get
             {
-                return (ShortTermMurders >= 5);
+                return (MurderCounts >= Mobile.MurderCountsRequiredForMurderer);
             }
         }
 
@@ -1560,8 +1576,20 @@ namespace Server.Mobiles
         public DateTime CreatedOn { set { m_Created = value; } get { return m_Created; } }
         public Boolean CloseRunebookGump;
 
-        public TimeSpan m_ShortTermElapse;
-        public TimeSpan m_LongTermElapse;       
+        public TimeSpan m_MurderCountDecayTimeRemaining = TimeSpan.FromHours(MurderCountDecayHours);
+        public int m_LifetimeMurderCounts = 0;
+
+        public DateTime m_RessPenaltyExpiration = DateTime.UtcNow;
+        public bool m_RessPenaltyAccountWideAggressionRestriction = false;
+        public int m_RessPenaltyEffectivenessReductionCount = 0;
+
+        public static int RessPenaltyAccountWideAggressionRestrictionFeePerCount = 200;
+        public static int RessPenaltyEffectivenessReductionFeePerCount = 350;
+        public static int RessPenaltyNoPenaltyFeePerCount = 500;
+
+        public static double RessPenaltyDamageScalar = .10;
+        public static double RessPenaltyHealingScalar = .10;
+        public static double RessPenaltyFizzleScalar = .10;
 
         public void EnterContestedRegion(bool ressingHere)
         {
@@ -3498,7 +3526,11 @@ namespace Server.Mobiles
 
             bool justiceDisabledZone = SpellHelper.InBuccs(Map, Location) || SpellHelper.InYewOrcFort(Map, Location) || SpellHelper.InYewCrypts(Map, Location) ||
                                         GreyZoneTotem.InGreyZoneTotemArea(Location, Map) || Hotspot.InHotspotArea(Location, Map, true);
-            
+
+            //Has Valid Killer(s)
+            if (killers.Count > 0 && !justiceDisabledZone)            
+                new ReportMurdererGump.GumpTimer(this, killers, DateTime.UtcNow, Location,Map).Start();            
+
             //Player, Paladin, and Murderer Handling
             bool killedByPlayer = false;
             bool killedByPaladin = false;
@@ -3717,22 +3749,7 @@ namespace Server.Mobiles
 
             OnWarmodeChanged();
         }
-
-        public void ConsiderSins()
-        {
-            SendMessage("Murder Counts: {0}", ShortTermMurders);
-            SendMessage("Lifetime Murder Counts: {0}", Kills);
-
-            if (ShortTermMurders > 0)
-            {
-                TimeSpan expiration = GameTime - m_ShortTermElapse;
-
-                string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + expiration, false, true, true, true, false);
-
-                SendMessage("Your next murder count will decay in " + timeRemaining + ".");
-            }
-        }
-
+        
         private List<Mobile> m_PermaFlags = new List<Mobile>();
         private List<Mobile> m_VisList;
         private TimeSpan m_GameTime;
@@ -3842,8 +3859,7 @@ namespace Server.Mobiles
             
             m_GameTime = TimeSpan.Zero;
 
-            m_ShortTermElapse = TimeSpan.FromHours(MurderCountDecayHours);
-            m_LongTermElapse = TimeSpan.FromHours(0.0);
+            m_MurderCountDecayTimeRemaining = TimeSpan.FromHours(MurderCountDecayHours);
 
             m_UserOptHideFameTitles = true;
 
@@ -4316,7 +4332,7 @@ namespace Server.Mobiles
         
         public override void Serialize(GenericWriter writer)
         {
-            CheckKillDecay();
+            CheckMurderCountDecay();
 
             if (KinPaintHue != -1)
             {
@@ -4419,8 +4435,11 @@ namespace Server.Mobiles
             writer.Write(NextTailorBulkOrder);
             writer.Write(NextSmithBulkOrder);
             writer.Write((int)m_Flags);
-            writer.Write(m_LongTermElapse);
-            writer.Write(m_ShortTermElapse);
+            writer.Write(m_MurderCountDecayTimeRemaining);
+            writer.Write(m_LifetimeMurderCounts);
+            writer.Write(m_RessPenaltyExpiration);
+            writer.Write(m_RessPenaltyAccountWideAggressionRestriction);
+            writer.Write(m_RessPenaltyEffectivenessReductionCount);
             writer.Write(GameTime);
             writer.Write(m_GuildSettings);
             writer.Write(m_CompetitionContext);
@@ -4516,8 +4535,12 @@ namespace Server.Mobiles
                 NextTailorBulkOrder = reader.ReadTimeSpan();
                 NextSmithBulkOrder = reader.ReadTimeSpan();
                 m_Flags = (PlayerFlag)reader.ReadInt();
-                m_LongTermElapse = reader.ReadTimeSpan();
-                m_ShortTermElapse = reader.ReadTimeSpan();
+                m_MurderCountDecayTimeRemaining = reader.ReadTimeSpan();
+                m_LifetimeMurderCounts = reader.ReadInt();
+                m_RessPenaltyExpiration = reader.ReadDateTime();
+                m_RessPenaltyAccountWideAggressionRestriction = reader.ReadBool();
+                m_RessPenaltyEffectivenessReductionCount = reader.ReadInt();
+
                 m_GameTime = reader.ReadTimeSpan();
                 m_GuildSettings = (GuildSettings)reader.ReadItem();
                 m_CompetitionContext = (CompetitionContext)reader.ReadItem();
@@ -4591,30 +4614,30 @@ namespace Server.Mobiles
         {
         }
 
-        public void CheckKillDecay()
-        {
-            if (m_ShortTermElapse < this.GameTime)
+        public void CheckMurderCountDecay()
+        {            
+            if (m_MurderCountDecayTimeRemaining < GameTime)
             {
-                m_ShortTermElapse += TimeSpan.FromHours(MurderCountDecayHours);
+                m_MurderCountDecayTimeRemaining += TimeSpan.FromHours(MurderCountDecayHours);
 
                 bool wasMurderer = false;
 
                 if (Murderer)
                     wasMurderer = true;
 
-                if (ShortTermMurders > 0)
+                if (MurderCounts > 0)
                 {
-                    --ShortTermMurders;
+                    --MurderCounts;
 
                     if (wasMurderer)
-                        SendMessage("You are no longer a murderer.");
+                        SendMessage("You are no longer known as a murderer.");
                 }
             }
         }
 
         public void ResetKillTime()
         {
-            m_ShortTermElapse = this.GameTime + TimeSpan.FromHours(MurderCountDecayHours);
+            m_MurderCountDecayTimeRemaining = GameTime + TimeSpan.FromHours(MurderCountDecayHours);
         }
 
         [CommandProperty(AccessLevel.GameMaster, AccessLevel.Developer)]
@@ -4631,6 +4654,7 @@ namespace Server.Mobiles
             {
                 if (NetState != null)
                     return m_GameTime + (DateTime.UtcNow - m_SessionStart);
+
                 else
                     return m_GameTime;
             }
@@ -4987,16 +5011,18 @@ namespace Server.Mobiles
 
         #region MyRunUO Invalidation
 
+        /*
         public override void OnKillsChange(int oldValue)
         {
-            if (this.Young && this.ShortTermMurders > oldValue)
+            if (this.Young && MurderCounts > oldValue)
             {
-                Account acc = this.Account as Account;
+                Account acc = Account as Account;
 
                 if (acc != null)
                     acc.RemoveYoungStatus(0);
             }
         }
+        */
 
         public override void OnGenderChanged(bool oldFemale)
         {

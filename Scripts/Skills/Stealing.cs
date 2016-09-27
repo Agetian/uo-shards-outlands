@@ -21,7 +21,7 @@ namespace Server.SkillHandlers
         }
 
         public static readonly bool ClassicMode = true;
-        public static readonly bool SuspendOnMurder = true;
+        public static readonly bool SuspendOnMurder = false;
 
         public static double MaxWeightStealable = 10.0;        
         public static double StackStealScalar = .5;
@@ -70,8 +70,10 @@ namespace Server.SkillHandlers
                 else if (root is Mobile && ((Mobile)root).Player && !IsInGuild(from))                
                     from.SendLocalizedMessage(1005596); // You must be in the thieves guild to steal from other players.                
 
-                else if (SuspendOnMurder && root is Mobile && ((Mobile)root).Player && IsInGuild(from) && from.ShortTermMurders > 0)                
-                    from.SendLocalizedMessage(502706); // You are currently suspended from the thieves guild.                
+                /*
+                else if (SuspendOnMurder && root is Mobile && ((Mobile)root).Player && IsInGuild(from) && from.MurderCounts > 0)                
+                    from.SendLocalizedMessage(502706); // You are currently suspended from the thieves guild.   
+                */
 
                 else if (root is BaseVendor && ((BaseVendor)root).IsInvulnerable)                
                     from.SendLocalizedMessage(1005598); // You can't steal from shopkeepers.                

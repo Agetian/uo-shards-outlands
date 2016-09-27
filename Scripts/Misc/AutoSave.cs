@@ -7,24 +7,22 @@ namespace Server.Misc
 {
 	public class AutoSave : Timer
     {       
-		public static TimeSpan m_Delay = TimeSpan.FromMinutes( 10 );
+		public static TimeSpan AutoSaveInterval = TimeSpan.FromMinutes(10);
+		private static TimeSpan AutoSaveNotificationLeadTime = TimeSpan.FromSeconds(15);
 
-		private static TimeSpan m_Warning = TimeSpan.FromSeconds(15);
-		//private static TimeSpan m_Warning = TimeSpan.FromSeconds( 15.0 );
+        public static void Initialize()
+        {
+            new AutoSave().Start();
 
-		public static void Initialize()
-		{
-			new AutoSave().Start();
-			CommandSystem.Register( "SetSaves", AccessLevel.Administrator, new CommandEventHandler( SetSaves_OnCommand ) );
-		}
+            CommandSystem.Register("SetSaves", AccessLevel.Administrator, new CommandEventHandler(SetSaves_OnCommand));
+        }
 
 		private static bool m_SavesEnabled = true;
-
 		public static bool SavesEnabled
 		{
 			get{ return m_SavesEnabled; }
 			set{ m_SavesEnabled = value; }
-		}
+		}        
 
 		[Usage( "SetSaves <true | false>" )]
 		[Description( "Enables or disables automatic shard saving." )]
@@ -41,7 +39,7 @@ namespace Server.Misc
 			}
 		}
 
-		public AutoSave() : base( m_Delay - m_Warning, m_Delay )
+		public AutoSave() : base( AutoSaveInterval - AutoSaveNotificationLeadTime, AutoSaveInterval )
 		{
 			Priority = TimerPriority.OneMinute;
 		}
@@ -51,13 +49,13 @@ namespace Server.Misc
 			if ( !m_SavesEnabled || AutoRestart.Restarting )
 				return;
 
-			if ( m_Warning == TimeSpan.Zero )
+			if ( AutoSaveNotificationLeadTime == TimeSpan.Zero )
 			{
 				Save( true );
 			}
 			else
 			{
-				int s = (int)m_Warning.TotalSeconds;
+				int s = (int)AutoSaveNotificationLeadTime.TotalSeconds;
 				int m = s / 60;
 				s %= 60;
 
@@ -68,7 +66,7 @@ namespace Server.Misc
 				else
 					World.Broadcast( 0x35, true, "The world will save in {0} second{1}.", s, s != 1 ? "s" : "" );
 
-				Timer.DelayCall( m_Warning, new TimerCallback( Save ) );
+				Timer.DelayCall( AutoSaveNotificationLeadTime, new TimerCallback( Save ) );
 			}
 		}
 

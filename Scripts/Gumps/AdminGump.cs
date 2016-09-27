@@ -152,8 +152,9 @@ namespace Server.Gumps
 				case AccessLevel.Counselor: return 0x2;
 				case AccessLevel.Player: default:
 				{
-					if ( m.ShortTermMurders >= 5 )
+					if ( m.MurderCounts >= Mobile.MurderCountsRequiredForMurderer)
 						return 0x21;
+
 					else if ( m.Criminal )
 						return 0x3B1;
 

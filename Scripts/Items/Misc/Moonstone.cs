@@ -75,7 +75,7 @@ namespace Server.Items
 			{
 				from.SendLocalizedMessage( 1049543 ); // You decide against traveling to Felucca while you are still young.
 			}
-			else if ( from.ShortTermMurders >= 5 )
+            else if (from.MurderCounts >= Mobile.MurderCountsRequiredForMurderer)
 			{
 				from.SendLocalizedMessage( 1005402 ); // The magic of the stone cannot be evoked by someone with blood on their hands.
 			}

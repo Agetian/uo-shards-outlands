@@ -419,10 +419,11 @@ namespace Server.Items
 
 			if ( mobile.Player )
 			{
-                if ( mobile.Kills >= 5 )
+                if ( mobile.MurderCounts >= Mobile.MurderCountsRequiredForMurderer )
 				{
 					checkLists = PMList.RedLists;
 				}
+
 				else
 				{
 					ClientFlags flags = mobile.NetState == null ? 0 : mobile.NetState.Flags;
@@ -531,7 +532,7 @@ namespace Server.Items
 			{
 				m_Mobile.SendLocalizedMessage( 1019002 ); // You are too far away to use the gate.
 			}
-			else if ( m_Mobile.Player && m_Mobile.Kills >= 5 && list.Map != Map.Felucca )
+			else if ( m_Mobile.Player && m_Mobile.MurderCounts >= Mobile.MurderCountsRequiredForMurderer && list.Map != Map.Felucca )
 			{
 				m_Mobile.SendLocalizedMessage( 1019004 ); // You are not allowed to travel there.
 			}

@@ -42,11 +42,14 @@ namespace Server.Mobiles
 				SayTo( pm, 502089 ); // You cannot be a member of the Thieves' Guild while you are Young.
 				return false;
 			}
-			else if ( pm.ShortTermMurders > 0 )
+
+            /*
+			else if ( pm.MurderCounts > 0 )
 			{
 				SayTo( pm, 501050 ); // This guild is for cunning thieves, not oafish cutthroats.
 				return false;
 			}
+            */
 
 			else if ( pm.Skills[SkillName.Stealing].Base < 60.0 )
 			{

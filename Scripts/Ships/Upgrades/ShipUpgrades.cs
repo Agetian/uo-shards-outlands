@@ -12,6 +12,8 @@ namespace Server
 {
     public class ShipUpgrades
     {
+        #region Enums
+
         public enum UpgradeType
         {
             Theme,
@@ -31,7 +33,16 @@ namespace Server
         {
             None,
             
+            Navy,
             Pirate,
+            Orc,
+            Undead,
+            Treasure,
+            Derelict,
+            Merchant,
+            Daemonic,
+            Eldritch,
+            Massacre
         }
 
         public enum PaintType
@@ -88,7 +99,9 @@ namespace Server
             None,
 
             Hellfire
-        }        
+        }
+
+        #endregion
 
         #region Theme Upgrade
 
@@ -100,11 +113,84 @@ namespace Server
 
             switch (themeUpgrade)
             {
+                case ThemeType.Navy:
+                    upgradeDetail.m_UpgradeName = "Navy";
+                    upgradeDetail.GumpCollectionId = "NavyShipThemeUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Adds a variety of navy-themed decorations", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("to your ship.", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                break;
+
                 case ThemeType.Pirate:
                     upgradeDetail.m_UpgradeName = "Pirate";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("Adds a variety of pirate-themed decorations", ShipUpgradeDetail.StatChangeHueType.Misc));
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("to your ship.", ShipUpgradeDetail.StatChangeHueType.Misc));
                     upgradeDetail.GumpCollectionId = "PirateShipThemeUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Adds a variety of pirate-themed decorations", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("to your ship.", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                break;
+
+                case ThemeType.Orc:
+                    upgradeDetail.m_UpgradeName = "Orc";
+                    upgradeDetail.GumpCollectionId = "OrcShipThemeUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Adds a variety of orc-themed decorations", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("to your ship.", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                break;
+
+                case ThemeType.Undead:
+                    upgradeDetail.m_UpgradeName = "Undead";
+                    upgradeDetail.GumpCollectionId = "UndeadShipThemeUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Adds a variety of undead-themed decorations", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("to your ship.", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                break;
+
+                case ThemeType.Treasure:
+                    upgradeDetail.m_UpgradeName = "Treasure";
+                    upgradeDetail.GumpCollectionId = "TreasureShipThemeUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Adds a variety of treasure-themed decorations", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("to your ship.", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                break;
+
+                case ThemeType.Derelict:
+                    upgradeDetail.m_UpgradeName = "Derelict";
+                    upgradeDetail.GumpCollectionId = "DerelictShipThemeUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Adds a variety of derelict-themed decorations", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("to your ship.", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                break;
+
+                case ThemeType.Merchant:
+                    upgradeDetail.m_UpgradeName = "Merchant";
+                    upgradeDetail.GumpCollectionId = "MerchantShipThemeUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Adds a variety of merchant-themed decorations", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("to your ship.", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                break;
+
+                case ThemeType.Daemonic:
+                    upgradeDetail.m_UpgradeName = "Daemonic";
+                    upgradeDetail.GumpCollectionId = "DaemonicShipThemeUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Adds a variety of daemonic-themed decorations", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("to your ship.", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                break;
+
+                case ThemeType.Eldritch:
+                    upgradeDetail.m_UpgradeName = "Eldritch";
+                    upgradeDetail.GumpCollectionId = "EldritchShipThemeUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Adds a variety of eldritch-themed decorations", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("to your ship.", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                break;
+
+                case ThemeType.Massacre:
+                    upgradeDetail.m_UpgradeName = "Massacre";
+                    upgradeDetail.GumpCollectionId = "MassacreShipThemeUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Adds a variety of massacre-themed decorations", ShipUpgradeDetail.UpgradeEffectType.Theme));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("to your ship.", ShipUpgradeDetail.UpgradeEffectType.Theme));
                 break;
             }
 
@@ -128,9 +214,13 @@ namespace Server
             switch (paintUpgrade)
             {
                 case PaintType.DarkGrey:
-                    upgradeDetail.m_UpgradeName = "Dark Grey";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("Changes the color of the ship (hue 1105)", ShipUpgradeDetail.StatChangeHueType.Special));
+                    upgradeDetail.m_UpgradeName = "Dark Grey";                    
                     upgradeDetail.GumpCollectionId = "DarkGreyShipPaintUpgrade";
+
+                    upgradeDetail.PaintHue = 1105;
+                    upgradeDetail.PaintTextHue = 1105;
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Changes the color of the ship (Hue 1105)", ShipUpgradeDetail.UpgradeEffectType.Paint));
                 break;
             }
 
@@ -155,8 +245,13 @@ namespace Server
             {
                 case CannonMetalType.Bloodstone:
                     upgradeDetail.m_UpgradeName = "Bloodstone";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("Changes the color of the ship's cannons (Hue 2117)", ShipUpgradeDetail.StatChangeHueType.Special));
                     upgradeDetail.GumpCollectionId = "BloodstoneShipCannonMetalUpgrade";
+
+                    upgradeDetail.CannonMetalHue = 2117;
+                    upgradeDetail.CannonMetalTextHue = 2116;
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Changes the color of the ship's cannons (Hue 2117)", ShipUpgradeDetail.UpgradeEffectType.CannonMetal));
+                    
                 break;
             }
 
@@ -181,12 +276,11 @@ namespace Server
             {
                 case OutfittingType.Hunter:
                     upgradeDetail.m_UpgradeName = "Hunter";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("+5% Forward Speed", ShipUpgradeDetail.StatChangeHueType.Speed));
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("+5% Drifting Speed", ShipUpgradeDetail.StatChangeHueType.Speed));
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("+2% Cannon Accuracy", ShipUpgradeDetail.StatChangeHueType.Cannon));
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("-5% Minor Ability Cooldown", ShipUpgradeDetail.StatChangeHueType.Abilities));
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("-5% Major Ability Cooldown", ShipUpgradeDetail.StatChangeHueType.Abilities));
                     upgradeDetail.GumpCollectionId = "HunterShipOutfittingUpgrade";
+
+                    upgradeDetail.ForwardSpeed = .10;
+                    upgradeDetail.DriftSpeed = .10;
+                    upgradeDetail.MinorAbilityCooldown = .20;                  
                 break;
             }
 
@@ -211,10 +305,10 @@ namespace Server
             {
                 case BannerType.Corsairs:
                     upgradeDetail.m_UpgradeName = "Corsairs";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("+25% Cannon Damage against Navy Ships", ShipUpgradeDetail.StatChangeHueType.Special));
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("+5% Boarding Chance", ShipUpgradeDetail.StatChangeHueType.Special));
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("+5% Doubloons Earned", ShipUpgradeDetail.StatChangeHueType.Special));
                     upgradeDetail.GumpCollectionId = "CorsairsShipBannerUpgrade";
+
+                    upgradeDetail.BoardingChance = .10;
+                    upgradeDetail.DoubloonsEarnedFromEnemyCrew = .10;                    
                 break;
             }
 
@@ -239,9 +333,11 @@ namespace Server
             {
                 case CharmType.BarrelOfLimes:
                     upgradeDetail.m_UpgradeName = "Barrel of Limes";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("+25% Damage Dealt by Henchmen onboard", ShipUpgradeDetail.StatChangeHueType.Special));
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("+5% Doubloons Earned", ShipUpgradeDetail.StatChangeHueType.Special));
                     upgradeDetail.GumpCollectionId = "BarrelOfLimesShipCharmUpgrade";
+
+                    upgradeDetail.CrewDamageMeleeDamageDealt = .10;
+                    upgradeDetail.CrewDamageMeleeDamageReceived = .10;
+                    upgradeDetail.CrewHealingReceived = .25;
                 break;
             }
 
@@ -265,9 +361,10 @@ namespace Server
             switch (minorAbilityUpgrade)
             {
                 case MinorAbilityType.ExpediteRepairs:
-                    upgradeDetail.m_UpgradeName = "Expedite Repairs";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("+25% Repair Effectiveness for 30 seconds", ShipUpgradeDetail.StatChangeHueType.Special));
+                    upgradeDetail.m_UpgradeName = "Expedite Repairs";                    
                     upgradeDetail.GumpCollectionId = "ExpediteRepairsShipMinorAbilityUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("+25% Repair Effectiveness for 30 seconds", ShipUpgradeDetail.UpgradeEffectType.MinorAbility));
                 break;
             }
 
@@ -292,8 +389,9 @@ namespace Server
             {
                 case MajorAbilityType.Smokescreen:
                     upgradeDetail.m_UpgradeName = "Smokescreen";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("Pacifies creatures hit for 10 seconds", ShipUpgradeDetail.StatChangeHueType.Special));
                     upgradeDetail.GumpCollectionId = "SmokescreenShipMajorAbilityUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Pacifies creatures hit for 10 seconds", ShipUpgradeDetail.UpgradeEffectType.MajorAbility));                   
                 break;
             }
 
@@ -317,10 +415,11 @@ namespace Server
             switch (epicAbilityUpgrade)
             {
                 case EpicAbilityType.Hellfire:
-                    upgradeDetail.m_UpgradeName = "Hellfire";
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("Unleashes a damaging barrage of fire that", ShipUpgradeDetail.StatChangeHueType.Special));
-                    upgradeDetail.m_Effects.Add(new KeyValuePair<string, ShipUpgradeDetail.StatChangeHueType>("continues to burn for 30 seconds, damaging targets", ShipUpgradeDetail.StatChangeHueType.Special));
+                    upgradeDetail.m_UpgradeName = "Hellfire";                    
                     upgradeDetail.GumpCollectionId = "HellfireShipEpicAbilityUpgrade";
+
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("Unleashes a damaging barrage of fire that", ShipUpgradeDetail.UpgradeEffectType.EpicAbility));
+                    upgradeDetail.m_SpecialEffects.Add(new KeyValuePair<string, ShipUpgradeDetail.UpgradeEffectType>("continues to burn for 30 seconds, damaging targets", ShipUpgradeDetail.UpgradeEffectType.EpicAbility));
                 break;
             }
 
@@ -336,35 +435,98 @@ namespace Server
 
     public class ShipUpgradeDetail
     {
-        public enum StatChangeHueType
+        public enum UpgradeEffectType
         {           
-            Stats,
-            Speed,
-            Cannon,
-            Abilities,
-            Special,
-            Misc
+            Theme,
+            Paint,
+            CannonMetal,
+            MinorAbility,
+            MajorAbility,
+            EpicAbility
         }
 
         public ShipUpgrades.UpgradeType m_UpgradeType = ShipUpgrades.UpgradeType.Theme;
-        public string m_UpgradeName = "";
-        public List<KeyValuePair<string, StatChangeHueType>> m_Effects = new List<KeyValuePair<string,StatChangeHueType>>();        
+        public string m_UpgradeName = "";        
         public string GumpCollectionId = "";
+
+        public List<KeyValuePair<string, UpgradeEffectType>> m_SpecialEffects = new List<KeyValuePair<string, UpgradeEffectType>>();
+
+        public int PaintHue = 0;
+        public int PaintTextHue = 0;
+
+        public int CannonMetalHue = 0;
+        public int CannonMetalTextHue = 0;
+
+        //Core Stats
+        public double HoldCapacity = 0.0;
+
+        public double MaxHitPoints = 0.0;
+        public double MaxSailPoints = 0.0;
+        public double MaxGunPoints = 0.0;
+
+        public double ForwardSpeed = 0.0;
+        public double DriftSpeed = 0.0;
+        public double SlowdownModePenalty = 0.0;
+
+        public double CannonAccuracy = 0.0;
+        public double CannonDamage = 0.0;       
+        public double CannonRange = 0.0;
+        public double CannonReloadTime = 0.0;
+
+        public double MinorAbilityCooldown = 0.0;        
+        public double MajorAbilityCooldown = 0.0;       
+        public double EpicAbilityCooldown = 0.0; 
+
+        public double RepairCooldown = 0.0;    
+        public double BoardingChance = 0.0;
+
+        //Non-Core Stats
+        public double CannonEnemyCrewDamage = 0.0;
+        public double CannonHitPointsDamage = 0.0;
+        public double CannonSailPointsDamage = 0.0;
+        public double CannonGunPointsDamage = 0.0;
+
+        public double CrewDamageMeleeDamageDealt = 0.0;
+        public double CrewDamageSpellDamageDealt = 0.0;
+
+        public double CrewDamageMeleeDamageReceived = 0.0;
+        public double CrewDamageSpellDamageReceived = 0.0;
+        public double CrewDamageCannonDamageReceived = 0.0;
+
+        public double RepairHitPointsBonus = 0.0;
+        public double RepairSailPointsBonus = 0.0;
+        public double RepairGunPointsBonus = 0.0;
+        public double RepairMaterialsReduction = 0.0;
+
+        public double MinorAbilityEffectiveness = 0.0;
+        public double MajorAbilityEffectiveness = 0.0;       
+        public double EpicAbilityEffectiveness = 0.0;
+
+        public double CrewHealingReceived = 0.0;
+
+        public double DoubloonsEarnedFromEnemyCrew = 0.0;
+        public double DoubloonsEarnedFromEnemyShips = 0.0;
+        
+        public double FishingSuccess = 0.0;
+
+        public double SpyglassAccuracy = 0.0;
 
         public ShipUpgradeDetail()
         {
         }
 
-        public int GetHue(StatChangeHueType statType)
+        public int GetHue(UpgradeEffectType statType)
         {
             switch (statType)
             {
-                case StatChangeHueType.Stats: return 149; break;
-                case StatChangeHueType.Speed: return 2599; break;
-                case StatChangeHueType.Cannon: return 2401; break;
-                case StatChangeHueType.Abilities: return 2603; break;
-                case StatChangeHueType.Special: return 2606; break;
-                case StatChangeHueType.Misc: return 53; break;
+                /*
+                case UpgradeEffectType.Stats: return 149; break;
+                case UpgradeEffectType.Speed: return 2599; break;
+                case UpgradeEffectType.Cannon: return 2401; break;
+                case UpgradeEffectType.Abilities: return 2603; break;
+                case UpgradeEffectType.Special: return 2606; break;
+                case UpgradeEffectType.Misc: return 53; break;
+                */
             }
 
             return 2499;

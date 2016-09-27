@@ -258,7 +258,7 @@ namespace Server.Mobiles
 				}
 
 				m_Owner.Criminal = false;
-				m_Owner.ShortTermMurders = 0;
+				m_Owner.MurderCounts = 0;
 				m_Owner.Stam = m_Owner.StamMax;
 
 				Mobile target = m_Owner.Focus;

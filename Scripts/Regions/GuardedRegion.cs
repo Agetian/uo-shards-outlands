@@ -116,7 +116,7 @@ namespace Server.Regions
 			if ( from.AccessLevel >= AccessLevel.GameMaster || IsDisabled() )
 				return true;
 
-			return ( AllowReds || from.ShortTermMurders < 5 );
+            return (AllowReds || from.MurderCounts < Mobile.MurderCountsRequiredForMurderer);
 		}
 
 		public virtual Type DefaultGuardType
@@ -218,7 +218,7 @@ namespace Server.Regions
 			if ( IsDisabled() )
 				return;
 
-			if ( !AllowReds && m.ShortTermMurders >= 5 )
+            if (!AllowReds && m.MurderCounts >= Mobile.MurderCountsRequiredForMurderer)
 				CheckGuardCandidate( m );
 		}
 
@@ -347,7 +347,8 @@ namespace Server.Regions
             while (mobiles.Count > 0)
             {
                 Mobile m = mobiles.Dequeue() as Mobile;
-                if (IsGuardCandidate(m) && ((!AllowReds && m.ShortTermMurders >= 5 && m.Region.IsPartOf(this)) || m_GuardCandidates.ContainsKey(m)))
+
+                if (IsGuardCandidate(m) && ((!AllowReds && m.MurderCounts >= Mobile.MurderCountsRequiredForMurderer && m.Region.IsPartOf(this)) || m_GuardCandidates.ContainsKey(m)))
                 {
                     GuardTimer timer = null;
                     m_GuardCandidates.TryGetValue(m, out timer);
@@ -371,7 +372,7 @@ namespace Server.Regions
 			if ( m == null || m is BaseGuard || !m.Alive || m.AccessLevel > AccessLevel.Player || m.Blessed || ( m is BaseCreature && ((BaseCreature)m).IsInvulnerable ) || IsDisabled() )
 				return false;
 
-			return (!AllowReds && m.ShortTermMurders >= 5) || m.Criminal;
+            return (!AllowReds && m.MurderCounts >= Mobile.MurderCountsRequiredForMurderer) || m.Criminal;
 		}
 
 		private class GuardTimer : Timer

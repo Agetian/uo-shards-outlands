@@ -1156,8 +1156,7 @@ namespace Server
             else if (CheckBlessed(parent, true))
                 return DeathMoveResult.MoveToBackpack;
 
-            //TEST: CHANGE TO ISMURDERER()
-            else if (CheckNewbied() && parent.ShortTermMurders < 5)
+            else if (CheckNewbied() && parent.MurderCounts < Mobile.MurderCountsRequiredForMurderer)
                 return DeathMoveResult.MoveToBackpack;
 
             else
@@ -1175,8 +1174,7 @@ namespace Server
             else if (CheckBlessed(parent, true))
                 return DeathMoveResult.MoveToBackpack;
 
-            //TEST: CHANGE TO ISMURDERER()
-            else if (CheckNewbied() && parent.ShortTermMurders < 5)
+            else if (CheckNewbied() && parent.MurderCounts < Mobile.MurderCountsRequiredForMurderer)
                 return DeathMoveResult.MoveToBackpack;
                 
             else
