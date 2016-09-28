@@ -1579,6 +1579,8 @@ namespace Server.Mobiles
         public TimeSpan m_MurderCountDecayTimeRemaining = TimeSpan.FromHours(MurderCountDecayHours);
         public int m_LifetimeMurderCounts = 0;
 
+        public static TimeSpan RessPenaltyDuration = TimeSpan.FromHours(24);
+
         public DateTime m_RessPenaltyExpiration = DateTime.UtcNow;
         public bool m_RessPenaltyAccountWideAggressionRestriction = false;
         public int m_RessPenaltyEffectivenessReductionCount = 0;
@@ -2755,6 +2757,8 @@ namespace Server.Mobiles
             if (CloseRunebookGump)
             {
                 CloseGump(typeof(RunebookGump));
+                CloseGump(typeof(RuneTomeGump));
+
                 CloseRunebookGump = false;
             }
 
@@ -2766,6 +2770,8 @@ namespace Server.Mobiles
             if (CloseRunebookGump)
             {
                 CloseGump(typeof(RunebookGump));
+                CloseGump(typeof(RuneTomeGump));
+
                 CloseRunebookGump = false;
             }
 
@@ -3284,11 +3290,23 @@ namespace Server.Mobiles
 
         public override void Resurrect()
         {
+            if (MurderCounts > Mobile.MurderCountsRequiredForMurderer && AccessLevel == AccessLevel.Player)
+            {
+                SendMessage(63, "Select a resurrection option and click 'Apply' twice to proceed.");
+
+                CloseGump(typeof(MurderPenaltyGump));
+                SendGump(new MurderPenaltyGump(this, false, 0, false));
+
+                return;
+            }
+
             m_TimeSpanResurrected = this.GameTime;
 
             if (CloseRunebookGump)
             {
                 CloseGump(typeof(RunebookGump));
+                CloseGump(typeof(RuneTomeGump));
+
                 CloseRunebookGump = false;
             }
 
@@ -3435,6 +3453,8 @@ namespace Server.Mobiles
             if (CloseRunebookGump)
             {
                 CloseGump(typeof(RunebookGump));
+                CloseGump(typeof(RuneTomeGump));
+
                 CloseRunebookGump = false;
             }
 

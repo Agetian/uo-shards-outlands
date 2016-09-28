@@ -11,7 +11,7 @@ using Server.Accounting;
 
 namespace Server
 {
-    public class ResurrectionGump : Gump
+    public class MurderPenaltyGump : Gump
     {
         public PlayerMobile m_Player;
         public bool m_PreviewMode = true;
@@ -26,7 +26,7 @@ namespace Server
 
         public int WhiteTextHue = 2499;
 
-        public ResurrectionGump(PlayerMobile player, bool previewMode, int selectionIndex, bool confirmed): base(400, 25)
+        public MurderPenaltyGump(PlayerMobile player, bool previewMode, int selectionIndex, bool confirmed): base(400, 25)
         {
             m_Player = player;
             m_PreviewMode = previewMode;
@@ -75,7 +75,7 @@ namespace Server
 
             AddLabel(161, 31, 149, "Punishable");
             AddLabel(147, 51, 149, "Murder Counts");
-            AddLabel(152, 71, 2550, "(any above " + Mobile.MurderCountsRequiredForMurderer.ToString() + ")");
+            AddLabel(143, 71, 2550, "(counts above " + Mobile.MurderCountsRequiredForMurderer.ToString() + ")");
 
             int punishableMurderCounts = m_Player.MurderCounts - Mobile.MurderCountsRequiredForMurderer;
 
@@ -155,8 +155,8 @@ namespace Server
             AddLabel(110, 364, WhiteTextHue, "-" + Utility.CreatePercentageString(healingPenalty) + " Healing Amounts");
             AddLabel(110, 384, WhiteTextHue, Utility.CreatePercentageString(fizzlePenalty) + " Chance to Fizzle Field");
             AddLabel(110, 404, WhiteTextHue, "and Paralyze Spells for 24 Hours");
-            AddLabel(110, 423, 2550, "(Penalties are Stackable)");
-
+            AddLabel(130, 423, 2550, "(Penalties are Stackable)");
+            
             if (m_SelectionIndex == 2)
             {
                 resurrectionTotalCost = punishableMurderCounts * PlayerMobile.RessPenaltyNoPenaltyFeePerCount;
@@ -181,13 +181,8 @@ namespace Server
             AddLabel(85, 531, 149, "Gold Across Account:");
             AddLabel(230, 531, WhiteTextHue, Utility.CreateCurrencyString(goldAvailableInAccount));
 
-            if (!m_PreviewMode)
-            {
-                AddButton(159, 555, 239, 240, 5, GumpButtonType.Reply, 0); //Apply
-
-                if (m_Confirmed)
-                    AddLabel(228, 555, 63, "Click Again to Confirm");
-            }
+            if (!m_PreviewMode)            
+                AddButton(159, 555, 239, 240, 5, GumpButtonType.Reply, 0); //Apply            
         }
         
         public override void OnResponse(NetState sender, RelayInfo info)
@@ -195,7 +190,44 @@ namespace Server
             if (m_Player == null)
                 return;
 
+            Account account = m_Player.Account as Account;
+
+            if (account == null)
+                return;
+
             bool closeGump = true;
+
+            if (m_SelectionIndex > 2)
+                m_SelectionIndex = 0;            
+
+            int resurrectionTotalCost = 0;
+            int goldAvailableInBank = 0;
+            int goldAvailableInAccount = 0;
+
+            int punishableMurderCounts = m_Player.MurderCounts - Mobile.MurderCountsRequiredForMurderer;
+
+            if (punishableMurderCounts < 0)
+                punishableMurderCounts = 0;
+
+            if (m_SelectionIndex == 0)            
+                resurrectionTotalCost = punishableMurderCounts * PlayerMobile.RessPenaltyAccountWideAggressionRestrictionFeePerCount;
+
+            if (m_SelectionIndex == 1)            
+                resurrectionTotalCost = punishableMurderCounts * PlayerMobile.RessPenaltyEffectivenessReductionFeePerCount;
+
+            if (m_SelectionIndex == 2)            
+                resurrectionTotalCost = punishableMurderCounts * PlayerMobile.RessPenaltyNoPenaltyFeePerCount;
+
+            foreach (Mobile mobile in account.accountMobiles)
+            {
+                if (mobile == null) continue;
+                if (mobile.Deleted) continue;
+
+                if (mobile == m_Player)
+                    goldAvailableInBank += Banker.GetBalance(m_Player);
+
+                goldAvailableInAccount += Banker.GetBalance(mobile);
+            }            
 
             switch (info.ButtonID)
             {
@@ -236,16 +268,111 @@ namespace Server
 
                 //Apply
                 case 5:
-                    if (m_Confirmed)
+                    if (resurrectionTotalCost > goldAvailableInAccount)
                     {
-                        //TEST
-                        //RESOLVE
+                        m_Player.SendMessage(1256, "That resurrection option costs more gold than you have available across your character's bank accounts.");
+
+                        closeGump = false;
+                    }
+
+                    else if (m_Confirmed)
+                    {
+                        int goldRemaining = resurrectionTotalCost;
+
+                        if (goldAvailableInBank >= goldRemaining)
+                        {
+                            Banker.Withdraw(m_Player, goldRemaining);
+
+                            goldRemaining = 0;
+
+                            if (m_Player.NetState != null)
+                                m_Player.PrivateOverheadMessage(MessageType.Regular, 0, false, "Withdrew " + resurrectionTotalCost.ToString() + " gold from your bank.", m_Player.NetState);
+                        }
+
+                        if (goldRemaining > 0)
+                        {
+                            foreach (Mobile mobile in account.accountMobiles)
+                            {
+                                if (goldRemaining <= 0)
+                                    continue;
+
+                                if (mobile == null) continue;
+                                if (mobile.Deleted) continue;
+                                if (mobile == m_Player) continue;
+
+                                int goldAvailableOnCharacter = Banker.GetBalance(mobile);
+
+                                if (goldAvailableOnCharacter >= goldRemaining)
+                                {
+                                    int goldWithdrawn = goldRemaining;
+
+                                    goldRemaining = 0;
+
+                                    Banker.Withdraw(mobile, goldRemaining);
+
+                                    if (m_Player.NetState != null)
+                                        m_Player.PrivateOverheadMessage(MessageType.Regular, 0, false, "Withdrew " + goldWithdrawn.ToString() + " gold from " + mobile.RawName + "'s bank.", m_Player.NetState);
+                                }
+
+                                else
+                                {
+                                    goldRemaining -= goldAvailableOnCharacter;
+
+                                    Banker.Withdraw(mobile, goldAvailableOnCharacter);
+
+                                    if (m_Player.NetState != null)
+                                        m_Player.PrivateOverheadMessage(MessageType.Regular, 0, false, "Withdrew " + goldAvailableOnCharacter.ToString() + " gold from " + mobile.RawName + "'s bank.", m_Player.NetState);
+                                }
+                            }  
+                        }
+
+                        if (m_SelectionIndex == 0)
+                        {
+                            m_Player.m_RessPenaltyExpiration = DateTime.UtcNow + PlayerMobile.RessPenaltyDuration;
+                            m_Player.m_RessPenaltyAccountWideAggressionRestriction = true;
+
+                            string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_Player.m_RessPenaltyExpiration, false, true, true, true, false);
+
+                            m_Player.SendMessage(2550, "Your murder counts have been reset to " + Mobile.MurderCountsRequiredForMurderer.ToString() + ". All characters on your account will be restricted from making aggressive actions for the next " + timeRemaining + ".");
+                        }
+
+                        else if (m_SelectionIndex == 1)
+                        {   
+                            if (m_Player.m_RessPenaltyExpiration > DateTime.UtcNow)
+                                m_Player.m_RessPenaltyEffectivenessReductionCount++;
+
+                            else
+                                m_Player.m_RessPenaltyEffectivenessReductionCount = 1;
+
+                            m_Player.m_RessPenaltyExpiration = DateTime.UtcNow + PlayerMobile.RessPenaltyDuration;
+
+                            string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_Player.m_RessPenaltyExpiration, false, true, true, true, false);
+                            
+                            m_Player.SendMessage(2550, "Your murder counts have been reset to " + Mobile.MurderCountsRequiredForMurderer.ToString() + ". Your character's combat penalty will be active for the next " + timeRemaining + ".");
+                        }
+
+                        else if (m_SelectionIndex == 2)
+                            m_Player.SendMessage(2550, "Your murder counts have been reset to " + Mobile.MurderCountsRequiredForMurderer.ToString() + " and you resurrect with no additional penalties.");
+
+                        m_Player.MurderCounts = Mobile.MurderCountsRequiredForMurderer;
+
+                        Timer.DelayCall(TimeSpan.FromSeconds(5), delegate
+                        {
+                            if (m_Player == null)
+                                return;
+
+                            m_Player.SendMessage(2550, "You may use [ConsiderSins or say 'I must consider my sins' at any time to view any current resurrection penalties you may have in place.");
+                        });
+
+                        m_Player.Resurrect();
                     }
 
                     else
                     {
                         m_Confirmed = true;
                         m_Player.SendSound(LargeSelectionSound);
+
+                        m_Player.SendMessage(63, "Click 'Apply' again to confirm your selection.");
 
                         closeGump = false;
                     }                    
@@ -257,8 +384,8 @@ namespace Server
 
             else
             {
-                m_Player.CloseGump(typeof(ResurrectionGump));
-                m_Player.SendGump(new ResurrectionGump(m_Player, m_PreviewMode, m_SelectionIndex, m_Confirmed));
+                m_Player.CloseGump(typeof(MurderPenaltyGump));
+                m_Player.SendGump(new MurderPenaltyGump(m_Player, m_PreviewMode, m_SelectionIndex, m_Confirmed));
             }
         }           
     }

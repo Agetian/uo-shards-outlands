@@ -132,8 +132,8 @@ namespace Server
                 AddLabel(194, startY, WhiteTextHue, "None");
             }
 
-            AddButton(60, 332, 2151, 2154, 2, GumpButtonType.Reply, 0);
-            AddLabel(95, 336, 2603, "View Potential Resurrection Penalty Options");        
+            AddButton(76, 332, 2151, 2154, 2, GumpButtonType.Reply, 0);
+            AddLabel(109, 336, 2603, "Preview Murderer Penalty Options");        
         }
         
         public override void OnResponse(NetState sender, RelayInfo info)
@@ -157,8 +157,8 @@ namespace Server
                     m_Player.CloseGump(typeof(ConsiderSinsGump));
                     m_Player.SendGump(new ConsiderSinsGump(m_Player));
 
-                    m_Player.CloseGump(typeof(ResurrectionGump));
-                    m_Player.SendGump(new ResurrectionGump(m_Player, true, 0, false));
+                    m_Player.CloseGump(typeof(MurderPenaltyGump));
+                    m_Player.SendGump(new MurderPenaltyGump(m_Player, true, 0, false));
 
                     return;
                 break;

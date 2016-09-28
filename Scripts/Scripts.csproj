@@ -973,7 +973,7 @@
     <Compile Include="Items\ExplodingAnimals\ExplodingAnimal.cs" />
     <Compile Include="Items\ParagonWand.cs" />
     <Compile Include="Notoriety\ConsiderSinsGump.cs" />
-    <Compile Include="Notoriety\ResurrectionGump.cs" />
+    <Compile Include="Notoriety\MurderPenaltyGump.cs" />
     <Compile Include="Notoriety\ReportMurderer.cs" />
     <Compile Include="PlantSystem\Plant.cs" />
     <Compile Include="PlantSystem\PlantBowl.cs" />
@@ -1918,7 +1918,7 @@
     <Compile Include="Gumps\Properties\SetPoint3DGump.cs" />
     <Compile Include="Gumps\Properties\SetTimeSpanGump.cs" />
     <Compile Include="Gumps\ReclaimVendorGump.cs" />
-    <Compile Include="Gumps\ResurrectGump.cs" />
+    <Compile Include="Notoriety\ResurrectGump.cs" />
     <Compile Include="Gumps\RewardGump.cs" />
     <Compile Include="Items\Runebooks\RunebookGump.cs" />
     <Compile Include="Gumps\SetSecureLevelGump.cs" />
@@ -2965,7 +2965,6 @@
     <Compile Include="Mobiles\Townfolk\Healers\EvilWanderingHealer.cs" />
     <Compile Include="Mobiles\Townfolk\Healers\FortuneTeller.cs" />
     <Compile Include="Mobiles\Townfolk\Healers\Healer.cs" />
-    <Compile Include="Mobiles\Townfolk\Healers\PricedHealer.cs" />
     <Compile Include="Mobiles\Townfolk\Healers\WanderingHealer.cs" />
     <Compile Include="Mobiles\_OLD\Monsters\Ants\AntLion.cs" />
     <Compile Include="Mobiles\_OLD\Monsters\Ants\BlackSolenInfiltratorQueen.cs" />
