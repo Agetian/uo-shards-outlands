@@ -25,6 +25,8 @@ namespace Server.Gumps
         private bool m_FromChaos = false;
         private double m_HitsScalar;
 
+        public int WhiteTextHue = 2499;
+
         public ResurrectGump(Mobile owner): this(owner, owner, ResurrectMessage.Generic, false)
         {
         }
@@ -54,8 +56,7 @@ namespace Server.Gumps
         }
 
         public ResurrectGump(Mobile owner, Mobile healer, ResurrectMessage msg, bool fromSacrifice, double hitsScalar): base(100, 0)
-        {
-
+        {            
             if (msg == 0)
                 m_FromChaos = true;
 
@@ -68,19 +69,37 @@ namespace Server.Gumps
             m_FromSacrifice = fromSacrifice;
             m_HitsScalar = hitsScalar;
 
-            AddPage(0);
+            #region Images 
 
-            AddBackground(0, 0, 400, 350, 2600);
+            AddImage(5, 4, 103, 2499);
+            AddImage(5, 64, 103, 2499);
+            AddImage(140, 4, 103, 2499);
+            AddImage(140, 64, 103, 2499);
+            AddImage(140, 144, 103, 2499);
+            AddImage(5, 144, 103, 2499);
+            AddImage(15, 106, 3604, 2052);
+            AddImage(143, 106, 3604, 2052);
+            AddImage(15, 14, 3604, 2052);
+            AddImage(143, 14, 3604, 2052);           
+            AddItem(102, 121, 3816);
+            AddItem(124, 136, 3808);
+            AddItem(95, 103, 4455);
+            AddItem(101, 145, 2322);
+            AddItem(141, 139, 2322);
+            AddItem(131, 121, 7681, 2415);
+            AddItem(76, 145, 3898);
+            AddItem(98, 156, 2581);
 
-            AddHtmlLocalized(0, 20, 400, 35, 1011022, false, false); // <center>Resurrection</center>            
-            AddHtml(50, 55, 300, 140, /*1011023 + */"It is possible for you to be resurrected here by this healer. Do you wish to try?<br>CONTINUE - You chose to try to come back to life now.<br>CANCEL - You prefer to remain a ghost for now.", true, true);
-            //AddHtmlLocalized(50, 55, 300, 140, 1011023 + (int)msg, true, true);
+            #endregion
 
-            AddButton(65, 227, 4005, 4007, 1, GumpButtonType.Reply, 0);
-            AddHtmlLocalized(100, 230, 110, 35, 1011011, false, false); // CONTINUE          
+            AddLabel(99, 20, 2603, "Resurrection");
+            AddLabel(25, 50, WhiteTextHue, "Do you wish to resurrect at this time?");
 
-            AddButton(200, 227, 4005, 4007, 0, GumpButtonType.Reply, 0);
-            AddHtmlLocalized(235, 230, 110, 35, 1011012, false, false); // CANCEL              
+            AddLabel(77, 203, 63, "Accept");
+            AddButton(42, 198, 9721, 9724, 1, GumpButtonType.Reply, 0);
+
+            AddLabel(200, 203, 2101, "Decline");      
+            AddButton(165, 199, 9721, 9724, 2, GumpButtonType.Reply, 0);                  
         }
         
         public override void OnResponse(NetState state, RelayInfo info)
@@ -89,49 +108,15 @@ namespace Server.Gumps
 
             from.CloseGump(typeof(ResurrectGump));
 
-            if (info.ButtonID == 1 || info.ButtonID == 2)
+            if (info.ButtonID == 1)
             {
                 if (from.Map == null || !from.Map.CanFit(from.Location, 16, false, false))
                 {
                     from.SendLocalizedMessage(502391); // Thou can not be resurrected there!
                     return;
-                }
+                }                
 
-                if (m_Price > 0)
-                {
-                    if (info.IsSwitched(1))
-                    {
-                        if (Banker.Withdraw(from, m_Price))
-                        {
-                            from.SendLocalizedMessage(1060398, m_Price.ToString()); // ~1_AMOUNT~ gold has been withdrawn from your bank box.
-                            from.SendLocalizedMessage(1060022, Banker.GetBalance(from).ToString()); // You have ~1_AMOUNT~ gold in cash remaining in your bank box.
-                        }
-
-                        else
-                        {
-                            from.SendLocalizedMessage(1060020); // Unfortunately, you do not have enough cash in your bank to cover the cost of the healing.
-                            return;
-                        }
-                    }
-
-                    else
-                    {
-                        from.SendLocalizedMessage(1060019); // You decide against paying the healer, and thus remain dead.
-                        return;
-                    }
-                }
-
-                from.PlaySound(0x214);
-                from.FixedEffect(0x376A, 10, 16);
-
-                from.Resurrect();
-
-                if (from.Fame > 0)
-                {
-                    int amount = from.Fame / 10;
-
-                    Misc.FameKarmaTitles.AwardFame(from, -amount, true);
-                }
+                from.Resurrect();                
 
                 if (from.Alive && m_HitsScalar > 0)
                     from.Hits = (int)(from.HitsMax * m_HitsScalar);

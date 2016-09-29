@@ -21,6 +21,8 @@ namespace Server.Gumps
         private Point3D m_Location; 
         private Map m_Map;
 
+        public int WhiteTextHue = 2499;
+
         public class GumpTimer : Timer
         {
             private int m_Idx;
@@ -50,7 +52,7 @@ namespace Server.Gumps
         {
         }
 
-        private ReportMurdererGump(Mobile victim, List<Mobile> killers, DateTime eventTime, Point3D location, Map map, int idx): base(0, 0)
+        private ReportMurdererGump(Mobile victim, List<Mobile> killers, DateTime eventTime, Point3D location, Map map, int idx): base(200, 100)
         {
             m_Victim = victim;           
             m_Killers = killers;
@@ -65,31 +67,44 @@ namespace Server.Gumps
 
         private void BuildGump()
         {
-            AddBackground(265, 205, 320, 290, 5054);
             Closable = false;
             Resizable = false;
 
-            AddPage(0);
+            #region Images 
 
-            AddImageTiled(225, 175, 50, 45, 0xCE);   //Top left corner
-            AddImageTiled(267, 175, 315, 44, 0xC9);  //Top bar
-            AddImageTiled(582, 175, 43, 45, 0xCF);   //Top right corner
-            AddImageTiled(225, 219, 44, 270, 0xCA);  //Left side
-            AddImageTiled(582, 219, 44, 270, 0xCB);  //Right side
-            AddImageTiled(225, 489, 44, 43, 0xCC);   //Lower left corner
-            AddImageTiled(267, 489, 315, 43, 0xE9);  //Lower Bar
-            AddImageTiled(582, 489, 43, 43, 0xCD);   //Lower right corner
+            AddImage(5, 4, 103, 2075);
+            AddImage(5, 64, 103, 2075);
+            AddImage(140, 4, 103, 2075);
+            AddImage(140, 64, 103, 2075);
+            AddImage(140, 144, 103, 2075);
+            AddImage(5, 144, 103, 2075);
+            AddImage(15, 106, 3604, 2052);
+            AddImage(143, 106, 3604, 2052);
+            AddImage(15, 14, 3604, 2052);
+            AddImage(143, 14, 3604, 2052);            
+            AddItem(124, 137, 2942);
+            AddItem(100, 121, 2943);
+            AddItem(112, 127, 5359);
+            AddItem(126, 120, 4031);
+            AddItem(126, 146, 5357);
+            AddItem(130, 148, 5357);
 
-            AddPage(1);
+            #endregion
 
-            AddHtml(260, 234, 300, 140, ((Mobile)m_Killers[m_Idx]).Name, false, false); // Player's Name
-            AddHtmlLocalized(260, 254, 300, 140, 1049066, false, false); // Would you like to report...
+            AddLabel(96, 20, 2117, "Report Murder");
 
-            AddButton(260, 300, 0xFA5, 0xFA7, 1, GumpButtonType.Reply, 0);
-            AddHtmlLocalized(300, 300, 300, 50, 1046362, false, false); // Yes
+            AddLabel(62, 40, WhiteTextHue, "Do you wish to report the");
+            AddLabel(52, 60, WhiteTextHue, "following player for murder?");
 
-            AddButton(360, 300, 0xFA5, 0xFA7, 2, GumpButtonType.Reply, 0);
-            AddHtmlLocalized(400, 300, 300, 50, 1046363, false, false); // No      
+            string killerName = ((Mobile)m_Killers[m_Idx]).Name;
+
+            AddLabel(Utility.CenteredTextOffset(140, killerName), 90, 2599, killerName);
+
+            AddLabel(77, 203, 63, "Accept");
+            AddButton(42, 198, 9721, 9724, 1, GumpButtonType.Reply, 0);
+
+            AddLabel(200, 203, 2101, "Decline");
+            AddButton(165, 199, 9721, 9724, 2, GumpButtonType.Reply, 0);    
         }
 
         public override void OnResponse(NetState state, RelayInfo info)

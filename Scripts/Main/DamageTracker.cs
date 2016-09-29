@@ -16,7 +16,7 @@ namespace Server
             SpellDamage,
             PoisonDamage,
             FollowerDamage,
-            ProvocationDamage,            
+            ProvocationDamage,
             DamageTaken,
             FollowerDamageTaken,
             HealingDealt
@@ -44,11 +44,11 @@ namespace Server
         public bool AddProvocationDamageToTotal = true;
         public bool AddFollowerDamageToTotal = true;
 
-        public TimeSpan RunningTime = TimeSpan.FromSeconds(0);
-        
-        public bool AutoStopEnabled = false;
-        public TimeSpan AutoStopDuration = AutoStopMinimumDuration;
-        public static TimeSpan AutoStopMinimumDuration = TimeSpan.FromSeconds(60);
+        public TimeSpan TimerAmountElapsed = TimeSpan.FromSeconds(0);
+        public bool TimerEnabled = true;
+        public TimeSpan TimerDuration = TimerDefaultDuration;
+        public static TimeSpan TimerDefaultDuration = TimeSpan.FromMinutes(1);
+        public static TimeSpan TimerMinimumDuration = TimeSpan.FromSeconds(5);
 
         public static TimeSpan TickSpeed = TimeSpan.FromSeconds(1);
 
@@ -56,25 +56,25 @@ namespace Server
         {
             m_Player = player;
         }
-        
+
         public void ClearResults()
         {
-            RunningTime = TimeSpan.FromSeconds(0);
-
             MeleeDamage = 0;
             SpellDamage = 0;
             FollowerDamage = 0;
             ProvocationDamage = 0;
             PoisonDamage = 0;
+
             DamageTaken = 0;
             FollowerDamageTaken = 0;
+
             HealingDealt = 0;
         }
 
         public static int AdjustDisplayedDamage(Mobile from, Mobile target, int amount)
         {
             BaseCreature bc_Target = target as BaseCreature;
-            PlayerMobile pm_Target = target as PlayerMobile;            
+            PlayerMobile pm_Target = target as PlayerMobile;
 
             double displayedDamage = amount;
 
@@ -170,16 +170,16 @@ namespace Server
                         player.SendMessage(player.PlayerMeleeDamageTextHue, "You attack " + target.Name + " for " + amount.ToString() + " damage.");
 
                     if (player.m_ShowMeleeDamage == DamageDisplayMode.PrivateOverhead)
-                        target.PrivateOverheadMessage(MessageType.Regular, player.PlayerMeleeDamageTextHue, false, "-" + amount.ToString(), player.NetState);                    
-                break;
+                        target.PrivateOverheadMessage(MessageType.Regular, player.PlayerMeleeDamageTextHue, false, "-" + amount.ToString(), player.NetState);
+                    break;
 
-                case DamageType.SpellDamage: 
+                case DamageType.SpellDamage:
                     if (player.m_ShowSpellDamage == DamageDisplayMode.PrivateMessage)
                         player.SendMessage(player.PlayerSpellDamageTextHue, "Your spell hits " + target.Name + " for " + amount.ToString() + " damage.");
 
                     if (player.m_ShowSpellDamage == DamageDisplayMode.PrivateOverhead)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerSpellDamageTextHue, false, "-" + amount.ToString(), player.NetState);
-                break;
+                    break;
 
                 case DamageType.FollowerDamage:
                     if (player.m_ShowFollowerDamage == DamageDisplayMode.PrivateMessage)
@@ -187,7 +187,7 @@ namespace Server
 
                     if (player.m_ShowFollowerDamage == DamageDisplayMode.PrivateOverhead)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerFollowerDamageTextHue, false, "-" + amount.ToString(), player.NetState);
-                break;
+                    break;
 
                 case DamageType.ProvocationDamage:
                     if (player.m_ShowProvocationDamage == DamageDisplayMode.PrivateMessage)
@@ -195,15 +195,15 @@ namespace Server
 
                     if (player.m_ShowProvocationDamage == DamageDisplayMode.PrivateOverhead)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerProvocationDamageTextHue, false, "-" + amount.ToString(), player.NetState);
-                break;
+                    break;
 
-                case DamageType.PoisonDamage: 
+                case DamageType.PoisonDamage:
                     if (player.m_ShowPoisonDamage == DamageDisplayMode.PrivateMessage)
                         player.SendMessage(player.PlayerPoisonDamageTextHue, "You inflict " + amount.ToString() + " poison damage on " + target.Name + ".");
 
                     if (player.m_ShowPoisonDamage == DamageDisplayMode.PrivateOverhead)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerPoisonDamageTextHue, false, "-" + amount.ToString(), player.NetState);
-                break;
+                    break;
 
                 case DamageType.DamageTaken:
                     if (player.m_ShowDamageTaken == DamageDisplayMode.PrivateMessage)
@@ -211,7 +211,7 @@ namespace Server
 
                     if (player.m_ShowDamageTaken == DamageDisplayMode.PrivateOverhead)
                         player.PrivateOverheadMessage(MessageType.Regular, player.PlayerDamageTakenTextHue, false, "-" + amount.ToString(), player.NetState);
-                break;
+                    break;
 
                 case DamageType.FollowerDamageTaken:
                     if (player.m_ShowFollowerDamageTaken == DamageDisplayMode.PrivateMessage)
@@ -219,9 +219,9 @@ namespace Server
 
                     if (player.m_ShowFollowerDamageTaken == DamageDisplayMode.PrivateOverhead && player.NetState != null)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerFollowerDamageTakenTextHue, false, "-" + amount.ToString(), player.NetState);
-                break;
+                    break;
             }
-            
+
             if (!player.m_DamageTracker.m_Running)
                 return;
 
@@ -255,7 +255,7 @@ namespace Server
             m_Running = false;
 
             if (m_Timer != null)
-            {                
+            {
                 m_Timer.Stop();
                 m_Timer = null;
             }
@@ -311,13 +311,13 @@ namespace Server
                     Stop();
                     return;
                 }
-                
-                m_DamageTracker.RunningTime += DamageTracker.TickSpeed;
 
-                if (m_DamageTracker.AutoStopEnabled)
+                m_DamageTracker.TimerAmountElapsed += DamageTracker.TickSpeed;
+
+                if (m_DamageTracker.TimerEnabled)
                 {
-                    if (m_DamageTracker.RunningTime >= m_DamageTracker.AutoStopDuration)
-                        m_DamageTracker.StopTimer();         
+                    if (m_DamageTracker.TimerAmountElapsed >= m_DamageTracker.TimerDuration)
+                        m_DamageTracker.StopTimer();
                 }
 
                 m_DamageTracker.RefreshGump();
@@ -328,6 +328,8 @@ namespace Server
     public class DamageTrackerGump : Gump
     {
         public PlayerMobile m_Player;
+
+        public int WhiteTextHue = 2499;
 
         public DamageTrackerGump(PlayerMobile player): base(10, 10)
         {
@@ -361,145 +363,195 @@ namespace Server
             if (player.m_DamageTracker.AddPoisonDamageToTotal)
                 totalDamage += player.m_DamageTracker.PoisonDamage;
 
-            string timeElapsed = Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + m_Player.m_DamageTracker.RunningTime, true, false, true, true, true);
+            string timerDuration = Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + m_Player.m_DamageTracker.TimerDuration, true, true, true, true, true);
+            string timerAmountElapsed = Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + m_Player.m_DamageTracker.TimerAmountElapsed, true, true, true, true, true);
 
-            if (m_Player.m_DamageTracker.RunningTime == TimeSpan.FromSeconds(0))
-                timeElapsed = "0s";
+            if (m_Player.m_DamageTracker.TimerAmountElapsed == TimeSpan.FromSeconds(0))
+                timerAmountElapsed = "0s";           
 
-            string autostopHours = m_Player.m_DamageTracker.AutoStopDuration.Hours.ToString() + "h";
-            string autostopMinutes = m_Player.m_DamageTracker.AutoStopDuration.Minutes.ToString() + "m";
-            string autostopSeconds = m_Player.m_DamageTracker.AutoStopDuration.Seconds.ToString() + "s";
-            
             if (player.m_DamageTracker.m_Collapsed)
             {
-                AddAlphaRegion(9, 7, 150, 90);
+                #region Images
 
-                AddButton(16, 18, 9900, 9900, 1, GumpButtonType.Reply, 0); //Expand Gump    
+                AddImage(38, 17, 103, 2499);
+                AddImage(181, 17, 103, 2499);
+                AddImage(48, 25, 2081, 2499);
+                AddImage(48, 37, 2081, 2499);
+                AddItem(43, 46, 6160);
 
-                AddLabel(42, 17, 2577, "Total Damage");
-                AddLabel(130, 17, textHue, Utility.CreateCurrencyString(totalDamage));
+                #endregion
 
-                AddItem(39, 38, 6160); //Hour Glass
+                AddButton(9, 16, 9906, 9906, 1, GumpButtonType.Reply, 0); //Expand Gump    
 
-                AddButton(46, 69, 4017, 4019, 2, GumpButtonType.Reply, 0); //Reset
+                AddLabel(69, 30, 149, "Time Elapsed");
+                if (m_Player.m_DamageTracker.TimerAmountElapsed >= m_Player.m_DamageTracker.TimerDuration && !m_Player.m_DamageTracker.m_Running)
+                    AddLabel(77, 50, 2101, timerAmountElapsed);
+                else
+                    AddLabel(77, 50, 63, timerAmountElapsed);             
 
-                //Running
-                if (m_Player.m_DamageTracker.m_Running)
+                AddLabel(187, 30, 2577, "Dealt");
+                AddLabel(229, 30, WhiteTextHue, Utility.CreateCurrencyString(totalDamage));
+
+                AddLabel(184, 50, 2603, "Taken");
+                AddLabel(229, 50, WhiteTextHue, Utility.CreateCurrencyString(player.m_DamageTracker.DamageTaken));
+
+                AddLabel(57, 79, 1256, "Reset Timer");
+                AddButton(79, 101, 4020, 4022, 2, GumpButtonType.Reply, 0);
+
+                AddLabel(151, 79, 53, "Clear Damage");
+                AddButton(176, 98, 9721, 9724, 3, GumpButtonType.Reply, 0);
+
+                if (player.m_DamageTracker.m_Running)
                 {
-                    AddLabel(72, 43, 63, timeElapsed);
-                    AddButton(88, 69, 4020, 4022, 3, GumpButtonType.Reply, 0); //Pause
+                    AddLabel(253, 79, 2599, "Pause");
+                    AddButton(257, 101, 4017, 4019, 4, GumpButtonType.Reply, 0);
                 }
 
-                //Paused
                 else
                 {
-                    AddLabel(72, 43, 2213, timeElapsed);
-                    AddButton(88, 69, 4005, 4007, 3, GumpButtonType.Reply, 0); //Start                   
-                }
+                    AddLabel(253, 79, 2599, "Start");
+                    AddButton(257, 101, 4005, 4007, 4, GumpButtonType.Reply, 0);
+                }   
             }
 
             else
             {
-                AddAlphaRegion(3, 9, 169, 376); 
+                #region Images
 
-                //Collapse
-                AddButton(16, 20, 9906, 9906, 1, GumpButtonType.Reply, 0); //Collapse Gump
+                AddImage(38, 17, 103, 2499);
+                AddImage(181, 17, 103, 2499);
+                AddImage(181, 110, 103, 2499);
+                AddImage(38, 110, 103, 2499);
+                AddImage(181, 206, 103, 2499);
+                AddImage(39, 206, 103, 2499);
+                AddImage(181, 306, 103, 2499);
+                AddImage(38, 306, 103, 2499);
+                AddImage(48, 25, 2081, 2499);
+                AddImage(48, 94, 2081, 2499);
+                AddImage(47, 160, 2081, 2499);
+                AddImage(47, 225, 2081, 2499);
+                AddImage(47, 293, 2081, 2499);
+                AddImage(48, 326, 2081, 2499);                
 
-                //Damage Dealt
-                AddImage(40, 17, 2445, 2425);         
-                AddLabel(52, 18, textHue, "Damage Dealt");
-                AddLabel(49, 45, 34, "Melee");
+                AddImage(51, 165, 3001, 1105);
+                AddImage(65, 165, 3001, 1105);
+                AddImage(51, 238, 3001, 1105);
+                AddImage(65, 238, 3001, 1105);
+                AddImage(51, 333, 3001, 1105);
+                AddImage(65, 333, 3001, 1105);
+
+                #endregion
+
+                AddButton(36, 14, 2094, 2095, 5, GumpButtonType.Reply, 0);
+                AddLabel(36, 2, 149, "Guide");
+
+                AddButton(9, 16, 9900, 9900, 1, GumpButtonType.Reply, 0); //Collapse Gump
+
+                //------------
+
+                AddLabel(137, 25, 149, "Damage Dealt");               
+
+                AddLabel(107, 45, 34, "Melee");
                 if (player.m_DamageTracker.AddMeleeDamageToTotal)
-                    AddButton(91, 45, 211, 210, 20, GumpButtonType.Reply, 0);
+                    AddButton(149, 45, 211, 210, 6, GumpButtonType.Reply, 0);
                 else
-                    AddButton(91, 45, 210, 211, 20, GumpButtonType.Reply, 0);
-                AddLabel(117, 45, textHue, Utility.CreateCurrencyString(player.m_DamageTracker.MeleeDamage));
+                    AddButton(149, 45, 210, 211, 6, GumpButtonType.Reply, 0);
+                AddLabel(175, 45, WhiteTextHue, Utility.CreateCurrencyString(player.m_DamageTracker.MeleeDamage));
 
-                AddLabel(52, 65, 117, "Spell");
+                AddLabel(110, 65, 117, "Spell");
                 if (player.m_DamageTracker.AddSpellDamageToTotal)
-                    AddButton(91, 65, 211, 210, 21, GumpButtonType.Reply, 0);
+                    AddButton(149, 65, 211, 210, 7, GumpButtonType.Reply, 0);
                 else
-                    AddButton(91, 65, 210, 211, 21, GumpButtonType.Reply, 0);
-                AddLabel(117, 65, textHue, Utility.CreateCurrencyString(player.m_DamageTracker.SpellDamage));
+                    AddButton(149, 65, 210, 211, 7, GumpButtonType.Reply, 0);
+                AddLabel(175, 65, WhiteTextHue, Utility.CreateCurrencyString(player.m_DamageTracker.SpellDamage));
 
-                AddLabel(42, 85, 63, "Poison");
+                AddLabel(100, 85, 63, "Poison");
                 if (player.m_DamageTracker.AddPoisonDamageToTotal)
-                    AddButton(91, 85, 211, 210, 22, GumpButtonType.Reply, 0);
+                    AddButton(149, 85, 211, 210, 8, GumpButtonType.Reply, 0);
                 else
-                    AddButton(91, 85, 210, 211, 22, GumpButtonType.Reply, 0);
-                AddLabel(117, 85, textHue, Utility.CreateCurrencyString(player.m_DamageTracker.PoisonDamage));
+                    AddButton(149, 85, 210, 211, 8, GumpButtonType.Reply, 0);
+                AddLabel(175, 85, WhiteTextHue, Utility.CreateCurrencyString(player.m_DamageTracker.PoisonDamage));
 
-                AddLabel(11, 105, 2417, "Provocation");
+                AddLabel(65, 105, 2417, "Provocation");
                 if (player.m_DamageTracker.AddProvocationDamageToTotal)
-                    AddButton(91, 105, 211, 210, 23, GumpButtonType.Reply, 0);
+                    AddButton(149, 105, 211, 210, 9, GumpButtonType.Reply, 0);
                 else
-                    AddButton(91, 105, 210, 211, 23, GumpButtonType.Reply, 0);
+                    AddButton(149, 105, 210, 211, 9, GumpButtonType.Reply, 0);
+                AddLabel(175, 105, WhiteTextHue, Utility.CreateCurrencyString(player.m_DamageTracker.ProvocationDamage));
 
-                AddLabel(117, 105, textHue, Utility.CreateCurrencyString(player.m_DamageTracker.ProvocationDamage));
-
-                AddLabel(26, 125, 89, "Followers");
+                AddLabel(81, 125, 89, "Followers");
                 if (player.m_DamageTracker.AddFollowerDamageToTotal)
-                    AddButton(91, 125, 211, 210, 24, GumpButtonType.Reply, 0);
+                    AddButton(149, 124, 211, 210, 10, GumpButtonType.Reply, 0);
                 else
-                    AddButton(91, 125, 210, 211, 24, GumpButtonType.Reply, 0);
-                AddLabel(117, 125, textHue, Utility.CreateCurrencyString(player.m_DamageTracker.FollowerDamage));
-               
-                AddLabel(48, 144, 2577, "Total");
-                AddLabel(117, 144, textHue, Utility.CreateCurrencyString(totalDamage));
+                    AddButton(149, 124, 210, 211, 10, GumpButtonType.Reply, 0);
+                AddLabel(175, 125, WhiteTextHue, Utility.CreateCurrencyString(player.m_DamageTracker.FollowerDamage));
 
-                 //Damage Taken
-                AddImage(40, 169, 2445, 2425);
-                AddLabel(50, 171, textHue, "Damage Taken");
-                AddLabel(82, 198, 2603, "Self");
-                AddLabel(117, 198, textHue, Utility.CreateCurrencyString(player.m_DamageTracker.DamageTaken));
+                AddLabel(106, 145, 2577, "Total");
+                AddLabel(175, 145, WhiteTextHue, Utility.CreateCurrencyString(totalDamage));
 
-                AddLabel(52, 219, 2562, "Followers");
-                AddLabel(117, 219, textHue, Utility.CreateCurrencyString(player.m_DamageTracker.FollowerDamageTaken));
+                //----------
 
-                //Stop Timer At
-                AddImage(40, 243, 2445, 2425);
-                AddLabel(49, 245, textHue, "Stop Timer At");
-                if (m_Player.m_DamageTracker.AutoStopEnabled)
-                    AddButton(18, 283, 2154, 2151, 4, GumpButtonType.Reply, 0);
+                AddLabel(136, 170, 149, "Damage Taken");
+
+                AddLabel(140, 195, 2603, "Self");
+                AddLabel(175, 195, WhiteTextHue, Utility.CreateCurrencyString(player.m_DamageTracker.DamageTaken));
+
+                AddLabel(106, 215, 2550, "Followers");
+                AddLabel(175, 215, WhiteTextHue, Utility.CreateCurrencyString(player.m_DamageTracker.FollowerDamageTaken));
+
+                //---------
+
+                AddLabel(136, 243, 149, "Damage Timer");
+
+                AddLabel(80, 263, 2599, "Force Pause After Duration");
+                if (player.m_DamageTracker.TimerEnabled)
+                    AddButton(265, 264, 211, 210, 17, GumpButtonType.Reply, 0);
                 else
-                    AddButton(18, 283, 2151, 2154, 4, GumpButtonType.Reply, 0);
+                    AddButton(265, 264, 210, 211, 17, GumpButtonType.Reply, 0);
 
-                //Hours
-                AddButton(58, 273, 5600, 5600, 5, GumpButtonType.Reply, 0);
-                AddLabel(Utility.CenteredTextOffset(65, autostopHours), 288, textHue, autostopHours);
-                AddButton(58, 308, 5606, 5606, 6, GumpButtonType.Reply, 0);
+                AddLabel(107, 286, 2599, "Timer Duration");
+                AddLabel(211, 286, WhiteTextHue, timerDuration);
 
-                AddButton(91, 273, 5600, 5600, 7, GumpButtonType.Reply, 0);
-                AddLabel(Utility.CenteredTextOffset(98, autostopMinutes), 288, textHue, autostopMinutes);
-                AddButton(91, 308, 5606, 5606, 8, GumpButtonType.Reply, 0);
+                AddButton(70, 314, 2223, 2223, 11, GumpButtonType.Reply, 0);
+                AddLabel(94, 310, WhiteTextHue, "Hour");
+                AddButton(127, 314, 2224, 2224, 12, GumpButtonType.Reply, 0);
 
-                AddButton(122, 273, 5600, 5600, 9, GumpButtonType.Reply, 0);
-                AddLabel(Utility.CenteredTextOffset(130, autostopSeconds), 288, textHue, autostopSeconds);
-                AddButton(122, 308, 5606, 5606, 10, GumpButtonType.Reply, 0);                                
+                AddButton(154, 314, 2223, 2223, 13, GumpButtonType.Reply, 0);
+                AddLabel(177, 310, WhiteTextHue, "Min");
+                AddButton(202, 314, 2224, 2224, 14, GumpButtonType.Reply, 0);
 
-                //Reset
-                AddLabel(8, 330, 2116, "Reset");
-                AddButton(50, 330, 4017, 4019, 2, GumpButtonType.Reply, 0);                
+                AddButton(228, 314, 2223, 2223, 15, GumpButtonType.Reply, 0);
+                AddLabel(252, 310, WhiteTextHue, "Sec");
+                AddButton(278, 314, 2224, 2224, 16, GumpButtonType.Reply, 0);
 
-                //Running
-                if (m_Player.m_DamageTracker.m_Running)
+                //-------------
+
+                AddLabel(96, 341, 149, "Time Elapsed");
+                AddItem(165, 338, 6160);
+                if (m_Player.m_DamageTracker.TimerAmountElapsed >= m_Player.m_DamageTracker.TimerDuration && !m_Player.m_DamageTracker.m_Running)
+                    AddLabel(200, 343, 2101, timerAmountElapsed);
+                else
+                    AddLabel(200, 343, 63, timerAmountElapsed);
+
+                //----------
+
+                AddLabel(58, 369, 1256, "Reset Timer");
+                AddButton(81, 391, 4020, 4022, 2, GumpButtonType.Reply, 0);
+
+                AddLabel(148, 369, 53, "Clear Damage");
+                AddButton(172, 388, 9721, 9724, 3, GumpButtonType.Reply, 0);
+
+                if (player.m_DamageTracker.m_Running)
                 {
-                    AddLabel(77, 361, 63, timeElapsed); //Time Elapsed
-
-                    AddLabel(93, 331, 2599, "Pause");
-                    AddButton(134, 329, 4020, 4022, 3, GumpButtonType.Reply, 0);
+                    AddLabel(251, 369, 2599, "Pause");
+                    AddButton(256, 391, 4017, 4019, 4, GumpButtonType.Reply, 0);
                 }
 
-                //Paused
                 else
                 {
-                    AddLabel(77, 361, 2213, timeElapsed); //Time Elapsed
-
-                    AddLabel(93, 331, 2599, "Start");
-                    AddButton(134, 329, 4005, 4007, 3, GumpButtonType.Reply, 0);
+                    AddLabel(251, 369, 2599, "Start");
+                    AddButton(256, 391, 4005, 4007, 4, GumpButtonType.Reply, 0);
                 }
-
-                AddItem(44, 356, 6160); //Hourglass
             }
         }
 
@@ -521,15 +573,22 @@ namespace Server
                         closeGump = false;
                     break;
 
-                    //Clear Results
+                    //Reset Timer
                     case 2:
+                        m_Player.m_DamageTracker.TimerAmountElapsed = TimeSpan.FromSeconds(0);
+
+                        closeGump = false;
+                    break;
+
+                    //Reset Damage
+                    case 3:
                         m_Player.m_DamageTracker.ClearResults();
 
                         closeGump = false;
                     break;
 
-                    //Start and Stop
-                    case 3:
+                    //Pause + Start
+                    case 4:
                         if (m_Player.m_DamageTracker.m_Running)
                             m_Player.m_DamageTracker.StopTimer();
 
@@ -543,7 +602,6 @@ namespace Server
 
             else
             {
-
                 switch (info.ButtonID)
                 {
                     //Collapse
@@ -553,108 +611,38 @@ namespace Server
                         closeGump = false;
                     break;
 
-                    //Clear Results
+                    //Reset Timer
                     case 2:
-                        m_Player.m_DamageTracker.ClearResults();
-                        m_Player.SendMessage("Damage Tracker results and time elapsed reset.");
+                        m_Player.m_DamageTracker.TimerAmountElapsed = TimeSpan.FromSeconds(0);                       
 
                         closeGump = false;
                     break;
 
-                    //Start and Stop
+                    //Reset Damage
                     case 3:
-                        if (m_Player.m_DamageTracker.m_Running)
-                        {
-                            m_Player.m_DamageTracker.StopTimer();
-                            m_Player.SendMessage("Damage Tracker paused.");
-                        }
-
-                        else
-                        {
-                            m_Player.m_DamageTracker.StartTimer();
-                            m_Player.SendMessage("Damage Tracker started.");
-                        }
+                        m_Player.m_DamageTracker.ClearResults();                        
 
                         closeGump = false;
                     break;
 
-                    //Auto-Stop                    
+                    //Pause + Start
                     case 4:
-                        m_Player.m_DamageTracker.AutoStopEnabled = !m_Player.m_DamageTracker.AutoStopEnabled;
-
-                        string autoStopTime = Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + m_Player.m_DamageTracker.AutoStopDuration, false, false, true, true, true);
-
-                        if (m_Player.m_DamageTracker.AutoStopEnabled)
-                            m_Player.SendMessage("Damage Tracker will now automatically stop after " + autoStopTime + " has elapsed.");
+                        if (m_Player.m_DamageTracker.m_Running)                        
+                            m_Player.m_DamageTracker.StopTimer();                        
 
                         else
-                            m_Player.SendMessage("Damage Tracker will now run freely.");
+                            m_Player.m_DamageTracker.StartTimer();
 
                         closeGump = false;
                     break;
 
-                    //Auto-Stop: Add 1 Hour                   
+                    //Guide
                     case 5:
-                        m_Player.m_DamageTracker.AutoStopDuration = m_Player.m_DamageTracker.AutoStopDuration + TimeSpan.FromMinutes(60);
-
-                        closeGump = false;
-                    break;
-
-                    //Auto-Stop: Remove 1 Hour                   
-                    case 6:
-                        if (m_Player.m_DamageTracker.AutoStopDuration.Hours > 0)
-                        {
-                            m_Player.m_DamageTracker.AutoStopDuration = m_Player.m_DamageTracker.AutoStopDuration - TimeSpan.FromMinutes(60);
-
-                            if (m_Player.m_DamageTracker.AutoStopDuration < DamageTracker.AutoStopMinimumDuration)
-                                m_Player.m_DamageTracker.AutoStopDuration = DamageTracker.AutoStopMinimumDuration;
-                        }
-
-                        closeGump = false;
-                    break;
-
-                    //Auto-Stop: Add 1 Minute                 
-                    case 7:
-                        m_Player.m_DamageTracker.AutoStopDuration = m_Player.m_DamageTracker.AutoStopDuration + TimeSpan.FromMinutes(1);
-
-                        closeGump = false;
-                    break;
-
-                    //Auto-Stop: Remove 1 Minute                   
-                    case 8:
-                        if (m_Player.m_DamageTracker.AutoStopDuration.Minutes > 0 || m_Player.m_DamageTracker.AutoStopDuration.Hours > 0)
-                        {
-                            m_Player.m_DamageTracker.AutoStopDuration = m_Player.m_DamageTracker.AutoStopDuration - TimeSpan.FromMinutes(1);
-
-                            if (m_Player.m_DamageTracker.AutoStopDuration < DamageTracker.AutoStopMinimumDuration)
-                                m_Player.m_DamageTracker.AutoStopDuration = DamageTracker.AutoStopMinimumDuration;
-                        }
-
-                        closeGump = false;
-                    break;
-
-                    //Auto-Stop: Add 5 Seconds                 
-                    case 9:
-                        m_Player.m_DamageTracker.AutoStopDuration = m_Player.m_DamageTracker.AutoStopDuration + TimeSpan.FromSeconds(5);
-
-                        closeGump = false;
-                    break;
-
-                    //Auto-Stop: Remove 5 Seconds                   
-                    case 10:
-                        if (m_Player.m_DamageTracker.AutoStopDuration.Seconds > 5 || m_Player.m_DamageTracker.AutoStopDuration.Minutes > 0 || m_Player.m_DamageTracker.AutoStopDuration.Hours > 0)
-                        {
-                            m_Player.m_DamageTracker.AutoStopDuration = m_Player.m_DamageTracker.AutoStopDuration - TimeSpan.FromSeconds(5);
-
-                            if (m_Player.m_DamageTracker.AutoStopDuration < DamageTracker.AutoStopMinimumDuration)
-                                m_Player.m_DamageTracker.AutoStopDuration = DamageTracker.AutoStopMinimumDuration;                          
-                        }
-
                         closeGump = false;
                     break;
 
                     //Add to Total: Melee                    
-                    case 20:
+                    case 6:
                         m_Player.m_DamageTracker.AddMeleeDamageToTotal = !m_Player.m_DamageTracker.AddMeleeDamageToTotal;
 
                         if (m_Player.m_DamageTracker.AddMeleeDamageToTotal)
@@ -667,7 +655,7 @@ namespace Server
                     break;
 
                     //Add to Total: Spell
-                    case 21:
+                        case 7:
                         m_Player.m_DamageTracker.AddSpellDamageToTotal = !m_Player.m_DamageTracker.AddSpellDamageToTotal;
 
                         if (m_Player.m_DamageTracker.AddSpellDamageToTotal)
@@ -680,7 +668,7 @@ namespace Server
                     break;
 
                     //Add to Total: Poison
-                    case 22:
+                    case 8:
                         m_Player.m_DamageTracker.AddPoisonDamageToTotal = !m_Player.m_DamageTracker.AddPoisonDamageToTotal;
 
                         if (m_Player.m_DamageTracker.AddPoisonDamageToTotal)
@@ -693,7 +681,7 @@ namespace Server
                     break;
 
                     //Add to Total: Provocation
-                    case 23:
+                    case 9:
                         m_Player.m_DamageTracker.AddProvocationDamageToTotal = !m_Player.m_DamageTracker.AddProvocationDamageToTotal;
 
                         if (m_Player.m_DamageTracker.AddPoisonDamageToTotal)
@@ -706,7 +694,7 @@ namespace Server
                     break;
 
                     //Add to Total: Follower
-                    case 24:
+                    case 10:
                         m_Player.m_DamageTracker.AddFollowerDamageToTotal = !m_Player.m_DamageTracker.AddFollowerDamageToTotal;
 
                         if (m_Player.m_DamageTracker.AddPoisonDamageToTotal)
@@ -716,10 +704,76 @@ namespace Server
                             m_Player.SendMessage("Damage caused by your followers will no longer be added to Total damage.");
 
                         closeGump = false;
-                    break;                    
+                    break;
+
+                    //Auto-Stop: Add 1 Hour                   
+                    case 11:
+                        if (m_Player.m_DamageTracker.TimerDuration < TimeSpan.FromHours(1))
+                            m_Player.m_DamageTracker.TimerDuration = TimeSpan.FromHours(1);
+
+                        else
+                            m_Player.m_DamageTracker.TimerDuration = m_Player.m_DamageTracker.TimerDuration + TimeSpan.FromHours(1);
+
+                        closeGump = false;
+                    break;
+
+                    //Auto-Stop: Remove 1 Hour                   
+                    case 12:
+                        m_Player.m_DamageTracker.TimerDuration = m_Player.m_DamageTracker.TimerDuration - TimeSpan.FromHours(1);                            
+
+                        if (m_Player.m_DamageTracker.TimerDuration < DamageTracker.TimerMinimumDuration)
+                            m_Player.m_DamageTracker.TimerDuration = DamageTracker.TimerMinimumDuration;
+                        
+                    closeGump = false;
+                    break;
+
+                    //Auto-Stop: Add 1 Minute                 
+                    case 13:
+                        if (m_Player.m_DamageTracker.TimerDuration < TimeSpan.FromMinutes(1))
+                            m_Player.m_DamageTracker.TimerDuration = TimeSpan.FromMinutes(1);     
+
+                        else
+                            m_Player.m_DamageTracker.TimerDuration = m_Player.m_DamageTracker.TimerDuration + TimeSpan.FromMinutes(1);
+
+                        closeGump = false;
+                    break;
+
+                    //Auto-Stop: Remove 1 Minute                   
+                    case 14:                        
+                        m_Player.m_DamageTracker.TimerDuration = m_Player.m_DamageTracker.TimerDuration - TimeSpan.FromMinutes(1);
+
+                        if (m_Player.m_DamageTracker.TimerDuration < DamageTracker.TimerMinimumDuration)
+                            m_Player.m_DamageTracker.TimerDuration = DamageTracker.TimerMinimumDuration;                        
+
+                        closeGump = false;
+                    break;
+
+                    //Auto-Stop: Add 5 Seconds                 
+                    case 15:
+                        m_Player.m_DamageTracker.TimerDuration = m_Player.m_DamageTracker.TimerDuration + TimeSpan.FromSeconds(5);
+
+                        closeGump = false;
+                    break;
+
+                    //Auto-Stop: Remove 5 Seconds                   
+                    case 16:                        
+                        m_Player.m_DamageTracker.TimerDuration = m_Player.m_DamageTracker.TimerDuration - TimeSpan.FromSeconds(5);
+
+                        if (m_Player.m_DamageTracker.TimerDuration < DamageTracker.TimerMinimumDuration)
+                            m_Player.m_DamageTracker.TimerDuration = DamageTracker.TimerMinimumDuration;                        
+
+                        closeGump = false;
+                    break;
+
+                    //Auto Stop
+                    case 17:
+                        m_Player.m_DamageTracker.TimerEnabled = !m_Player.m_DamageTracker.TimerEnabled;
+
+                        closeGump = false;
+                    break;
                 }
             }
-            
+
             if (!closeGump)
             {
                 m_Player.CloseGump(typeof(DamageTrackerGump));

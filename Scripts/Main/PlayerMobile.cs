@@ -3324,6 +3324,16 @@ namespace Server.Mobiles
                 else if (!EquipItem(deathRobe))
                     deathRobe.Delete();
             }
+
+            PlaySound(0x214);
+            FixedEffect(0x376A, 10, 16);
+
+            if (Fame > 0)
+            {
+                int amount = Fame / 10;
+
+                Misc.FameKarmaTitles.AwardFame(this, -amount, true);
+            }
         }
 
         public override double RacialSkillBonus
