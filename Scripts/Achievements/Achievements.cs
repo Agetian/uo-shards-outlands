@@ -304,12 +304,14 @@ namespace Server
                 case Achievement.SinkOrSwim:
                     if (TryAcceptReward(player, entry, 1, 1))
                     {
+                        /*
                         item = new CyprusTreeSeed();
 
                         item.ItemGroup = ItemGroupType.Achievement;
 
                         player.Backpack.AddItem(item);
-                        player.SendMessage(rewardTextHue, "You receive a Cyprus Tree seed.");                        
+                        player.SendMessage(rewardTextHue, "You receive a Cyprus Tree seed.");   
+                        */
                     }
                 break;
 
