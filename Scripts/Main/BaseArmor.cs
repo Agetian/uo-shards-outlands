@@ -106,7 +106,8 @@ namespace Server.Items
 
             set
             {
-                m_ArmorBase = value; Invalidate();
+                m_ArmorBase = value; 
+                Invalidate();
             }
         }
 

@@ -359,7 +359,9 @@ namespace Server.Items
         public static AspectWeaponDetail GetAspectWeaponDetail(AspectEnum aspect)
         {
             AspectWeaponDetail detail = new AspectWeaponDetail();
-            
+
+            #region Aspects
+
             switch (aspect)
             {
                 case AspectEnum.Lyric:
@@ -422,7 +424,9 @@ namespace Server.Items
                     detail.m_EffectDescription = "";
                 break;
             }
-            
+
+            #endregion
+
             return detail;
         }
 
@@ -509,7 +513,7 @@ namespace Server.Items
                     armor.BaseArmorRating = armor.ArmorBase;
 
                     if (matchingSet && !from.RecentlyInPlayerCombat)
-                        armor.BaseArmorRating = (int)(Math.Round(armor.ArmorBase * (aspectArmor.AspectArmorDetail.ArmorBonusPerTier * aspectArmor.AspectArmorDetail.m_TierLevel)));
+                        armor.BaseArmorRating = (int)(Math.Round(armor.ArmorBase * (1 + (aspectArmor.AspectArmorDetail.ArmorBonusPerTier * (double)aspectArmor.AspectArmorDetail.m_TierLevel))));
                 }
             }
 
@@ -533,7 +537,7 @@ namespace Server.Items
 
                 if (aspectArmor.MatchingSet && !from.RecentlyInPlayerCombat)
                 {
-                    armor.BaseArmorRating = (int)(Math.Round(armor.ArmorBase * (aspectArmor.AspectArmorDetail.ArmorBonusPerTier * aspectArmor.AspectArmorDetail.m_TierLevel)));
+                    armor.BaseArmorRating = (int)(Math.Round(armor.ArmorBase * (1 + (aspectArmor.AspectArmorDetail.ArmorBonusPerTier * (double)aspectArmor.AspectArmorDetail.m_TierLevel))));
 
                     string aspectName = GetAspectName(aspectArmor.AspectArmorDetail.m_Aspect);
 
@@ -544,8 +548,6 @@ namespace Server.Items
                     {
                         from.AllowedStealthSteps = 0;
                         from.RevealingAction();
-
-                        from.SendMessage("Your Aspect armor reveals you.");
                     }
 
                     from.FixedParticles(0x373A, 10, 15, 5036, effectHue, 0, EffectLayer.Head);
@@ -553,7 +555,8 @@ namespace Server.Items
 
                     UpdateArmorProperties(from);
 
-                    from.PublicOverheadMessage(MessageType.Emote, effectTextHue, false, "*" + aspectName + " Aspect*");
+                    if (from.NetState != null)
+                        from.PrivateOverheadMessage(MessageType.Emote, effectTextHue, false, "*" + aspectName + " Aspect*", from.NetState);
                 }
             });
         }
@@ -574,14 +577,10 @@ namespace Server.Items
                     {
                         player.AllowedStealthSteps = 0;
                         player.RevealingAction();
-
-                        player.SendMessage("Your Aspect armor reveals you.");
                     }
 
                     player.PlaySound(0x56B);
                     player.SendMessage("Your aspect effect fades.");
-
-                    //player.PublicOverheadMessage(MessageType.Emote, 0, false, "*Aspect Fades*");
                 }
             }
         }
@@ -690,7 +689,7 @@ namespace Server.Items
         public AspectEnum m_Aspect;
         public int m_TierLevel;
 
-        public double ArmorBonusPerTier = .02;
+        public double ArmorBonusPerTier = .1;
 
         public string[] gumpText = new string[0];
 

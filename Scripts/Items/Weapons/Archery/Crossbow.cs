@@ -17,7 +17,7 @@ namespace Server.Items
         public override int BaseMinDamage { get { return 16; } }
         public override int BaseMaxDamage { get { return 32; } }
         public override int BaseSpeed { get { return 38; } }
-        public override int BaseMaxRange { get { return 8; } }
+        public override int BaseMaxRange { get { return 10; } }
 
         public override int InitMinHits { get { return 40; } }
         public override int InitMaxHits { get { return 60; } }
