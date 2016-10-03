@@ -84,8 +84,47 @@ namespace Server
 
             return null;
         }
+
+        public List<ArenaParticipant> GetParticipants()
+        {
+            List<ArenaParticipant> m_Participants = new List<ArenaParticipant>();
+
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant participant in arenaTeam.m_Participants)
+                {
+                    if (participant == null) continue;
+                    if (participant.Deleted) continue;
+
+                    m_Participants.Add(participant);
+                }
+            }
+
+            return m_Participants;
+        }
+
+        public void BroadcastMessage(string message, int hue)
+        {
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant participant in arenaTeam.m_Participants)
+                {
+                    if (participant == null) continue;
+                    if (participant.Deleted) continue;
+                    if (participant.m_Player == null) continue;
+
+                    participant.m_Player.SendMessage(hue, message);
+                }
+            }
+        }
         
-        public void LeaveMatch(PlayerMobile player)
+        public void LeaveMatch(PlayerMobile player, bool broadcast)
         {
             if (player == null)
                 return;
@@ -110,6 +149,7 @@ namespace Server
                 playerParticipant.Delete();
             }            
 
+            //if (broadcast)
             //TEST: BROADCAST TO REST OF MATCH PARTICIPANTS THAT PLAYER HAS LEFT
         }
 
@@ -177,6 +217,49 @@ namespace Server
                 return false;
 
             return true;
+        }
+
+        public void CancelMatch()
+        {
+            BroadcastMessage("The current arena match you were in has been canceled.", 1256);
+
+            Queue m_TeamsQueue = new Queue();
+            Queue m_ParticipantQueue = new Queue();
+
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null)
+                    continue;
+
+                m_TeamsQueue.Enqueue(arenaTeam);
+
+                foreach (ArenaParticipant participant in arenaTeam.m_Participants)
+                {
+                    if (participant == null)
+                        continue;
+
+                    m_ParticipantQueue.Enqueue(participant);
+
+                    if (participant.m_Player != null)
+                        participant.m_Player.m_ArenaPlayerSettings.m_ArenaMatch = null;
+                }
+            }
+
+            while (m_ParticipantQueue.Count > 0)
+            {
+                ArenaParticipant arenaParticipant = (ArenaParticipant)m_ParticipantQueue.Dequeue();
+
+                arenaParticipant.Delete();
+            }
+
+            while (m_TeamsQueue.Count > 0)
+            {
+                ArenaTeam arenaTeam = (ArenaTeam)m_TeamsQueue.Dequeue();
+
+                arenaTeam.Delete();
+            }
+
+            Delete();
         }
 
         public override void OnDelete()

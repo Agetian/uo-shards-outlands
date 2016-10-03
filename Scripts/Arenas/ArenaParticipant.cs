@@ -61,7 +61,7 @@ namespace Server
 
             if (team2 != null && teamIndex == 1)
                 team2.m_Participants.Add(this);
-
+            
             Visible = false;
             Movable = false;
         }
