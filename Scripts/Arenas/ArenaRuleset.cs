@@ -237,6 +237,8 @@ namespace Server
             switch (arenaGumpObject.m_ArenaRuleset.m_PresetType)
             {
                 case ArenaPresetType.PlayerSaved:
+                    arenaGumpObject.m_ArenaRuleset = new ArenaRuleset();
+
                     ArenaRuleset.LoadPlayerPresetSettings(arenaGumpObject);
                 break;
 
@@ -356,6 +358,39 @@ namespace Server
             #endregion
 
             arenaGumpObject.m_ArenaRuleset.m_PresetType = ArenaRuleset.ArenaPresetType.PlayerSaved;
+        }
+
+        public static void CopyRulesetSettings(ArenaRuleset rulesetFrom, ArenaRuleset rulesetTarget)
+        {
+            if (rulesetFrom == null) return;
+            if (rulesetTarget == null) return;
+
+            rulesetTarget.m_MatchType = rulesetFrom.m_MatchType;
+            rulesetTarget.m_ListingMode = rulesetFrom.m_ListingMode;
+            rulesetTarget.m_RoundDuration = rulesetFrom.m_RoundDuration;
+            rulesetTarget.m_SuddenDeathMode = rulesetFrom.m_SuddenDeathMode;
+            rulesetTarget.m_EquipmentAllowed = rulesetFrom.m_EquipmentAllowed;
+            rulesetTarget.m_PoisonedWeaponsRestriction = rulesetFrom.m_PoisonedWeaponsRestriction;
+            rulesetTarget.m_MountsRestriction = rulesetFrom.m_MountsRestriction;
+            rulesetTarget.m_FollowersRestrictionType = rulesetFrom.m_FollowersRestrictionType;
+            rulesetTarget.m_ResourceConsumption = rulesetFrom.m_ResourceConsumption;
+            rulesetTarget.m_ItemDurabilityDamage = rulesetFrom.m_ItemDurabilityDamage;
+
+            rulesetTarget.SetSpellRestriction(typeof(PoisonSpell), rulesetFrom.GetSpellRestriction(typeof(PoisonSpell)).m_RestrictionMode);
+            rulesetTarget.SetSpellRestriction(typeof(PoisonFieldSpell), rulesetFrom.GetSpellRestriction(typeof(PoisonFieldSpell)).m_RestrictionMode);
+            rulesetTarget.SetSpellRestriction(typeof(ParalyzeSpell), rulesetFrom.GetSpellRestriction(typeof(ParalyzeSpell)).m_RestrictionMode);
+            rulesetTarget.SetSpellRestriction(typeof(ParalyzeFieldSpell), rulesetFrom.GetSpellRestriction(typeof(ParalyzeFieldSpell)).m_RestrictionMode);
+            rulesetTarget.SetSpellRestriction(typeof(EarthquakeSpell), rulesetFrom.GetSpellRestriction(typeof(EarthquakeSpell)).m_RestrictionMode);
+
+            rulesetTarget.SetItemRestriction(typeof(Pouch), rulesetFrom.GetItemRestriction(typeof(Pouch)).m_RestrictionMode);
+            rulesetTarget.SetItemRestriction(typeof(BaseHealPotion), rulesetFrom.GetItemRestriction(typeof(BaseHealPotion)).m_RestrictionMode);
+            rulesetTarget.SetItemRestriction(typeof(BaseCurePotion), rulesetFrom.GetItemRestriction(typeof(BaseCurePotion)).m_RestrictionMode);
+            rulesetTarget.SetItemRestriction(typeof(BaseRefreshPotion), rulesetFrom.GetItemRestriction(typeof(BaseRefreshPotion)).m_RestrictionMode);
+            rulesetTarget.SetItemRestriction(typeof(BaseStrengthPotion), rulesetFrom.GetItemRestriction(typeof(BaseStrengthPotion)).m_RestrictionMode);
+            rulesetTarget.SetItemRestriction(typeof(BaseAgilityPotion), rulesetFrom.GetItemRestriction(typeof(BaseAgilityPotion)).m_RestrictionMode);
+            rulesetTarget.SetItemRestriction(typeof(BaseExplosionPotion), rulesetFrom.GetItemRestriction(typeof(BaseExplosionPotion)).m_RestrictionMode);
+            rulesetTarget.SetItemRestriction(typeof(BasePoisonPotion), rulesetFrom.GetItemRestriction(typeof(BasePoisonPotion)).m_RestrictionMode);
+            rulesetTarget.SetItemRestriction(typeof(BaseMagicResistPotion), rulesetFrom.GetItemRestriction(typeof(BaseMagicResistPotion)).m_RestrictionMode);
         }
 
         public static void LoadPlayerPresetSettings(ArenaGumpObject arenaGumpObject)
@@ -826,7 +861,7 @@ namespace Server
                     break;
 
                     case ListingModeType.GuildOnly:
-                        basicRuleDetail.m_Line1Text = "Guild Only";
+                        basicRuleDetail.m_Line1Text = "Guild Members Only";
                         basicRuleDetail.m_Line1Hue = 63;
                     break;
 

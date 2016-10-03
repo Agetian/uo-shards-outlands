@@ -185,15 +185,57 @@ namespace Server
                 #region Available Matches
 
                 case ArenaPageType.AvailableMatches:                    
-                    AddLabel(293, 84, 2603, "Available Matches");
-
                     m_AvailableMatches = m_ArenaGumpObject.m_ArenaGroupController.GetArenaMatches(m_Player);
+
+                    ArenaMatch playersCurrentMatch = m_Player.m_ArenaPlayerSettings.m_ArenaMatch;
+
+                    bool hasCreatedMatchActive = false;
+
+                    if (m_Player.m_ArenaPlayerSettings.m_ArenaMatch != null)
+                    {
+                        if (m_Player.m_ArenaPlayerSettings.m_ArenaMatch.Deleted)
+                            m_Player.m_ArenaPlayerSettings.m_ArenaMatch = null;
+
+                        else
+                        {
+                            if (m_Player.m_ArenaPlayerSettings.m_ArenaMatch.m_Creator == m_Player)
+                                hasCreatedMatchActive = true;
+                        }
+
+                        if (m_Player.m_ArenaPlayerSettings.m_ArenaMatch != null)
+                            playersCurrentMatch = m_Player.m_ArenaPlayerSettings.m_ArenaMatch;
+                    }
                     
+                    if (playersCurrentMatch != null && m_AvailableMatches.Contains(playersCurrentMatch))
+                    {  
+                        AddLabel(302, 84, 63, "Current Match");
+
+                        #region Images 
+
+                        AddImage(18, 154, 96, 1102);
+                        AddImage(173, 154, 96, 1102);
+                        AddImage(300, 154, 96, 1102);
+                        AddImage(409, 154, 96, 1102);
+                        AddImage(491, 154, 96, 1102);
+                        AddImage(18, 153, 96, 1102);
+                        AddImage(173, 153, 96, 1102);
+                        AddImage(300, 153, 96, 1102);
+                        AddImage(409, 153, 96, 1102);
+                        AddImage(491, 153, 96, 1102);
+
+                        #endregion
+
+                        AddLabel(294, 144, 2603, "Available Matches");
+                    }
+
+                    else                    
+                        AddLabel(293, 84, 2603, "Available Matches");                    
+                                        
                     int MatchesPerPage = MatchListingsPerAvailableMatchesPage;
 
                     int totalMatches = m_AvailableMatches.Count;
                     int totalMatchPages = (int)(Math.Ceiling((double)totalMatches / (double)MatchesPerPage));
-
+                    
                     if (m_ArenaGumpObject.m_Page >= totalMatchPages)
                         m_ArenaGumpObject.m_Page = 0;
 
@@ -206,31 +248,46 @@ namespace Server
                     if (matchEndIndex >= totalMatches)
                         matchEndIndex = totalMatches - 1;
 
+                    //Always Place Current Match at Top of Page 
+                    if (playersCurrentMatch != null && m_AvailableMatches.Contains(playersCurrentMatch))
+                    {
+                        m_AvailableMatches.Remove(playersCurrentMatch);
+                        m_AvailableMatches.Insert(matchStartIndex, playersCurrentMatch);
+                    }
+
                     //Matches
                     int matchCount = matchEndIndex - matchStartIndex;
-
+                                        
                     int startY = 110;
                     int rowSpacing = 50;
-
+                                        
                     for (int a = 0; a < matchCount + 1; a++)
                     {
                         if (totalMatches == 0)
                             continue;
 
-                        int matchIndex = matchStartIndex + a;
+                        ArenaMatch arenaMatch = null;
 
-                        if (matchIndex >= totalMatches)
-                            continue;
+                        if (a == 0 && playersCurrentMatch != null)
+                            arenaMatch = playersCurrentMatch;
 
-                        ArenaMatch arenaMatch = m_AvailableMatches[matchIndex];
+                        else
+                        {
+                            int matchIndex = matchStartIndex + a;
 
+                            if (matchIndex >= totalMatches)
+                                continue;
+
+                            arenaMatch = m_AvailableMatches[matchIndex];
+                        }
+                        
                         if (arenaMatch == null) continue;
                         if (arenaMatch.Deleted) continue;
                         if (arenaMatch.m_Ruleset == null) continue;
                         if (arenaMatch.m_Ruleset.Deleted) continue;
-
+                        
                         int teamSize = arenaMatch.m_Ruleset.TeamSize;
-
+                        
                         int team1Players = 0;
                         int team1ReadyPlayers = 0;
 
@@ -241,8 +298,8 @@ namespace Server
 
                         if (m_Player.m_ArenaPlayerSettings.m_ArenaMatch == arenaMatch)
                         {
-                            if (arenaMatch.m_Creator == m_Player)
-                                createdMatch = true;
+                            if (arenaMatch.m_Creator == m_Player)                            
+                                createdMatch = true;                            
                         }
                         
                         bool isOnTeam1 = false;
@@ -251,14 +308,12 @@ namespace Server
                         ArenaTeam team1 = arenaMatch.GetTeam(0);
                         ArenaTeam team2 = arenaMatch.GetTeam(1);
 
-                        ArenaParticipant arenaParticipant = null;
-
+                        ArenaParticipant arenaParticipant = arenaMatch.GetParticipant(m_Player);
+                                                
                         if (team1 != null)
                         {
-                            arenaParticipant = team1.GetPlayerParticipant(m_Player);
-
-                            if (arenaParticipant != null)
-                                isOnTeam1 = true;
+                            if (team1.GetPlayerParticipant(m_Player) != null)                            
+                                isOnTeam1 = true;                            
 
                             foreach (ArenaParticipant participant in team1.m_Participants)
                             {
@@ -274,10 +329,8 @@ namespace Server
 
                         if (team2 != null)
                         {
-                            arenaParticipant = team2.GetPlayerParticipant(m_Player);
-
-                            if (arenaParticipant != null)
-                                isOnTeam2 = true;
+                            if (team2.GetPlayerParticipant(m_Player) != null)                                
+                                isOnTeam2 = true;                            
 
                             foreach (ArenaParticipant participant in team2.m_Participants)
                             {
@@ -289,11 +342,11 @@ namespace Server
                                 if (participant.m_ReadyToggled)
                                     team2ReadyPlayers++;
                             }
-                        }
+                        }                        
                         
                         #region Teamsize / Ranked
 
-                        int playerCountTextHue = WhiteTextHue;
+                        int playerCountTextHue = 149;
 
                         if (isOnTeam1 || isOnTeam2)
                             playerCountTextHue = 63;
@@ -353,7 +406,7 @@ namespace Server
                                 AddLabel(Utility.CenteredTextOffset(162, matchName), startY + 20, 63, matchName);
 
                             else
-                                AddLabel(Utility.CenteredTextOffset(162, matchName), startY + 20, 2550, matchName);                        
+                                AddLabel(Utility.CenteredTextOffset(162, matchName), startY + 20, WhiteTextHue, matchName);                        
                         }
 
                         #region Soldier Icons
@@ -413,88 +466,134 @@ namespace Server
                         }
 
                         #endregion
-
+                        
+                        //Team 1
                         if (isOnTeam1)
-                        {
                             AddLabel(385, startY, 63, "Team 1");
-                            AddLabel(385, startY + 20, WhiteTextHue, "Players:");
-
-                            if (!createdMatch)
-                            {
-                                AddLabel(307, startY + 9, 2401, "Leave");
-                                AddButton(347, startY + 6, 2151, 2154, 20 + a, GumpButtonType.Reply, 0);
-                            }
-
-                            else
-                                AddImage(347, startY + 6, 9724, 0);
-                        }
 
                         else
-                        {
                             AddLabel(385, startY, 149, "Team 1");
-                            AddLabel(385, startY + 20, WhiteTextHue, "Players:");
 
-                            if (team1Players < teamSize)
-                            {
-                                if (isOnTeam2)
-                                {
-                                    AddLabel(305, startY + 9, 63, "Switch");
-                                    AddButton(347, startY + 6, 2151, 2154, 20 + a, GumpButtonType.Reply, 0);
-                                }
+                        AddLabel(385, startY + 20, 2550, "Players:");
 
-                                else
-                                {
-                                    AddLabel(313, startY + 9, WhiteTextHue, "Join");
-                                    AddButton(347, startY + 6, 2151, 2154, 20 + a, GumpButtonType.Reply, 0);
-                                }
-                            }
-                        }                        
+                        if (team1Players >= teamSize && team1ReadyPlayers >= teamSize)
+                            AddLabel(438, startY + 20, 63, team1Players.ToString() + "/" + teamSize.ToString());
 
-                        if (team1Players >= teamSize)
+                        else if (team1Players >= teamSize)
                             AddLabel(438, startY + 20, WhiteTextHue, team1Players.ToString() + "/" + teamSize.ToString());
+
                         else
                             AddLabel(438, startY + 20, 2401, team1Players.ToString() + "/" + teamSize.ToString());
 
+                        //Team 2
                         if (isOnTeam2)
-                        {
                             AddLabel(573, startY, 63, "Team 2");
-                            AddLabel(573, startY + 20, WhiteTextHue, "Players:");
-
-                            if (!createdMatch)
-                            {
-                                AddLabel(493, startY + 9, 2401, "Leave");
-                                AddButton(533, startY + 6, 2151, 2154, 30 + a, GumpButtonType.Reply, 0);
-                            }
-
-                            else
-                                AddImage(533, startY + 6, 9724, 0);
-                        }
 
                         else
-                        {
                             AddLabel(573, startY, 149, "Team 2");
-                            AddLabel(573, startY + 20, WhiteTextHue, "Players:");
 
-                            if (team2Players < teamSize)
-                            {
-                                if (isOnTeam1)
+                        AddLabel(573, startY + 20, 2550, "Players:");
+
+                        if (team2Players >= teamSize && team2ReadyPlayers >= teamSize)
+                            AddLabel(633, startY + 20, 63, team2Players.ToString() + "/" + teamSize.ToString());
+
+                        else if (team2Players >= teamSize)
+                            AddLabel(633, startY + 20, WhiteTextHue, team2Players.ToString() + "/" + teamSize.ToString());
+
+                        else
+                            AddLabel(633, startY + 20, 2401, team2Players.ToString() + "/" + teamSize.ToString());
+
+                        if (playersCurrentMatch == arenaMatch)
+                        {
+                            //Team 1
+                            if (isOnTeam1)
+                            {                                
+                                if (arenaParticipant.m_ReadyToggled)
                                 {
-                                    AddLabel(491, startY + 8, 63, "Switch");
-                                    AddButton(533, startY + 6, 2151, 2154, 30 + a, GumpButtonType.Reply, 0);
+                                    AddLabel(305, startY + 9, 63, "Ready");
+                                    AddButton(347, startY + 6, 2154, 2151, 20 + a, GumpButtonType.Reply, 0);
                                 }
 
                                 else
                                 {
-                                    AddLabel(501, startY + 8, WhiteTextHue, "Join");
+                                    AddLabel(305, startY + 9, WhiteTextHue, "Ready");
+                                    AddButton(347, startY + 6, 2151, 2154, 20 + a, GumpButtonType.Reply, 0);
+                                }
+                            }
+
+                            else
+                            {
+                                if (team1Players < teamSize)
+                                {
+                                    AddLabel(318, startY + 9, WhiteTextHue, "Join");
+                                    AddButton(347, startY + 6, 9721, 9724, 20 + a, GumpButtonType.Reply, 0);
+                                }
+
+                                else
+                                {
+                                    AddLabel(318, startY + 9, 1102, "Full");
+                                    AddImage(347, startY + 6, 9721, 1102);
+                                }
+                            }
+
+                            //Team 2
+                            if (isOnTeam2)
+                            {                                
+                                if (arenaParticipant.m_ReadyToggled)
+                                {
+                                    AddLabel(491, startY + 9, 63, "Ready");
+                                    AddButton(533, startY + 6, 2154, 2151, 30 + a, GumpButtonType.Reply, 0);
+                                }
+
+                                else
+                                {
+                                    AddLabel(491, startY + 9, WhiteTextHue, "Ready");
                                     AddButton(533, startY + 6, 2151, 2154, 30 + a, GumpButtonType.Reply, 0);
+                                }                                
+                            }
+
+                            else
+                            {
+                                if (team2Players < teamSize)
+                                {
+                                    AddLabel(502, startY + 9, WhiteTextHue, "Join");
+                                    AddButton(533, startY + 6, 9721, 9724, 30 + a, GumpButtonType.Reply, 0);
+                                }
+
+                                else
+                                {
+                                    AddLabel(502, startY + 9, 1102, "Full");
+                                    AddImage(533, startY + 6, 9721, 1102);
                                 }
                             }
                         }
 
-                        if (team2Players >= teamSize)
-                            AddLabel(628, startY + 20, WhiteTextHue, team2Players.ToString() + "/" + teamSize.ToString());
-                        else
-                            AddLabel(628, startY + 20, 2401, team2Players.ToString() + "/" + teamSize.ToString());
+                        else if (playersCurrentMatch == null)
+                        {
+                            if (team1Players < teamSize)
+                            {
+                                AddLabel(318, startY + 9, WhiteTextHue, "Join");
+                                AddButton(347, startY + 6, 9721, 9724, 20 + a, GumpButtonType.Reply, 0);
+                            }
+
+                            else
+                            {
+                                AddLabel(318, startY + 9, 1102, "Full");
+                                AddImage(347, startY + 6, 9721, 1102);
+                            }
+
+                            if (team2Players < teamSize)
+                            {
+                                AddLabel(502, startY + 9, WhiteTextHue, "Join");
+                                AddButton(533, startY + 6, 9721, 9724, 30 + a, GumpButtonType.Reply, 0);
+                            }
+
+                            else
+                            {
+                                AddLabel(502, startY + 9, 1102, "Full");
+                                AddImage(533, startY + 6, 9721, 1102);
+                            }
+                        }
 
                         if (isOnTeam1 || isOnTeam2)
                         {
@@ -519,14 +618,31 @@ namespace Server
                         AddLabel(57, 483, WhiteTextHue, "Previous Page");
                     }
 
-                    AddButton(283, 483, 4008, 4010, 12, GumpButtonType.Reply, 0);
-			        AddLabel(317, 483, 63, "Create New Match");
-
                     if (m_ArenaGumpObject.m_Page < totalMatchPages - 1)
                     {
                         AddButton(563, 483, 4005, 4007, 11, GumpButtonType.Reply, 0);
                         AddLabel(599, 483, WhiteTextHue, "Next Page");
                     }
+
+                    AddButton(196, 483, 4029, 4031, 13, GumpButtonType.Reply, 0);
+                    AddLabel(230, 483, 2603, "Refresh Listings");
+
+                    if (playersCurrentMatch != null)
+                    {
+                        AddButton(366, 483, 4008, 4010, 12, GumpButtonType.Reply, 0);
+
+                        if (hasCreatedMatchActive)
+                            AddLabel(400, 483, 1256, "Cancel Current Match");
+
+                        else
+                            AddLabel(400, 483, 1256, "Leave Current Match");
+                    }
+
+                    else
+                    {
+                        AddButton(366, 483, 4008, 4010, 12, GumpButtonType.Reply, 0);
+                        AddLabel(400, 483, 63, "Create New Match");
+                    }                   
                 break;
 
                 #endregion
@@ -781,6 +897,8 @@ namespace Server
                 case ArenaPageType.MatchInfo:
                     ArenaMatch selectedArenaMatch = m_ArenaGumpObject.m_ArenaMatchViewing;
 
+                    #region Valid Arena Match
+
                     bool validArenaMatch = true;
 
                     if (selectedArenaMatch == null)                    
@@ -820,7 +938,7 @@ namespace Server
                         validArenaMatch = false;
 
                     else if (arenaTeam2.Deleted)                    
-                        validArenaMatch = false;
+                        validArenaMatch = false;                   
 
                     if (!validArenaMatch)
                     {
@@ -830,9 +948,32 @@ namespace Server
                         m_Player.CloseGump(typeof(ArenaGump));
                         m_Player.SendGump(new ArenaGump(m_Player, m_ArenaGumpObject));
 
+                        //TEST: FIX
+
                         m_Player.SendMessage("That match is now longer viewable.");
 
                         return;
+                    }
+
+                    #endregion
+
+                    playersCurrentMatch = m_Player.m_ArenaPlayerSettings.m_ArenaMatch;
+
+                    hasCreatedMatchActive = false;
+
+                    if (m_Player.m_ArenaPlayerSettings.m_ArenaMatch != null)
+                    {
+                        if (m_Player.m_ArenaPlayerSettings.m_ArenaMatch.Deleted)
+                            m_Player.m_ArenaPlayerSettings.m_ArenaMatch = null;
+
+                        else
+                        {
+                            if (m_Player.m_ArenaPlayerSettings.m_ArenaMatch.m_Creator == m_Player)
+                                hasCreatedMatchActive = true;
+                        }
+
+                        if (m_Player.m_ArenaPlayerSettings.m_ArenaMatch != null)
+                            playersCurrentMatch = m_Player.m_ArenaPlayerSettings.m_ArenaMatch;
                     }
 
                     int teamPlayersNeeded = selectedArenaMatch.m_Ruleset.TeamSize;
@@ -848,8 +989,6 @@ namespace Server
                     bool playerIsOnTeam1 = false;
                     bool playerIsOnTeam2 = false;
 
-                    bool playerReady = false;
-
                     ArenaParticipant playerParticipant = selectedArenaMatch.GetParticipant(m_Player);
 
                     if (arenaTeam1.GetPlayerParticipant(m_Player) != null)
@@ -857,9 +996,6 @@ namespace Server
 
                     if (arenaTeam2.GetPlayerParticipant(m_Player) != null)
                         playerIsOnTeam2 = true;
-
-                    if (playerParticipant != null)                    
-                        playerReady = playerParticipant.m_ReadyToggled;                     
 
                     if (m_Player.m_ArenaPlayerSettings.m_ArenaMatch == selectedArenaMatch)
                     {
@@ -869,7 +1005,31 @@ namespace Server
                     
                     AddLabel(316, 84, 2603, "Match Info");
 
-                    //Team 1
+                    #region Images
+
+                    AddImage(18, 206, 96, 1102);
+			        AddImage(173, 206, 96, 1102);
+			        AddImage(300, 206, 96, 1102);
+			        AddImage(409, 206, 96, 1102);
+			        AddImage(491, 206, 96, 1102);
+			        AddImage(18, 205, 96, 1102);
+			        AddImage(173, 205, 96, 1102);
+			        AddImage(300, 205, 96, 1102);
+			        AddImage(409, 205, 96, 1102);
+			        AddImage(491, 205, 96, 1102);
+
+                    #endregion
+
+			        AddLabel(300, 196, 2603, "Match Settings");
+
+                    #region Team 1
+
+                    if (playerIsOnTeam1 || playerIsOnTeam2)
+                    {
+                        AddButton(53, 177, 30008, 30009, 21, GumpButtonType.Reply, 0);
+                        AddLabel(74, 174, 54, "Message Team");
+                    }
+
                     startY = 120;
                     rowSpacing = 15;
 
@@ -877,7 +1037,8 @@ namespace Server
                     
                     for (int a = 0; a < teamPlayersNeeded; a++)
                     {
-                        int playerHue = 2401;
+                        int playerIconHue = 1102;
+                        int playerTextHue = 1102;
 
                         string playerName = "";
 
@@ -892,89 +1053,44 @@ namespace Server
                                 continue;
 
                             team1PlayerCount++;
-                            playerHue = 2500;
+
+                            playerIconHue = 2500;
+                            playerTextHue = 2499;                                 
 
                             playerName = participant.m_Player.RawName;
 
                             if (participant.m_ReadyToggled)
                             {                              
                                 team1ReadyPlayerCount++;
-                                playerHue = 2208;
+
+                                playerIconHue = 2208;
+                                playerTextHue = 63;
                             }                                
                         }
 
-                        AddItem(statueStartX + (a * 15), 108, 15178, playerHue);
+                        AddItem(statueStartX + (a * 15), 108, 15178, playerIconHue);
 
                         if (playerName != "")
-                            AddButton(145, startY + 3, 1209, 1210, 0, GumpButtonType.Reply, 0);
+                            AddButton(145, startY + 3, 1209, 1210, 30 + a, GumpButtonType.Reply, 0);
 
                         if (playerName == "")
-                            playerName = "-Empty-";
+                            playerName = "(open player slot)";
 
-                        AddLabel(165, startY, playerHue, playerName);
+                        AddLabel(165, startY, playerTextHue, playerName);
 
                         startY += rowSpacing;
-                    }
+                    }                    
 
-                    int teamTextHue = 2401;
+                    #endregion
 
-                    if (team1PlayerCount >= teamPlayersNeeded)
-                        teamTextHue = 2499;
-
-                    if (team1ReadyPlayerCount >= teamPlayersNeeded)
-                        teamTextHue = 63;
-
-                    if (teamPlayersNeeded == 1)
-                        AddLabel(46, 161, teamTextHue, "[" + team1PlayerCount.ToString() + "/" + teamPlayersNeeded.ToString() + "]");
-                    else
-                        AddLabel(41, 161, teamTextHue, "[" + team1PlayerCount.ToString() + "/" + teamPlayersNeeded.ToString() + "]");
+                    #region Team 2
 
                     if (playerIsOnTeam1 || playerIsOnTeam2)
                     {
-                        AddButton(53, 182, 30008, 30009, 0, GumpButtonType.Reply, 0);
-                        AddLabel(74, 179, 54, "Message");
+                        AddButton(312, 177, 30008, 30009, 23, GumpButtonType.Reply, 0);
+                        AddLabel(333, 174, 54, "Message Team");
                     }
 
-                    if (playerIsOnTeam1)
-                    {
-                        AddLabel(99, 100, 63, "Team 1");
-
-                        if (playerCreatedMatch)
-                            AddImage(104, 120, 9724, 0);
-
-                        else
-                        {
-                            AddButton(104, 120, 9724, 9724, 0, GumpButtonType.Reply, 0);
-                            AddLabel(99, 148, 2401, "Leave");
-                        }
-                    }
-
-                    else
-                    {
-                        AddLabel(99, 100, 149, "Team 1");
-
-                        if (team1PlayerCount < teamPlayersNeeded)
-                        {
-                            if (playerIsOnTeam2)
-                            {
-                                AddButton(104, 120, 2151, 2154, 0, GumpButtonType.Reply, 0);
-                                AddLabel(95, 148, 63, "Switch");
-                            }
-
-                            else
-                            {
-                                AddButton(104, 120, 2151, 2154, 0, GumpButtonType.Reply, 0);
-                                AddLabel(104, 148, WhiteTextHue, "Join");
-                            }
-                        }
-
-                        else
-                        {
-                            //TEST: ADD TEAM FULL GRAPHIC
-                        }
-                    }
-
-                    //Team 2
                     startY = 120;
                     rowSpacing = 15;
 
@@ -982,7 +1098,8 @@ namespace Server
 
                     for (int a = 0; a < teamPlayersNeeded; a++)
                     {
-                        int playerHue = 2401;
+                        int playerIconHue = 2401;
+                        int playerTextHue = 1102;
 
                         string playerName = "";
 
@@ -997,107 +1114,161 @@ namespace Server
                                 continue;
 
                             team2PlayerCount++;
-                            playerHue = 2500;
+
+                            playerIconHue = 2500;
+                            playerTextHue = 2499;
 
                             if (participant.m_ReadyToggled)
                             {                              
                                 team2ReadyPlayerCount++;
-                                playerHue = 2208;
+
+                                playerIconHue = 2208;
+                                playerTextHue = 63;
+
                             }                                
                         }
 
-                        AddItem(statueStartX + (a * 15), 108, 15178, playerHue);
+                        AddItem(statueStartX + (a * 15), 108, 15178, playerIconHue);
 
                         if (playerName != "")
-                            AddButton(405, startY + 3, 1209, 1210, 0, GumpButtonType.Reply, 0);
+                            AddButton(405, startY + 3, 1209, 1210, 40 + a, GumpButtonType.Reply, 0);
 
                         if (playerName == "")
-                            playerName = "-Empty-";
+                            playerName = "(open player slot)";
 
-                        AddLabel(425, startY, playerHue, playerName);
+                        AddLabel(425, startY, playerTextHue, playerName);
 
                         startY += rowSpacing;
-                    }
+                    }                  
 
-                    teamTextHue = 2401;
+                    #endregion
 
-                    if (team2PlayerCount >= teamPlayersNeeded)
-                        teamTextHue = 2499;
-
-                    if (team2ReadyPlayerCount >= teamPlayersNeeded)
-                        teamTextHue = 63;
-
-                    if (teamPlayersNeeded == 1)
-                        AddLabel(304, 161, teamTextHue, "[" + team2PlayerCount.ToString() + "/" + teamPlayersNeeded.ToString() + "]");
+                     if (playerIsOnTeam1)
+                        AddLabel(99, 100, 63, "Team 1");
                     else
-                        AddLabel(299, 161, teamTextHue, "[" + team2PlayerCount.ToString() + "/" + teamPlayersNeeded.ToString() + "]");
-
-                    if (playerIsOnTeam1 || playerIsOnTeam2)
-                    {
-                        AddButton(312, 182, 30008, 30009, 0, GumpButtonType.Reply, 0);
-                        AddLabel(333, 179, 54, "Message");
-                    }
+                        AddLabel(99, 100, 149, "Team 1");
 
                     if (playerIsOnTeam2)
-                    {
                         AddLabel(356, 100, 63, "Team 2");
-
-                        if (playerCreatedMatch)
-                            AddImage(362, 120, 9724, 0);
-
-                        else
-                        {
-                            AddButton(362, 120, 9724, 9724, 0, GumpButtonType.Reply, 0);
-                            AddLabel(358, 148, 2401, "Leave");
-                        }
-                    }
-
                     else
-                    {
                         AddLabel(356, 100, 149, "Team 2");
-
-                        if (team2PlayerCount < teamPlayersNeeded)
+                    
+                    if (playersCurrentMatch == selectedArenaMatch)
+                    {
+                        //Team 1
+                        if (playerIsOnTeam1 && playerParticipant != null)
                         {
-                            if (playerIsOnTeam1)
+                            if (playerParticipant.m_ReadyToggled)
                             {
-                                AddButton(362, 120, 2151, 2154, 0, GumpButtonType.Reply, 0);
-                                AddLabel(357, 148, 63, "Switch");
+                                AddButton(104, 120, 2154, 2151, 20, GumpButtonType.Reply, 0);
+                                AddLabel(100, 148, 63, "Ready");                               
                             }
 
                             else
                             {
-                                AddButton(362, 120, 2151, 2154, 0, GumpButtonType.Reply, 0);
-                                AddLabel(362, 148, WhiteTextHue, "Join");
+                                AddButton(104, 120, 2151, 2154, 20, GumpButtonType.Reply, 0);
+                                AddLabel(100, 148, WhiteTextHue, "Ready");                               
                             }
                         }
 
                         else
                         {
-                            //TEST: ADD TEAM FULL GRAPHIC
+                            if (team1PlayerCount < teamPlayersNeeded)
+                            {
+                                AddButton(104, 120, 9721, 9724, 20, GumpButtonType.Reply, 0);
+                                AddLabel(107, 148, WhiteTextHue, "Join");
+                            }
+
+                            else
+                            {
+                                AddImage(104, 120, 9721, 1102);
+                                AddLabel(107, 148, 1102, "Full");
+                            }
+                        }
+
+                        //Team 2
+                        if (playerIsOnTeam2)
+                        {
+                            if (playerParticipant.m_ReadyToggled)
+                            {
+                                AddButton(362, 120, 2154, 2151, 22, GumpButtonType.Reply, 0);
+                                AddLabel(358, 148, 63, "Ready");
+                               
+                            }
+
+                            else
+                            {
+                                AddButton(362, 120, 2151, 2154, 22, GumpButtonType.Reply, 0);
+                                AddLabel(358, 148, WhiteTextHue, "Ready");
+                              
+                            }
+                        }
+
+                        else
+                        {
+                            if (team2PlayerCount < teamPlayersNeeded)
+                            {
+                                AddButton(362, 120, 9721, 9724, 22, GumpButtonType.Reply, 0);
+                                AddLabel(363, 148, WhiteTextHue, "Join");
+                            }
+
+                            else
+                            {
+                                AddImage(362, 120, 9721, 1102);
+                                AddLabel(363, 148, 1102, "Full");
+                            }
                         }
                     }
+
+                    else if (playersCurrentMatch == null)
+                    {
+                        if (team1PlayerCount < teamPlayersNeeded)
+                        {
+                            AddButton(104, 120, 9721, 9724, 20, GumpButtonType.Reply, 0);
+                            AddLabel(107, 148, WhiteTextHue, "Join");
+                        }
+
+                        else
+                        {
+                            AddImage(104, 120, 9721, 1102);
+                            AddLabel(107, 148, 1102, "Full");
+                        }
+
+                        if (team2PlayerCount < teamPlayersNeeded)
+                        {
+                            AddButton(362, 120, 9721, 9724, 22, GumpButtonType.Reply, 0);
+                            AddLabel(363, 148, WhiteTextHue, "Join");
+                        }
+
+                        else
+                        {
+                            AddImage(362, 120, 9721, 1102);
+                            AddLabel(363, 148, 1102, "Full");
+                        }
+                    }
+
+                    #region Match Controls
                    	
                     //Match Controls
-                    if (playerIsOnTeam1 || playerIsOnTeam2)
-                    {
-                        AddButton(546, 105, 9721, 9724, 0, GumpButtonType.Reply, 0);
-                        AddLabel(582, 109, 54, "Message All");
-                    }
-
-                    if (playerIsOnTeam1 || playerIsOnTeam2)
-                    {
-                        if (playerReady)
-                            AddButton(546, 137, 2154, 2151, 0, GumpButtonType.Reply, 0);
-                        else
-                            AddButton(546, 137, 2151, 2154, 0, GumpButtonType.Reply, 0);
-                        AddLabel(582, 141, 63, "Ready");
-                    }
-
                     if (playerCreatedMatch)
                     {
-                        AddButton(546, 170, 2472, 2473, 0, GumpButtonType.Reply, 0);
-                        AddLabel(582, 174, 1256, "Cancel Match");
+                        AddButton(546, 137, 2472, 2473, 11, GumpButtonType.Reply, 0);
+                        AddLabel(582, 141, 1256, "Cancel Match");
                     }
+
+                    else if (playerIsOnTeam1 || playerIsOnTeam2)
+                    {
+                        AddButton(546, 137, 2472, 2473, 11, GumpButtonType.Reply, 0);
+                        AddLabel(582, 141, 1256, "Leave Match");
+                    }
+
+                    if (playerIsOnTeam1 || playerIsOnTeam2)
+                    {
+                        AddButton(546, 170, 9721, 9724, 12, GumpButtonType.Reply, 0);
+                        AddLabel(582, 174, 54, "Message All");
+                    }   
+                 
+                    #endregion
 
                     #region Rules Settings
 
@@ -1315,28 +1486,32 @@ namespace Server
 
                     #endregion
 
-                    //Controls                    
+                    #region Settings Controls      
+          
+                    AddButton(23, 483, 4014, 4016, 13, GumpButtonType.Reply, 0);
+			        AddLabel(57, 483, WhiteTextHue, "Return");
+
+                    //Previous Settings Page
                     if (m_ArenaGumpObject.m_SettingsPage > 0)
-                        AddButton(171, 467, 9909, 9909, 15, GumpButtonType.Reply, 0);
+                        AddButton(171, 467, 9909, 9909, 14, GumpButtonType.Reply, 0);
 
                     if (m_ArenaGumpObject.m_SettingsPage > 0 || m_ArenaGumpObject.m_SettingsPage < totalSettingsPages)
                         AddLabel(200, 468, 2599, "More Settings");
 
+                    //Next Settings Page
                     if (m_ArenaGumpObject.m_SettingsPage < totalSettingsPages - 1)
-                        AddButton(296, 467, 9903, 9903, 16, GumpButtonType.Reply, 0);                    
-                    
-
-                    AddButton(23, 483, 4014, 4016, 0, GumpButtonType.Reply, 0);
-			        AddLabel(57, 483, WhiteTextHue, "Return");
+                        AddButton(296, 467, 9903, 9903, 15, GumpButtonType.Reply, 0);   
 
                     if (playerCreatedMatch)
                     {
-                        AddButton(321, 499, 2151, 2154, 0, GumpButtonType.Reply, 0);
+                        AddButton(321, 499, 2151, 2154, 16, GumpButtonType.Reply, 0);
                         AddLabel(357, 502, 63, "Save Changes");
 
-                        AddButton(468, 498, 2472, 2473, 0, GumpButtonType.Reply, 0);
+                        AddButton(468, 498, 2472, 2473, 17, GumpButtonType.Reply, 0);
                         AddLabel(504, 502, 1256, "Cancel Changes");
                     }
+
+                    #endregion
                     
                 break;
 
@@ -1439,10 +1614,12 @@ namespace Server
                             closeGump = false;
                         break;
 
-                        //Create Match
+                        //Leave Match / Create Match
                         case 12:
-                            if (m_Player.m_ArenaPlayerSettings.CurrentlyInMatch())                            
-                                m_Player.SendMessage("You must leave your current match before you may create a new match.");                            
+                            if (m_Player.m_ArenaPlayerSettings.CurrentlyInMatch())
+                            {
+                                //Leave Match
+                            }                           
 
                             else
                             {
@@ -1454,7 +1631,14 @@ namespace Server
 
                                 m_ArenaGumpObject.m_ArenaPage = ArenaPageType.CreateMatch;
                                 m_Player.SendSound(ChangePageSound);
-                            }
+                            }                            
+
+                            closeGump = false;
+                        break;
+
+                        //Refresh Matches
+                        case 13:
+                            m_Player.SendSound(ChangePageSound);
 
                             closeGump = false;
                         break;
@@ -1478,6 +1662,7 @@ namespace Server
                             matchIndex = 0;
 
                         m_Player.SendSound(LargeSelectionSound);
+
                         closeGump = false;
                     }
 
@@ -1494,6 +1679,7 @@ namespace Server
                             matchIndex = 0;
 
                         m_Player.SendSound(LargeSelectionSound);
+
                         closeGump = false;
                     }
 
@@ -1683,9 +1869,8 @@ namespace Server
 
                     #endregion
 
-                    #region View Match
-
-                    //View Match Info
+                    #region Match Info
+                    
                     if (info.ButtonID >= 40 && info.ButtonID < 50)
                     {
                         matchIndex = (info.ButtonID - 40) + (m_ArenaGumpObject.m_Page * MatchListingsPerAvailableMatchesPage);
@@ -1752,8 +1937,10 @@ namespace Server
 
                             if (validArenaMatch)
                             {
+                                ArenaRuleset.CopyRulesetSettings(selectedArenaMatch.m_Ruleset, m_ArenaGumpObject.m_ArenaRuleset);
+
                                 m_ArenaGumpObject.m_ArenaMatchViewing = selectedArenaMatch;
-                                m_ArenaGumpObject.m_ArenaPage = ArenaPageType.MatchInfo;
+                                m_ArenaGumpObject.m_ArenaPage = ArenaPageType.MatchInfo;                                
 
                                 m_Player.SendSound(SelectionSound);
                             }
@@ -1839,10 +2026,7 @@ namespace Server
                                 participant.m_ReadyToggled = true;                               
 
                                 m_ArenaGumpObject.m_ArenaRuleset = new ArenaRuleset();
-                                m_ArenaGumpObject.m_ArenaRuleset.IsTemporary = true;
-
-                                m_ArenaGumpObject.m_ArenaPage = ArenaPageType.MatchInfo;
-                                m_ArenaGumpObject.m_ArenaMatchViewing = arenaMatch;
+                                m_ArenaGumpObject.m_ArenaRuleset.IsTemporary = true;                               
 
                                 arenaGroupController.m_MatchListings.Add(arenaMatch);
 
@@ -1851,7 +2035,10 @@ namespace Server
                                 m_Player.SendMessage(63, "You create a new match listing.");
                                 m_Player.SendSound(ChangePageSound);
 
-                                
+                                m_ArenaGumpObject.m_ArenaPage = ArenaPageType.MatchInfo;
+                                m_ArenaGumpObject.m_ArenaMatchViewing = arenaMatch;
+
+                                ArenaRuleset.CopyRulesetSettings(arenaMatch.m_Ruleset, m_ArenaGumpObject.m_ArenaRuleset);
                             }
 
                             closeGump = false;
@@ -1981,45 +2168,140 @@ namespace Server
                 case ArenaPageType.MatchInfo:
                     switch (info.ButtonID)
                     {
-                        //Return
+                        //Ready
                         case 10:
+                            closeGump = false;
                         break;
 
-                        //Previous Settings
+                        //Leave or Cancel Match
                         case 11:
-                        break;
+                            m_ArenaGumpObject.m_ArenaPage = ArenaPageType.AvailableMatches;
 
-                        //Next Settings
-                        case 12:
-                        break;
-
-                        //Select Team 1
-                        case 13:
-                        break;
-
-                        //Select Team 2
-                        case 14:
-                        break;
-
-                        //Message Team 1
-                        case 15:
-                        break;
-
-                        //Message Team 2
-                        case 16:
+                            closeGump = false;
                         break;
 
                         //Message All
+                        case 12:
+                            closeGump = false;
+                        break;
+
+                        //-----
+
+                        //Team 1: Join + Ready
+                        case 20:
+                            closeGump = false;
+                        break;
+
+                        //Team 1: Message
+                        case 21:
+                            closeGump = false;
+                        break;
+
+                        //Team 2: Join + Ready
+                        case 22:
+                            closeGump = false;
+                        break;
+
+                        //Team 2: Message
+                        case 23:
+                            closeGump = false;
+                        break;
+
+                        //-----
+
+                        //Return
+                        case 13:
+                            m_ArenaGumpObject.m_ArenaPage = ArenaPageType.AvailableMatches;
+
+                            closeGump = false;
+                        break;
+
+                        //Previous Settings
+                        case 14:
+                            closeGump = false;
+                        break;
+
+                        //Next Settings
+                        case 15:
+                            closeGump = false;
+                        break;
+
+                        //Save Changes
+                        case 16:
+                            closeGump = false;
+                        break;
+
+                        //Cancel Changes
                         case 17:
+                            closeGump = false;
                         break;
 
-                        //Ready + Start Match
-                        case 18:
-                        break;
+                        //--------------
 
-                        //Cancel Match
-                        case 19:
-                        break;
+                        //Team 1 Player Selection
+                        if (info.ButtonID >= 30 && info.ButtonID < 40)
+                        {
+                            closeGump = false;
+                        }
+
+                        //Team 2 Player Selection
+                        if (info.ButtonID >= 40 && info.ButtonID < 50)
+                        {
+                            closeGump = false;
+                        }
+
+                         //----------
+
+                        /*
+                        //Change Basic Rule Setting
+                        if (info.ButtonID >= 100 && info.ButtonID < 200)
+                        {
+                            int ruleIndex = (int)(Math.Floor(((double)info.ButtonID - 100) / 2));
+
+                            int changeValue = 1;
+
+                            if (info.ButtonID % 2 == 0)
+                                changeValue = -1;
+
+                            m_ArenaGumpObject.m_ArenaRuleset.ChangeBasicSetting(m_Player, ruleIndex, changeValue);
+
+                            m_Player.SendSound(SelectionSound);
+                            closeGump = false;
+                        }
+
+                        //Change Spell Rule Setting
+                        if (info.ButtonID >= 200 && info.ButtonID < 300)
+                        {
+                            int ruleIndex = (int)(Math.Floor(((double)info.ButtonID - 200) / 2));
+
+                            int changeValue = 1;
+
+                            if (info.ButtonID % 2 == 0)
+                                changeValue = -1;
+
+                            m_ArenaGumpObject.m_ArenaRuleset.ChangeSpellSetting(m_Player, ruleIndex, changeValue);
+
+                            m_Player.SendSound(SelectionSound);
+                            closeGump = false;
+                        }
+
+                        //Change Item Rule Setting
+                        if (info.ButtonID >= 300 && info.ButtonID < 400)
+                        {
+                            int ruleIndex = (int)(Math.Floor(((double)info.ButtonID - 300) / 2));
+
+                            int changeValue = 1;
+
+                            if (info.ButtonID % 2 == 0)
+                                changeValue = -1;
+
+                            m_ArenaGumpObject.m_ArenaRuleset.ChangeItemSetting(m_Player, ruleIndex, changeValue);
+
+                            m_Player.SendSound(SelectionSound);
+                            closeGump = false;
+                        }
+                        */
+
                     }    
                 break;
 

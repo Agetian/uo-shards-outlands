@@ -120,13 +120,19 @@ namespace Server
             if (m_Ruleset.Deleted) return false;
             if (m_Creator == null) return false;
 
-            if (m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.GuildOnly)
+            if (player.AccessLevel > AccessLevel.Player)
+                return true;
+
+            if (m_Creator == player)
+                return true;
+
+            if (m_Creator.Guild != null &&  m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.GuildOnly)
             {
                 if (m_Creator.Guild == null) return false;
                 if (m_Creator.Guild != player.Guild) return false;
             }
 
-            if (m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.PartyOnly)
+            if (m_Creator.Party != null &&  m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.PartyOnly)
             {
                 if (m_Creator.Party == null) return false;
                 if (m_Creator.Party != player.Party) return false;

@@ -131,15 +131,15 @@ namespace Server
                 }
 
                 if (arenaMatch.m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.GuildOnly)
-                {
-                    if (arenaMatch.m_Creator.Party == null) continue;
-                    if (arenaMatch.m_Creator.Party != player.Party) continue;
+                {   
+                    if (arenaMatch.m_Creator.Guild != null && arenaMatch.m_Creator.Guild != player.Guild)
+                        continue;
                 }
 
                 if (arenaMatch.m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.PartyOnly)
                 {
-                    if (arenaMatch.m_Creator.Guild == null) continue;
-                    if (arenaMatch.m_Creator.Guild != player.Guild) continue;
+                    if ( arenaMatch.m_Creator.Party != null && arenaMatch.m_Creator.Party != player.Party) 
+                        continue;
                 }
 
                 m_FilteredMatches.Add(arenaMatch);
