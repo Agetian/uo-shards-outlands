@@ -47,15 +47,41 @@ namespace Server
         public static TimeSpan AuditInterval = TimeSpan.FromMinutes(5);
         public static TimeSpan LoggedOutPlayerTimeoutThreshold = TimeSpan.FromMinutes(10);
 
+        public bool m_Enabled;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public bool Enabled
+        {
+            get { return m_Enabled; }
+            set
+            {
+                m_Enabled = value;
+
+                if (m_Enabled)
+                {
+                    if (m_Timer == null)
+                    {
+                        m_Timer = new ArenaGroupControllerTimer(this);
+                        m_Timer.Start();
+                    }
+
+                    else
+                        m_Timer.Start();
+                }
+
+                else
+                {
+                    if (m_Timer != null)                    
+                        m_Timer.Stop();                    
+                }
+            }
+        }
+
         [Constructable]
         public ArenaGroupController(): base(3804)
         {
             Name = "arena group controller";
 
             Movable = false;
-
-            m_Timer = new ArenaGroupControllerTimer(this);
-            m_Timer.Start();
 
             //-----
 
@@ -94,11 +120,9 @@ namespace Server
 
             foreach (ArenaController arenaController in m_Arenas)
             {
-                if (arenaController == null)
-                    continue;
-
-                if (!arenaController.Enabled)
-                    continue;
+                if (arenaController == null) continue;
+                if (arenaController.Deleted) continue;
+                if (!arenaController.Enabled) continue;
 
                 if (arenaController.m_ArenaFight == null)
                     return arenaController;
@@ -172,6 +196,15 @@ namespace Server
                     Stop();
                     return;        
                 }
+
+                if (!m_ArenaGroupController.Enabled)
+                {
+                    Stop();
+                    return;  
+                }
+
+                //TEST
+                m_ArenaGroupController.PublicOverheadMessage(MessageType.Regular, 0, false, "Tick");
                
                 if (DateTime.UtcNow >= m_ArenaGroupController.m_NextListingAudit)
                     m_ArenaGroupController.AuditListings();                
@@ -182,11 +215,9 @@ namespace Server
                 {
                     foreach (ArenaMatch arenaMatch in m_ArenaGroupController.m_MatchListings)
                     {
-                        if (arenaMatch == null) continue;
-                        if (arenaMatch.Deleted) continue;
-
-                        if (DateTime.UtcNow < arenaMatch.m_NextReadyCheck) continue;
-                        if (!arenaMatch.IsReadyToStart()) continue;
+                        if (!ArenaMatch.IsValidArenaMatch(arenaMatch, null, false)) continue;                        
+                        if (DateTime.UtcNow < arenaMatch.m_NextReadyCheck) continue;                        
+                        if (!arenaMatch.IsReadyToStart()) continue;                       
 
                         List<KeyValuePair<PlayerMobile, ArenaRuleset.ArenaRulesetFailureType>> m_RulesetViolations = new List<KeyValuePair<PlayerMobile, ArenaRuleset.ArenaRulesetFailureType>>();
 
@@ -245,10 +276,21 @@ namespace Server
             }
         }
 
+        public override void OnDelete()
+        {
+            if (m_Timer != null)
+            {
+                m_Timer.Stop();
+                m_Timer = null;
+            }
+
+            base.OnDelete();
+        }
+
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
-            writer.Write((int)0);
+            writer.Write((int)1);
 
             //Version 0
             writer.Write(m_MatchListings.Count);
@@ -262,6 +304,9 @@ namespace Server
             {
                 writer.Write(m_Tournaments[a]);
             }
+
+            //Version 1
+            writer.Write(Enabled);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -283,6 +328,12 @@ namespace Server
                 {
                     m_Tournaments.Add(reader.ReadItem() as ArenaTournament);
                 }
+            }
+
+            //Version 1
+            if (version >= 1)
+            {
+                Enabled = reader.ReadBool();
             }
 
             //-----

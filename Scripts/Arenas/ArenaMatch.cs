@@ -26,7 +26,6 @@ namespace Server
         public PlayerMobile m_Creator;
         public DateTime m_CreationDate;
 
-        public bool m_CreatorReady;
         public DateTime m_NextReadyCheck = DateTime.UtcNow;
 
         public static TimeSpan ReadyCheckInterval = TimeSpan.FromSeconds(60);
@@ -185,10 +184,8 @@ namespace Server
 
         public bool IsReadyToStart()
         {
-            if (m_MatchStatus != MatchStatusType.Listed) return false;
-            if (!m_CreatorReady) return false;
-            if (m_Ruleset == null) return false;
-            if (m_Ruleset.Deleted) return false;
+            if (m_MatchStatus != MatchStatusType.Listed) 
+                return false;            
 
             int fullTeams = 0;
 
@@ -206,9 +203,10 @@ namespace Server
                     if (participant == null) continue;
                     if (participant.Deleted) continue;
                     if (participant.m_Player == null) continue;
-                    if (participant.m_Player.Deleted) continue;                                   
-
-                    readyPlayers++;
+                    if (participant.m_Player.Deleted) continue;
+                    
+                    if (participant.m_ReadyToggled)
+                        readyPlayers++;
                 }
 
                 if (readyPlayers >= playersNeededPerTeam)
@@ -313,8 +311,6 @@ namespace Server
 
             writer.Write(m_Creator);
             writer.Write(m_CreationDate);
-
-            writer.Write(m_CreatorReady);
             writer.Write((int)m_MatchStatus);
             writer.Write(m_Ruleset);
             writer.Write(m_ArenaFight);
@@ -340,8 +336,6 @@ namespace Server
 
                 m_Creator = (PlayerMobile)reader.ReadMobile();
                 m_CreationDate = reader.ReadDateTime();
-
-                m_CreatorReady = reader.ReadBool();
                 m_MatchStatus = (MatchStatusType)reader.ReadInt();
                 m_Ruleset = (ArenaRuleset)reader.ReadItem();
                 m_ArenaFight = (ArenaFight)reader.ReadItem();
