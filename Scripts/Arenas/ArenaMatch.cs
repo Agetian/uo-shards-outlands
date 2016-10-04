@@ -129,6 +129,8 @@ namespace Server
             if (player == null)
                 return;
 
+            string playerName = player.RawName;
+
             ArenaTeam playerTeam = null;
             ArenaParticipant playerParticipant = null;
 
@@ -147,10 +149,10 @@ namespace Server
                     playerTeam.m_Participants.Remove(playerParticipant);
 
                 playerParticipant.Delete();
-            }            
+            }
 
-            //if (broadcast)
-            //TEST: BROADCAST TO REST OF MATCH PARTICIPANTS THAT PLAYER HAS LEFT
+            if (broadcast)
+                BroadcastMessage(playerName + " has left the match.", 0);
         }
 
         public bool CanPlayerJoinMatch(PlayerMobile player)
@@ -260,6 +262,32 @@ namespace Server
             }
 
             Delete();
+        }
+
+        public static bool IsValidArenaMatch(ArenaMatch arenaMatch, PlayerMobile player, bool checkIfPlayerCanJoin)
+        {
+            if (arenaMatch == null) return false;
+            if (arenaMatch.Deleted) return false;
+            if (arenaMatch.m_ArenaGroupController == null) return false;
+            if (arenaMatch.m_ArenaGroupController.Deleted) return false;
+            if (arenaMatch.m_Ruleset == null) return false;
+            if (arenaMatch.m_Ruleset.Deleted) return false;
+
+            if (checkIfPlayerCanJoin)
+            {
+                if (!arenaMatch.CanPlayerJoinMatch(player))
+                    return false;
+            }
+
+            ArenaTeam arenaTeam1 = arenaMatch.GetTeam(0);
+            ArenaTeam arenaTeam2 = arenaMatch.GetTeam(1);
+
+            if (arenaTeam1 == null) return false;
+            if (arenaTeam1.Deleted) return false;
+            if (arenaTeam2 == null) return false;
+            if (arenaTeam2.Deleted) return false;
+
+            return true;
         }
 
         public override void OnDelete()
