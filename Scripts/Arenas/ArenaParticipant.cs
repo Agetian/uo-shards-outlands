@@ -68,17 +68,10 @@ namespace Server
 
         public bool IsReadyForEvent()
         {
-            if (m_Player == null)
-                return false;
-            
-            if (!m_Player.Alive)
-                return false;
-
-            if (m_Player.NetState == null)
-                return false;
-
-            if (!m_ReadyToggled)
-                return false;
+            if (m_Player == null) return false;            
+            if (!m_Player.Alive) return false;
+            if (m_Player.NetState == null) return false;
+            if (!m_ReadyToggled) return false;
 
             return true;
         }
@@ -98,6 +91,22 @@ namespace Server
             }
         }
 
+        public ArenaSpellUsage AdjustSpellUsage(Type type, int amount)
+        {
+            foreach (ArenaSpellUsage arenaSpellUsage in m_SpellUsages)
+            {
+                if (arenaSpellUsage == null) continue;
+
+                if (arenaSpellUsage.m_SpellType == type)
+                {
+                    arenaSpellUsage.m_Uses += amount;
+                    break;
+                }
+            }
+
+            return null;
+        }
+
         public ArenaSpellUsage GetSpellUsage(Type type)
         {
             foreach (ArenaSpellUsage arenaSpellUsage in m_SpellUsages)
@@ -106,6 +115,22 @@ namespace Server
 
                 if (arenaSpellUsage.m_SpellType == type)                
                     return arenaSpellUsage;
+            }
+
+            return null;
+        }
+
+        public ArenaItemUsage AdjustItemUsage(Type type, int amount)
+        {
+            foreach (ArenaItemUsage arenaItemUsage in m_ItemUsages)
+            {
+                if (arenaItemUsage == null) continue;
+
+                if (arenaItemUsage.m_ItemType == type)
+                {
+                    arenaItemUsage.m_Uses += amount;
+                    break;
+                }
             }
 
             return null;

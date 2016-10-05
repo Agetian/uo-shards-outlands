@@ -32,12 +32,12 @@ namespace Server
             set { m_Enabled = value; }
         }
 
-        public Rectangle2D m_Boundary;
+        public Rectangle2D m_ArenaBoundary;
         [CommandProperty(AccessLevel.GameMaster)]
-        public Rectangle2D Boundary
+        public Rectangle2D ArenaBoundary
         {
-            get { return m_Boundary; }
-            set { m_Boundary = value; }
+            get { return m_ArenaBoundary; }
+            set { m_ArenaBoundary = value; }
         }
         
         public ArenaFight m_ArenaFight;
@@ -91,7 +91,7 @@ namespace Server
         {
             Point2D sourcePoint = new Point2D(location.X, location.Y);
 
-            if (m_Boundary.Contains(sourcePoint))
+            if (m_ArenaBoundary.Contains(sourcePoint))
                 return true;
 
             return false;
@@ -218,7 +218,7 @@ namespace Server
             //Version 0
             writer.Write(m_ArenaGroupController);
             writer.Write(m_Enabled);
-            writer.Write(m_Boundary);
+            writer.Write(m_ArenaBoundary);
             writer.Write(m_ArenaFight);
 
             writer.Write(m_Walls.Count);
@@ -238,7 +238,7 @@ namespace Server
             {
                 ArenaGroupController = reader.ReadItem() as ArenaGroupController;
                 Enabled = reader.ReadBool();
-                Boundary = reader.ReadRect2D();
+                ArenaBoundary = reader.ReadRect2D();
                 m_ArenaFight = reader.ReadItem() as ArenaFight;
 
                 int staticWallsCount = reader.ReadInt();

@@ -19,6 +19,17 @@ namespace Server
         public ArenaRuleset m_SavedRulesetPreset;
 
         public ArenaMatch m_ArenaMatch;
+        public ArenaParticipant m_ArenaParticipant 
+        { 
+            get 
+            {
+                if (m_ArenaMatch != null)                
+                    return m_ArenaMatch.GetParticipant(m_Player);
+                
+                else
+                    return null;
+            } 
+        }
 
         #region Stored Records
 

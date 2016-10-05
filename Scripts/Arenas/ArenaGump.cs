@@ -2019,8 +2019,6 @@ namespace Server
 
                                 ArenaParticipant participant = new ArenaParticipant(m_Player, arenaMatch, 0);
 
-                                participant.m_ReadyToggled = true;                               
-
                                 m_ArenaGumpObject.m_ArenaRuleset = new ArenaRuleset();
                                 m_ArenaGumpObject.m_ArenaRuleset.IsTemporary = true;                               
 

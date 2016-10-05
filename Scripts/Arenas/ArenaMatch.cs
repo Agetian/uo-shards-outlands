@@ -28,7 +28,7 @@ namespace Server
 
         public DateTime m_NextReadyCheck = DateTime.UtcNow;
 
-        public static TimeSpan ReadyCheckInterval = TimeSpan.FromSeconds(60);
+        public static TimeSpan ReadyCheckInterval = TimeSpan.FromSeconds(30);
 
         public MatchStatusType m_MatchStatus = MatchStatusType.Listed;        
         public ArenaRuleset m_Ruleset = new ArenaRuleset();        
@@ -128,6 +128,8 @@ namespace Server
             if (player == null)
                 return;
 
+            ArenaPlayerSettings.CheckCreateArenaPlayerSettings(player);
+
             string playerName = player.RawName;
 
             ArenaTeam playerTeam = null;
@@ -148,6 +150,8 @@ namespace Server
                     playerTeam.m_Participants.Remove(playerParticipant);
 
                 playerParticipant.Delete();
+
+                player.m_ArenaPlayerSettings.m_ArenaMatch = null;
             }
 
             if (broadcast)

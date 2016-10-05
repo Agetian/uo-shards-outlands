@@ -1187,6 +1187,11 @@ namespace Server.Mobiles
             }
 
             DisguiseTimers.StopTimer(from);
+
+            ArenaPlayerSettings.CheckCreateArenaPlayerSettings(player);
+
+            if (player.m_ArenaPlayerSettings.m_ArenaMatch != null)
+                player.m_ArenaPlayerSettings.m_ArenaMatch.LeaveMatch(player, true);
         }
 
         private static void Disconnect(object state)

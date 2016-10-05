@@ -47,6 +47,14 @@ namespace Server
         public static TimeSpan AuditInterval = TimeSpan.FromMinutes(5);
         public static TimeSpan LoggedOutPlayerTimeoutThreshold = TimeSpan.FromMinutes(10);
 
+        public Rectangle2D m_ArenaGroupRegionBoundary;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public Rectangle2D ArenaGroupRegionBoundary
+        {
+            get { return m_ArenaGroupRegionBoundary; }
+            set { m_ArenaGroupRegionBoundary = value; }
+        }
+
         public bool m_Enabled;
         [CommandProperty(AccessLevel.GameMaster)]
         public bool Enabled
@@ -202,10 +210,7 @@ namespace Server
                     Stop();
                     return;  
                 }
-
-                //TEST
-                m_ArenaGroupController.PublicOverheadMessage(MessageType.Regular, 0, false, "Tick");
-               
+                               
                 if (DateTime.UtcNow >= m_ArenaGroupController.m_NextListingAudit)
                     m_ArenaGroupController.AuditListings();                
 
@@ -237,7 +242,7 @@ namespace Server
 
                                 if (arenaMatch.m_Ruleset == null) continue;
 
-                                ArenaRuleset.ArenaRulesetFailureType rulesetFailure = arenaMatch.m_Ruleset.CheckForRulesetViolations(arenaParticipant.m_Player);
+                                ArenaRuleset.ArenaRulesetFailureType rulesetFailure = arenaMatch.m_Ruleset.CheckForRulesetViolations(arenaMatch, arenaParticipant.m_Player);
 
                                 m_RulesetViolations.Add(new KeyValuePair<PlayerMobile, ArenaRuleset.ArenaRulesetFailureType>(arenaParticipant.m_Player, rulesetFailure));
 
@@ -248,9 +253,46 @@ namespace Server
 
                         if (rulesetViolationExists)
                         {
-                            //TEST: SEND VIOLATION GUMP TO ALL TEAM MEMBERS OF EACH TIME                            
+                            arenaMatch.BroadcastMessage("Unable to start match due to the following ruleset violations:", 0);
+
+                            bool arenaError = false;
+
+                            foreach (KeyValuePair<PlayerMobile, ArenaRuleset.ArenaRulesetFailureType> rulesetViolation in m_RulesetViolations)
+                            {
+                                string message = "";
+
+                                PlayerMobile player = rulesetViolation.Key;
+                                ArenaRuleset.ArenaRulesetFailureType rule = rulesetViolation.Value;
+
+                                if (player == null)
+                                    continue;
+
+                                switch (rulesetViolation.Value)
+                                {
+                                    case ArenaRuleset.ArenaRulesetFailureType.ArenaInvalid: arenaError = true; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.Dead: message = player.RawName + ": Not Alive"; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.EquipmentAllowed: message = player.RawName + ": Has Restricted Equipment (worn or in backpack)"; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.Follower: message = player.RawName + ": Exceeds Follower Control Slots Allowed"; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.Mount: message = player.RawName + ": Mounts Not Allowed"; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.NotInArenaRegion: message = player.RawName + ": Outside of Arena Region"; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.NotOnline: message = player.RawName + ": Not Online"; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.PoisonedWeapon:message = player.RawName + ": Exceeds Allowed Number of Poisoned Weapons"; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.Transformed: message = player.RawName + ": Transformed or Disguised"; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.Young: message = player.RawName + ": Young Status"; break;
+                                }
+
+                                if (message != "")
+                                    arenaMatch.BroadcastMessage(message, 1256);
+                            }
+
+                            if (arenaError)
+                                arenaMatch.BroadcastMessage("Arena Configuration Error", 1256);
 
                             arenaMatch.m_NextReadyCheck = DateTime.UtcNow + ArenaMatch.ReadyCheckInterval;
+
+                            string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, arenaMatch.m_NextReadyCheck, false, true, true, true, true);
+
+                            arenaMatch.BroadcastMessage("Match will re-attempt to start in " + timeRemaining + ".", 0);                            
                         }
 
                         else
@@ -290,9 +332,12 @@ namespace Server
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
-            writer.Write((int)1);
+            writer.Write((int)0);
 
             //Version 0
+            writer.Write(Enabled);
+            writer.Write(ArenaGroupRegionBoundary);           
+
             writer.Write(m_MatchListings.Count);
             for (int a = 0; a < m_MatchListings.Count; a++)
             {
@@ -304,9 +349,6 @@ namespace Server
             {
                 writer.Write(m_Tournaments[a]);
             }
-
-            //Version 1
-            writer.Write(Enabled);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -317,6 +359,9 @@ namespace Server
             //Version 0
             if (version >= 0)
             {
+                Enabled = reader.ReadBool();
+                ArenaGroupRegionBoundary = reader.ReadRect2D();
+
                 int matchListingsCount = reader.ReadInt();
                 for (int a = 0; a < matchListingsCount; a++)
                 {
@@ -327,13 +372,7 @@ namespace Server
                 for (int a = 0; a < tournamentsCount; a++)
                 {
                     m_Tournaments.Add(reader.ReadItem() as ArenaTournament);
-                }
-            }
-
-            //Version 1
-            if (version >= 1)
-            {
-                Enabled = reader.ReadBool();
+                }                 
             }
 
             //-----

@@ -26,11 +26,16 @@ namespace Server
         public enum ArenaRulesetFailureType
         {
             None,
+            ArenaInvalid,
+            NotOnline,
             Dead,
             NotInArenaRegion,
+            Young,
             Transformed,
-            EquipmentRestriction,
-            WeaponPoisonedAtStart
+            EquipmentAllowed,
+            PoisonedWeapon,
+            Mount,
+            Follower,
         }
 
         public enum ArenaRulesetType
@@ -92,6 +97,7 @@ namespace Server
         public enum EquipmentAllowedType
         {
             GMRegularMaterials,
+            GMAnyMaterials,
             NoRestrictions
         }
 
@@ -156,7 +162,7 @@ namespace Server
                 return 1;
             }            
         }
-
+        
         public ArenaRulesetType m_RulesetType = ArenaRulesetType.Duel;
         public ArenaPresetType m_PresetType = ArenaPresetType.DuelBasic;
 
@@ -179,13 +185,13 @@ namespace Server
         [Constructable]
         public ArenaRuleset(): base(0x0)
         {
-            Visible = false;
-            Movable = false;
-
             CreateSpellRestrictionEntries();
             CreateItemRestrictionEntries();
 
             ApplyDefaultRuleset();
+
+            Visible = false;
+            Movable = false;
         }
 
         public ArenaRuleset(Serial serial): base(serial)
@@ -932,6 +938,11 @@ namespace Server
                         basicRuleDetail.m_Line1Text = "GM or Less (Regular Materials)"; 
                         basicRuleDetail.m_Line1Hue = 2499;
                     break;
+
+                    case EquipmentAllowedType.GMAnyMaterials:
+                        basicRuleDetail.m_Line1Text = "GM or Less (Any Materials)";
+                        basicRuleDetail.m_Line1Hue = 2499;
+                    break;
                 }
             }
 
@@ -1612,21 +1623,178 @@ namespace Server
             return true;
         }
 
-        public ArenaRulesetFailureType CheckForRulesetViolations(PlayerMobile player)
+        public ArenaRulesetFailureType CheckForRulesetViolations(ArenaMatch arenaMatch, PlayerMobile player)
         {
-            if (player == null) return ArenaRulesetFailureType.NotInArenaRegion;
-            if (player.Deleted) return ArenaRulesetFailureType.NotInArenaRegion;
+            if (arenaMatch == null) 
+                return ArenaRulesetFailureType.ArenaInvalid;
+
+            if (arenaMatch.Deleted) 
+                return ArenaRulesetFailureType.ArenaInvalid;
+
+            if (arenaMatch.m_ArenaGroupController == null)
+                return ArenaRulesetFailureType.ArenaInvalid;
+
+            if (arenaMatch.m_ArenaGroupController.Deleted)
+                return ArenaRulesetFailureType.ArenaInvalid;
+            
+            if (player == null)
+                return ArenaRulesetFailureType.NotOnline;
+
+            if (player.Deleted)
+                return ArenaRulesetFailureType.NotOnline;
 
             if (!player.Alive)
-                return ArenaRulesetFailureType.Dead;            
-            
-            //TEST: Not in Arena Zone
+                return ArenaRulesetFailureType.Dead;
 
-            //TEST: Disguised / Polymorphed / Incognito
+            if (player.Young)
+                return ArenaRulesetFailureType.Young;
 
-            //TEST: Restricted Equipment
+            if (!arenaMatch.m_ArenaGroupController.ArenaGroupRegionBoundary.Contains(player.Location) || arenaMatch.m_ArenaGroupController.Map != player.Map)
+                return ArenaRulesetFailureType.NotInArenaRegion;
 
-            //TEST: Weapon Poisoned At Start
+            //Polymorphed / Transformed / Disguise Kit / Incognito
+            if (!player.CanBeginAction(typeof(PolymorphSpell)))
+                return ArenaRulesetFailureType.Transformed;
+
+            if (player.IsBodyMod)
+                return ArenaRulesetFailureType.Transformed;
+
+            if (DisguiseTimers.IsDisguised(player))
+                return ArenaRulesetFailureType.Transformed;
+
+            if (!player.CanBeginAction(typeof(IncognitoSpell)))
+                return ArenaRulesetFailureType.Transformed;
+
+            //Mount
+            if (player.Mount != null && m_MountsRestriction == MountsRestrictionType.NotAllowed)
+                return ArenaRulesetFailureType.Mount;
+
+            //Follower
+            int followerCount = 0;
+            int maxFollowerCountAllowed = 0;
+
+            if (player.Mount != null && m_MountsRestriction == MountsRestrictionType.Allowed)
+                maxFollowerCountAllowed++; 
+
+            switch(m_FollowersRestrictionType)
+            {
+                case FollowersRestrictionType.None: maxFollowerCountAllowed = 0; break;
+                case FollowersRestrictionType.OneControlSlot: maxFollowerCountAllowed = 1; break;
+                case FollowersRestrictionType.TwoControlSlot: maxFollowerCountAllowed = 2; break;
+                case FollowersRestrictionType.ThreeControlSlot: maxFollowerCountAllowed = 3; break;
+                case FollowersRestrictionType.FourControlSlot: maxFollowerCountAllowed = 4; break;
+                case FollowersRestrictionType.FiveControlSlot: maxFollowerCountAllowed = 5; break;
+            }
+
+            foreach (Mobile mobile in player.AllFollowers)
+            {
+                BaseCreature bc_Creature = mobile as BaseCreature;
+
+                if (bc_Creature == null)
+                    continue;
+
+                followerCount += bc_Creature.ControlSlots;
+            }
+
+            if (followerCount > maxFollowerCountAllowed)
+                return ArenaRulesetFailureType.Follower;
+
+            //Poisoned Weapon
+            int poisonedWeaponCount = 0;
+            int maxPoisonedWeaponCountAllowed = 0;
+
+            switch (m_PoisonedWeaponsRestriction)
+            {
+                case PoisonedWeaponsStartingRestrictionType.None: maxPoisonedWeaponCountAllowed = 0; break;
+                case PoisonedWeaponsStartingRestrictionType.One: maxPoisonedWeaponCountAllowed = 1; break;
+                case PoisonedWeaponsStartingRestrictionType.Two: maxPoisonedWeaponCountAllowed = 2; break;
+                case PoisonedWeaponsStartingRestrictionType.Three: maxPoisonedWeaponCountAllowed = 3; break;
+                case PoisonedWeaponsStartingRestrictionType.Five: maxPoisonedWeaponCountAllowed = 5; break;
+                case PoisonedWeaponsStartingRestrictionType.Unlimited: maxPoisonedWeaponCountAllowed = 1000; break;
+            }
+
+            BaseWeapon oneHandedWeapon = player.FindItemOnLayer(Layer.OneHanded) as BaseWeapon;
+            BaseWeapon twoHandedWeapon = player.FindItemOnLayer(Layer.TwoHanded) as BaseWeapon;
+
+            if (oneHandedWeapon != null)
+            {
+                if (oneHandedWeapon.Poison != null)
+                    poisonedWeaponCount++;
+            }
+
+            if (twoHandedWeapon != null)
+            {
+                if (twoHandedWeapon.Poison != null)
+                    poisonedWeaponCount++;
+            }
+
+            foreach (Item item in player.Backpack.Items)
+            {
+                BaseWeapon weapon = item as BaseWeapon;
+
+                if (weapon == null)
+                    continue;
+
+                if (weapon.Poison != null)
+                    poisonedWeaponCount++;
+            }
+
+            if (poisonedWeaponCount > maxPoisonedWeaponCountAllowed)
+                return ArenaRulesetFailureType.PoisonedWeapon;
+
+            //Equipment
+            if (player.Backpack == null)
+                return ArenaRulesetFailureType.EquipmentAllowed;
+
+            List<Item> m_Items = player.GetAllItems();
+
+            foreach (Item item in m_Items)
+            {
+                if (!(item is BaseWeapon || item is BaseArmor))
+                    continue;
+
+                BaseWeapon weapon = item as BaseWeapon;
+                BaseArmor armor = item as BaseArmor;
+
+                if (weapon != null)
+                {
+                    switch (m_EquipmentAllowed)
+                    {
+                        case EquipmentAllowedType.NoRestrictions:
+                            break;
+
+                        case EquipmentAllowedType.GMRegularMaterials:
+                            if (weapon.IsMagical)
+                                return ArenaRulesetFailureType.EquipmentAllowed;
+
+                            if (!(weapon.Resource == CraftResource.None || weapon.Resource == CraftResource.Iron || weapon.Resource == CraftResource.RegularWood || weapon.Resource == CraftResource.RegularLeather))
+                                return ArenaRulesetFailureType.EquipmentAllowed;
+                            break;
+                    }
+                }
+
+                if (armor != null)
+                {
+                    switch (m_EquipmentAllowed)
+                    {
+                        case EquipmentAllowedType.NoRestrictions:
+                            break;
+
+                        case EquipmentAllowedType.GMRegularMaterials:
+                            if (armor.IsMagical)
+                                return ArenaRulesetFailureType.EquipmentAllowed;
+
+                            if (!(armor.Resource == CraftResource.None || armor.Resource == CraftResource.Iron || armor.Resource == CraftResource.RegularWood || armor.Resource == CraftResource.RegularLeather))
+                                return ArenaRulesetFailureType.EquipmentAllowed;
+                        break;
+
+                        case EquipmentAllowedType.GMAnyMaterials:
+                            if (armor.IsMagical)
+                                return ArenaRulesetFailureType.EquipmentAllowed;
+                        break;
+                    }
+                }
+            }
 
             return ArenaRulesetFailureType.None;
         }

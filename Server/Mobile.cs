@@ -11868,7 +11868,53 @@ namespace Server
             }
         }
 
+        public List<Item> GetEquippedItems()
+        {
+            List<Item> m_Items = new List<Item>();
+
+            int layerCount = Enum.GetNames(typeof(Layer)).Length;
+
+            for (int a = 0; a < layerCount; a++)
+            {
+                Layer layer = (Layer)a;
+
+                Item item = FindItemOnLayer(layer);
+
+                if (item != null)
+                    m_Items.Add(item);
+            }
+
+            return m_Items;
+        }
+
+        public List<Item> GetAllItems()
+        {
+            List<Item> m_Items = new List<Item>();   
+
+            List<Item> m_EquippedItems = GetEquippedItems();
+
+            foreach (Item item in m_EquippedItems)
+            {
+                m_Items.Add(item);
+            }
+
+            if (Backpack != null)
+            {
+                if (!Backpack.Deleted)
+                {
+                    foreach (Item item in Backpack.Items)
+                    {
+                        if (item != null)
+                            m_Items.Add(item);
+                    }
+                }
+            }                    
+
+            return m_Items;
+        }
+
         #region Armor
+
         public Item ShieldArmor
         {
             get
