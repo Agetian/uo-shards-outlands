@@ -1387,6 +1387,34 @@ namespace Server.Mobiles
 
         public CompetitionContext m_CompetitionContext = null;
 
+        public ArenaParticipant m_ActiveArenaParticipant
+        {
+            get
+            {
+                if (m_ArenaPlayerSettings == null) return null;
+                if (m_ArenaPlayerSettings.Deleted) return null;
+                if (!ArenaMatch.IsValidArenaMatch(m_ArenaPlayerSettings.m_ArenaMatch, this, false)) return null;
+
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
+
+                return m_ArenaPlayerSettings.m_ArenaMatch.GetParticipant(this);
+            }
+        }
+
+        public ArenaRuleset m_ActiveArenaRuleset
+        {
+            get 
+            {
+                if (m_ArenaPlayerSettings == null) return null;
+                if (m_ArenaPlayerSettings.Deleted) return null;
+                if (!ArenaMatch.IsValidArenaMatch(m_ArenaPlayerSettings.m_ArenaMatch, this, false)) return null;
+
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
+
+                return m_ArenaPlayerSettings.m_ArenaMatch.m_Ruleset;
+            }          
+        }
+
         public override bool KeepsItemsOnDeath { get { return (AccessLevel > AccessLevel.Player); } }
 
         public DateTime NextEmoteAllowed = DateTime.UtcNow;
@@ -1966,6 +1994,12 @@ namespace Server.Mobiles
 
         public override bool AllowItemUse(Item item)
         {
+            if (m_ActiveArenaRuleset != null)
+            {
+                if (!m_ActiveArenaRuleset.AttemptItemUsage(this, item))
+                    return false;
+            }   
+
             return DesignContext.Check(this);
         }
 

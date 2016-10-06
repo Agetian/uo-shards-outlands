@@ -112,6 +112,8 @@ namespace Server.Spells.Fifth
                 }
             }
 
+            ArenaRuleset.SpellCompletion(Caster, typeof(PoisonFieldSpell));
+
             FinishSequence();
         }
 

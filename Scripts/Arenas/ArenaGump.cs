@@ -2480,13 +2480,35 @@ namespace Server
                             {
                                 ArenaRuleset.CopyRulesetSettings(m_ArenaGumpObject.m_ArenaRuleset, selectedArenaMatch.m_Ruleset);
 
-                                selectedArenaMatch.BroadcastMessage("Rules of your current arena match have been changed.", 1256);
+                                List<ArenaParticipant> m_Participants = selectedArenaMatch.GetParticipants();
+
+                                foreach (ArenaParticipant participant in m_Participants)
+                                {
+                                    if (participant == null) continue;
+                                    if (participant.Deleted) continue;
+                                    if (participant.m_Player == null) continue;
+
+                                    if (participant.m_Player == m_Player)
+                                        m_Player.SendMessage("You change the rules for the arena match.");
+
+                                    else
+                                    {
+                                        if (participant.m_ReadyToggled)
+                                            participant.m_Player.SendMessage(1256, "Rules of your arena match have changed. Review the changes and click 'Ready'.");
+
+                                        else
+                                            participant.m_Player.SendMessage(1256, "Rules of your arena match have changed.");
+                                    }
+
+                                    participant.m_Player.SendSound(0x5B6);
+                                }
 
                                 m_ArenaGumpObject.ArenaRulesetEdited = false;
 
                                 m_Player.SendSound(SelectionSound);
 
                                 //TEST: NEED TO DUMP EXTRA TEAMMATES IF DOWNGRADING TEAMSIZE SETTING
+                                //TEST: Make sure new players meet criteria (i.e. belong to Guild / Party
                             }
 
                             closeGump = false;

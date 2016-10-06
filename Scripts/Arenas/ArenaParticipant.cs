@@ -111,13 +111,18 @@ namespace Server
         {
             foreach (ArenaSpellUsage arenaSpellUsage in m_SpellUsages)
             {
-                if (arenaSpellUsage == null) continue;
+                if (arenaSpellUsage == null)
+                    continue;
 
                 if (arenaSpellUsage.m_SpellType == type)                
                     return arenaSpellUsage;
             }
 
-            return null;
+            ArenaSpellUsage newArenaSpellUsage = new ArenaSpellUsage(type, 0);
+
+            m_SpellUsages.Add(newArenaSpellUsage);
+
+            return newArenaSpellUsage;
         }
 
         public ArenaItemUsage AdjustItemUsage(Type type, int amount)
@@ -140,13 +145,18 @@ namespace Server
         {
             foreach (ArenaItemUsage arenaItemUsage in m_ItemUsages)
             {
-                if (arenaItemUsage == null) continue;
+                if (arenaItemUsage == null) 
+                    continue;
 
                 if (arenaItemUsage.m_ItemType == type)
                     return arenaItemUsage;
             }
 
-            return null;
+            ArenaItemUsage newArenaItemUsage = new ArenaItemUsage(type, 0);
+
+            m_ItemUsages.Add(newArenaItemUsage);
+
+            return newArenaItemUsage;
         }
 
         public ArenaParticipant(Serial serial): base(serial)

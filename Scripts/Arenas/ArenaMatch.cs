@@ -294,6 +294,42 @@ namespace Server
 
         public override void OnDelete()
         {
+            Queue m_TeamsQueue = new Queue();
+            Queue m_ParticipantQueue = new Queue();
+
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null)
+                    continue;
+
+                m_TeamsQueue.Enqueue(arenaTeam);
+
+                foreach (ArenaParticipant participant in arenaTeam.m_Participants)
+                {
+                    if (participant == null)
+                        continue;
+
+                    m_ParticipantQueue.Enqueue(participant);
+
+                    if (participant.m_Player != null)
+                        participant.m_Player.m_ArenaPlayerSettings.m_ArenaMatch = null;
+                }
+            }
+
+            while (m_ParticipantQueue.Count > 0)
+            {
+                ArenaParticipant arenaParticipant = (ArenaParticipant)m_ParticipantQueue.Dequeue();
+
+                arenaParticipant.Delete();
+            }
+
+            while (m_TeamsQueue.Count > 0)
+            {
+                ArenaTeam arenaTeam = (ArenaTeam)m_TeamsQueue.Dequeue();
+
+                arenaTeam.Delete();
+            }
+
             if (m_ArenaGroupController != null)
             {
                 if (m_ArenaGroupController.m_MatchListings.Contains(this))

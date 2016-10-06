@@ -172,6 +172,8 @@ namespace Server.Spells.Seventh
                 }
             }
 
+            ArenaRuleset.SpellCompletion(Caster, typeof(ChainLightningSpell));
+
             FinishSequence();
         }
 

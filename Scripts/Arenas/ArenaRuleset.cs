@@ -1487,20 +1487,43 @@ namespace Server
             }
         }
 
-        public bool IsSpellAllowed(PlayerMobile player, Type spellType)
+        public bool AttemptUseSpell(PlayerMobile player, Type spellType)
         {
-            if (player.m_CompetitionContext == null) return true;
-            if (player.m_CompetitionContext.m_ArenaParticipant == null) return true;
-            if (player.m_CompetitionContext.m_ArenaParticipant.m_SpellUsages == null) return true;
-            
-            //TEST: Add Always Restricted Spells
+            ArenaParticipant arenaParticipant = player.m_ActiveArenaParticipant;
+
+            if (arenaParticipant == null)
+                return false;
+
+            bool restrictedSpell = false;
+
+            if (spellType == typeof(TelekinesisSpell)) restrictedSpell = true;
+            if (spellType == typeof(RecallSpell)) restrictedSpell = true;
+            if (spellType == typeof(BladeSpirits)) restrictedSpell = true;
+            if (spellType == typeof(IncognitoSpell)) restrictedSpell = true;
+            if (spellType == typeof(SummonCreatureSpell)) restrictedSpell = true;
+            if (spellType == typeof(InvisibilitySpell)) restrictedSpell = true;
+            if (spellType == typeof(MarkSpell)) restrictedSpell = true;
+            if (spellType == typeof(GateTravelSpell)) restrictedSpell = true;
+            if (spellType == typeof(PolymorphSpell)) restrictedSpell = true;
+            if (spellType == typeof(AirElementalSpell)) restrictedSpell = true;
+            if (spellType == typeof(EarthElementalSpell)) restrictedSpell = true;
+            if (spellType == typeof(EnergyVortexSpell)) restrictedSpell = true;
+            if (spellType == typeof(FireElementalSpell)) restrictedSpell = true;
+            if (spellType == typeof(ResurrectionSpell)) restrictedSpell = true;
+            if (spellType == typeof(SummonDaemonSpell)) restrictedSpell = true;
+            if (spellType == typeof(WaterElementalSpell)) restrictedSpell = true;
+
+            if (restrictedSpell)
+            {
+                player.SendMessage("That spell is not allowed here.");
+                return false;
+            }           
             
             foreach (ArenaSpellRestriction spellRestriction in m_SpellRestrictions)
             {
                 if (spellRestriction == null)
                     continue;
 
-                //Custom 
                 if (spellRestriction.m_SpellType == spellType)
                 {
                     int maxUsesAllowed = 0;
@@ -1514,21 +1537,24 @@ namespace Server
                         case ArenaSpellRestriction.SpellRestrictionModeType.TenUses: maxUsesAllowed = 10; break;
                         case ArenaSpellRestriction.SpellRestrictionModeType.TwentyFiveUses: maxUsesAllowed = 25; break;
                         case ArenaSpellRestriction.SpellRestrictionModeType.FiftyUses: maxUsesAllowed = 50; break;
-                        case ArenaSpellRestriction.SpellRestrictionModeType.Unlimited: maxUsesAllowed = 10000; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.Unlimited: return true; break;
                     }
 
                     if (maxUsesAllowed == 0)
+                    {
+                        player.SendMessage("That spell has been restricted for this match.");
                         return false;
+                    }
 
-                    ArenaSpellUsage arenaSpellUsage = player.m_CompetitionContext.m_ArenaParticipant.GetSpellUsage(spellType);
+                    ArenaSpellUsage arenaSpellUsage = arenaParticipant.GetSpellUsage(spellType);
 
                     if (arenaSpellUsage != null)
                     {
                         if (arenaSpellUsage.m_Uses >= maxUsesAllowed)
+                        {
+                            player.SendMessage("You have exceeded the maximum uses of that spell allowed for this match.");
                             return false;
-
-                        else
-                            return true;
+                        }
                     }
                 }
             }
@@ -1536,86 +1562,149 @@ namespace Server
             return true;
         }
 
-        public bool IsItemAllowed(PlayerMobile player, Item item)
+        public static void SpellCompletion(Mobile mobile, Type spellType)
         {
-            if (player.m_CompetitionContext == null) return true;
-            if (player.m_CompetitionContext.m_ArenaParticipant == null) return true;
-            if (player.m_CompetitionContext.m_ArenaParticipant.m_SpellUsages == null) return true;
+            PlayerMobile player = mobile as PlayerMobile;
 
-            Type itemType = item.GetType();
-
-            foreach (ArenaItemRestriction itemRestriction in m_ItemRestrictions)
+            if (player == null)
+                return;
+           
+            if (player.m_ActiveArenaParticipant != null && player.m_ActiveArenaRuleset != null)
             {
-                if (itemRestriction == null)
-                    continue;
+                player.m_ActiveArenaParticipant.AdjustSpellUsage(spellType, 1);
 
-                if (itemRestriction.m_ItemType == typeof(Pouch))
-                {
-                    if (item is TrapableContainer)
-                    {
-                        TrapableContainer container = item as TrapableContainer;
+                ArenaSpellUsage arenaSpellUsage = player.m_ActiveArenaParticipant.GetSpellUsage(spellType);
 
-                        if (container.TrapType != TrapType.None)
-                        {
-                            int maxUsesAllowed = 0;
+                int spellUses = 0;
 
-                            switch (itemRestriction.m_RestrictionMode)
-                            {
-                                case ArenaItemRestriction.ItemRestrictionModeType.Disabled: maxUsesAllowed = 0; break;
-                                case ArenaItemRestriction.ItemRestrictionModeType.OneUse: maxUsesAllowed = 1; break;
-                                case ArenaItemRestriction.ItemRestrictionModeType.ThreeUses: maxUsesAllowed = 3; break;
-                                case ArenaItemRestriction.ItemRestrictionModeType.FiveUses: maxUsesAllowed = 5; break;
-                                case ArenaItemRestriction.ItemRestrictionModeType.TenUses: maxUsesAllowed = 10; break;
-                                case ArenaItemRestriction.ItemRestrictionModeType.TwentyFiveUses: maxUsesAllowed = 25; break;
-                                case ArenaItemRestriction.ItemRestrictionModeType.FiftyUses: maxUsesAllowed = 50; break;
-                                case ArenaItemRestriction.ItemRestrictionModeType.Unlimited: maxUsesAllowed = 10000; break;
-                            }
+                if (arenaSpellUsage != null)
+                    spellUses = arenaSpellUsage.m_Uses;
 
-                            if (maxUsesAllowed == 0)
-                                return false;
+                ArenaSpellRestriction arenaSpellRestriction = player.m_ActiveArenaRuleset.GetSpellRestriction(spellType);
 
-                            ArenaItemUsage arenaItemUsage = player.m_CompetitionContext.m_ArenaParticipant.GetItemUsage(itemType);
-
-                            if (arenaItemUsage != null)
-                            {
-                                if (arenaItemUsage.m_Uses >= maxUsesAllowed)
-                                    return false;
-
-                                else
-                                    return true;
-                            }
-                        }
-                    }                    
-                }
-
-                else if (itemType == itemRestriction.m_ItemType)
+                if (arenaSpellRestriction != null)
                 {
                     int maxUsesAllowed = 0;
 
-                    switch (itemRestriction.m_RestrictionMode)
+                    switch (arenaSpellRestriction.m_RestrictionMode)
                     {
-                        case ArenaItemRestriction.ItemRestrictionModeType.Disabled: maxUsesAllowed = 0; break;
-                        case ArenaItemRestriction.ItemRestrictionModeType.OneUse: maxUsesAllowed = 1; break;
-                        case ArenaItemRestriction.ItemRestrictionModeType.ThreeUses: maxUsesAllowed = 3; break;
-                        case ArenaItemRestriction.ItemRestrictionModeType.FiveUses: maxUsesAllowed = 5; break;
-                        case ArenaItemRestriction.ItemRestrictionModeType.TenUses: maxUsesAllowed = 10; break;
-                        case ArenaItemRestriction.ItemRestrictionModeType.TwentyFiveUses: maxUsesAllowed = 25; break;
-                        case ArenaItemRestriction.ItemRestrictionModeType.FiftyUses: maxUsesAllowed = 50; break;
-                        case ArenaItemRestriction.ItemRestrictionModeType.Unlimited: maxUsesAllowed = 10000; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.Disabled: maxUsesAllowed = 0; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.OneUse: maxUsesAllowed = 1; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.ThreeUses: maxUsesAllowed = 3; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.FiveUses: maxUsesAllowed = 5; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.TenUses: maxUsesAllowed = 10; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.TwentyFiveUses: maxUsesAllowed = 25; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.FiftyUses: maxUsesAllowed = 50; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.Unlimited: maxUsesAllowed = 10000; break;
                     }
 
-                    if (maxUsesAllowed == 0)
-                        return false;
-
-                    ArenaItemUsage arenaItemUsage = player.m_CompetitionContext.m_ArenaParticipant.GetItemUsage(itemType);
-
-                    if (arenaItemUsage != null)
+                    if (spellUses > 0 && (maxUsesAllowed > 0 && maxUsesAllowed <= 100))
                     {
-                        if (arenaItemUsage.m_Uses >= maxUsesAllowed)
-                            return false;
+                        string spellName = "";
 
-                        else
-                            return true;
+                        if (spellType == typeof(PoisonSpell)) spellName = "Poison";
+                        if (spellType == typeof(PoisonFieldSpell)) spellName = "Poison Field";
+                        if (spellType == typeof(ParalyzeSpell)) spellName = "Paralyze";
+                        if (spellType == typeof(ParalyzeFieldSpell)) spellName = "Paralyze Field";
+                        if (spellType == typeof(MeteorSwarmSpell)) spellName = "Meteor Swarm";
+                        if (spellType == typeof(ChainLightningSpell)) spellName = "Chain Lightning";
+                        if (spellType == typeof(EarthquakeSpell)) spellName = "Earthquake";
+
+                        player.SendMessage(spellName + " Casts Allowed: " + spellUses.ToString() + " / " + maxUsesAllowed.ToString());
+                    }
+                }
+            }            
+        }
+        
+        public bool AttemptItemUsage(PlayerMobile player, Item item)
+        {
+            ArenaParticipant arenaParticipant = player.m_ActiveArenaParticipant;
+
+            if (arenaParticipant == null)
+                return false;
+
+            bool restrictedItem = false;
+
+            //TEST: ADD RESTRICTED ITEMS
+
+            if (restrictedItem)
+            {
+                player.SendMessage("That item is not allowed here.");
+                return false;
+            }
+
+            Type itemType = item.GetType();
+
+            if (item is BaseAgilityPotion) itemType = typeof(BaseAgilityPotion);
+            if (item is BaseCurePotion) itemType = typeof(BaseCurePotion);
+            if (item is BaseExplosionPotion) itemType = typeof(BaseExplosionPotion);
+            if (item is BaseHealPotion) itemType = typeof(BaseHealPotion);
+            if (item is BaseMagicResistPotion) itemType = typeof(BaseMagicResistPotion);
+            if (item is BasePoisonPotion) itemType = typeof(BasePoisonPotion);
+            if (item is BaseRefreshPotion) itemType = typeof(BaseRefreshPotion);
+            if (item is BaseStrengthPotion) itemType = typeof(BaseStrengthPotion);
+            
+            if (item is TrapableContainer)
+            {
+                TrapableContainer container = item as TrapableContainer;
+
+                if (container.TrapType != TrapType.None)
+                    itemType = typeof(Pouch);
+            }
+
+            ArenaItemRestriction itemRestriction = GetItemRestriction(itemType);
+
+            if (itemRestriction != null)
+            {
+                int maxUsesAllowed = 0;
+
+                switch (itemRestriction.m_RestrictionMode)
+                {
+                    case ArenaItemRestriction.ItemRestrictionModeType.Disabled: maxUsesAllowed = 0; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.OneUse: maxUsesAllowed = 1; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.ThreeUses: maxUsesAllowed = 3; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.FiveUses: maxUsesAllowed = 5; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.TenUses: maxUsesAllowed = 10; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.TwentyFiveUses: maxUsesAllowed = 25; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.FiftyUses: maxUsesAllowed = 50; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.Unlimited: return true; break;
+                }
+
+                if (maxUsesAllowed == 0)
+                {
+                    player.SendMessage("That item has been restricted for this match.");
+                    return false;
+                }
+
+                ArenaItemUsage arenaItemUsage = arenaParticipant.GetItemUsage(itemType);
+
+                if (arenaItemUsage != null)
+                {
+                    if (arenaItemUsage.m_Uses >= maxUsesAllowed)
+                    {
+                        player.SendMessage("You have exceeded the maximum uses of that item allowed for this match.");
+                        return false;
+                    }
+
+                    else
+                    {
+                        arenaItemUsage.m_Uses++;
+
+                        string itemName = "";
+
+                        if (itemType == typeof(BaseAgilityPotion)) itemName = "Agility Potion";
+                        if (itemType == typeof(BaseCurePotion)) itemName = "Cure Potion";
+                        if (itemType == typeof(BaseExplosionPotion)) itemName = "Explosion Potion";
+                        if (itemType == typeof(BaseHealPotion)) itemName = "Heal Potion";
+                        if (itemType == typeof(BaseMagicResistPotion)) itemName = "Magic Resist Potion";
+                        if (itemType == typeof(BasePoisonPotion)) itemName = "Poison Potion";
+                        if (itemType == typeof(BaseRefreshPotion)) itemName = "Refresh Potion";
+                        if (itemType == typeof(BaseStrengthPotion)) itemName = "Strength Potion";
+                        if (itemType == typeof(Pouch)) itemName = "Trapped Container";
+
+                        player.SendMessage(itemName + " Uses Allowed: " + arenaItemUsage.m_Uses.ToString() + " / " + maxUsesAllowed.ToString());
+
+                        return true;
                     }
                 }
             }
@@ -1909,15 +1998,15 @@ namespace Server
     public class ArenaSpellRestriction
     {
         public enum SpellRestrictionModeType
-        {
-            Disabled,            
+        {          
+            Unlimited,
             OneUse,
             ThreeUses,
             FiveUses,
             TenUses,
             TwentyFiveUses,
             FiftyUses,
-            Unlimited,
+            Disabled,
         }
 
         public Type m_SpellType;
@@ -1933,15 +2022,15 @@ namespace Server
     public class ArenaItemRestriction
     {
         public enum ItemRestrictionModeType
-        {
-            Disabled,           
+        {            
+            Unlimited,
             OneUse,
             ThreeUses,
             FiveUses,
             TenUses,
             TwentyFiveUses,
             FiftyUses,
-            Unlimited,
+            Disabled,
         }
 
         public Type m_ItemType;

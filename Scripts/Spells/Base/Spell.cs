@@ -4,7 +4,15 @@ using Server.Network;
 using Server.Targeting;
 using Server.Mobiles;
 using System.Collections.Generic;
+
+using Server.Spells.First;
 using Server.Spells.Second;
+using Server.Spells.Third;
+using Server.Spells.Fourth;
+using Server.Spells.Fifth;
+using Server.Spells.Sixth;
+using Server.Spells.Seventh;
+using Server.Spells.Eighth;
 
 namespace Server.Spells
 {
@@ -513,6 +521,14 @@ namespace Server.Spells
  
             if (m_Caster.Player)
             {
+                PlayerMobile player = m_Caster as PlayerMobile;
+                
+                if (player.m_ActiveArenaRuleset != null)
+                {
+                    if (!player.m_ActiveArenaRuleset.AttemptUseSpell(player, this.GetType()))
+                        return false;
+                }                
+
                 Item item = m_Caster.FindItemOnLayer(Layer.OneHanded);
 
                 if (item != null && !(item is Spellbook) && !(item is Runebook) && !(item is BaseWand))
@@ -746,7 +762,7 @@ namespace Server.Spells
         }
 
         public virtual void FinishSequence()
-        {
+        {   
             if (m_Caster is BaseCreature)
             {
             }
@@ -754,7 +770,7 @@ namespace Server.Spells
             m_State = SpellState.None;
 
             if (m_Caster.Spell == this)
-                m_Caster.Spell = null;
+                m_Caster.Spell = null;            
         }
 
         public virtual int ComputeKarmaAward()

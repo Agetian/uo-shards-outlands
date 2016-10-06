@@ -74,6 +74,17 @@ namespace Server.SkillHandlers
 
 					if ( startTimer )
 					{
+                        PlayerMobile player = from as PlayerMobile;
+
+                        if (player != null)
+                        {
+                            if (player.m_ActiveArenaRuleset != null)
+                            {
+                                if (!player.m_ActiveArenaRuleset.AttemptItemUsage(player, m_Potion))
+                                    return;
+                            }
+                        }
+
 						new InternalTimer( from, (Item)targeted, m_Potion ).Start();
 
 						from.PlaySound( 0x4F );		
