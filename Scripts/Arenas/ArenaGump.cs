@@ -414,7 +414,7 @@ namespace Server
                         //Team 1 Statues
                         for (int b = 0; b < teamSize; b++)
                         {
-                            int playerHue = 2401;
+                            int playerIconHue = 1105;
 
                             if (team1 != null)
                             {
@@ -428,20 +428,20 @@ namespace Server
                                     if (participant == null)
                                         continue;
 
-                                    playerHue = 2500;
+                                    playerIconHue = 2500;
 
-                                    if (participant.m_ReadyToggled)                                        
-                                        playerHue = 2208;   
+                                    if (participant.m_ReadyToggled)                                    
+                                        playerIconHue = 2208;                                    
                                 }
                             }
 
-                            AddItem(35 - ((teamSize - 1) * 7) + (b * 7), startY - 10, 15178, playerHue);
+                            AddItem(35 - ((teamSize - 1) * 7) + (b * 7), startY - 10, 15178, playerIconHue);
                         }
 
                         //Team 2 Statues
                         for (int b = 0; b < teamSize; b++)
                         {
-                            int playerHue = 2401;
+                            int playerIconHue = 1105;
 
                             if (team2 != null)
                             {
@@ -455,14 +455,14 @@ namespace Server
                                     if (participant == null)
                                         continue;
 
-                                    playerHue = 2500;
+                                    playerIconHue = 2500;
 
                                     if (participant.m_ReadyToggled)
-                                        playerHue = 2208;                                    
+                                        playerIconHue = 2208;                                                             
                                 }
                             }
 
-                            AddItem(60 + (b * 7), startY - 10, 15179, playerHue);
+                            AddItem(60 + (b * 7), startY - 10, 15179, playerIconHue);
                         }
 
                         #endregion
@@ -531,7 +531,7 @@ namespace Server
 
                                 else
                                 {
-                                    AddLabel(318, startY + 9, 1102, "Full");
+                                    AddLabel(318, startY + 9, WhiteTextHue, "Full");
                                     AddImage(347, startY + 6, 9721, 1102);
                                 }
                             }
@@ -562,7 +562,7 @@ namespace Server
 
                                 else
                                 {
-                                    AddLabel(502, startY + 9, 1102, "Full");
+                                    AddLabel(502, startY + 9, WhiteTextHue, "Full");
                                     AddImage(533, startY + 6, 9721, 1102);
                                 }
                             }
@@ -1006,8 +1006,8 @@ namespace Server
                                         
                     for (int a = 0; a < teamPlayersNeeded; a++)
                     {
-                        int playerIconHue = 1102;
                         int playerTextHue = 1102;
+                        int playerIconHue = 1105;                       
 
                         string playerName = "";
 
@@ -1022,9 +1022,9 @@ namespace Server
                                 continue;
 
                             team1PlayerCount++;
-
-                            playerIconHue = 2500;
-                            playerTextHue = 2499;                                 
+                            
+                            playerTextHue = WhiteTextHue;
+                            playerIconHue = 2500;   
 
                             if (participant.m_Player != null)
                                 playerName = participant.m_Player.RawName;
@@ -1033,8 +1033,8 @@ namespace Server
                             {                              
                                 team1ReadyPlayerCount++;
 
-                                playerIconHue = 2208;
                                 playerTextHue = 63;
+                                playerIconHue = 2208;                               
                             }                                
                         }
 
@@ -1072,8 +1072,8 @@ namespace Server
 
                     for (int a = 0; a < teamPlayersNeeded; a++)
                     {
-                        int playerIconHue = 2401;
                         int playerTextHue = 1102;
+                        int playerIconHue = 1105;                        
 
                         string playerName = "";
 
@@ -1089,8 +1089,8 @@ namespace Server
 
                             team2PlayerCount++;
 
-                            playerIconHue = 2500;
-                            playerTextHue = 2499;
+                            playerTextHue = WhiteTextHue;
+                            playerIconHue = 2500;                           
 
                             if (participant.m_Player != null)
                                 playerName = participant.m_Player.RawName;
@@ -1099,8 +1099,8 @@ namespace Server
                             {                              
                                 team2ReadyPlayerCount++;
 
-                                playerIconHue = 2208;
                                 playerTextHue = 63;
+                                playerIconHue = 2208;                               
                             }                                
                         }
 
@@ -1627,7 +1627,7 @@ namespace Server
 
                                 else
                                 {
-                                    m_Player.m_ArenaPlayerSettings.m_ArenaMatch.LeaveMatch(m_Player, true);
+                                    m_Player.m_ArenaPlayerSettings.m_ArenaMatch.LeaveMatch(m_Player, true, true);
                                     m_Player.SendMessage("You leave your current match.");
                                 }
                             }                           
@@ -1820,7 +1820,9 @@ namespace Server
                                     else
                                         arenaTeam1.m_Participants.Add(playerParticipant);
 
-                                    m_Player.SendMessage("You switch teams.");
+                                    selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has switched teams.", 0);
+
+                                    selectedArenaMatch.ParticipantsForceGumpUpdate();
                                 }
                             }
 
@@ -1840,7 +1842,9 @@ namespace Server
                                     else
                                         arenaTeam2.m_Participants.Add(playerParticipant);
 
-                                    m_Player.SendMessage("You switch teams.");
+                                    selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);
+
+                                    selectedArenaMatch.ParticipantsForceGumpUpdate();
                                 }
                             }
                         }
@@ -1860,12 +1864,14 @@ namespace Server
                                 else
                                 {
                                     selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);
-
+                                    
                                     ArenaParticipant newArenaParticipant = new ArenaParticipant(m_Player, selectedArenaMatch, 0);
 
                                     m_Player.m_ArenaPlayerSettings.m_ArenaMatch = selectedArenaMatch;
 
                                     m_Player.SendMessage("You join the match.");
+
+                                    selectedArenaMatch.ParticipantsForceGumpUpdate();
                                 }
                             }
 
@@ -1883,6 +1889,8 @@ namespace Server
                                     m_Player.m_ArenaPlayerSettings.m_ArenaMatch = selectedArenaMatch;
 
                                     m_Player.SendMessage("You join the match.");
+
+                                    selectedArenaMatch.ParticipantsForceGumpUpdate();
                                 }
                             }
                         }
@@ -2260,7 +2268,7 @@ namespace Server
 
                             else if (playerIsOnTeam1 || playerIsOnTeam2)
                             {
-                                selectedArenaMatch.LeaveMatch(m_Player, true);
+                                selectedArenaMatch.LeaveMatch(m_Player, true, true);
 
                                 m_Player.SendMessage("You leave the match.");
                             }
@@ -2318,7 +2326,9 @@ namespace Server
                                         else
                                             arenaTeam1.m_Participants.Add(playerParticipant);
 
-                                        m_Player.SendMessage("You switch teams.");
+                                        selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);
+
+                                        selectedArenaMatch.ParticipantsForceGumpUpdate();
                                     }
                                 }
                             }
@@ -2333,13 +2343,15 @@ namespace Server
 
                                 else
                                 {
-                                    selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);
+                                    selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);                                    
 
                                     ArenaParticipant newArenaParticipant = new ArenaParticipant(m_Player, selectedArenaMatch, 0);
 
                                     m_Player.m_ArenaPlayerSettings.m_ArenaMatch = selectedArenaMatch;
 
                                     m_Player.SendMessage("You join the match.");
+
+                                    selectedArenaMatch.ParticipantsForceGumpUpdate();
                                 }
                             }
 
@@ -2392,7 +2404,9 @@ namespace Server
                                         else
                                             arenaTeam2.m_Participants.Add(playerParticipant);
 
-                                        m_Player.SendMessage("You switch teams.");
+                                        selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);
+
+                                        selectedArenaMatch.ParticipantsForceGumpUpdate();
                                     }
                                 }
                             }
@@ -2414,6 +2428,8 @@ namespace Server
                                     m_Player.m_ArenaPlayerSettings.m_ArenaMatch = selectedArenaMatch;
 
                                     m_Player.SendMessage("You join the match.");
+
+                                    selectedArenaMatch.ParticipantsForceGumpUpdate();
                                 }
                             }
 

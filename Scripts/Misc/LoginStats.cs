@@ -22,19 +22,21 @@ namespace Server.Misc
 			int mobileCount = World.Mobiles.Count;
 
 			Mobile m = args.Mobile;
+
 			if (m.AccessLevel >= AccessLevel.Counselor)
 			{
-			m.SendMessage("Welcome, {0}! There {1} currently {2} user{3} online, with {4} item{5} and {6} mobile{7} in the world.",
+			    m.SendMessage("Welcome, {0}! There {1} currently {2} user{3} online, with {4} item{5} and {6} mobile{7} in the world.",
 				args.Mobile.Name,
 				userCount == 1 ? "is" : "are",
 				userCount, userCount == 1 ? "" : "s",
 				itemCount, itemCount == 1 ? "" : "s",
 				mobileCount, mobileCount == 1 ? "" : "s");
 			}
-			else
-			m.SendMessage("Welcome {0}!", args.Mobile.Name);
 
-			m.SendGump( new Server.Gumps.WelcomeGump(0) );
+			else
+			    m.SendMessage("Welcome {0}!", args.Mobile.Name);
+
+			//m.SendGump( new Server.Gumps.WelcomeGump(0) );
 		}
 	}
 }

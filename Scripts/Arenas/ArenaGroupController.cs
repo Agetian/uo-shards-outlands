@@ -108,8 +108,16 @@ namespace Server
 
             if (player == null)
                 return;
+
+            if (player.m_ActiveArenaParticipant != null)
+            {
+                player.SendMessage("You are already in the middle of a match.");
+                return;
+            }
                         
             ArenaGumpObject arenaGumpObject = new ArenaGumpObject(player, this);
+
+            player.m_ArenaGumpObject = arenaGumpObject;
             
             player.SendSound(0x055);
 

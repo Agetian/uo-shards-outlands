@@ -1182,16 +1182,9 @@ namespace Server.Mobiles
 
                 player.LastOnline = DateTime.UtcNow;
                 player.SetSallos(false);
-
-                Guilds.OnLogout(player);
             }
 
             DisguiseTimers.StopTimer(from);
-
-            ArenaPlayerSettings.CheckCreateArenaPlayerSettings(player);
-
-            if (player.m_ArenaPlayerSettings.m_ArenaMatch != null)
-                player.m_ArenaPlayerSettings.m_ArenaMatch.LeaveMatch(player, true);
         }
 
         private static void Disconnect(object state)
@@ -1208,6 +1201,13 @@ namespace Server.Mobiles
 
             if (player == null)
                 return;
+
+            Guilds.OnLogout(player);
+
+            ArenaPlayerSettings.CheckCreateArenaPlayerSettings(player);
+
+            if (player.m_ArenaPlayerSettings.m_ArenaMatch != null)
+                player.m_ArenaPlayerSettings.m_ArenaMatch.LeaveMatch(player, true, true);
         }
 
         public static bool IPMatch(PlayerMobile player1, PlayerMobile player2)
@@ -1387,6 +1387,7 @@ namespace Server.Mobiles
 
         public CompetitionContext m_CompetitionContext = null;
 
+        public ArenaGumpObject m_ArenaGumpObject;
         public ArenaParticipant m_ActiveArenaParticipant
         {
             get

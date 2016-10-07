@@ -251,6 +251,9 @@ namespace Server
 
             //----
 
+            //Force On System Start
+            m_ReadyToggled = false;
+
             if (m_ArenaMatch == null)
                 Delete();
         }

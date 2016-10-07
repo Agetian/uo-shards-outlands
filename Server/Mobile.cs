@@ -2218,8 +2218,7 @@ namespace Server
         {
             private Mobile m_Mobile;
 
-            public LogoutTimer(Mobile m)
-                : base(TimeSpan.FromDays(1.0))
+            public LogoutTimer(Mobile m): base(TimeSpan.FromDays(1.0))
             {
                 Priority = TimerPriority.OneSecond;
                 m_Mobile = m;

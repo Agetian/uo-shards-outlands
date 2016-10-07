@@ -122,28 +122,63 @@ namespace Server
                 }
             }
         }
-        
-        public void LeaveMatch(PlayerMobile player, bool broadcast)
+
+        public void ParticipantsForceGumpUpdate()
         {
+            foreach (ArenaTeam arenaTeam in m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                foreach (ArenaParticipant participant in arenaTeam.m_Participants)
+                {
+                    if (participant == null) continue;
+                    if (participant.Deleted) continue;
+                    if (participant.m_Player == null) continue;
+                    
+                    if (participant.m_Player.HasGump(typeof(ArenaGump)) && participant.m_Player.m_ArenaGumpObject != null)
+                    {
+                        participant.m_Player.CloseGump(typeof(ArenaGump));
+                        participant.m_Player.SendGump(new ArenaGump(participant.m_Player, participant.m_Player.m_ArenaGumpObject));
+                    } 
+                }
+            }
+        }
+                
+        public void LeaveMatch(PlayerMobile player, bool broadcast, bool gumpUpdateParticipants)
+        {
+            if (!IsValidArenaMatch(this, null, false))
+                return;
+
             if (player == null)
                 return;
 
-            ArenaPlayerSettings.CheckCreateArenaPlayerSettings(player);
-
             string playerName = player.RawName;
-
+            
             ArenaTeam playerTeam = null;
             ArenaParticipant playerParticipant = null;
-
+           
             foreach (ArenaTeam team in m_Teams)
             {
                 if (team == null) continue;
                 if (team.Deleted) continue;
+               
+                foreach(ArenaParticipant participant in team.m_Participants)
+                {
+                    if (participant == null) continue;
+                    if (participant.Deleted) continue;
+                    if (participant.m_Player == null) continue;
 
-                playerTeam = team;
-                playerParticipant = team.GetPlayerParticipant(player);
+                    if (participant.m_Player == player)
+                    {
+                        playerTeam = team;
+                        playerParticipant = participant;
+
+                        break;
+                    }
+                }                
             }
-
+            
             if (playerTeam != null && playerParticipant != null)
             {
                 if (playerTeam.m_Participants.Contains(playerParticipant))
@@ -154,8 +189,17 @@ namespace Server
                 player.m_ArenaPlayerSettings.m_ArenaMatch = null;
             }
 
-            if (broadcast)
-                BroadcastMessage(playerName + " has left the match.", 0);
+            if (player == m_Creator)            
+                CancelMatch();            
+
+            else
+            {
+                if (broadcast)
+                    BroadcastMessage(playerName + " has left the match.", 0);
+            }
+
+            if (gumpUpdateParticipants)
+                ParticipantsForceGumpUpdate();
         }
 
         public bool CanPlayerJoinMatch(PlayerMobile player)
@@ -227,6 +271,8 @@ namespace Server
         {
             BroadcastMessage("The current arena match you were in has been canceled.", 1256);
 
+            List<PlayerMobile> m_Players = new List<PlayerMobile>();
+                        
             Queue m_TeamsQueue = new Queue();
             Queue m_ParticipantQueue = new Queue();
 
@@ -239,10 +285,13 @@ namespace Server
 
                 foreach (ArenaParticipant participant in arenaTeam.m_Participants)
                 {
-                    if (participant == null)
-                        continue;
+                    if (participant == null) 
+                        continue;                    
 
                     m_ParticipantQueue.Enqueue(participant);
+
+                    if (participant.m_Player != null)
+                        m_Players.Add(participant.m_Player);
 
                     if (participant.m_Player != null)
                         participant.m_Player.m_ArenaPlayerSettings.m_ArenaMatch = null;
@@ -252,7 +301,7 @@ namespace Server
             while (m_ParticipantQueue.Count > 0)
             {
                 ArenaParticipant arenaParticipant = (ArenaParticipant)m_ParticipantQueue.Dequeue();
-
+                
                 arenaParticipant.Delete();
             }
 
@@ -261,9 +310,18 @@ namespace Server
                 ArenaTeam arenaTeam = (ArenaTeam)m_TeamsQueue.Dequeue();
 
                 arenaTeam.Delete();
-            }
+            }            
 
             Delete();
+
+            foreach (PlayerMobile player in m_Players)
+            {
+                if (player.HasGump(typeof(ArenaGump)) && player.m_ArenaGumpObject != null)
+                {
+                    player.CloseGump(typeof(ArenaGump));
+                    player.SendGump(new ArenaGump(player, player.m_ArenaGumpObject));
+                }
+            }
         }
 
         public static bool IsValidArenaMatch(ArenaMatch arenaMatch, PlayerMobile player, bool checkIfPlayerCanJoin)

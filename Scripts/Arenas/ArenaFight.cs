@@ -45,11 +45,11 @@ namespace Server
         [Constructable]
         public ArenaFight(): base(0x0)
         {
-            Visible = false;
-            Movable = false;
-
             m_Timer = new ArenaFightTimer(this);
             m_Timer.Start();
+
+            Visible = false;
+            Movable = false;
         }
 
         public ArenaFight(Serial serial) : base(serial)
@@ -287,12 +287,8 @@ namespace Server
 
         public void Initialize()
         {
-            if (m_ArenaController == null) return;
-            if (m_ArenaController.Deleted) return;
-            if (m_ArenaMatch == null) return;
-            if (m_ArenaMatch.Deleted) return;
-            if (m_ArenaMatch.m_Ruleset == null) return;
-            if (m_ArenaMatch.m_Ruleset.Deleted) return;
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return;
 
             //TEST: APPLY RULESET FEATURES
 
@@ -374,17 +370,7 @@ namespace Server
                 }
             }
 
-            /*
-            foreach (ArenaTeam arenaTeam in m_Teams)
-            {
-                if (arenaTeam == null) continue;
-                if (arenaTeam.Deleted) continue;
-
-                foreach (ArenaParticipant participant in arenaTeam.m_Participants)
-                {
-                }
-            }
-             * */
+            StartCountdown();
         }
 
         public void SendArenaParticipantsSound(int sound)
@@ -427,14 +413,28 @@ namespace Server
 
         public void StartCountdown()
         {
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return;
+
             m_FightPhase = FightPhaseType.StartCountdown;
             m_PhaseTimeRemaining = TimeSpan.FromSeconds(10);
+
+            List<ArenaParticipant> m_Participants = m_ArenaMatch.GetParticipants();
+
+            foreach (ArenaParticipant participant in m_Participants)
+            {
+                if (participant == null) continue;
+                if (participant.Deleted) continue;
+                if (participant.m_Player == null) continue;
+
+                participant.m_Player.CloseAllGumps();
+            }
         }
 
         public void StartFight()
         {
-            if (m_ArenaController == null) return;
-            if (m_ArenaController.Deleted) return;
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return;
 
             m_ArenaController.ClearWalls();
 
