@@ -312,11 +312,8 @@ namespace Server
                             arenaFight.m_ArenaController = emptyArena;
                             arenaFight.m_ArenaMatch = arenaMatch;
 
-                            for (int a = 0; a < arenaMatch.m_Teams.Count; a++)
-                            {
-                                arenaFight.m_Teams.Add(arenaMatch.m_Teams[a]);
-                            }
-
+                            arenaMatch.m_ArenaFight = arenaFight;  
+                          
                             emptyArena.m_ArenaFight = arenaFight;
 
                             arenaFight.Initialize();

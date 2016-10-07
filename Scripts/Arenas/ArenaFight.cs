@@ -8,6 +8,7 @@ using Server.Items;
 using Server.Mobiles;
 using Server.Network;
 using Server.Spells;
+using Server.Targeting;
 
 namespace Server
 {
@@ -17,8 +18,7 @@ namespace Server
         {
             StartCountdown,
             Fight,
-            PostBattle,
-            Completed
+            PostBattle
         }
 
         public ArenaController m_ArenaController;
@@ -31,16 +31,12 @@ namespace Server
         public bool m_SuddenDeath = false;
         public int m_SuddenDeathTickCounter = 0;
         public TimeSpan m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(3);
-
-        public List<ArenaTeam> m_Teams = new List<ArenaTeam>();
-
+        
         public static TimeSpan TimerTickDuration = TimeSpan.FromSeconds(1);
 
         public Timer m_Timer;
         
         //----
-
-        public CompetitionContext m_CompetitionContext;
         
         [Constructable]
         public ArenaFight(): base(0x0)
@@ -65,17 +61,16 @@ namespace Server
 
         public virtual void OnLocationChanged(PlayerMobile player)
         {
-            if (player == null)
-                return;
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false)) return;
+            if (player == null) return;
 
-            ArenaParticipant arenaParticipant = GetParticipant(player);
+            ArenaParticipant arenaParticipant = m_ArenaMatch.GetParticipant(player);
 
             if (arenaParticipant != null && m_ArenaController != null)
             {
-                if (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive && !m_ArenaController.IsWithin(player.Location))
+                if (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive && !m_ArenaController.IsWithinArena(player.Location))
                 {
-                    arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.Inactive;
-                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Disqualified;
+                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Eliminated;
 
                     if (player.Map == Map.Internal)
                     {
@@ -85,24 +80,81 @@ namespace Server
                             player.LogoutLocation = exitTile.Location;
                     }
 
-                    if (!CheckTeamsRemaining())
-                        StartPostBattle();
+                    ArenaTeam winningTeam = CheckForTeamVictory();
+
+                    if (winningTeam != null)
+                    {
+                        StartPostBattle(winningTeam, false);
+                        return;
+                    }
                 }                
             }
         }
-
-        public virtual void OnDeath(PlayerMobile player, Container corpse)
+        
+        public virtual void OnDeath(PlayerMobile player, Container corpseContainer)
         {
-            ArenaParticipant arenaParticipant = GetParticipant(player);
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false)) return;
+            if (player == null)  return;
+
+            ArenaParticipant arenaParticipant = m_ArenaMatch.GetParticipant(player);
 
             if (arenaParticipant != null)
             {
                 if (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive)
-                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Dead;
-            }
+                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Eliminated;
+            }            
+            
+            Timer.DelayCall(TimeSpan.FromSeconds(4.0), delegate
+            {
+                if (player == null)
+                    return;
 
-            if (!CheckTeamsRemaining())
-                StartPostBattle();
+                ClearEffects(player);
+
+                player.Hits = player.HitsMax;
+                player.Stam = player.StamMax;
+                player.Mana = player.ManaMax;
+
+                player.DropHolding();
+
+                if (player.BankBox != null)
+                    player.BankBox.Close();
+
+                player.CloseAllGumps();
+
+                if (player.NetState != null)
+                    player.NetState.CancelAllTrades();
+
+                CancelSpell(player);
+
+                Target.Cancel(player);
+
+                if (!player.Alive)                
+                    player.Resurrect();                
+
+                //Force Exit
+                if (m_ArenaController != null)
+                {
+                    if (m_ArenaController.IsWithinArena(player.Location))
+                    {
+                        ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+
+                        if (exitTile != null)
+                            player.Location = exitTile.Location;
+
+                        else
+                            player.Location = Location;  
+                    }
+                }
+            });
+
+            ArenaTeam winningTeam = CheckForTeamVictory();
+
+            if (winningTeam != null)
+            {
+                StartPostBattle(winningTeam, false);
+                return;
+            }
         }
 
         public virtual bool AllowFreeConsume(PlayerMobile player)
@@ -137,6 +189,9 @@ namespace Server
 
         public virtual void CancelSpell(PlayerMobile player)
         {
+            if (player == null)
+                return;
+
             if (player.Spell is Spell)
             {
                 Spell spell = player.Spell as Spell;
@@ -150,16 +205,32 @@ namespace Server
         {
             SpecialAbilities.ClearSpecialEffects(player);
 
-            player.RemoveStatMod("[Magic] Str Offset");
-            player.RemoveStatMod("[Magic] Dex Offset");
-            player.RemoveStatMod("[Magic] Int Offset");
-            //TEST: CLEAR MAGIC RESIST POTION
-
-            player.Paralyzed = false;
-            player.Hidden = false;
+            player.RemoveStatModsBeginningWith("[Magic]");
 
             player.MagicDamageAbsorb = 0;
             player.MeleeDamageAbsorb = 0;
+            player.VirtualArmorMod = 0;
+
+            BuffInfo.RemoveBuff(player, BuffIcon.Agility);
+            BuffInfo.RemoveBuff(player, BuffIcon.ArchProtection);
+            BuffInfo.RemoveBuff(player, BuffIcon.Bless);
+            BuffInfo.RemoveBuff(player, BuffIcon.Clumsy);
+            BuffInfo.RemoveBuff(player, BuffIcon.Incognito);
+            BuffInfo.RemoveBuff(player, BuffIcon.MagicReflection);
+            BuffInfo.RemoveBuff(player, BuffIcon.MassCurse);
+            BuffInfo.RemoveBuff(player, BuffIcon.Invisibility);
+            BuffInfo.RemoveBuff(player, BuffIcon.HidingAndOrStealth);
+            BuffInfo.RemoveBuff(player, BuffIcon.Paralyze);
+            BuffInfo.RemoveBuff(player, BuffIcon.Poison);
+            BuffInfo.RemoveBuff(player, BuffIcon.Polymorph);
+            BuffInfo.RemoveBuff(player, BuffIcon.Protection);
+            BuffInfo.RemoveBuff(player, BuffIcon.ReactiveArmor);
+            BuffInfo.RemoveBuff(player, BuffIcon.Strength);
+            BuffInfo.RemoveBuff(player, BuffIcon.Weaken);
+            BuffInfo.RemoveBuff(player, BuffIcon.FeebleMind);            
+            
+            player.Paralyzed = false;
+            player.RevealingAction();
 
             Spells.Second.ProtectionSpell.Registry.Remove(player);
             player.EndAction(typeof(DefensiveSpell));
@@ -178,111 +249,92 @@ namespace Server
 
         public virtual void RemoveAggressions(PlayerMobile player)
         {
-            /*
-            for (int i = 0; i < m_Participants.Count; ++i)
-            {
-                Participant p = (Participant)m_Participants[i];
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return;
 
-                for (int j = 0; j < p.Players.Length; ++j)
-                {
-                    DuelPlayer dp = (DuelPlayer)p.Players[j];
-
-                    if (dp == null || dp.Mobile == mob)
-                        continue;
-
-                    mob.RemoveAggressed(dp.Mobile);
-                    mob.RemoveAggressor(dp.Mobile);
-                    dp.Mobile.RemoveAggressed(mob);
-                    dp.Mobile.RemoveAggressor(mob);
-                }
-            }
-            */
-        }
-
-        #endregion
-
-        public ArenaParticipant GetParticipant(PlayerMobile player)
-        {
-            foreach (ArenaTeam arenaTeam in m_Teams)
+            foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
             {
                 if (arenaTeam == null) continue;
                 if (arenaTeam.Deleted) continue;
 
                 foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
                 {
-                    if (arenaParticipant.m_Player == player)
-                        return arenaParticipant;
+                    if (arenaParticipant.m_Player == null) continue;
+                    if (arenaParticipant.m_Player.Deleted) continue;
+
+                    arenaParticipant.m_Player.RemoveAggressed(player);
+                    arenaParticipant.m_Player.RemoveAggressor(player);
+
+                    player.RemoveAggressed(arenaParticipant.m_Player);
+                    player.RemoveAggressor(arenaParticipant.m_Player);                      
                 }
+            }       
+        }
+
+        #endregion
+        
+        public ArenaTeam CheckForTeamVictory()
+        {
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return null;
+
+            List<ArenaTeam> m_TeamsRemaining = new List<ArenaTeam>();
+
+            foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
+            {
+                if (arenaTeam == null) continue;
+                if (arenaTeam.Deleted) continue;
+
+                m_TeamsRemaining.Add(arenaTeam);
+            }            
+
+            foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
+            {
+                bool teamEliminated = false;
+
+                if (arenaTeam == null)
+                    teamEliminated = true;
+
+                else if (arenaTeam.Deleted)
+                    teamEliminated = true;
+
+                int activePlayers = 0;
+
+                foreach(ArenaParticipant participant in arenaTeam.m_Participants)
+                {
+                    if (participant == null) continue;
+                    if (participant.Deleted) continue;
+                    if (participant.m_Player == null) continue;
+
+                    if (participant.m_FightStatus == ArenaParticipant.FightStatusType.Alive)
+                        activePlayers++;
+                }
+
+                if (activePlayers == 0)
+                    teamEliminated = true;
+
+                if (teamEliminated && m_TeamsRemaining.Contains(arenaTeam))
+                    m_TeamsRemaining.Remove(arenaTeam);                   
             }
+
+            if (m_TeamsRemaining.Count == 1)
+                return m_TeamsRemaining[0];
+
+            if (m_TeamsRemaining.Count == 0)
+                return new ArenaTeam();
 
             return null;
         }
-        
-        public bool CheckTeamsRemaining()
+
+        public void ForcedSuddenDeathResolution()
         {
-            int teamCount = m_Teams.Count;
-            int teamsRemaining = teamCount;
-            
-            foreach (ArenaTeam arenaTeam in m_Teams)
-            {
-                if (arenaTeam == null)
-                {
-                    teamsRemaining--;
-                    continue;
-                }
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return;
 
-                if (arenaTeam.Deleted)
-                {
-                    teamsRemaining--;
-                    continue;
-                }
+            //TEST: FIX AND FINISH
+            ArenaTeam winningTeam = new ArenaTeam();
 
-                arenaTeam.m_LastEventTime = DateTime.UtcNow;
-
-                int participantCount = arenaTeam.m_Participants.Count;
-                int playersEliminated = 0;
-
-                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
-                {
-                    if (arenaParticipant == null)
-                    {
-                        playersEliminated++;
-                        continue;
-                    }
-
-                    if (arenaParticipant.Deleted)
-                    {
-                        playersEliminated++;
-                        continue;
-                    }
-
-                    if (arenaParticipant.m_Player == null)
-                    {
-                        playersEliminated++;
-                        continue;
-                    }
-
-                    if (arenaParticipant.m_Player.Deleted)
-                    {
-                        playersEliminated++;
-                        continue;
-                    }
-
-                    if (arenaParticipant.m_EventStatus != ArenaParticipant.EventStatusType.Inactive)
-                        arenaParticipant.m_LastEventTime = DateTime.UtcNow;
-                    
-                    if (arenaParticipant.m_FightStatus != ArenaParticipant.FightStatusType.Alive)
-                        playersEliminated++;                    
-                }
-
-                if (playersEliminated >= participantCount)
-                    teamsRemaining--;
-            }
-
-            if (teamsRemaining <= 1)
-                return false;
-
-            return true;
+            StartPostBattle(winningTeam, true);
         }
 
         public void Initialize()
@@ -327,9 +379,9 @@ namespace Server
                 }
             }
 
-            for (int a = 0; a < m_Teams.Count; a++)
+            for (int a = 0; a < m_ArenaMatch.m_Teams.Count; a++)
             {
-                ArenaTeam arenaTeam = m_Teams[a];
+                ArenaTeam arenaTeam = m_ArenaMatch.m_Teams[a];
 
                 if (arenaTeam == null) continue;
                 if (arenaTeam.Deleted) continue;
@@ -345,7 +397,27 @@ namespace Server
 
                     PlayerMobile player = participant.m_Player;
 
+                    RemoveAggressions(player);
+
                     ClearEffects(player);
+
+                    player.Hits = player.HitsMax;
+                    player.Stam = player.StamMax;
+                    player.Mana = player.ManaMax;
+
+                    player.DropHolding();
+
+                    if (player.BankBox != null)
+                        player.BankBox.Close();
+
+                    player.CloseAllGumps();
+
+                    if (player.NetState != null)
+                        player.NetState.CancelAllTrades();
+
+                    CancelSpell(player);
+
+                    Target.Cancel(player);
 
                     ArenaTile playerStartingTile = m_ArenaController.GetPlayerStartingTile(a, b);
 
@@ -375,7 +447,10 @@ namespace Server
 
         public void SendArenaParticipantsSound(int sound)
         {
-            foreach (ArenaTeam arenaTeam in m_Teams)
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return;
+
+            foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
             {
                 if (arenaTeam == null) continue;
                 if (arenaTeam.Deleted) continue;
@@ -394,7 +469,10 @@ namespace Server
 
         public void SendArenaParticipantsMessage(string text, int hue)
         {
-            foreach (ArenaTeam arenaTeam in m_Teams)
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return;
+
+            foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
             {
                 if (arenaTeam == null) continue;
                 if (arenaTeam.Deleted) continue;
@@ -418,17 +496,6 @@ namespace Server
 
             m_FightPhase = FightPhaseType.StartCountdown;
             m_PhaseTimeRemaining = TimeSpan.FromSeconds(10);
-
-            List<ArenaParticipant> m_Participants = m_ArenaMatch.GetParticipants();
-
-            foreach (ArenaParticipant participant in m_Participants)
-            {
-                if (participant == null) continue;
-                if (participant.Deleted) continue;
-                if (participant.m_Player == null) continue;
-
-                participant.m_Player.CloseAllGumps();
-            }
         }
 
         public void StartFight()
@@ -440,7 +507,7 @@ namespace Server
 
             //TEST: SEND SOUND TO PLAYERS
 
-            foreach (ArenaTeam arenaTeam in m_Teams)
+            foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
             {
                 if (arenaTeam == null) continue;
                 if (arenaTeam.Deleted) continue;
@@ -450,7 +517,7 @@ namespace Server
                     if (arenaParticipant == null) continue;
                     if (arenaParticipant.Deleted) continue;
 
-                    arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.Playing;
+                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Alive;
 
                     //TEST: UNFREEZE
                 }
@@ -464,9 +531,16 @@ namespace Server
         {
         }
         
-        public void StartPostBattle()
+        public void StartPostBattle(ArenaTeam winningTeam, bool forcedSuddenDeathVictory)
         {
-            foreach (ArenaTeam arenaTeam in m_Teams)
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return;
+
+            //Announce Resolution
+
+            //
+
+            foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
             {
                 if (arenaTeam == null) continue;
                 if (arenaTeam.Deleted) continue;
@@ -475,10 +549,18 @@ namespace Server
                 {
                     if (arenaParticipant == null) continue;
                     if (arenaParticipant.Deleted) continue;
-                    
-                    if (arenaParticipant.m_EventStatus != ArenaParticipant.EventStatusType.Inactive)                    
-                        arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.PostBattle;
+                    if (arenaParticipant.m_Player == null) continue;
 
+                    PlayerMobile player = arenaParticipant.m_Player;
+
+                    if (arenaTeam == winningTeam)
+                    {
+                    }
+
+                    else
+                    {
+                    }
+                    
                     arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.PostBattle;
                 }
             }
@@ -489,48 +571,106 @@ namespace Server
 
         public void FightCompleted()
         {
-            m_FightPhase = FightPhaseType.Completed;
-            m_PhaseTimeRemaining = TimeSpan.FromSeconds(5);
-        }
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return;
 
-        public void ClearFight()
-        {
-            /*
-            foreach (ArenaTeam arenaTeam in m_Teams)
+            Queue m_TeamsQueue = new Queue();
+            Queue m_ParticipantQueue = new Queue();
+
+            Queue m_ItemsToTrashQueue = new Queue();
+            Queue m_ItemsToDeleteQueue = new Queue();
+
+            foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
             {
-                if (arenaTeam == null) continue;
-                if (arenaTeam.Deleted) continue;
+                if (arenaTeam == null)
+                    continue;
 
-                arenaTeam.m_LastEventTime = DateTime.UtcNow;
+                m_TeamsQueue.Enqueue(arenaTeam);
 
-                foreach(ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                foreach (ArenaParticipant participant in arenaTeam.m_Participants)
                 {
-                    if (arenaParticipant == null) continue;
-                    if (arenaParticipant.Deleted) continue;
+                    if (participant == null)
+                        continue;
 
-                    if (arenaParticipant.m_EventStatus != ArenaParticipant.EventStatusType.Inactive)
+                    m_ParticipantQueue.Enqueue(participant);
+
+                    PlayerMobile player = participant.m_Player;
+
+                    if (m_ArenaController.IsWithinArena(player.Location))
                     {
-                        arenaParticipant.m_EventStatus = ArenaParticipant.EventStatusType.Waiting;
-                        arenaParticipant.m_LastEventTime = DateTime.UtcNow;
+                        ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+
+                        if (exitTile != null)
+                            player.Location = exitTile.Location;
+
+                        else
+                            player.Location = Location;
                     }
 
-                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Alive;
+                    participant.m_FightStatus = ArenaParticipant.FightStatusType.Waiting;
+                    participant.m_ReadyToggled = false;
+                    participant.m_LastEventTime = DateTime.UtcNow;
 
-                    arenaParticipant.m_ArenaFight = null;                    
-
-                    //TEST: Record Player Fight Data
+                    participant.ResetArenaFightValues();                   
                 }
             }
-            */
 
+            while (m_ParticipantQueue.Count > 0)
+            {
+                ArenaParticipant arenaParticipant = (ArenaParticipant)m_ParticipantQueue.Dequeue();
+
+                arenaParticipant.Delete();
+            }
+
+            while (m_TeamsQueue.Count > 0)
+            {
+                ArenaTeam arenaTeam = (ArenaTeam)m_TeamsQueue.Dequeue();
+
+                arenaTeam.Delete();
+            }
+
+            m_ArenaMatch.m_ArenaFight = null;
+            m_ArenaMatch.m_MatchStatus = ArenaMatch.MatchStatusType.Listed;   
+         
+            IPooledEnumerable arenaObjects = m_ArenaController.Map.GetObjectsInBounds(m_ArenaController.ArenaBoundary);
+
+            foreach (Object targetObject in arenaObjects)
+            {
+                if (targetObject is Item)
+                {
+                    Item item = targetObject as Item;
+
+                    if (item.Movable)
+                        m_ItemsToTrashQueue.Enqueue(item);
+
+                    if (item is Corpse)
+                        m_ItemsToDeleteQueue.Enqueue(item);
+                }
+            }
+
+            arenaObjects.Free();
+
+            while (m_ItemsToTrashQueue.Count > 0)
+            {
+                Item arenaItem = (Item)m_ItemsToTrashQueue.Dequeue();
+
+                //TEST: Move Item to Arena-Specific Trash Can
+            }
+
+            while (m_ItemsToDeleteQueue.Count > 0)
+            {
+                Item arenaItem = (Item)m_ItemsToDeleteQueue.Dequeue();
+
+                arenaItem.Delete();
+            }
+            
             if (m_Timer != null)
             {
                 m_Timer.Stop();
                 m_Timer = null;
             }
 
-            if (m_ArenaController != null)
-                m_ArenaController.MatchComplete();
+            Delete();
         }
 
         public class ArenaFightTimer : Timer
@@ -594,9 +734,11 @@ namespace Server
                     break;
 
                     case FightPhaseType.Fight:
-                        if (!m_ArenaFight.CheckTeamsRemaining())
+                        ArenaTeam winningTeam = m_ArenaFight.CheckForTeamVictory();
+
+                        if (winningTeam != null)
                         {
-                            m_ArenaFight.StartPostBattle();
+                            m_ArenaFight.StartPostBattle(winningTeam, false);
                             return;
                         }
 
@@ -609,8 +751,7 @@ namespace Server
 
                             if (m_ArenaFight.m_SuddenDeathTimeRemaining.TotalSeconds <= 0)
                             {
-                                m_ArenaFight.StartPostBattle();
-
+                               m_ArenaFight.ForcedSuddenDeathResolution();
                                 return;
                             }
                         }
@@ -643,25 +784,12 @@ namespace Server
                             return;
                         }
                     break;
-
-                    case FightPhaseType.Completed:
-                        m_ArenaFight.m_ArenaController.PublicOverheadMessage(MessageType.Regular, 0, false, "Completed");
-
-                        if (m_ArenaFight.m_PhaseTimeRemaining.TotalSeconds <= 0)
-                        {
-                            m_ArenaFight.ClearFight();
-                            return;
-                        }                       
-                    break;
                 }                
             }
         }
 
         public override void OnDelete()
         {
-            if (m_CompetitionContext != null)
-                m_CompetitionContext.Delete();
-
             base.OnDelete();
         }
 
@@ -679,15 +807,7 @@ namespace Server
 
             writer.Write(m_SuddenDeath);
             writer.Write(m_SuddenDeathTickCounter);
-            writer.Write(m_SuddenDeathTimeRemaining);            
-
-            writer.Write(m_Teams.Count);
-            for (int a = 0; a < m_Teams.Count; a++)
-            {
-                writer.Write(m_Teams[a]);
-            }
-
-            writer.Write(m_CompetitionContext);
+            writer.Write(m_SuddenDeathTimeRemaining);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -707,14 +827,6 @@ namespace Server
                 m_SuddenDeath = reader.ReadBool();
                 m_SuddenDeathTickCounter = reader.ReadInt();
                 m_SuddenDeathTimeRemaining = reader.ReadTimeSpan();
-
-                int teamsCount = reader.ReadInt();
-                for (int a = 0; a < teamsCount; a++)
-                {
-                    m_Teams.Add(reader.ReadItem() as ArenaTeam);
-                }
-
-                m_CompetitionContext = reader.ReadItem() as CompetitionContext;
             }
 
             //-----

@@ -87,7 +87,7 @@ namespace Server
             return false;
         }
 
-        public bool IsWithin(Point3D location)
+        public bool IsWithinArena(Point3D location)
         {
             Point2D sourcePoint = new Point2D(location.X, location.Y);
 
@@ -169,45 +169,6 @@ namespace Server
             }
 
             m_Walls.Clear();
-        }
-
-        public void MatchComplete()
-        {
-            if (m_ArenaFight != null)
-            {
-                foreach (ArenaTeam arenaTeam in m_ArenaFight.m_Teams)
-                {
-                    if (arenaTeam == null) continue;
-                    if (arenaTeam.Deleted) continue;
-
-                    foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
-                    {
-                        if (arenaParticipant == null) continue;
-                        if (arenaParticipant.Deleted) continue;
-                        if (arenaParticipant.m_Player == null) continue;
-                        if (arenaParticipant.m_Player.Deleted) continue;
-
-                        //Clear Players From Arena
-                        if (IsWithin(arenaParticipant.m_Player.Location))
-                        {
-                            ArenaTile exitTile = GetRandomExitTile();
-
-                            if (exitTile != null)                            
-                                arenaParticipant.m_Player.Location = exitTile.Location;                            
-
-                            else
-                                arenaParticipant.m_Player.Location = Location;                          
-                        }
-                    }
-                }
-            }
-
-            //TEST: Clear Items from Arena
-            
-            //if (m_ArenaGroupController != null)
-                //m_ArenaGroupController.MatchComplete(m_ArenaFight);
-
-            m_ArenaFight = null;
         }
 
         public override void Serialize(GenericWriter writer)

@@ -10,20 +10,13 @@ namespace Server
 {
     public class ArenaParticipant : Item
     {
-        public enum EventStatusType
-        {
-            Waiting,
-            Playing,            
-            PostBattle,
-            Eliminated,
-            Inactive
-        }
-
         public enum FightStatusType
-        {            
+        {          
+            Waiting,
             Alive,
             Dead,
-            Disqualified,
+            Eliminated,
+            Inactive,
             PostBattle
         }
 
@@ -34,7 +27,6 @@ namespace Server
 
         public bool m_ReadyToggled = false;
 
-        public EventStatusType m_EventStatus = EventStatusType.Waiting;
         public FightStatusType m_FightStatus = FightStatusType.Alive;
 
         public int m_DamageDealt = 0;
@@ -88,6 +80,14 @@ namespace Server
                     continue;
                 
                 arenaItemUsage.m_Uses = 0;
+            }
+
+            foreach (ArenaSpellUsage arenaSpellUsage in m_SpellUsages)
+            {
+                if (arenaSpellUsage == null)
+                    continue;
+
+                arenaSpellUsage.m_Uses = 0;
             }
         }
 
@@ -174,7 +174,6 @@ namespace Server
             writer.Write(m_ArenaMatch);
 
             writer.Write(m_ReadyToggled);
-            writer.Write((int)m_EventStatus);
             writer.Write((int)m_FightStatus);
             writer.Write(m_DamageDealt);
             writer.Write(m_DamageReceived);
@@ -212,7 +211,6 @@ namespace Server
                 m_ArenaMatch = (ArenaMatch)reader.ReadItem();
 
                 m_ReadyToggled = reader.ReadBool();
-                m_EventStatus = (EventStatusType)reader.ReadInt();
                 m_FightStatus = (FightStatusType)reader.ReadInt();
                 m_DamageDealt = reader.ReadInt();
                 m_DamageReceived = reader.ReadInt();

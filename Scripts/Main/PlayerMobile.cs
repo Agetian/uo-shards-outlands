@@ -1388,6 +1388,21 @@ namespace Server.Mobiles
         public CompetitionContext m_CompetitionContext = null;
 
         public ArenaGumpObject m_ArenaGumpObject;
+
+        public ArenaMatch m_ActiveArenaMatch
+        {
+            get
+            {
+                if (m_ArenaPlayerSettings == null) return null;
+                if (m_ArenaPlayerSettings.Deleted) return null;
+                if (!ArenaMatch.IsValidArenaMatch(m_ArenaPlayerSettings.m_ArenaMatch, this, false)) return null;
+
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
+
+                return m_ArenaPlayerSettings.m_ArenaMatch;
+            }
+        }
+
         public ArenaParticipant m_ActiveArenaParticipant
         {
             get
@@ -1416,7 +1431,33 @@ namespace Server.Mobiles
             }          
         }
 
-        public override bool KeepsItemsOnDeath { get { return (AccessLevel > AccessLevel.Player); } }
+        public ArenaFight m_ActiveArenaFight
+        {
+            get
+            {
+                if (m_ArenaPlayerSettings == null) return null;
+                if (m_ArenaPlayerSettings.Deleted) return null;
+                if (!ArenaMatch.IsValidArenaMatch(m_ArenaPlayerSettings.m_ArenaMatch, this, false)) return null;
+
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
+
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight == null) return null;
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight.Deleted) return null;
+
+                return m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight;
+            }
+        }
+
+        public override bool KeepsItemsOnDeath 
+        { 
+            get 
+            {
+                if (m_ActiveArenaFight != null)
+                    return true;
+
+                return (AccessLevel > AccessLevel.Player); 
+            }
+        }
 
         public DateTime NextEmoteAllowed = DateTime.UtcNow;
         public static TimeSpan EmoteCooldownLong = TimeSpan.FromSeconds(120);
@@ -3081,10 +3122,8 @@ namespace Server.Mobiles
             else
                 ShipOccupied = ship;
 
-            /*
-            if (m_CompetitionContext != null)
-                m_CompetitionContext.OnLocationChanged(this);
-            */
+            if (m_ActiveArenaFight != null)
+                m_ActiveArenaFight.OnLocationChanged(this);
             
             DesignContext context = m_DesignContext;
 
@@ -3156,10 +3195,8 @@ namespace Server.Mobiles
                 if (Mount != null)
                     Mount.Rider = null;
 
-            /*
-            if (m_CompetitionContext != null)
-                m_CompetitionContext.OnMapChanged(this);
-            */
+            if (m_ActiveArenaFight != null)
+                m_ActiveArenaFight.OnMapChanged(this);
             
             DesignContext context = m_DesignContext;
 
@@ -3278,66 +3315,21 @@ namespace Server.Mobiles
                     Stop();
                 }
             }
-        }
-
-        public override void OnAfterResurrect()
-        {
-            if (!Warmode && NetState != null && AccessLevel == Server.AccessLevel.Player)
-            {
-                IPooledEnumerable enu = GetClientsInRange(Core.GlobalMaxUpdateRange);
-                foreach (NetState state in enu)
-                {
-                    if (state == null || NetState == null || state.Mobile == this || !CanSee(state.Mobile))
-                        continue;
-
-                    Send(MobileIncoming.Create(NetState, this, state.Mobile));
-
-                    if (NetState.StygianAbyss)
-                    {
-                        if (Poison != null)
-                            Send(new HealthbarPoison(state.Mobile));
-
-                        if (Blessed || YellowHealthbar)
-                            Send(new HealthbarYellow(state.Mobile));
-                    }
-
-                    if (IsDeadBondedPet)
-                        Send(new BondedStatus(0, state.Mobile.Serial, 1));
-
-                    if (ObjectPropertyList.Enabled)
-                    {
-                        Send(OPLPacket);
-                    }
-                }
-
-                enu.Free();
-            }
-
-            //Reapply Kin Paint
-            if (KinPaintHue != -1 && KinPaintExpiration > DateTime.UtcNow)            
-                HueMod = KinPaintHue;
-            
-            //Player Enhancement Customization: Lifegiver
-            bool reborn = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(this, CustomizationType.Reborn);
-
-            if (reborn)
-                CustomizationAbilities.Reborn(this);
-
-            AspectGear.PlayerResurrected(this);
-
-            Stam = StamMax;
-        }
+        }        
 
         public override void Resurrect()
         {
-            if (MurderCounts > Mobile.MurderCountsRequiredForMurderer && AccessLevel == AccessLevel.Player)
+            if (m_ActiveArenaFight == null)
             {
-                SendMessage(63, "Select a resurrection option and click 'Apply' twice to proceed.");
+                if (MurderCounts > Mobile.MurderCountsRequiredForMurderer && AccessLevel == AccessLevel.Player)
+                {
+                    SendMessage(63, "Select a resurrection option and click 'Apply' twice to proceed.");
 
-                CloseGump(typeof(MurderPenaltyGump));
-                SendGump(new MurderPenaltyGump(this, false, 0, false));
+                    CloseGump(typeof(MurderPenaltyGump));
+                    SendGump(new MurderPenaltyGump(this, false, 0, false));
 
-                return;
+                    return;
+                }
             }
 
             m_TimeSpanResurrected = this.GameTime;
@@ -3374,6 +3366,55 @@ namespace Server.Mobiles
 
                 Misc.FameKarmaTitles.AwardFame(this, -amount, true);
             }
+        }
+
+        public override void OnAfterResurrect()
+        {
+            if (!Warmode && NetState != null && AccessLevel == Server.AccessLevel.Player)
+            {
+                IPooledEnumerable enu = GetClientsInRange(Core.GlobalMaxUpdateRange);
+                foreach (NetState state in enu)
+                {
+                    if (state == null || NetState == null || state.Mobile == this || !CanSee(state.Mobile))
+                        continue;
+
+                    Send(MobileIncoming.Create(NetState, this, state.Mobile));
+
+                    if (NetState.StygianAbyss)
+                    {
+                        if (Poison != null)
+                            Send(new HealthbarPoison(state.Mobile));
+
+                        if (Blessed || YellowHealthbar)
+                            Send(new HealthbarYellow(state.Mobile));
+                    }
+
+                    if (IsDeadBondedPet)
+                        Send(new BondedStatus(0, state.Mobile.Serial, 1));
+
+                    if (ObjectPropertyList.Enabled)
+                    {
+                        Send(OPLPacket);
+                    }
+                }
+
+                enu.Free();
+            }
+
+            //Reapply Kin Paint
+            if (KinPaintHue != -1 && KinPaintExpiration > DateTime.UtcNow)
+                HueMod = KinPaintHue;
+
+            //Player Enhancement Customization: Lifegiver
+            bool reborn = false; //PlayerEnhancementPersistance.IsCustomizationEntryActive(this, CustomizationType.Reborn);
+
+            if (reborn)
+                CustomizationAbilities.Reborn(this);
+
+            if (m_ActiveArenaFight == null)
+                AspectGear.PlayerResurrected(this);
+
+            Stam = StamMax;
         }
 
         public override double RacialSkillBonus
@@ -3689,6 +3730,7 @@ namespace Server.Mobiles
                                 if (this.Guild == creatureOwner.Guild)
                                     continue;
                             }
+
                             if (damageInflicted.ContainsKey(creatureOwner))
                                 damageInflicted[creatureOwner] += de.DamageGiven;
                             else
@@ -3793,11 +3835,9 @@ namespace Server.Mobiles
 
             if ((carnage || violentDeath))
                 CustomizationAbilities.PlayerDeathExplosion(Location, Map, carnage, violentDeath);
-
-            /*
-            if (m_CompetitionContext != null)
-                m_CompetitionContext.OnDeath(this, corpse);
-            */
+            
+            if (m_ActiveArenaFight != null)
+                m_ActiveArenaFight.OnDeath(this, corpse);         
             
             if (m_BuffTable != null)
             {

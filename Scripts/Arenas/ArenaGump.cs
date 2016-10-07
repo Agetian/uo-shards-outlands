@@ -1794,15 +1794,11 @@ namespace Server
                         //Currently Already in Match
                         if (playerParticipant != null)
                         {
-                            if (newTeamIndex == 0 && playerIsOnTeam1)
-                            {
-                                playerParticipant.m_ReadyToggled = !playerParticipant.m_ReadyToggled;
-                            }
+                            if (newTeamIndex == 0 && playerIsOnTeam1)                            
+                                playerParticipant.m_ReadyToggled = !playerParticipant.m_ReadyToggled;                            
 
-                            else if (newTeamIndex == 1 && playerIsOnTeam2)
-                            {
-                                playerParticipant.m_ReadyToggled = !playerParticipant.m_ReadyToggled;
-                            }
+                            else if (newTeamIndex == 1 && playerIsOnTeam2)                            
+                                playerParticipant.m_ReadyToggled = !playerParticipant.m_ReadyToggled;                            
 
                             else if (newTeamIndex == 0 && !playerIsOnTeam1)
                             {
@@ -1819,6 +1815,9 @@ namespace Server
 
                                     else
                                         arenaTeam1.m_Participants.Add(playerParticipant);
+
+
+                                    playerParticipant.m_ReadyToggled = false;
 
                                     selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has switched teams.", 0);
 
@@ -1842,7 +1841,9 @@ namespace Server
                                     else
                                         arenaTeam2.m_Participants.Add(playerParticipant);
 
-                                    selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);
+                                    playerParticipant.m_ReadyToggled = false;
+
+                                    selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has switched teams.", 0);
 
                                     selectedArenaMatch.ParticipantsForceGumpUpdate();
                                 }
@@ -2765,7 +2766,7 @@ namespace Server
             AddButton(34, 365, 2151, 2154, 1, GumpButtonType.Reply, 0);
 
             AddLabel(191, 370, 53, "Kick from Match");
-            AddButton(160, 365, 9721, 2154, 2, GumpButtonType.Reply, 0);
+            AddButton(160, 365, 9721, 9724, 2, GumpButtonType.Reply, 0);
 
             AddButton(89, 326, 2473, 2473, 3, GumpButtonType.Reply, 0);
             AddLabel(118, 330, 2115, "Ban From Match");            
