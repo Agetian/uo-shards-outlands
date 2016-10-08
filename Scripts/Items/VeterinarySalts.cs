@@ -119,7 +119,7 @@ namespace Server.Custom.Items
 
 			BaseCreature deadFollower = target as BaseCreature;
 
-			if (deadFollower == null || !deadFollower.IsDeadPet)
+			if (deadFollower == null || !deadFollower.IsDeadFollower)
 			{
 				from.SendMessage("That is not a deceased creature.");
 				return;

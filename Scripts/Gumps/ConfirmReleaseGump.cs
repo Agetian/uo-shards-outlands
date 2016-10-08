@@ -17,9 +17,15 @@ namespace Server.Gumps
 
 			m_From.CloseGump( typeof( ConfirmReleaseGump ) );
 
+            if (ArenaGroupController.GetArenaGroupRegionAtLocation(from.Location, from.Map) != null)
+            {
+                m_From.SendMessage("Followers cannot be released in that area.");
+                return;
+            }
+
 			if (m_From.Region is NewbieDungeonRegion)
 			{
-				m_From.SendMessage("You cannot release your pets here.");
+				m_From.SendMessage("You cannot release your followers here.");
 				return;
 			}
 
@@ -39,9 +45,15 @@ namespace Server.Gumps
 
 		public override void OnResponse( Server.Network.NetState sender, RelayInfo info )
 		{
+            if (ArenaGroupController.GetArenaGroupRegionAtLocation(m_From.Location, m_From.Map) != null)
+            {
+                m_From.SendMessage("Followers may not be released in that area.");
+                return;
+            }
+
 			if (m_From.Region is NewbieDungeonRegion)
 			{
-				m_From.SendMessage("You cannot release your pets here.");
+                m_From.SendMessage("Followers may not be released in that area.");
 				return;
 			}
 

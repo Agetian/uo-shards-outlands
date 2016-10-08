@@ -14,7 +14,8 @@ namespace Server
     {
         public enum ArenaTileType
         {
-            StartLocation,
+            PlayerStartLocation,
+            FollowerStartLocation,
             WallLocation,
             ExitLocation
         }
@@ -31,7 +32,7 @@ namespace Server
             set { m_ArenaController = value; }
         }
 
-        public ArenaTileType m_TileType = ArenaTileType.StartLocation;
+        public ArenaTileType m_TileType = ArenaTileType.PlayerStartLocation;
         [CommandProperty(AccessLevel.GameMaster)]
         public ArenaTileType TileType
         {
@@ -42,7 +43,7 @@ namespace Server
 
                 switch (m_TileType)
                 {
-                    case ArenaTileType.StartLocation:
+                    case ArenaTileType.PlayerStartLocation:
                         TeamNumber = 0;
                         PlayerNumber = 0;
 
@@ -50,22 +51,23 @@ namespace Server
                         Hue = 201;
                     break;
 
+                    case ArenaTileType.FollowerStartLocation:
+                        TeamNumber = 0;
+                        PlayerNumber = 0;
+                    break;
+
                     case ArenaTileType.WallLocation:
                         TeamNumber = -1;
                         PlayerNumber = 0;
-
-                        ItemID = 6182;
-                        Hue = 2267;
                     break;
 
                     case ArenaTileType.ExitLocation:
                         TeamNumber = -1;
                         PlayerNumber = -1;
-
-                        ItemID = 6179;
-                        Hue = 2265;
                     break;
                 }
+
+                Configure();
             }
         }
 
@@ -86,13 +88,7 @@ namespace Server
             {
                 m_TeamNumber = value;
 
-                switch (m_TeamNumber)
-                {
-                    case 0: Hue = 201; break;
-                    case 1: Hue = 239; break;
-                    case 2: Hue = 2127; break;
-                    case 3: Hue = 57; break;
-                }
+                Configure();
             }
         }
 
@@ -102,6 +98,14 @@ namespace Server
         {
             get { return m_PlayerNumber; }
             set { m_PlayerNumber = value; }
+        }
+
+        public int m_FollowerNumber = 0;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public int FollowerNumber
+        {
+            get { return m_FollowerNumber; }
+            set { m_FollowerNumber = value; }
         }
 
         [Constructable]
@@ -122,13 +126,54 @@ namespace Server
         {
         }
 
+        public void Configure()
+        {
+            switch (TileType)
+            {
+                case ArenaTileType.PlayerStartLocation:
+                    ItemID = 6178;
+
+                    switch (TeamNumber)
+                    {
+                        case 0: Hue = 200; break;
+                        case 1: Hue = 238; break;
+                    }
+                break;
+
+                case ArenaTileType.FollowerStartLocation:
+                    ItemID = 6178;
+
+                    switch (TeamNumber)
+                    {
+                        case 0: Hue = 201; break;
+                        case 1: Hue = 239; break;
+                    }
+                break;
+
+                case ArenaTileType.WallLocation:
+                    ItemID = 6182;
+                    Hue = 2267;
+                break;
+
+                case ArenaTileType.ExitLocation:
+                    ItemID = 6179;
+                    Hue = 2265;
+                break;
+            }
+        }
+
         public override void OnSingleClick(Mobile from)
         {
             switch (TileType)
             {
-                case ArenaTileType.StartLocation:
+                case ArenaTileType.PlayerStartLocation:
                     LabelTo(from, "Arena Start Location");
                     LabelTo(from, "(Team " + m_TeamNumber.ToString() + " / Player " + m_PlayerNumber.ToString() + ")");
+                break;
+
+                case ArenaTileType.FollowerStartLocation:
+                    LabelTo(from, "Arena Start Location");
+                    LabelTo(from, "(Team " + m_TeamNumber.ToString() + " / Player " + m_PlayerNumber.ToString() + " / Follower " + m_FollowerNumber.ToString() + ")");
                 break;
 
                 case ArenaTileType.WallLocation:
@@ -150,6 +195,14 @@ namespace Server
             return false;
         }
 
+        public override void OnDelete()
+        {
+            if (m_Instances.Contains(this))
+                m_Instances.Remove(this);
+
+            base.OnDelete();           
+        }
+
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);
@@ -161,6 +214,7 @@ namespace Server
             writer.Write((int)m_Facing);
             writer.Write(m_TeamNumber);
             writer.Write(m_PlayerNumber);
+            writer.Write(m_FollowerNumber);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -176,6 +230,7 @@ namespace Server
                 Facing = (Direction)reader.ReadInt();
                 TeamNumber = reader.ReadInt();
                 PlayerNumber = reader.ReadInt();
+                FollowerNumber = reader.ReadInt();
             }
 
             //-----

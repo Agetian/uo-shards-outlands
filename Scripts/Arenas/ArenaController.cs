@@ -79,6 +79,20 @@ namespace Server
         {
         }
 
+        public static ArenaController GetArenaAtLocation(Point3D location, Map map)
+        {
+            foreach (ArenaController arenaController in m_Instances)
+            {
+                if (arenaController == null) continue;
+                if (arenaController.Deleted) continue;
+
+                if (arenaController.m_ArenaBoundary.Contains(location) && arenaController.Map == map)
+                    return arenaController;
+            }
+
+            return null;
+        }
+
         public override bool CanBeSeenBy(Mobile from)
         {
             if (from.AccessLevel > AccessLevel.Player)
@@ -87,9 +101,12 @@ namespace Server
             return false;
         }
 
-        public bool IsWithinArena(Point3D location)
+        public bool IsWithinArena(Point3D location, Map map)
         {
             Point2D sourcePoint = new Point2D(location.X, location.Y);
+
+            if (Map != map)
+                return false;
 
             if (m_ArenaBoundary.Contains(sourcePoint))
                 return true;
@@ -123,9 +140,26 @@ namespace Server
                 if (arenaTile == null) continue;
                 if (arenaTile.Deleted) continue;
 
-                if (arenaTile.m_TileType == ArenaTile.ArenaTileType.StartLocation)
+                if (arenaTile.m_TileType == ArenaTile.ArenaTileType.PlayerStartLocation)
                 {
                     if (arenaTile.m_TeamNumber == team && arenaTile.m_PlayerNumber == playerNumber)
+                        return arenaTile;
+                }
+            }
+
+            return null;
+        }
+
+        public ArenaTile GetFollowerStartingTile(int team, int playerNumber, int followerNumber)
+        {
+            foreach (ArenaTile arenaTile in m_ArenaTiles)
+            {
+                if (arenaTile == null) continue;
+                if (arenaTile.Deleted) continue;
+
+                if (arenaTile.m_TileType == ArenaTile.ArenaTileType.FollowerStartLocation)
+                {
+                    if (arenaTile.m_TeamNumber == team && arenaTile.m_PlayerNumber == playerNumber && arenaTile.m_FollowerNumber == followerNumber)
                         return arenaTile;
                 }
             }
@@ -169,6 +203,14 @@ namespace Server
             }
 
             m_Walls.Clear();
+        }
+
+        public override void OnDelete()
+        {
+            if (m_Instances.Contains(this))
+                m_Instances.Remove(this);
+
+            base.OnDelete();
         }
 
         public override void Serialize(GenericWriter writer)

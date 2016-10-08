@@ -75,7 +75,7 @@ namespace Server.Mobiles
 
             if (DateTime.UtcNow >= m_NextVoidAttackAllowed && AIObject.currentCombatRange != CombatRange.Withdraw && AIObject.Action != ActionType.Flee)
             {
-                if (combatant != null && !CantWalk && !Frozen && !IsHindered() && Alive && !IsDeadPet && !IsDeadBondedPet)
+                if (combatant != null && !CantWalk && !Frozen && !IsHindered() && Alive && !IsDeadFollower && !IsDeadBondedFollower)
                 {
                     if (combatant.Alive && InLOS(combatant) && GetDistanceToSqrt(combatant) <= 8)
                     {
@@ -123,7 +123,7 @@ namespace Server.Mobiles
                             Timer.DelayCall(TimeSpan.FromSeconds(destinationDelay), delegate
                             {
                                 if (this == null) return;
-                                if (Deleted || !Alive || IsDeadPet || IsDeadBondedPet) return;
+                                if (Deleted || !Alive || IsDeadFollower || IsDeadBondedFollower) return;
                                 if (!SpecialAbilities.IsDamagable(combatant)) return;
                                 if (Utility.GetDistance(Location, combatant.Location) >= 20) return;
 

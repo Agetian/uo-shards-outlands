@@ -311,7 +311,7 @@ namespace Server
 
             creature.IsStabled = false;
 
-            if (!creature.Alive || creature.IsDeadBondedPet)
+            if (!creature.Alive || creature.IsDeadBondedFollower)
                 creature.ResurrectPet();
 
             creature.ApplyExperience();

@@ -2730,6 +2730,12 @@ namespace Server.Mobiles
 
             if (ns != null)
             {
+                if (m_ActiveArenaFight != null)
+                {
+                    if (m_ActiveArenaFight.m_FightPhase == ArenaFight.FightPhaseType.StartCountdown)
+                        return false;
+                }
+
                 if (IsHindered())
                     return false;
 
@@ -3163,7 +3169,7 @@ namespace Server.Mobiles
 
             if (bc_Creature != null)
             {
-                bool allowMoveOver = (!Alive || !m.Alive || IsDeadBondedPet || m.IsDeadBondedPet) || (Hidden && AccessLevel > AccessLevel.Player);
+                bool allowMoveOver = (!Alive || !m.Alive || IsDeadBondedFollower || m.IsDeadBondedFollower) || (Hidden && AccessLevel > AccessLevel.Player);
 
                 if (allowMoveOver)
                     return true;
@@ -3389,7 +3395,7 @@ namespace Server.Mobiles
                             Send(new HealthbarYellow(state.Mobile));
                     }
 
-                    if (IsDeadBondedPet)
+                    if (IsDeadBondedFollower)
                         Send(new BondedStatus(0, state.Mobile.Serial, 1));
 
                     if (ObjectPropertyList.Enabled)
@@ -3467,7 +3473,7 @@ namespace Server.Mobiles
                                         Send(new HealthbarYellow(state.Mobile));
                                 }
 
-                                if (IsDeadBondedPet)
+                                if (IsDeadBondedFollower)
                                     Send(new BondedStatus(0, state.Mobile.Serial, 1));
 
                                 if (ObjectPropertyList.Enabled)

@@ -272,7 +272,7 @@ namespace Server.Mobiles
 
         public static bool DoBandageHeal(BaseCreature creature, Mobile target)
         {
-            if (target == null || !target.Alive || target.Map != creature.Map || target.Deleted || target.IsDeadBondedPet || !creature.CanSee(target))
+            if (target == null || !target.Alive || target.Map != creature.Map || target.Deleted || target.IsDeadBondedFollower || !creature.CanSee(target))
                 return false;
 
             creature.DoingBandage = true;
@@ -364,7 +364,7 @@ namespace Server.Mobiles
                 return;
 
             //If Heal Target Isn't Valid
-            if (target == null || target.Deleted || !target.Alive || target.Map != creature.Map || target.Deleted || target.IsDeadBondedPet || !creature.CanSee(target))
+            if (target == null || target.Deleted || !target.Alive || target.Map != creature.Map || target.Deleted || target.IsDeadBondedFollower || !creature.CanSee(target))
             {
                 creature.DoingBandage = false;
                 target.BeingBandaged = false;
@@ -498,7 +498,7 @@ namespace Server.Mobiles
                 return false;
 
             //Ignore If Dead
-            if (!target.Alive || target.IsDeadBondedPet)
+            if (!target.Alive || target.IsDeadBondedFollower)
                 return false;
 
             //Ignore ServerStaff

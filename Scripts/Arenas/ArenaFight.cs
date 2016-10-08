@@ -68,16 +68,56 @@ namespace Server
 
             if (arenaParticipant != null && m_ArenaController != null)
             {
-                if (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive && !m_ArenaController.IsWithinArena(player.Location))
+                if (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive && !IsWithinArena(player.Location, player.Map))
                 {
                     arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Eliminated;
 
+                    ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+
                     if (player.Map == Map.Internal)
                     {
-                        ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+                        if (exitTile != null)
+                        {
+                            player.LogoutLocation = exitTile.Location;
+                            player.LogoutMap = exitTile.Map;
+                        }
+
+                        else
+                        {
+                            player.LogoutLocation = m_ArenaController.Location;
+                            player.LogoutMap = m_ArenaController.Map;
+                        }
+                    }
+
+                    RestoreAndClearEffects(player);
+
+                    foreach (Mobile mobile in player.AllFollowers)
+                    {
+                        BaseCreature bc_Creature = mobile as BaseCreature;
+
+                        if (bc_Creature == null) continue;
+                        if (bc_Creature.Deleted) continue;
+                        if (!m_ArenaMatch.m_ArenaFight.IsWithinArena(bc_Creature.Location, bc_Creature.Map)) continue;
+
+                        if ((!bc_Creature.Alive || bc_Creature.IsDeadFollower) && !bc_Creature.IsBonded)
+                            continue;
 
                         if (exitTile != null)
-                            player.LogoutLocation = exitTile.Location;
+                        {
+                            bc_Creature.Location = exitTile.Location;
+                            bc_Creature.Map = exitTile.Map;
+                        }
+
+                        else
+                        {
+                            bc_Creature.Location = m_ArenaController.Location;
+                            bc_Creature.Map = m_ArenaController.Map;
+                        }
+
+                        if (bc_Creature.IsDeadBondedFollower)
+                            bc_Creature.ResurrectPet();
+
+                        RestoreAndClearEffects(bc_Creature);
                     }
 
                     ArenaTeam winningTeam = CheckForTeamVictory();
@@ -89,6 +129,52 @@ namespace Server
                     }
                 }                
             }
+        }
+
+        public virtual bool IsWithinArena(Point3D location, Map map)
+        {
+            if (m_ArenaController == null)
+                return false;
+
+            return m_ArenaController.IsWithinArena(location, map);
+        }
+
+        public virtual void FollowerOnDeath(BaseCreature creature, Container corpseContainer)
+        {
+            if (creature == null)
+                return;
+
+            ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+
+            if (IsWithinArena(creature.Location, creature.Map))
+            {
+                if (exitTile != null)
+                {
+                    creature.Location = exitTile.Location;
+                    creature.Map = exitTile.Map;
+                }
+
+                else
+                {
+                    creature.Location = m_ArenaController.Location;
+                    creature.Map = m_ArenaController.Map;
+                }
+            }
+
+            creature.ControlTarget = null;
+            creature.ControlOrder = OrderType.Stop;
+
+            Timer.DelayCall(TimeSpan.FromSeconds(4.0), delegate
+            {
+                if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false)) return;
+                if (creature == null) return;
+                if (m_ArenaController == null) return;
+
+                if (creature.IsDeadBondedFollower)
+                    creature.ResurrectPet();
+
+                RestoreAndClearEffects(creature);
+            });
         }
         
         public virtual void OnDeath(PlayerMobile player, Container corpseContainer)
@@ -102,50 +188,84 @@ namespace Server
             {
                 if (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive)
                     arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Eliminated;
-            }            
+            }
+
+            Queue m_Queue = new Queue();
+
+            foreach (Mobile mobile in player.AllFollowers)
+            {
+                BaseCreature bc_Creature = mobile as BaseCreature;
+
+                if (bc_Creature == null) continue;
+                if (!m_ArenaMatch.m_ArenaFight.IsWithinArena(bc_Creature.Location, bc_Creature.Map)) continue;
+
+                if (bc_Creature.Alive)
+                    m_Queue.Enqueue(bc_Creature);
+            }
+
+            while (m_Queue.Count > 0)
+            {
+                BaseCreature creature = (BaseCreature)m_Queue.Dequeue();
+
+                creature.Kill();
+            }
             
             Timer.DelayCall(TimeSpan.FromSeconds(4.0), delegate
             {
-                if (player == null)
-                    return;
+                if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false)) return;
+                if (player == null) return;
+                if (m_ArenaController == null) return;
 
-                ClearEffects(player);
+                if (!player.Alive)
+                    player.Resurrect(); 
 
-                player.Hits = player.HitsMax;
-                player.Stam = player.StamMax;
-                player.Mana = player.ManaMax;
+                RestoreAndClearEffects(player);                               
+                                
+                ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
 
-                player.DropHolding();
-
-                if (player.BankBox != null)
-                    player.BankBox.Close();
-
-                player.CloseAllGumps();
-
-                if (player.NetState != null)
-                    player.NetState.CancelAllTrades();
-
-                CancelSpell(player);
-
-                Target.Cancel(player);
-
-                if (!player.Alive)                
-                    player.Resurrect();                
-
-                //Force Exit
-                if (m_ArenaController != null)
+                if (IsWithinArena(player.Location, player.Map))
                 {
-                    if (m_ArenaController.IsWithinArena(player.Location))
+                    if (exitTile != null)
                     {
-                        ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+                        player.Location = exitTile.Location;
+                        player.Map = exitTile.Map;
+                    }
 
-                        if (exitTile != null)
-                            player.Location = exitTile.Location;
-
-                        else
-                            player.Location = Location;  
+                    else
+                    {
+                        player.Location = m_ArenaController.Location;
+                        player.Map = m_ArenaController.Map;
                     }
                 }
+
+                foreach (Mobile mobile in player.AllFollowers)
+                {
+                    BaseCreature bc_Creature = mobile as BaseCreature;
+
+                    if (bc_Creature == null) continue;
+                    if (bc_Creature.Deleted) continue;
+                    if (!m_ArenaMatch.m_ArenaFight.IsWithinArena(bc_Creature.Location, bc_Creature.Map)) continue;
+
+                    if ((!bc_Creature.Alive || bc_Creature.IsDeadFollower) && !bc_Creature.IsBonded)
+                        continue;
+
+                    if (exitTile != null)
+                    {
+                        bc_Creature.Location = exitTile.Location;
+                        bc_Creature.Map = exitTile.Map;
+                    }
+
+                    else
+                    {
+                        bc_Creature.Location = m_ArenaController.Location;
+                        bc_Creature.Map = m_ArenaController.Map;
+                    }
+
+                    if (bc_Creature.IsDeadBondedFollower)
+                        bc_Creature.ResurrectPet();
+
+                    RestoreAndClearEffects(bc_Creature);
+                }                
             });
 
             ArenaTeam winningTeam = CheckForTeamVictory();
@@ -187,88 +307,92 @@ namespace Server
             return true;
         }
 
-        public virtual void CancelSpell(PlayerMobile player)
+        public virtual void CancelSpell(Mobile mobile)
         {
-            if (player == null)
+            if (mobile == null)
                 return;
 
-            if (player.Spell is Spell)
+            if (mobile.Spell is Spell)
             {
-                Spell spell = player.Spell as Spell;
+                Spell spell = mobile.Spell as Spell;
                 spell.Disturb(DisturbType.Kill);
             }
-
-            Targeting.Target.Cancel(player);
         }
-
-        public virtual void ClearEffects(PlayerMobile player)
+                
+        public virtual void RestoreAndClearEffects(Mobile mobile)
         {
-            SpecialAbilities.ClearSpecialEffects(player);
+            SpecialAbilities.ClearSpecialEffects(mobile);
 
-            player.RemoveStatModsBeginningWith("[Magic]");
+            mobile.Warmode = false;
 
-            player.MagicDamageAbsorb = 0;
-            player.MeleeDamageAbsorb = 0;
-            player.VirtualArmorMod = 0;
+            mobile.RemoveStatModsBeginningWith("[Magic]");
 
-            BuffInfo.RemoveBuff(player, BuffIcon.Agility);
-            BuffInfo.RemoveBuff(player, BuffIcon.ArchProtection);
-            BuffInfo.RemoveBuff(player, BuffIcon.Bless);
-            BuffInfo.RemoveBuff(player, BuffIcon.Clumsy);
-            BuffInfo.RemoveBuff(player, BuffIcon.Incognito);
-            BuffInfo.RemoveBuff(player, BuffIcon.MagicReflection);
-            BuffInfo.RemoveBuff(player, BuffIcon.MassCurse);
-            BuffInfo.RemoveBuff(player, BuffIcon.Invisibility);
-            BuffInfo.RemoveBuff(player, BuffIcon.HidingAndOrStealth);
-            BuffInfo.RemoveBuff(player, BuffIcon.Paralyze);
-            BuffInfo.RemoveBuff(player, BuffIcon.Poison);
-            BuffInfo.RemoveBuff(player, BuffIcon.Polymorph);
-            BuffInfo.RemoveBuff(player, BuffIcon.Protection);
-            BuffInfo.RemoveBuff(player, BuffIcon.ReactiveArmor);
-            BuffInfo.RemoveBuff(player, BuffIcon.Strength);
-            BuffInfo.RemoveBuff(player, BuffIcon.Weaken);
-            BuffInfo.RemoveBuff(player, BuffIcon.FeebleMind);            
-            
-            player.Paralyzed = false;
-            player.RevealingAction();
+            mobile.MagicDamageAbsorb = 0;
+            mobile.MeleeDamageAbsorb = 0;
+            mobile.VirtualArmorMod = 0;
 
-            Spells.Second.ProtectionSpell.Registry.Remove(player);
-            player.EndAction(typeof(DefensiveSpell));
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Agility);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.ArchProtection);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Bless);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Clumsy);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Incognito);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.MagicReflection);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.MassCurse);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Invisibility);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.HidingAndOrStealth);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Paralyze);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Poison);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Polymorph);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Protection);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.ReactiveArmor);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Strength);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.Weaken);
+            BuffInfo.RemoveBuff(mobile, BuffIcon.FeebleMind);
 
-            TransformationSpellHelper.RemoveContext(player, true);
+            mobile.Paralyzed = false;
+            mobile.RevealingAction();
 
-            BaseArmor.ValidateMobile(player);
-            BaseClothing.ValidateMobile(player);
+            Spells.Second.ProtectionSpell.Registry.Remove(mobile);
+            mobile.EndAction(typeof(DefensiveSpell));
 
-            player.Hits = player.HitsMax;
-            player.Stam = player.StamMax;
-            player.Mana = player.ManaMax;
+            //TEST
+            //TransformationSpellHelper.RemoveContext(mobile, true);
 
-            player.Poison = null;
-        }
+            BaseArmor.ValidateMobile(mobile);
+            BaseClothing.ValidateMobile(mobile);
 
-        public virtual void RemoveAggressions(PlayerMobile player)
-        {
-            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
-                return;
+            mobile.Poison = null;
 
-            foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
+            mobile.ClearAllAggression();
+
+            mobile.Hits = mobile.HitsMax;
+            mobile.Stam = mobile.StamMax;
+            mobile.Mana = mobile.ManaMax;
+
+            mobile.DropHolding();
+
+            if (mobile.BankBox != null)
+                mobile.BankBox.Close();
+
+            mobile.CloseAllGumps();
+
+            if (mobile.NetState != null)
+                mobile.NetState.CancelAllTrades();
+
+            CancelSpell(mobile);
+
+            Target.Cancel(mobile);
+
+            BaseCreature bc_Creature = mobile as BaseCreature;
+
+            if (bc_Creature != null)
             {
-                if (arenaTeam == null) continue;
-                if (arenaTeam.Deleted) continue;
-
-                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                if (bc_Creature.ControlMaster is PlayerMobile)
                 {
-                    if (arenaParticipant.m_Player == null) continue;
-                    if (arenaParticipant.m_Player.Deleted) continue;
-
-                    arenaParticipant.m_Player.RemoveAggressed(player);
-                    arenaParticipant.m_Player.RemoveAggressor(player);
-
-                    player.RemoveAggressed(arenaParticipant.m_Player);
-                    player.RemoveAggressor(arenaParticipant.m_Player);                      
+                    bc_Creature.ControlTarget = null;
+                    bc_Creature.ControlOrder = OrderType.Stop;
                 }
-            }       
+            }        
         }
 
         #endregion
@@ -375,7 +499,7 @@ namespace Server
 
                 else
                 {
-                    //TEST: MISSING WALL TILE
+                    //TEST: HANDLING FOR IF WALL TILE IS MISSING
                 }
             }
 
@@ -397,27 +521,7 @@ namespace Server
 
                     PlayerMobile player = participant.m_Player;
 
-                    RemoveAggressions(player);
-
-                    ClearEffects(player);
-
-                    player.Hits = player.HitsMax;
-                    player.Stam = player.StamMax;
-                    player.Mana = player.ManaMax;
-
-                    player.DropHolding();
-
-                    if (player.BankBox != null)
-                        player.BankBox.Close();
-
-                    player.CloseAllGumps();
-
-                    if (player.NetState != null)
-                        player.NetState.CancelAllTrades();
-
-                    CancelSpell(player);
-
-                    Target.Cancel(player);
+                    RestoreAndClearEffects(player);                    
 
                     ArenaTile playerStartingTile = m_ArenaController.GetPlayerStartingTile(a, b);
 
@@ -434,9 +538,33 @@ namespace Server
                         //TEST: SET DEFAULT PLAYER LOCATION (IF TILES MISSING)
                     }
 
-                    //TEST: Participant Settings Set
+                    for (int c = 0; c < player.AllFollowers.Count; c++)
+                    {
+                        BaseCreature bc_Creature = player.AllFollowers[c] as BaseCreature;
 
-                    //TEST: ADD COMPETITION CONTEXT                    
+                        if (bc_Creature == null) continue;
+                        if (!m_ArenaMatch.m_ArenaGroupController.ArenaGroupRegionBoundary.Contains(bc_Creature.Location) || m_ArenaMatch.m_ArenaGroupController.Map != bc_Creature.Map) continue;
+
+                        if (bc_Creature.IsDeadBondedFollower)
+                            bc_Creature.ResurrectPet();
+
+                        RestoreAndClearEffects(bc_Creature);
+
+                        ArenaTile followerStartingTile = m_ArenaController.GetFollowerStartingTile(a, b, c);
+
+                        if (followerStartingTile != null)
+                        {
+                            bc_Creature.Location = followerStartingTile.Location;
+                            bc_Creature.Map = followerStartingTile.Map;
+
+                            bc_Creature.Direction = followerStartingTile.Facing;
+                        }
+
+                        else
+                        {
+                            //TEST: SET DEFAULT CREATURE LOCATION (IF TILES MISSING)
+                        }                        
+                    }                 
 
                     //TEST: FREEZE PLAYER UNTIL FIGHT START
                 }
@@ -537,9 +665,7 @@ namespace Server
                 return;
 
             //Announce Resolution
-
-            //
-
+            
             foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
             {
                 if (arenaTeam == null) continue;
@@ -549,9 +675,22 @@ namespace Server
                 {
                     if (arenaParticipant == null) continue;
                     if (arenaParticipant.Deleted) continue;
-                    if (arenaParticipant.m_Player == null) continue;
+                    if (arenaParticipant.m_Player == null) continue;                   
 
                     PlayerMobile player = arenaParticipant.m_Player;
+
+                    if (IsWithinArena(player.Location, player.Map))                    
+                        RestoreAndClearEffects(player);
+
+                    foreach (Mobile mobile in player.AllFollowers)
+                    {
+                        BaseCreature bc_Creature = mobile as BaseCreature;
+
+                        if (bc_Creature == null) continue;
+                        if (!IsWithinArena(bc_Creature.Location, bc_Creature.Map)) continue;
+
+                        RestoreAndClearEffects(bc_Creature);
+                    }
 
                     if (arenaTeam == winningTeam)
                     {
@@ -574,9 +713,6 @@ namespace Server
             if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
                 return;
 
-            Queue m_TeamsQueue = new Queue();
-            Queue m_ParticipantQueue = new Queue();
-
             Queue m_ItemsToTrashQueue = new Queue();
             Queue m_ItemsToDeleteQueue = new Queue();
 
@@ -585,26 +721,28 @@ namespace Server
                 if (arenaTeam == null)
                     continue;
 
-                m_TeamsQueue.Enqueue(arenaTeam);
-
                 foreach (ArenaParticipant participant in arenaTeam.m_Participants)
                 {
                     if (participant == null)
                         continue;
-
-                    m_ParticipantQueue.Enqueue(participant);
-
+                    
                     PlayerMobile player = participant.m_Player;
 
-                    if (m_ArenaController.IsWithinArena(player.Location))
+                    if (IsWithinArena(player.Location, player.Map))
                     {
                         ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
 
                         if (exitTile != null)
+                        {
                             player.Location = exitTile.Location;
+                            player.Map = exitTile.Map;
+                        }
 
                         else
-                            player.Location = Location;
+                        {
+                            player.Location = m_ArenaController.Location;
+                            player.Map = m_ArenaController.Map;
+                        }
                     }
 
                     participant.m_FightStatus = ArenaParticipant.FightStatusType.Waiting;
@@ -613,20 +751,6 @@ namespace Server
 
                     participant.ResetArenaFightValues();                   
                 }
-            }
-
-            while (m_ParticipantQueue.Count > 0)
-            {
-                ArenaParticipant arenaParticipant = (ArenaParticipant)m_ParticipantQueue.Dequeue();
-
-                arenaParticipant.Delete();
-            }
-
-            while (m_TeamsQueue.Count > 0)
-            {
-                ArenaTeam arenaTeam = (ArenaTeam)m_TeamsQueue.Dequeue();
-
-                arenaTeam.Delete();
             }
 
             m_ArenaMatch.m_ArenaFight = null;
@@ -646,6 +770,25 @@ namespace Server
                     if (item is Corpse)
                         m_ItemsToDeleteQueue.Enqueue(item);
                 }
+
+                if (targetObject is Mobile)
+                {
+                    Mobile targetMobile = targetObject as Mobile;
+
+                    ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+
+                    if (exitTile != null)
+                    {
+                        targetMobile.Location = exitTile.Location;
+                        targetMobile.Map = exitTile.Map;
+                    }
+
+                    else
+                    {
+                        targetMobile.Location = m_ArenaController.Location;
+                        targetMobile.Map = m_ArenaController.Map;
+                    }
+                }
             }
 
             arenaObjects.Free();
@@ -654,7 +797,10 @@ namespace Server
             {
                 Item arenaItem = (Item)m_ItemsToTrashQueue.Dequeue();
 
-                //TEST: Move Item to Arena-Specific Trash Can
+                ArenaTrashBarrel arenaTrashBarrel = ArenaTrashBarrel.GetArenaTrashBarrel(m_ArenaController);
+
+                if (arenaTrashBarrel != null)
+                    arenaTrashBarrel.DropItem(arenaItem);
             }
 
             while (m_ItemsToDeleteQueue.Count > 0)

@@ -55,7 +55,7 @@ namespace Server.Spells.First
             if (!Caster.CanSee(target) || target.Hidden)            
                 Caster.SendLocalizedMessage(500237); // Target can not be seen.
             
-			else if ( target.IsDeadBondedPet )			
+			else if ( target.IsDeadBondedFollower )			
 				Caster.SendLocalizedMessage( 1060177 ); // You cannot heal a creature that is already dead!
 			
 			else if ( target is BaseCreature && ((BaseCreature)target).IsAnimatedDead )			

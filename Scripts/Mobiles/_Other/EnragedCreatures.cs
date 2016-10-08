@@ -257,7 +257,7 @@ namespace Server.Mobiles
 			{	
 				return false;
 			}
-			else if ( combatant.IsDeadBondedPet || !combatant.Alive )
+			else if ( combatant.IsDeadBondedFollower || !combatant.Alive )
 			{
 				return false;
 			}

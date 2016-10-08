@@ -988,7 +988,7 @@ namespace Server.Commands.Generic
 			}
 			else
 			{
-				if ( mob.IsDeadBondedPet )
+				if ( mob.IsDeadBondedFollower )
 				{
 					BaseCreature bc = mob as BaseCreature;
 

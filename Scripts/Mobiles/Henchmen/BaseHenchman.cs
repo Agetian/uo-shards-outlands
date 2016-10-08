@@ -135,7 +135,7 @@ namespace Server.Custom
             double frequency = .001;           
             double infrequentValue = .0001;
 
-            if (!Hidden && !IsDeadBondedPet && Alive)
+            if (!Hidden && !IsDeadBondedFollower && Alive)
             {
                 if (Combatant != null)
                 {

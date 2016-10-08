@@ -424,6 +424,9 @@ namespace Server
         {  
             Skill mobileSkill = from.Skills[skill.SkillName];
             SkillName skillName = skill.SkillName;
+
+            BaseCreature bc_Creature = from as BaseCreature;
+            PlayerMobile player = from as PlayerMobile;
             
             double skillValue = mobileSkill.Base;
 
@@ -432,7 +435,10 @@ namespace Server
             
             bool success = chance >= Utility.RandomDouble();
 
-            if (from is BaseCreature)
+            if (bc_Creature != null)
+                return success;
+
+            if (ArenaGroupController.GetArenaGroupRegionAtLocation(from.Location, from.Map) != null)
                 return success;
             
             //Check For Stat Gain            
@@ -578,7 +584,7 @@ namespace Server
             if (from.Region.IsPartOf(typeof(Regions.Jail)))
                 return;
 
-            if (from is BaseCreature && ((BaseCreature)from).IsDeadPet)
+            if (from is BaseCreature && ((BaseCreature)from).IsDeadFollower)
                 return;
                         
             if (skill.Base < skill.Cap && skill.Lock == SkillLock.Up)

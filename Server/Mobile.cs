@@ -2396,9 +2396,9 @@ namespace Server
                 if (DateTime.UtcNow < m_Mobile.LastSwingTime + m_Mobile.NextSwingDelay)
                     return;
 
-                if (m_Mobile.Deleted || !m_Mobile.Alive || m_Mobile.IsDeadBondedPet) return;
+                if (m_Mobile.Deleted || !m_Mobile.Alive || m_Mobile.IsDeadBondedFollower) return;
                 if (m_Mobile.Combatant == null) return;
-                if (m_Mobile.Combatant.Deleted || !m_Mobile.Combatant.Alive || m_Mobile.Combatant.IsDeadBondedPet) return;
+                if (m_Mobile.Combatant.Deleted || !m_Mobile.Combatant.Alive || m_Mobile.Combatant.IsDeadBondedFollower) return;
                 if (m_Mobile.Combatant.m_Map != m_Mobile.m_Map) return;
 
                 if (m_Mobile.ReadyForSwing()) 
@@ -2801,6 +2801,62 @@ namespace Server
         public virtual void PushNotoriety(Mobile from, Mobile to, bool aggressor)
         {
         }
+
+        public void ClearAllAggression()
+        {
+            List<Mobile> m_Mobiles = new List<Mobile>();
+
+            Queue m_Queue = new Queue();
+
+            foreach (AggressorInfo aggressed in m_Aggressed)
+            {
+                if (aggressed == null)
+                    continue;
+
+                if (aggressed.Attacker != null)
+                {
+                    if (!m_Mobiles.Contains(aggressed.Attacker))
+                        m_Mobiles.Add(aggressed.Attacker);                   
+                }
+
+                if (aggressed.Defender != null)
+                {
+                    if (!m_Mobiles.Contains(aggressed.Defender))
+                        m_Mobiles.Add(aggressed.Defender);
+                }
+            }
+
+            foreach (AggressorInfo aggressor in m_Aggressors)
+            {
+                if (aggressor == null)
+                    continue;
+
+                if (aggressor.Attacker != null)
+                {
+                    if (!m_Mobiles.Contains(aggressor.Attacker))
+                        m_Mobiles.Add(aggressor.Attacker);
+                }
+
+                if (aggressor.Defender != null)
+                {
+                    if (!m_Mobiles.Contains(aggressor.Defender))
+                        m_Mobiles.Add(aggressor.Defender);
+                }
+            }
+
+            foreach (Mobile mobile in m_Mobiles)
+            {
+                m_Queue.Enqueue(mobile);
+            }
+
+            while (m_Queue.Count > 0)
+            {
+                Mobile mobile = (Mobile)m_Queue.Dequeue();
+
+                RemoveAggressed(mobile);
+                RemoveAggressor(mobile);
+            }
+        }        
 
         public void RemoveAggressed(Mobile aggressed)
         {
@@ -3779,7 +3835,7 @@ namespace Server
             return true;
         }
 
-        public virtual bool IsDeadBondedPet { get { return false; } }
+        public virtual bool IsDeadBondedFollower { get { return false; } }
 
         /// <summary>
         /// Overridable. Event invoked when a Mobile <paramref name="m" /> moves over this Mobile.
@@ -3813,7 +3869,7 @@ namespace Server
         {
             if ((m_Map.Rules & MapRules.FreeMovement) == 0)
             {
-                if (!shoved.Alive || !Alive || shoved.IsDeadBondedPet || IsDeadBondedPet)
+                if (!shoved.Alive || !Alive || shoved.IsDeadBondedFollower || IsDeadBondedFollower)
                     return true;
 
                 else if (shoved.m_Hidden && shoved.m_AccessLevel > AccessLevel.Player)
@@ -4256,7 +4312,7 @@ namespace Server
             if (!CanBeDamaged())
                 return;
 
-            else if (!Alive || IsDeadBondedPet)
+            else if (!Alive || IsDeadBondedFollower)
                 return;
 
             else if (m_Deleted)
@@ -5888,6 +5944,7 @@ namespace Server
                 OnDamage(amount, from, newHits < 0);
                 
                 IMount m = this.Mount;
+
                 if (m != null && informMount)
                     m.OnRiderDamaged(amount, from, newHits < 0);
 
@@ -5961,7 +6018,7 @@ namespace Server
 
         public virtual void Heal(int amount, Mobile from, bool message)
         {
-            if (!Alive || IsDeadBondedPet)
+            if (!Alive || IsDeadBondedFollower)
                 return;
 
             if (!Region.OnHeal(this, ref amount))
@@ -7552,7 +7609,7 @@ namespace Server
                                     ns.Send(new HealthbarYellow(m));
                             }
 
-                            if (m.IsDeadBondedPet)
+                            if (m.IsDeadBondedFollower)
                                 ns.Send(new BondedStatus(0, m.m_Serial, 1));
 
                             if (ObjectPropertyList.Enabled)
@@ -7717,7 +7774,7 @@ namespace Server
             if (target == null)
                 return false;
 
-            if (m_Deleted || target.m_Deleted || !Alive || IsDeadBondedPet || (!allowDead && (!target.Alive || target.IsDeadBondedPet)))
+            if (m_Deleted || target.m_Deleted || !Alive || IsDeadBondedFollower || (!allowDead && (!target.Alive || target.IsDeadBondedFollower)))
             {
                 if (message)
                     SendLocalizedMessage(1001017); // You can not perform beneficial acts on your target.
@@ -7803,7 +7860,7 @@ namespace Server
             if (target == null)
                 return false;
 
-            if (m_Deleted || (!ignoreOurBlessedness && m_Blessed) || target.m_Deleted || target.m_Blessed || !Alive || IsDeadBondedPet || !target.Alive || target.IsDeadBondedPet)
+            if (m_Deleted || (!ignoreOurBlessedness && m_Blessed) || target.m_Deleted || target.m_Blessed || !Alive || IsDeadBondedFollower || !target.Alive || target.IsDeadBondedFollower)
             {
                 if (message)
                     SendLocalizedMessage(1001018); // You can not perform negative acts on your target.
@@ -8743,7 +8800,7 @@ namespace Server
                     {
                         state.Send(MobileIncoming.Create(state, state.Mobile, this));
 
-                        if (IsDeadBondedPet)
+                        if (IsDeadBondedFollower)
                             state.Send(new BondedStatus(0, m_Serial, 1));
 
                         if (ObjectPropertyList.Enabled)
@@ -9822,7 +9879,7 @@ namespace Server
                                             m.m_NetState.Send(new HealthbarYellow(this));
                                     }
 
-                                    if (IsDeadBondedPet)
+                                    if (IsDeadBondedFollower)
                                         m.m_NetState.Send(new BondedStatus(0, m_Serial, 1));
 
                                     if (ObjectPropertyList.Enabled)
@@ -9847,7 +9904,7 @@ namespace Server
                                             ourState.Send(new HealthbarYellow(m));
                                     }
 
-                                    if (m.IsDeadBondedPet)
+                                    if (m.IsDeadBondedFollower)
                                         ourState.Send(new BondedStatus(0, m.m_Serial, 1));
 
                                     if (ObjectPropertyList.Enabled)
@@ -9883,7 +9940,7 @@ namespace Server
                                         ns.Send(new HealthbarYellow(this));
                                 }
 
-                                if (IsDeadBondedPet)
+                                if (IsDeadBondedFollower)
                                     ns.Send(new BondedStatus(0, m_Serial, 1));
 
                                 if (ObjectPropertyList.Enabled)
@@ -10221,7 +10278,7 @@ namespace Server
                                 state.Send(new HealthbarYellow(this));
                         }
 
-                        if (IsDeadBondedPet)
+                        if (IsDeadBondedFollower)
                             state.Send(new BondedStatus(0, m_Serial, 1));
 
                         if (ObjectPropertyList.Enabled)
@@ -10965,7 +11022,7 @@ namespace Server
                         {
                             state.Send(MobileIncoming.Create(state, beholder, m));
 
-                            if (m.IsDeadBondedPet)
+                            if (m.IsDeadBondedFollower)
                             {
                                 if (deadPacket == null)
                                     deadPacket = Packet.Acquire(new BondedStatus(0, m.m_Serial, 1));

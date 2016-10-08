@@ -124,7 +124,7 @@ namespace Server.Mobiles
 
 		public override void OnDoubleClick( Mobile from )
 		{
-			if ( IsDeadPet )
+			if ( IsDeadFollower )
 				return;
 
 			if ( from.IsBodyMod && !from.Body.IsHuman )

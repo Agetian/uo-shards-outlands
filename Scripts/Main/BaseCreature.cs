@@ -487,13 +487,102 @@ namespace Server.Mobiles
 
         public List<Mobile> m_Creatures = new List<Mobile>();
 
-        //-------
-
         public List<AspectGearExperienceEntry> m_AspectGearExperienceEntries = new List<AspectGearExperienceEntry>();
 
         public virtual TimeSpan GetNextAbilityDelay()
         {
             return TimeSpan.FromSeconds(NextAbilityDelayMin - ((NextAbilityDelayMin - NextAbilityDelayMax)));
+        }
+
+        public ArenaMatch m_ActiveArenaMatch
+        {
+            get
+            {
+                PlayerMobile playerOwner = ControlMaster as PlayerMobile;
+
+                if (playerOwner != null)
+                {
+                    if (playerOwner.m_ArenaPlayerSettings == null) return null;
+                    if (playerOwner.m_ArenaPlayerSettings.Deleted) return null;
+                    if (!ArenaMatch.IsValidArenaMatch(playerOwner.m_ArenaPlayerSettings.m_ArenaMatch, playerOwner, false)) return null;
+
+                    if (playerOwner.m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
+
+                    return playerOwner.m_ArenaPlayerSettings.m_ArenaMatch;
+                }
+
+                else
+                    return null;
+            }
+        }
+
+        public ArenaParticipant m_ActiveArenaParticipant
+        {
+            get
+            {
+                PlayerMobile playerOwner = ControlMaster as PlayerMobile;
+
+                if (playerOwner != null)
+                {
+                    if (playerOwner.m_ArenaPlayerSettings == null) return null;
+                    if (playerOwner.m_ArenaPlayerSettings.Deleted) return null;
+                    if (!ArenaMatch.IsValidArenaMatch(playerOwner.m_ArenaPlayerSettings.m_ArenaMatch, playerOwner, false)) return null;
+
+                    if (playerOwner.m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
+
+                    return playerOwner.m_ArenaPlayerSettings.m_ArenaMatch.GetParticipant(playerOwner);
+                }
+
+                else
+                    return null;
+            }
+        }
+
+        public ArenaRuleset m_ActiveArenaRuleset
+        {
+            get
+            {
+                PlayerMobile playerOwner = ControlMaster as PlayerMobile;
+
+                if (playerOwner != null)
+                {
+                    if (playerOwner.m_ArenaPlayerSettings == null) return null;
+                    if (playerOwner.m_ArenaPlayerSettings.Deleted) return null;
+                    if (!ArenaMatch.IsValidArenaMatch(playerOwner.m_ArenaPlayerSettings.m_ArenaMatch, playerOwner, false)) return null;
+
+                    if (playerOwner.m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
+
+                    return playerOwner.m_ArenaPlayerSettings.m_ArenaMatch.m_Ruleset;
+                }
+
+                else
+                    return null;
+            }
+        }
+
+        public ArenaFight m_ActiveArenaFight
+        {
+            get
+            {
+                PlayerMobile playerOwner = ControlMaster as PlayerMobile;
+
+                if (playerOwner != null)
+                {
+                    if (playerOwner.m_ArenaPlayerSettings == null) return null;
+                    if (playerOwner.m_ArenaPlayerSettings.Deleted) return null;
+                    if (!ArenaMatch.IsValidArenaMatch(playerOwner.m_ArenaPlayerSettings.m_ArenaMatch, playerOwner, false)) return null;
+
+                    if (playerOwner.m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
+
+                    if (playerOwner.m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight == null) return null;
+                    if (playerOwner.m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight.Deleted) return null;
+
+                    return playerOwner.m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight;
+                }
+
+                else
+                    return null;
+            }
         }
 
         public virtual void SetRare()
@@ -2661,11 +2750,11 @@ namespace Server.Mobiles
         public virtual TimeSpan AbandonDelay { get { return TimeSpan.FromHours(72); } }
         public virtual TimeSpan DeleteDelay { get { return TimeSpan.FromHours(6); } }
 
-        public override bool CanRegenHits { get { return !m_IsDeadPet && !IsBoss() && !IsChamp() && base.CanRegenHits; } }
-        public override bool CanRegenStam { get { return !m_IsDeadPet && base.CanRegenStam; } }
-        public override bool CanRegenMana { get { return !m_IsDeadPet && base.CanRegenMana; } }
+        public override bool CanRegenHits { get { return !m_IsDeadFollower && !IsBoss() && !IsChamp() && base.CanRegenHits; } }
+        public override bool CanRegenStam { get { return !m_IsDeadFollower && base.CanRegenStam; } }
+        public override bool CanRegenMana { get { return !m_IsDeadFollower && base.CanRegenMana; } }
 
-        public override bool IsDeadBondedPet { get { return m_IsDeadPet; } }
+        public override bool IsDeadBondedFollower { get { return m_IsDeadFollower; } }
 
         public XmlSpawner m_XMLSpawner;
         [CommandProperty(AccessLevel.GameMaster)]
@@ -2695,11 +2784,11 @@ namespace Server.Mobiles
             set { m_IsBonded = value; InvalidateProperties(); }
         }
 
-        private bool m_IsDeadPet;
-        public bool IsDeadPet
+        private bool m_IsDeadFollower;
+        public bool IsDeadFollower
         {
-            get { return m_IsDeadPet; }
-            set { m_IsDeadPet = value; }
+            get { return m_IsDeadFollower; }
+            set { m_IsDeadFollower = value; }
         }
 
         private DateTime m_OwnerAbandonTime = DateTime.UtcNow + TimeSpan.FromDays(1000);
@@ -2879,9 +2968,9 @@ namespace Server.Mobiles
         [CommandProperty(AccessLevel.GameMaster)]
         public virtual bool BardImmune { get { return m_BardImmune; } set { m_BardImmune = value; } }
 
-        public virtual bool Unprovokable { get { return BardImmune || m_IsDeadPet; } }
-        public virtual bool Uncalmable { get { return BardImmune || m_IsDeadPet; } }
-        public virtual bool AreaPeaceImmune { get { return BardImmune || m_IsDeadPet; } }
+        public virtual bool Unprovokable { get { return BardImmune || m_IsDeadFollower; } }
+        public virtual bool Uncalmable { get { return BardImmune || m_IsDeadFollower; } }
+        public virtual bool AreaPeaceImmune { get { return BardImmune || m_IsDeadFollower; } }
 
         public virtual bool AllowParagon { get { return (!IsChamp() && !IsChampMinion() && !IsBoss() && !IsBossMinion() && !IsLoHBoss() && !IsLoHMinion() && !IsEventBoss() && !IsEventMinion()) && !Rare; } }
 
@@ -3626,7 +3715,7 @@ namespace Server.Mobiles
 
         public override ApplyPoisonResult ApplyPoison(Mobile from, Poison poison)
         {
-            if (!Alive || IsDeadPet)
+            if (!Alive || IsDeadFollower)
                 return ApplyPoisonResult.Immune;
 
             int poisonLevel = poison.Level;
@@ -4955,7 +5044,7 @@ namespace Server.Mobiles
             writer.Write(m_DamageMin);
             writer.Write(m_DamageMax);
             writer.Write(m_Owners, true);
-            writer.Write(m_IsDeadPet);
+            writer.Write(m_IsDeadFollower);
             writer.Write(m_IsBonded);
             writer.Write(m_Paragon);
             writer.Write(m_RemoveIfUntamed);
@@ -5109,7 +5198,7 @@ namespace Server.Mobiles
                 m_DamageMin = reader.ReadInt();
                 m_DamageMax = reader.ReadInt();
                 m_Owners = reader.ReadStrongMobileList();
-                m_IsDeadPet = reader.ReadBool();
+                m_IsDeadFollower = reader.ReadBool();
                 m_IsBonded = reader.ReadBool();
                 m_Paragon = reader.ReadBool();
                 m_RemoveIfUntamed = reader.ReadBool();
@@ -6594,7 +6683,7 @@ namespace Server.Mobiles
 
             if (bc_Creature != null)
             {
-                bool allowMoveOver = (!Alive || !m.Alive || IsDeadBondedPet || m.IsDeadBondedPet) || (Hidden && AccessLevel > AccessLevel.Player);
+                bool allowMoveOver = (!Alive || !m.Alive || IsDeadBondedFollower || m.IsDeadBondedFollower) || (Hidden && AccessLevel > AccessLevel.Player);
 
                 if (allowMoveOver)
                     return true;
@@ -6624,7 +6713,7 @@ namespace Server.Mobiles
         {
             if ((Map.Rules & MapRules.FreeMovement) == 0)
             {
-                if (!shoved.Alive || !Alive || shoved.IsDeadBondedPet || IsDeadBondedPet)
+                if (!shoved.Alive || !Alive || shoved.IsDeadBondedFollower || IsDeadBondedFollower)
                     return true;
 
                 else if (shoved.Hidden && shoved.AccessLevel > AccessLevel.Player)
@@ -7794,7 +7883,7 @@ namespace Server.Mobiles
                 pack.DropItem(item);
         }
 
-        public override void OnDeath(Container c)
+        public override void OnDeath(Container corpse)
         {
             ClearExpiredDamageEntries();
 
@@ -7929,7 +8018,7 @@ namespace Server.Mobiles
                 Stam = 0;
                 Mana = 0;
 
-                IsDeadPet = true;
+                IsDeadFollower = true;
                 ControlTarget = ControlMaster;
                 ControlOrder = OrderType.Follow;
 
@@ -7959,11 +8048,28 @@ namespace Server.Mobiles
 
                 CheckStatTimers();
 
-                if (RessPenaltyExpiration <= DateTime.UtcNow)
-                    RessPenaltyCount = 0;
+                bool inArena = false;
 
-                RessPenaltyExpiration = DateTime.UtcNow + RessPenaltyDuration;
-                RessPenaltyCount++;
+                if (m_ActiveArenaFight != null)
+                {
+                    if (m_ActiveArenaFight.IsWithinArena(Location, Map))
+                    {
+                        inArena = true;
+
+                        m_ActiveArenaFight.FollowerOnDeath(this, corpse);
+                    }
+                }
+
+                if (!inArena)
+                {
+                    if (RessPenaltyExpiration <= DateTime.UtcNow)
+                        RessPenaltyCount = 0;
+
+                    RessPenaltyExpiration = DateTime.UtcNow + RessPenaltyDuration;
+                    RessPenaltyCount++;
+
+                    //TEST: ADD PET RESS PENALTY FEEDBACK
+                }                
             }
 
             #endregion
@@ -8245,10 +8351,10 @@ namespace Server.Mobiles
                     }
                 }
 
-                base.OnDeath(c);
+                base.OnDeath(corpse);
 
                 if (DeleteCorpseOnDeath)                
-                    c.Delete();
+                    corpse.Delete();
             }
 
             #region Doubloons
@@ -9255,7 +9361,7 @@ namespace Server.Mobiles
 
         public virtual void ResurrectPet()
         {
-            if (!IsDeadPet)
+            if (!IsDeadFollower)
                 return;
 
             OnBeforeResurrect();
@@ -9270,7 +9376,7 @@ namespace Server.Mobiles
 
             ProcessDeltaQueue();
 
-            IsDeadPet = false;
+            IsDeadFollower = false;
 
             Effects.SendPacket(Location, Map, new BondedStatus(0, this.Serial, 0));
 
@@ -9286,7 +9392,7 @@ namespace Server.Mobiles
 
         public override bool CanBeDamaged()
         {
-            if (IsDeadPet || IsInvulnerable)
+            if (IsDeadFollower || IsInvulnerable)
                 return false;
 
             return base.CanBeDamaged();

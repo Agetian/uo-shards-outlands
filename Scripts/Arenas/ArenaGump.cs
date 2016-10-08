@@ -1707,7 +1707,7 @@ namespace Server
 
                             m_Player.CloseGump(typeof(ArenaGump));
                             m_Player.SendGump(new ArenaGump(m_Player, m_ArenaGumpObject));
-
+                            
                             m_Player.SendMessage("That match is now longer viewable.");
 
                             return;
@@ -1720,7 +1720,7 @@ namespace Server
 
                             m_Player.CloseGump(typeof(ArenaGump));
                             m_Player.SendGump(new ArenaGump(m_Player, m_ArenaGumpObject));
-
+                            
                             m_Player.SendMessage("That match is now currently in progress.");
 
                             return;

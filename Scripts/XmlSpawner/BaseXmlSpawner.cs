@@ -7984,7 +7984,7 @@ namespace Server.Mobiles
                                 {
                                     p.Resurrect();
                                 }
-                                else if (petres && p is BaseCreature && ((BaseCreature)p).ControlMaster == triggermob && ((BaseCreature)p).Controlled && ((BaseCreature)p).IsDeadPet)
+                                else if (petres && p is BaseCreature && ((BaseCreature)p).ControlMaster == triggermob && ((BaseCreature)p).Controlled && ((BaseCreature)p).IsDeadFollower)
                                 {
                                     ((BaseCreature)p).ResurrectPet();
                                 }

@@ -36,6 +36,7 @@ namespace Server
             PoisonedWeapon,
             Mount,
             Follower,
+            PackAnimal,
         }
 
         public enum ArenaRulesetType
@@ -1780,6 +1781,12 @@ namespace Server
                 BaseCreature bc_Creature = mobile as BaseCreature;
 
                 if (bc_Creature == null)
+                    continue;
+
+                if (bc_Creature is PackAnimal)
+                    return ArenaRulesetFailureType.PackAnimal;
+
+                if (!arenaMatch.m_ArenaGroupController.ArenaGroupRegionBoundary.Contains(bc_Creature.Location) || arenaMatch.m_ArenaGroupController.Map != bc_Creature.Map)
                     continue;
 
                 followerCount += bc_Creature.ControlSlots;

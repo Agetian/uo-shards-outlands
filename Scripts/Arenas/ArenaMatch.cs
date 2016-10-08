@@ -329,7 +329,7 @@ namespace Server
             if (arenaMatch == null) return false;
             if (arenaMatch.Deleted) return false;
             if (arenaMatch.m_ArenaGroupController == null) return false;
-            if (arenaMatch.m_ArenaGroupController.Deleted) return false;
+            if (arenaMatch.m_ArenaGroupController.Deleted) return false; 
             if (arenaMatch.m_Ruleset == null) return false;
             if (arenaMatch.m_Ruleset.Deleted) return false;
 

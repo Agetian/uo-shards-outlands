@@ -17,7 +17,7 @@ namespace Server.Mobiles
 			m_Animal = animal;
 			m_From = from;
 
-			if ( animal.IsDeadPet )
+			if ( animal.IsDeadFollower )
 				Enabled = false;
 		}
 
@@ -40,7 +40,7 @@ namespace Server.Mobiles
 			if ( from == animal || from.AccessLevel >= AccessLevel.GameMaster )
 				return true;
 
-			if ( from.Alive && animal.Controlled && !animal.IsDeadPet && ( from == animal.ControlMaster || from == animal.SummonMaster ) )
+			if ( from.Alive && animal.Controlled && !animal.IsDeadFollower && ( from == animal.ControlMaster || from == animal.SummonMaster ) )
 				return true;
 
 			return false;
@@ -68,7 +68,7 @@ namespace Server.Mobiles
 
 		public static void TryPackOpen( BaseCreature animal, Mobile from )
 		{
-			if ( animal.IsDeadPet )
+			if ( animal.IsDeadFollower )
 				return;
 
 			Container item = animal.Backpack;

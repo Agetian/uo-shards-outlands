@@ -95,6 +95,7 @@ namespace Server.Mobiles
                 }
             }
 
+            /*
             if (text.IndexOf("all fetch") != -1)
             {
                 if (pm != null)
@@ -108,6 +109,7 @@ namespace Server.Mobiles
                     BaseAI.BeginPickAllFetchTarget(pm);
                 }
             }
+            */
 
             if (text.IndexOf("all release") != -1)
             {

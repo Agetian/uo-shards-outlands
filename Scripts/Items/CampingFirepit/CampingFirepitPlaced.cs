@@ -297,7 +297,7 @@ namespace Server.Custom
 
                     if (bc_Creature != null)
                     {
-                        if (bc_Creature.IsDeadPet || bc_Creature.IsDeadBondedPet)
+                        if (bc_Creature.IsDeadFollower || bc_Creature.IsDeadBondedFollower)
                             continue;
 
                         if (!(bc_Creature.Controlled && bc_Creature.ControlMaster is PlayerMobile))

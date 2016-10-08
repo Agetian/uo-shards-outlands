@@ -55,7 +55,7 @@ namespace Server.Spells.Fourth
 			else if ( target is BaseCreature && ((BaseCreature)target).IsAnimatedDead )			
 				Caster.SendLocalizedMessage( 1061654 ); // You cannot heal that which is not alive.
 			
-			else if ( target.IsDeadBondedPet )			
+			else if ( target.IsDeadBondedFollower )			
 				Caster.SendLocalizedMessage( 1060177 ); // You cannot heal a creature that is already dead!
 			
 			else if ( target is Golem )			

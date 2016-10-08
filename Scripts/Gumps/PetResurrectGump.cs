@@ -55,7 +55,7 @@ namespace Server.Gumps
 
         public override void OnResponse(NetState state, RelayInfo info)
         {
-            if (m_Follower.Deleted || !m_Follower.IsBonded || !m_Follower.IsDeadPet)
+            if (m_Follower.Deleted || !m_Follower.IsBonded || !m_Follower.IsDeadFollower)
                 return;
 
             Mobile from = state.Mobile;

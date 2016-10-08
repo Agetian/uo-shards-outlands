@@ -559,7 +559,7 @@ namespace Server.Mobiles
                     case OrderType.Unfriend: DoOrderUnfriend(); break;
                     case OrderType.Release: DoOrderRelease(); break;
                     case OrderType.Transfer: DoOrderTransfer(); break;
-                    case OrderType.Fetch: DoOrderFetch(); break;
+                    //case OrderType.Fetch: DoOrderFetch(); break;
                 }
             }
 
@@ -825,7 +825,7 @@ namespace Server.Mobiles
             if (bc_Creature == null)
                 return false;
 
-            if (!bc_Creature.Alive || bc_Creature.Deleted || bc_Creature.IsDeadBondedPet || bc_Creature.Blessed)
+            if (!bc_Creature.Alive || bc_Creature.Deleted || bc_Creature.IsDeadBondedFollower || bc_Creature.Blessed)
                 return false;
 
             bool validCombatant = false;
@@ -887,7 +887,7 @@ namespace Server.Mobiles
 
             if (bc_Creature.DoingBandage)
             {
-                if (bc_Creature.HealTarget != null && (bc_Creature.GetDistanceToSqrt(bc_Creature.HealTarget) <= (double)bc_Creature.RangePerception) && bc_Creature.HealTarget.Alive && !bc_Creature.HealTarget.Deleted && bc_Creature.Map == bc_Creature.HealTarget.Map && !bc_Creature.HealTarget.IsDeadBondedPet && bc_Creature.CanSee(bc_Creature.HealTarget))
+                if (bc_Creature.HealTarget != null && (bc_Creature.GetDistanceToSqrt(bc_Creature.HealTarget) <= (double)bc_Creature.RangePerception) && bc_Creature.HealTarget.Alive && !bc_Creature.HealTarget.Deleted && bc_Creature.Map == bc_Creature.HealTarget.Map && !bc_Creature.HealTarget.IsDeadBondedFollower && bc_Creature.CanSee(bc_Creature.HealTarget))
                 {
                     if (bc_Creature.HealTarget == bc_Creature)
                     {
@@ -907,7 +907,7 @@ namespace Server.Mobiles
                     AIHeal.BandageFail(bc_Creature);
             }
 
-            if (bc_Creature.Combatant != null && bc_Creature.Combatant.Alive && !bc_Creature.Combatant.Deleted && bc_Creature.Map == bc_Creature.Combatant.Map && !bc_Creature.Combatant.IsDeadBondedPet)
+            if (bc_Creature.Combatant != null && bc_Creature.Combatant.Alive && !bc_Creature.Combatant.Deleted && bc_Creature.Map == bc_Creature.Combatant.Map && !bc_Creature.Combatant.IsDeadBondedFollower)
                 validCombatant = true;
 
             if (bc_Creature.Controlled)
@@ -1307,7 +1307,7 @@ namespace Server.Mobiles
 
             if (bc_Creature.DoingBandage)
             {
-                if (bc_Creature.HealTarget != null && (bc_Creature.GetDistanceToSqrt(bc_Creature.HealTarget) <= (double)bc_Creature.RangePerception) && bc_Creature.HealTarget.Alive && !bc_Creature.HealTarget.Deleted && bc_Creature.Map == bc_Creature.HealTarget.Map && !bc_Creature.HealTarget.IsDeadBondedPet && bc_Creature.CanSee(bc_Creature.HealTarget))
+                if (bc_Creature.HealTarget != null && (bc_Creature.GetDistanceToSqrt(bc_Creature.HealTarget) <= (double)bc_Creature.RangePerception) && bc_Creature.HealTarget.Alive && !bc_Creature.HealTarget.Deleted && bc_Creature.Map == bc_Creature.HealTarget.Map && !bc_Creature.HealTarget.IsDeadBondedFollower && bc_Creature.CanSee(bc_Creature.HealTarget))
                 {
                     if (bc_Creature.HealTarget == bc_Creature)
                     {
@@ -1450,7 +1450,7 @@ namespace Server.Mobiles
 
             if (bc_Creature.DoingBandage)
             {
-                if (bc_Creature.HealTarget != null && (bc_Creature.GetDistanceToSqrt(bc_Creature.HealTarget) <= (double)bc_Creature.RangePerception) && bc_Creature.HealTarget.Alive && !bc_Creature.HealTarget.Deleted && bc_Creature.Map == bc_Creature.HealTarget.Map && !bc_Creature.HealTarget.IsDeadBondedPet && bc_Creature.CanSee(bc_Creature.HealTarget))
+                if (bc_Creature.HealTarget != null && (bc_Creature.GetDistanceToSqrt(bc_Creature.HealTarget) <= (double)bc_Creature.RangePerception) && bc_Creature.HealTarget.Alive && !bc_Creature.HealTarget.Deleted && bc_Creature.Map == bc_Creature.HealTarget.Map && !bc_Creature.HealTarget.IsDeadBondedFollower && bc_Creature.CanSee(bc_Creature.HealTarget))
                 {
                     if (bc_Creature.HealTarget == bc_Creature)
                     {
@@ -1840,7 +1840,7 @@ namespace Server.Mobiles
                             continue;
 
                         //Ignore If Dead
-                        if (!target.Alive || target.IsDeadBondedPet)
+                        if (!target.Alive || target.IsDeadBondedFollower)
                             continue;
 
                         //Ignore ServerStaff
@@ -1922,6 +1922,21 @@ namespace Server.Mobiles
                         return false;
                     }
 
+                    //Owner in Arena but Pet is Not
+                    if (pm_Owner.m_ActiveArenaFight != null)
+                    {
+                        if (!pm_Owner.m_ActiveArenaFight.IsWithinArena(bc_Creature.Location, bc_Creature.Map))
+                        {
+                            if (bc_Creature.ControlOrder != OrderType.Stop)
+                            {
+                                bc_Creature.ControlOrder = OrderType.Stop;
+                                bc_Creature.AIObject.DoOrderStop();
+                            }
+
+                            return false;
+                        }
+                    }
+
                     //Within Maximum Control Range
                     if (bc_Creature.GetDistanceToSqrt(bc_Creature.ControlMaster) <= ((double)bc_Creature.RangePerception * 4))
                     {
@@ -1967,9 +1982,48 @@ namespace Server.Mobiles
             return false;
         }
 
+        public bool IsArenaCommandRestricted()
+        {
+            if (bc_Creature == null)
+                return false;
+
+            PlayerMobile playerOwner = bc_Creature.ControlMaster as PlayerMobile;
+
+            if (playerOwner == null)
+                return false;
+
+            ArenaFight arenaFight = bc_Creature.m_ActiveArenaFight;
+
+            if (arenaFight == null)
+                return false;
+
+            bool playerWithinArena = false;
+            bool creatureWithinArena = false;
+
+            if (arenaFight.IsWithinArena(playerOwner.Location, playerOwner.Map))
+                playerWithinArena = true;
+
+            if (arenaFight.IsWithinArena(bc_Creature.Location, bc_Creature.Map))
+                creatureWithinArena = true;
+
+            if (playerWithinArena && !creatureWithinArena)
+                return true;
+
+            if (!playerWithinArena && creatureWithinArena)
+                return true;
+
+            if (arenaFight.m_FightPhase == ArenaFight.FightPhaseType.StartCountdown)
+                return true;
+
+            return false;
+        }
+
         public bool ReceiveOrderCome(Mobile from)
         {
             if (from == null || bc_Creature == null)
+                return false;
+
+            if (IsArenaCommandRestricted())
                 return false;
 
             if (bc_Creature.CheckControlChance(from))
@@ -2006,6 +2060,9 @@ namespace Server.Mobiles
         {
             if (from == null || bc_Creature == null)
                 return false;
+
+            if (IsArenaCommandRestricted())
+                return false;
             
             if (!from.Alive)
             {
@@ -2013,12 +2070,9 @@ namespace Server.Mobiles
                 return false;
             }
 
-            if (bc_Creature.IsDeadPet)
+            if (bc_Creature.IsDeadFollower)
             {
-                if (bc_Creature.IsHenchman)
-                    from.SendMessage("You cannot command a deceased individual to do that.");
-                else
-                    from.SendMessage("You cannot command a deceased pet to do that.");
+                from.SendMessage("You cannot command a deceased follower to do that.");
 
                 return false;
             }
@@ -2072,6 +2126,9 @@ namespace Server.Mobiles
             if (from == null || bc_Creature == null)
                 return false;
 
+            if (IsArenaCommandRestricted())
+                return false;
+
             if (bc_Creature.CheckControlChance(from))
             {
                 bc_Creature.ControlOrder = OrderType.Follow;
@@ -2084,10 +2141,7 @@ namespace Server.Mobiles
             {
                 if (bc_Creature.IsBarded())
                 {
-                    if (bc_Creature.IsHenchman)
-                        from.SendMessage("That individual is entranced and refuses your command!");
-                    else
-                        from.SendMessage("Your creature is entranced and refuses your command!");
+                    from.SendMessage("Your follower is entranced and refuses your command!");
 
                     return false;
                 }
@@ -2111,6 +2165,12 @@ namespace Server.Mobiles
             if (from == null || bc_Creature == null)
                 return false;
 
+            if (IsArenaCommandRestricted())
+                return false;
+
+            if (bc_Creature is BaseMount)
+                from.SendMessage("Mounts may not be given that command.");
+
             if (!from.Alive)
             {
                 from.SendMessage("You must be alive to issue that command.");
@@ -2119,9 +2179,10 @@ namespace Server.Mobiles
 
             PlayerMobile player = from as PlayerMobile;
 
-            if (bc_Creature.IsDeadPet)
+            if (bc_Creature.IsDeadFollower)
             {
-                from.SendMessage("You cannot command a deceased pet to do that.");
+                from.SendMessage("You cannot command a deceased follower to do that.");
+
                 return false;
             }
 
@@ -2135,10 +2196,7 @@ namespace Server.Mobiles
             {
                 if (bc_Creature.IsBarded())
                 {
-                    if (bc_Creature.IsHenchman)
-                        from.SendMessage("That individual is entranced and refuses your command!");
-                    else
-                        from.SendMessage("Your creature is entranced and refuses your command!");
+                    from.SendMessage("Your follower is entranced and refuses your command!");
 
                     return false;
                 }
@@ -2147,6 +2205,7 @@ namespace Server.Mobiles
                 {
                     if (bc_Creature.IsHenchman)
                         from.SendMessage("You must have Begging and Camping skill equal to this individual's 'taming' difficulty in order to command this individual!");
+                    
                     else
                         from.SendMessage("You must have Animal Taming and Animal Lore skill equal to this creature's taming difficulty in order to command this creature!");
 
@@ -2172,10 +2231,7 @@ namespace Server.Mobiles
             {
                 if (bc_Creature.IsBarded())
                 {
-                    if (bc_Creature.IsHenchman)
-                        from.SendMessage("That individual is entranced and refuses your command!");
-                    else
-                        from.SendMessage("Your creature is entranced and refuses your command!");
+                    from.SendMessage("Your follower is entranced and refuses your command!");
 
                     return false;
                 }
@@ -2198,6 +2254,12 @@ namespace Server.Mobiles
         {
             if (from == null || bc_Creature == null)
                 return false;
+
+            if (IsArenaCommandRestricted())
+                return false;
+
+            if (bc_Creature is BaseMount)
+                from.SendMessage("Mounts may not be given that command.");
             
             if (!from.Alive)
             {
@@ -2207,9 +2269,10 @@ namespace Server.Mobiles
 
             PlayerMobile player = from as PlayerMobile;
 
-            if (bc_Creature.IsDeadPet)
+            if (bc_Creature.IsDeadFollower)
             {
-                from.SendMessage("You cannot command a deceased pet to do that.");
+                from.SendMessage("You cannot command a deceased follower to do that.");
+
                 return false;
             }
 
@@ -2224,10 +2287,7 @@ namespace Server.Mobiles
             {
                 if (bc_Creature.IsBarded())
                 {
-                    if (bc_Creature.IsHenchman)
-                        from.SendMessage("That individual is entranced and refuses your command!");
-                    else
-                        from.SendMessage("Your creature is entranced and refuses your command!");
+                    from.SendMessage("Your follower is entranced and refuses your command!");
 
                     return false;
                 }
@@ -2236,6 +2296,7 @@ namespace Server.Mobiles
                 {
                     if (bc_Creature.IsHenchman)
                         from.SendMessage("You must have Begging and Camping skill equal to this individual's 'taming' difficulty in order to command this individual!");
+                    
                     else
                         from.SendMessage("You must have Animal Taming and Animal Lore skill equal to this creature's taming difficulty in order to command this creature!");
 
@@ -2251,6 +2312,9 @@ namespace Server.Mobiles
             if (from == null || bc_Creature == null)
                 return false;
 
+            if (IsArenaCommandRestricted())
+                return false;
+            
             PlayerMobile player = from as PlayerMobile;
 
             if (bc_Creature.CheckControlChance(from))
@@ -2263,10 +2327,7 @@ namespace Server.Mobiles
             {
                 if (bc_Creature.IsBarded())
                 {
-                    if (bc_Creature.IsHenchman)
-                        from.SendMessage("That individual is entranced and refuses your command!");
-                    else
-                        from.SendMessage("Your creature is entranced and refuses your command!");
+                    from.SendMessage("Your follower is entranced and refuses your command!");
 
                     return false;
                 }
@@ -2289,6 +2350,12 @@ namespace Server.Mobiles
         {
             if (from == null || bc_Creature == null)
                 return false;
+                        
+            if (ArenaGroupController.GetArenaGroupRegionAtLocation(bc_Creature.Location, bc_Creature.Map) != null)
+            {
+                from.SendMessage("Followers cannot be released in that area.");
+                return false;
+            }
 
             if (!bc_Creature.Summoned)
                 from.SendGump(new Gumps.ConfirmReleaseGump(from, bc_Creature));
@@ -2307,6 +2374,12 @@ namespace Server.Mobiles
             if (from == null || bc_Creature == null)
                 return false;
             
+            if (ArenaGroupController.GetArenaGroupRegionAtLocation(bc_Creature.Location, bc_Creature.Map) != null)
+            {
+                from.SendMessage("Followers cannot be transferred in that area.");
+                return false;
+            }
+            
             if (!from.Alive)
             {
                 from.SendMessage("You must be alive to issue that command.");
@@ -2315,7 +2388,7 @@ namespace Server.Mobiles
 
             PlayerMobile player = from as PlayerMobile;
 
-            if (bc_Creature.IsDeadPet)
+            if (bc_Creature.IsDeadFollower)
             {
                 from.SendMessage("You cannot command a deceased follower to do that.");
                 return false;
@@ -2323,7 +2396,7 @@ namespace Server.Mobiles
 
             if (bc_Creature.Summoned)
             {
-                from.SendMessage("You cannot transfer a summoned creature.");
+                from.SendMessage("You cannot transfer a summoned follower.");
                 return false;
             }
 
@@ -2369,6 +2442,12 @@ namespace Server.Mobiles
         {
             if (from == null || bc_Creature == null)
                 return false;
+
+            if (IsArenaCommandRestricted())
+                return false;
+
+            if (bc_Creature is BaseMount)
+                from.SendMessage("Mounts may not be given that command.");
             
             if (!from.Alive)
             {
@@ -2378,9 +2457,9 @@ namespace Server.Mobiles
 
             PlayerMobile player = from as PlayerMobile;
 
-            if (bc_Creature.IsDeadPet)
+            if (bc_Creature.IsDeadFollower)
             {
-                from.SendMessage("You cannot command a deceased pet to do that.");
+                from.SendMessage("You cannot command a deceased follower to do that.");
                 return false;
             }
 
@@ -2566,13 +2645,13 @@ namespace Server.Mobiles
             bool validTarget = false;
             bool validControlMaster = false;
 
-            if (bc_Creature.IsDeadPet)
+            if (bc_Creature.IsDeadFollower)
                 return true;
 
-            if (bc_Creature.ControlTarget != null && !bc_Creature.ControlTarget.Deleted && bc_Creature.CanSee(bc_Creature.ControlTarget) && bc_Creature.ControlTarget.Map == bc_Creature.Map && bc_Creature.ControlTarget.Alive && !bc_Creature.ControlTarget.IsDeadBondedPet)
+            if (bc_Creature.ControlTarget != null && !bc_Creature.ControlTarget.Deleted && bc_Creature.CanSee(bc_Creature.ControlTarget) && bc_Creature.ControlTarget.Map == bc_Creature.Map && bc_Creature.ControlTarget.Alive && !bc_Creature.ControlTarget.IsDeadBondedFollower)
                 validTarget = true;
 
-            if (bc_Creature.ControlMaster != null && !bc_Creature.ControlMaster.Deleted && bc_Creature.ControlMaster.Map == bc_Creature.Map && bc_Creature.ControlMaster.Alive && !bc_Creature.IsDeadBondedPet)
+            if (bc_Creature.ControlMaster != null && !bc_Creature.ControlMaster.Deleted && bc_Creature.ControlMaster.Map == bc_Creature.Map && bc_Creature.ControlMaster.Alive && !bc_Creature.IsDeadBondedFollower)
                 validControlMaster = true;
 
             else if (bc_Creature.BardProvoked)
@@ -2606,7 +2685,7 @@ namespace Server.Mobiles
             bool validControlMaster = false;
 
             //If Creature Has Valid ControlMaster
-            if (bc_Creature.ControlMaster != null && !bc_Creature.ControlMaster.Deleted && bc_Creature.ControlMaster.Map == bc_Creature.Map && bc_Creature.ControlMaster.Alive && !bc_Creature.IsDeadBondedPet)
+            if (bc_Creature.ControlMaster != null && !bc_Creature.ControlMaster.Deleted && bc_Creature.ControlMaster.Map == bc_Creature.Map && bc_Creature.ControlMaster.Alive && !bc_Creature.IsDeadBondedFollower)
                 validControlMaster = true;
 
             bc_Creature.Combatant = GetAnyAggressor();
@@ -2673,7 +2752,7 @@ namespace Server.Mobiles
 
             if (bc_Creature.ControlMaster != null)
             {
-                if (!bc_Creature.ControlMaster.Deleted && bc_Creature.ControlMaster.Map == bc_Creature.Map && bc_Creature.ControlMaster.Alive && !bc_Creature.IsDeadBondedPet)
+                if (!bc_Creature.ControlMaster.Deleted && bc_Creature.ControlMaster.Map == bc_Creature.Map && bc_Creature.ControlMaster.Alive && !bc_Creature.IsDeadBondedFollower)
                 {
                     validControlMaster = true;
 
@@ -2842,7 +2921,7 @@ namespace Server.Mobiles
 
         public virtual bool DoOrderDrop()
         {
-            if (bc_Creature.IsDeadPet || !bc_Creature.CanDrop)
+            if (bc_Creature.IsDeadFollower || !bc_Creature.CanDrop)
                 return true;
 
             bc_Creature.DebugSay("I drop my stuff for my master");
@@ -2899,7 +2978,7 @@ namespace Server.Mobiles
             {
                 bc_Creature.DebugSay("Begin transfer with {0}", to.Name);
 
-                if (bc_Creature.IsDeadPet || !bc_Creature.Alive)
+                if (bc_Creature.IsDeadFollower || !bc_Creature.Alive)
                 {
                     from.SendMessage("You may only transfer living creatures or individuals.");
 
@@ -2928,8 +3007,8 @@ namespace Server.Mobiles
 
                     if (from.Skills[SkillName.Begging].Value < bc_Creature.MinTameSkill || from.Skills[SkillName.Camping].Value < bc_Creature.MinTameSkill)
                     {
-                        from.SendMessage("The pet refuses to be transferred  to the new handler. You do not have enough taming skill and animal lore to command the creature.");
-                        to.SendMessage("The pet refuses to be transferred to you. The owner does not have enough taming skill and animal lore to command the creature.");
+                        from.SendMessage("The follower refuses to be transferred  to the new handler. You do not have enough taming skill and animal lore to command the creature.");
+                        to.SendMessage("The follower refuses to be transferred to you. The owner does not have enough taming skill and animal lore to command the creature.");
 
                         bc_Creature.ControlTarget = null;
 
@@ -2944,8 +3023,8 @@ namespace Server.Mobiles
                 {
                     if (to.Skills[SkillName.AnimalTaming].Value < bc_Creature.MinTameSkill || to.Skills[SkillName.AnimalLore].Value < bc_Creature.MinTameSkill)
                     {
-                        from.SendMessage("The pet refuses to be transferred to the new handler. They do not have enough taming skill and animal lore to command the creature.");
-                        to.SendMessage("The pet refuses to be transferred to you. You do not have enough taming skill and animal lore to command the creature.");
+                        from.SendMessage("The follower refuses to be transferred to the new handler. They do not have enough taming skill and animal lore to command the creature.");
+                        to.SendMessage("The follower refuses to be transferred to you. You do not have enough taming skill and animal lore to command the creature.");
 
                         bc_Creature.ControlTarget = null;
 
@@ -2957,8 +3036,8 @@ namespace Server.Mobiles
 
                     if (from.Skills[SkillName.AnimalTaming].Value < bc_Creature.MinTameSkill || from.Skills[SkillName.AnimalLore].Value < bc_Creature.MinTameSkill)
                     {
-                        from.SendMessage("The pet refuses to be transferred  to the new handler. You do not have enough taming skill and animal lore to command the creature.");
-                        to.SendMessage("The pet refuses to be transferred to you. The owner does not have enough taming skill and animal lore to command the creature.");
+                        from.SendMessage("The follower refuses to be transferred  to the new handler. You do not have enough taming skill and animal lore to command the creature.");
+                        to.SendMessage("The follower refuses to be transferred to you. The owner does not have enough taming skill and animal lore to command the creature.");
 
                         bc_Creature.ControlTarget = null;
 
@@ -2971,8 +3050,8 @@ namespace Server.Mobiles
 
                 if (TransferItem.IsInCombat(bc_Creature))
                 {
-                    from.SendMessage("You may not transfer a pet that has recently been in combat.");
-                    to.SendMessage("The pet may not be transfered to you because it has recently been in combat.");
+                    from.SendMessage("You may not transfer a follower that has recently been in combat.");
+                    to.SendMessage("The follower may not be transfered to you because it has recently been in combat.");
 
                     bc_Creature.ControlTarget = null;
 
@@ -3013,6 +3092,16 @@ namespace Server.Mobiles
 
         public virtual bool DoOrderRelease()
         {
+            if (ArenaGroupController.GetArenaGroupRegionAtLocation(bc_Creature.Location, bc_Creature.Map) != null)
+            {
+                PlayerMobile playerOwner = bc_Creature.ControlMaster as PlayerMobile;
+
+                if (playerOwner != null)
+                    playerOwner.SendMessage("That follower may not be released in that area.");
+
+                return false;
+            }
+
             bc_Creature.PlaySound(bc_Creature.GetAngerSound());
 
             bc_Creature.SetControlMaster(null);
@@ -3029,7 +3118,7 @@ namespace Server.Mobiles
                 bc_Creature.RangeHome = se.HomeRange;
             }
 
-            if (bc_Creature.DeleteOnRelease || bc_Creature.IsDeadPet)
+            if (bc_Creature.DeleteOnRelease || bc_Creature.IsDeadFollower)
                 bc_Creature.Delete();
 
             bc_Creature.BeginDeleteTimer();
@@ -3696,7 +3785,7 @@ namespace Server.Mobiles
             bool validControlMaster = false;
 
             //If Mobile Has Valid ControlMaster
-            if (bc_Creature.ControlMaster != null && !bc_Creature.ControlMaster.Deleted && bc_Creature.ControlMaster.Map == bc_Creature.Map && bc_Creature.ControlMaster.Alive && !bc_Creature.IsDeadBondedPet)
+            if (bc_Creature.ControlMaster != null && !bc_Creature.ControlMaster.Deleted && bc_Creature.ControlMaster.Map == bc_Creature.Map && bc_Creature.ControlMaster.Alive && !bc_Creature.IsDeadBondedFollower)
                 validControlMaster = true;
 
             //Controller Exists: Check Their Aggressosr
@@ -4116,7 +4205,7 @@ namespace Server.Mobiles
             else if (bc_Creature.Controlled)
             {
                 //Mobile Cannot Get Target From Its Master
-                if (bc_Creature.ControlTarget == null || bc_Creature.ControlTarget.Deleted || bc_Creature.ControlTarget.Hidden || !bc_Creature.ControlTarget.Alive || bc_Creature.ControlTarget.IsDeadBondedPet || !bc_Creature.InRange(bc_Creature.ControlTarget, bc_Creature.RangePerception * 2))
+                if (bc_Creature.ControlTarget == null || bc_Creature.ControlTarget.Deleted || bc_Creature.ControlTarget.Hidden || !bc_Creature.ControlTarget.Alive || bc_Creature.ControlTarget.IsDeadBondedFollower || !bc_Creature.InRange(bc_Creature.ControlTarget, bc_Creature.RangePerception * 2))
                 {
                     if (bc_Creature.ControlTarget != null && bc_Creature.ControlTarget != bc_Creature.ControlMaster)
                         bc_Creature.ControlTarget = null;
@@ -5371,7 +5460,7 @@ namespace Server.Mobiles
 
                 if (target is BaseCreature && ((BaseCreature)target).IsScaryToPets && bc_Creature.IsScaredOfScaryThings)
                 {
-                    bc_Creature.SayTo(from, "Your pet refuses to attack this creature!");
+                    bc_Creature.SayTo(from, "Your follower refuses to attack this creature!");
                     return;
                 }
                 
@@ -5656,43 +5745,43 @@ namespace Server.Mobiles
                 {
                     case OrderType.Attack:
                         bc_Creature.AIObject.ReceiveOrderAttack(m_From);
-                        break;
+                    break;
 
                     case OrderType.Guard:
                         bc_Creature.AIObject.ReceiveOrderGuard(m_From);
-                        break;
+                    break;
 
                     case OrderType.Patrol:
                         bc_Creature.AIObject.ReceiveOrderPatrol(m_From);
-                        break;
+                    break;
 
                     case OrderType.Follow:
                         bc_Creature.AIObject.ReceiveOrderFollow(m_From);
-                        break;
+                    break;
 
                     case OrderType.Come:
                         bc_Creature.AIObject.ReceiveOrderCome(m_From);
-                        break;
+                    break;
 
                     case OrderType.Stay:
                         bc_Creature.AIObject.ReceiveOrderStay(m_From);
-                        break;
+                    break;
 
                     case OrderType.Stop:
                         bc_Creature.AIObject.ReceiveOrderStop(m_From);
-                        break;
-
-                    case OrderType.Fetch:
-                        bc_Creature.AIObject.ReceiveOrderFetch(m_From);
-                        break;
+                    break;                   
 
                     case OrderType.Transfer:
                         bc_Creature.AIObject.ReceiveOrderTransfer(m_From);
-                        break;
+                    break;
 
                     case OrderType.Release:
                         bc_Creature.AIObject.ReceiveOrderRelease(m_From);
-                        break;
+                    break;
+
+                    //case OrderType.Fetch:
+                    //bc_Creature.AIObject.ReceiveOrderFetch(m_From);
+                    //break;
                 }
             }
         }
@@ -5992,12 +6081,14 @@ namespace Server.Mobiles
                         return;
                     }
 
+                    /*
                     //Fetch Command
                     if (customSpeech.IndexOf("all fetch") == -1 && customSpeech.IndexOf("fetch") > -1)
                     {
                         ReceiveOrderFetch(mobile);
                         return;
                     }
+                    */
 
                     // First, check the all*
                     for (int i = 0; i < keywords.Length; ++i)
@@ -6007,58 +6098,58 @@ namespace Server.Mobiles
                         switch (keyword)
                         {
                             case 0x164: // all come
-                                {
-                                    ReceiveOrderCome(mobile);
-                                    return;
-                                }
+                            {
+                                ReceiveOrderCome(mobile);
+                                return;
+                            }
 
                             case 0x165: // all follow
-                                {
-                                    ReceiveOrderFollow(mobile);
-                                    return;
-                                }
+                            {
+                                ReceiveOrderFollow(mobile);
+                                return;
+                            }
 
                             case 0x166: // all guard
-                                {
-                                    ReceiveOrderGuard(mobile);
-                                    return;
-                                }
+                            {
+                                ReceiveOrderGuard(mobile);
+                                return;
+                            }
 
                             case 0x16B: // all guard me
-                                {
-                                    ReceiveOrderGuard(mobile);
-                                    return;
-                                }
+                            {
+                                ReceiveOrderGuard(mobile);
+                                return;
+                            }
 
                             case 0x167: // all stop
-                                {
-                                    ReceiveOrderStop(mobile);
-                                    return;
-                                }
+                            {
+                                ReceiveOrderStop(mobile);
+                                return;
+                            }
 
                             case 0x168: // all kill
-                                {
-                                    ReceiveOrderAttack(mobile);
-                                    return;
-                                }
+                            {
+                                ReceiveOrderAttack(mobile);
+                                return;
+                            }
 
                             case 0x169: // all attack
-                                {
-                                    ReceiveOrderAttack(mobile);
-                                    return;
-                                }
+                            {
+                                ReceiveOrderAttack(mobile);
+                                return;
+                            }
 
                             case 0x16C: // all follow me
-                                {
-                                    ReceiveOrderFollow(mobile);
-                                    return;
-                                }
+                            {
+                                ReceiveOrderFollow(mobile);
+                                return;
+                            }
 
                             case 0x170: // all stay
-                                {
-                                    ReceiveOrderStay(mobile);
-                                    return;
-                                }
+                            {
+                                ReceiveOrderStay(mobile);
+                                return;
+                            }
                         }
                     }
 
@@ -6075,10 +6166,10 @@ namespace Server.Mobiles
                                     ReceiveOrderCome(mobile);
                                     return;
                                 }
-                                break;
+                            break;
 
                             case 0x156: // *drop
-                                break;
+                            break;
 
                             case 0x15A: // *follow                            
                                 if (WasNamed(speech))
@@ -6086,10 +6177,10 @@ namespace Server.Mobiles
                                     ReceiveOrderFollow(mobile);
                                     return;
                                 }
-                                break;
+                            break;
 
                             case 0x15B: // *friend
-                                break;
+                            break;
 
                             case 0x15C: // *guard                            
                                 if (WasNamed(speech))
@@ -6097,7 +6188,7 @@ namespace Server.Mobiles
                                     ReceiveOrderGuard(mobile);
                                     return;
                                 }
-                                break;
+                            break;
 
                             case 0x15D: // *kill                            
                                 if (WasNamed(speech))
@@ -6105,7 +6196,7 @@ namespace Server.Mobiles
                                     ReceiveOrderAttack(mobile);
                                     return;
                                 }
-                                break;
+                            break;
 
                             case 0x15E: // *attack                            
                                 if (WasNamed(speech))
@@ -6113,7 +6204,7 @@ namespace Server.Mobiles
                                     ReceiveOrderAttack(mobile);
                                     return;
                                 }
-                                break;
+                            break;
 
                             case 0x15F: // *patrol                                
                                 if (WasNamed(speech))
@@ -6121,7 +6212,7 @@ namespace Server.Mobiles
                                     ReceiveOrderPatrol(mobile);
                                     return;
                                 }
-                                break;
+                            break;
 
                             case 0x161: // *stop                                
                                 if (WasNamed(speech))
@@ -6129,7 +6220,7 @@ namespace Server.Mobiles
                                     ReceiveOrderStop(mobile);
                                     return;
                                 }
-                                break;
+                            break;
 
                             case 0x163: // *follow me                                
                                 if (WasNamed(speech))
@@ -6137,7 +6228,7 @@ namespace Server.Mobiles
                                     ReceiveOrderFollow(mobile);
                                     return;
                                 }
-                                break;
+                            break;
 
                             case 0x16D: // *release                                
                                 if (WasNamed(speech) && customSpeech.IndexOf("all release") == -1)
@@ -6145,7 +6236,7 @@ namespace Server.Mobiles
                                     ReceiveOrderRelease(mobile);
                                     return;
                                 }
-                                break;
+                            break;
 
                             case 0x16E: // *transfer                            
                                 if (WasNamed(speech))
@@ -6153,7 +6244,7 @@ namespace Server.Mobiles
                                     ReceiveOrderTransfer(mobile);
                                     return;
                                 }
-                                break;
+                            break;
 
                             case 0x16F: // *stay                            
                                 if (WasNamed(speech))
@@ -6161,7 +6252,7 @@ namespace Server.Mobiles
                                     ReceiveOrderStay(mobile);
                                     return;
                                 }
-                                break;
+                            break;
                         }
                     }
                 }
@@ -6290,16 +6381,16 @@ namespace Server.Mobiles
                 {
                     if (to.Skills[SkillName.AnimalTaming].Value < m_Creature.MinTameSkill || to.Skills[SkillName.AnimalLore].Value < m_Creature.MinTameSkill)
                     {
-                        from.SendMessage("The pet refuses to be transferred to the new handler. They do not have enough taming skill and animal lore to command the creature.");
-                        to.SendMessage("The pet refuses to be transferred to you. You do not have enough taming skill and animal lore to command the creature.");
+                        from.SendMessage("The follower refuses to be transferred to the new handler. They do not have enough taming skill and animal lore to command the creature.");
+                        to.SendMessage("The follower refuses to be transferred to you. You do not have enough taming skill and animal lore to command the creature.");
 
                         return false;
                     }
 
                     if (from.Skills[SkillName.AnimalTaming].Value < m_Creature.MinTameSkill || from.Skills[SkillName.AnimalLore].Value < m_Creature.MinTameSkill)
                     {
-                        from.SendMessage("The pet refuses to be transferred to the new handler. You do not have enough taming skill and animal lore to command the creature.");
-                        to.SendMessage("The pet refuses to be transferred to you. The owner does not have enough taming skill and animal lore to command the creature.");
+                        from.SendMessage("The follower refuses to be transferred to the new handler. You do not have enough taming skill and animal lore to command the creature.");
+                        to.SendMessage("The follower refuses to be transferred to you. The owner does not have enough taming skill and animal lore to command the creature.");
 
                         return false;
                     }
@@ -6313,8 +6404,8 @@ namespace Server.Mobiles
 
                 if (IsInCombat(m_Creature))
                 {
-                    from.SendMessage("You may not transfer a pet that has recently been in combat.");
-                    to.SendMessage("The pet may not be transfered to you because it has recently been in combat.");
+                    from.SendMessage("You may not transfer a follower that has recently been in combat.");
+                    to.SendMessage("The follower may not be transfered to you because it has recently been in combat.");
 
                     return false;
                 }

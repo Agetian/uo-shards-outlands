@@ -201,7 +201,7 @@ namespace Server
 
                         if (follower.GetType() != m_PrimaryType) continue;
                         if (follower == null) continue;
-                        if (!follower.Alive || follower.IsDeadBondedPet) continue;
+                        if (!follower.Alive || follower.IsDeadBondedFollower) continue;
                         if (Utility.GetDistance(follower.Location, vendor.Location) >= 12) continue;
 
                         jobProgress.m_TurnedInAmount++;

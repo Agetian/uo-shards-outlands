@@ -100,6 +100,23 @@ namespace Server
         {
         }
 
+        public static ArenaGroupController GetArenaGroupRegionAtLocation(Point3D location, Map map)
+        {
+            foreach (ArenaGroupController arenaGroupController in m_Instances)
+            {
+                if (arenaGroupController == null) continue;
+                if (arenaGroupController.Deleted) continue;
+
+                //TEST
+                Console.Write(arenaGroupController.ArenaGroupRegionBoundary.ToString() + " vs " + location.ToString() + "\n");
+
+                if (arenaGroupController.ArenaGroupRegionBoundary.Contains(location) && arenaGroupController.Map == map)
+                    return arenaGroupController;
+            }
+
+            return null;
+        }
+
         public override void OnDoubleClick(Mobile from)
         {
             base.OnDoubleClick(from);
@@ -281,6 +298,7 @@ namespace Server
                                     case ArenaRuleset.ArenaRulesetFailureType.Dead: message = player.RawName + ": Not Alive"; break;
                                     case ArenaRuleset.ArenaRulesetFailureType.EquipmentAllowed: message = player.RawName + ": Has Restricted Equipment (worn or in backpack)"; break;
                                     case ArenaRuleset.ArenaRulesetFailureType.Follower: message = player.RawName + ": Exceeds Follower Control Slots Allowed"; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.PackAnimal: message = player.RawName + ": Pack Animals Not Allowed"; break;
                                     case ArenaRuleset.ArenaRulesetFailureType.Mount: message = player.RawName + ": Mounts Not Allowed"; break;
                                     case ArenaRuleset.ArenaRulesetFailureType.NotInArenaRegion: message = player.RawName + ": Outside of Arena Region"; break;
                                     case ArenaRuleset.ArenaRulesetFailureType.NotOnline: message = player.RawName + ": Not Online"; break;
@@ -325,6 +343,9 @@ namespace Server
 
         public override void OnDelete()
         {
+            if (m_Instances.Contains(this))
+                m_Instances.Remove(this);
+
             if (m_Timer != null)
             {
                 m_Timer.Stop();

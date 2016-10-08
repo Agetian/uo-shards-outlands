@@ -321,7 +321,7 @@ namespace Server.Items
                 playSound = false;
             }
 
-            else if (!m_Patient.Alive || (petPatient != null && petPatient.IsDeadPet))
+            else if (!m_Patient.Alive || (petPatient != null && petPatient.IsDeadFollower))
             {
                 healDamage = false;
 
@@ -346,7 +346,7 @@ namespace Server.Items
                         m_Patient.PlaySound(0x214);
                         m_Patient.FixedEffect(0x376A, 10, 16);
 
-                        if (petPatient != null && petPatient.IsDeadPet)
+                        if (petPatient != null && petPatient.IsDeadFollower)
                         {
                             Mobile master = petPatient.ControlMaster;
 
@@ -387,7 +387,7 @@ namespace Server.Items
 
                 else
                 {
-                    if (petPatient != null && petPatient.IsDeadPet)
+                    if (petPatient != null && petPatient.IsDeadFollower)
                         healerNumber = 503256; // You fail to resurrect the creature.
                     else
                         healerNumber = 500966; // You are unable to resurrect your patient.
@@ -540,7 +540,7 @@ namespace Server.Items
 
         public static BandageContext BeginHeal(Mobile healer, Mobile patient)
         {
-            bool isDeadPet = (patient is BaseCreature && ((BaseCreature)patient).IsDeadPet);
+            bool isDeadPet = (patient is BaseCreature && ((BaseCreature)patient).IsDeadFollower);
 
             PlayerMobile playerPatient = patient as PlayerMobile;
 
