@@ -15,11 +15,12 @@ namespace Server
         {
             AvailableMatches,
             ScheduledTournaments,
-            RecordsAndTeams,
+            RanksAndRecords,
+            CreditsAndRewards,
 
             CreateMatch,
             MatchInfo,
-            TournamentRounds
+            TournamentMatches
         }
                 
         public PlayerMobile m_Player;
@@ -142,7 +143,8 @@ namespace Server
             AddButton(7, 4, 2094, 2095, 1, GumpButtonType.Reply, 0);
             AddLabel(30, 4, 149, "Guide");
 
-            //Available Matches
+            #region Available Matches
+
             AddItem(15, 28, 8454, 2515);
             AddItem(36, 28, 8455, 2515);
 
@@ -151,34 +153,85 @@ namespace Server
             else
                 AddButton(75, 41, 9721, 9724, 2, GumpButtonType.Reply, 0);
 
-            AddLabel(108, 35, 2603, "Available");
-            AddLabel(108, 53, 2603, "Matches");            
-           
-            //Scheduled Tournaments
-            AddItem(211, 29, 2826);
-            AddItem(208, 23, 9920);
+            if (arenaGumpObject.m_ArenaPage == ArenaPageType.TournamentMatches)
+            {
+                AddLabel(108, 35, 2603, "Tournament");
+                AddLabel(118, 53, 2603, "Matches");
+            }
 
-            if (arenaGumpObject.m_ArenaPage == ArenaPageType.ScheduledTournaments)
-                AddButton(261, 41, 9724, 9721, 3, GumpButtonType.Reply, 0);
             else
-                AddButton(261, 41, 9721, 9724, 3, GumpButtonType.Reply, 0);
+            {
+                AddLabel(108, 35, 2603, "Available");
+                AddLabel(108, 53, 2603, "Matches");
+            }
 
-            AddLabel(302, 35, 53, "Scheduled");
-            AddLabel(294, 55, 53, "Tournaments");
-                 
-            //Teams and Records
-            AddItem(413, 56, 5357);
-            AddItem(405, 43, 4030);
-            AddItem(407, 34, 4031);
+            #endregion
 
-            if (arenaGumpObject.m_ArenaPage == ArenaPageType.RecordsAndTeams)
-                AddButton(444, 41, 9724, 9721, 4, GumpButtonType.Reply, 0);  
+            #region Tournaments
+
+            if (arenaGumpObject.m_ArenaPage == ArenaPageType.TournamentMatches)
+            {
+                AddItem(175, 43, 9556, 0);
+                AddItem(205, 35, 3976, 0);
+                AddItem(219, 47, 3852, 0);
+
+                if (arenaGumpObject.m_ArenaPage == ArenaPageType.ScheduledTournaments)
+                    AddButton(244, 41, 9724, 9721, 3, GumpButtonType.Reply, 0);
+                else
+                    AddButton(244, 41, 9721, 9724, 3, GumpButtonType.Reply, 0);
+
+                AddLabel(279, 35, 53, "Tournament");
+                AddLabel(290, 53, 53, "Ruleset");
+            }
+
             else
-                AddButton(444, 41, 9721, 9724, 4, GumpButtonType.Reply, 0);  
-  
-            AddLabel(481, 35, 2606, "Teams");
-            AddLabel(491, 48, 2606, "and");
-            AddLabel(476, 61, 2606, "Records");
+            {
+                AddItem(194, 29, 2826);
+                AddItem(193, 25, 9920);
+
+                if (arenaGumpObject.m_ArenaPage == ArenaPageType.ScheduledTournaments)
+                    AddButton(244, 41, 9724, 9721, 3, GumpButtonType.Reply, 0);
+                else
+                    AddButton(244, 41, 9721, 9724, 3, GumpButtonType.Reply, 0);
+
+                AddLabel(285, 35, 53, "Scheduled");
+                AddLabel(277, 55, 53, "Tournaments");
+            }
+
+            #endregion
+
+            #region Ranks and Records
+
+            AddItem(383, 56, 5357);
+            AddItem(375, 43, 4030);
+            AddItem(377, 34, 4031);
+
+            if (arenaGumpObject.m_ArenaPage == ArenaPageType.RanksAndRecords)
+                AddButton(414, 41, 9724, 9721, 4, GumpButtonType.Reply, 0);  
+            else
+                AddButton(414, 41, 9721, 9724, 4, GumpButtonType.Reply, 0);
+
+            AddLabel(455, 35, 2606, "Ranks");
+            AddLabel(461, 48, 2606, "and");
+            AddLabel(448, 61, 2606, "Records");
+
+            #endregion
+
+            #region Credits and Rewards
+
+            AddItem(519, 25, 13042, 0);
+            AddItem(519, 36, 5441, 2052);
+
+            if (arenaGumpObject.m_ArenaPage == ArenaPageType.CreditsAndRewards)
+                AddButton(568, 41, 9724, 9721, 5, GumpButtonType.Reply, 0);
+            else
+                AddButton(568, 41, 9721, 9724, 5, GumpButtonType.Reply, 0);
+
+            AddLabel(605, 35, 90, "Credits");
+            AddLabel(617, 48, 90, "and");
+            AddLabel(605, 61, 90, "Rewards");
+
+            #endregion
 
             switch (arenaGumpObject.m_ArenaPage)
             {
@@ -1503,16 +1556,129 @@ namespace Server
 
                 #endregion
 
-                #region Records and Teams
+                #region Ranks and Records
 
-                case ArenaPageType.RecordsAndTeams:
+                case ArenaPageType.RanksAndRecords:
                 break;
 
                 #endregion
 
                 #region Tournament Rounds
 
-                case ArenaPageType.TournamentRounds:
+                case ArenaPageType.ScheduledTournaments:
+                    #region TEST
+
+                AddLabel(102, 98, 63, "Round 1");
+			    AddLabel(329, 98, 149, "Round 2");
+			    AddLabel(549, 98, 149, "Round 3");
+			    AddItem(248, 128, 6169);
+			    AddLabel(315, 156, WhiteTextHue, "Azure Paladins");
+                AddLabel(349, 141, WhiteTextHue, "vs");
+                AddLabel(313, 126, WhiteTextHue, "Outlands Rangers");
+			    AddLabel(263, 156, 149, "Info");
+			    AddButton(245, 160, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddItem(116, 221, 7574);
+			    AddLabel(99, 232, 1102, "Deathwatch");
+                AddLabel(132, 217, WhiteTextHue, "vs");
+			    AddLabel(95, 202, 2599, "Azure Paladins");
+			    AddLabel(47, 232, 149, "Info");
+			    AddButton(29, 236, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddItem(29, 202, 7960);
+			    AddImage(19, 119, 96, 1102);
+			    AddImage(174, 119, 96, 1102);
+			    AddImage(301, 119, 96, 1102);
+			    AddImage(410, 119, 96, 1102);
+			    AddImage(492, 119, 96, 1102);
+			    AddImage(227, 95, 2701, 1105);
+			    AddImage(227, 121, 2701, 1105);
+			    AddLabel(70, 503, 63, "Focus on Current Match");
+			    AddImage(463, 95, 2701, 1105);
+			    AddImage(463, 121, 2701, 1105);
+			    AddItem(116, 296, 7574);
+			    AddLabel(99, 307, 1102, "Nightstalkers");
+                AddLabel(132, 292, WhiteTextHue, "vs");
+			    AddLabel(96, 277, 2599, "Chosen Destiny");
+			    AddLabel(47, 307, 149, "Info");
+			    AddButton(29, 311, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddItem(29, 277, 7960);
+			    AddItem(248, 205, 6169);
+                AddLabel(352, 233, WhiteTextHue, "?");
+                AddLabel(349, 218, WhiteTextHue, "vs");
+                AddLabel(318, 203, WhiteTextHue, "Chosen Destiny");
+			    AddLabel(263, 233, 149, "Info");
+			    AddButton(245, 237, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddItem(248, 278, 6169);
+                AddLabel(352, 306, WhiteTextHue, "?");
+                AddLabel(349, 291, WhiteTextHue, "vs");
+                AddLabel(352, 276, WhiteTextHue, "?");
+			    AddLabel(263, 306, 149, "Info");
+			    AddButton(245, 310, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddButton(490, 500, 9721, 9724, 0, GumpButtonType.Reply, 0);
+			    AddLabel(526, 503, 53, "Manage Tournament");
+			    AddButton(29, 500, 2151, 2151, 0, GumpButtonType.Reply, 0);
+			    AddItem(116, 147, 7574);
+			    AddLabel(99, 158, 1102, "Team Fortune");
+                AddLabel(132, 143, WhiteTextHue, "vs");
+			    AddLabel(91, 128, 2599, "Outlands Rangers");
+			    AddLabel(47, 158, 149, "Info");
+			    AddButton(29, 162, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddItem(29, 128, 7960);
+			    AddLabel(97, 383, 63, "Chosen Destiny");
+			    AddLabel(132, 368, 63, "vs");
+			    AddLabel(96, 353, 63, "Azure Paladins");
+			    AddLabel(47, 383, 63, "Info");
+			    AddItem(-3, 352, 3937);
+			    AddItem(23, 353, 3936);
+			    AddButton(29, 387, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddItem(32, 426, 6169);
+                AddLabel(84, 454, WhiteTextHue, "Skull and Crossbones");
+                AddLabel(132, 439, WhiteTextHue, "vs");
+                AddLabel(103, 424, WhiteTextHue, "Deathwatch");
+			    AddLabel(47, 454, 149, "Info");
+			    AddButton(29, 458, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddItem(248, 354, 6169);
+                AddLabel(352, 382, WhiteTextHue, "?");
+                AddLabel(349, 367, WhiteTextHue, "vs");
+                AddLabel(352, 352, WhiteTextHue, "?");
+			    AddLabel(263, 382, 149, "Info");
+			    AddButton(245, 386, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddItem(489, 126, 6169);
+                AddLabel(593, 154, WhiteTextHue, "?");
+                AddLabel(590, 139, WhiteTextHue, "vs");
+                AddLabel(593, 124, WhiteTextHue, "?");
+			    AddLabel(504, 154, 149, "Info");
+			    AddButton(486, 158, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddItem(490, 205, 6169);
+                AddLabel(594, 233, WhiteTextHue, "?");
+                AddLabel(591, 218, WhiteTextHue, "vs");
+                AddLabel(594, 203, WhiteTextHue, "?");
+			    AddLabel(505, 233, 149, "Info");
+			    AddButton(487, 237, 1210, 248, 0, GumpButtonType.Reply, 0);
+			    AddImage(324, 503, 2444, 2401);
+			    AddButton(346, 476, 9900, 248, 0, GumpButtonType.Reply, 0);
+			    AddButton(347, 530, 9906, 248, 0, GumpButtonType.Reply, 0);
+			    AddButton(390, 503, 9903, 248, 0, GumpButtonType.Reply, 0);
+			    AddButton(300, 505, 9909, 248, 0, GumpButtonType.Reply, 0);
+			    AddLabel(336, 504, 149, "Scroll");
+			    AddImage(16, 94, 96, 1102);
+			    AddImage(171, 94, 96, 1102);
+			    AddImage(298, 94, 96, 1102);
+			    AddImage(407, 94, 96, 1102);
+			    AddImage(489, 94, 96, 1102);
+			    AddImage(16, 93, 96, 1102);
+			    AddImage(171, 93, 96, 1102);
+			    AddImage(298, 93, 96, 1102);
+			    AddImage(407, 93, 96, 1102);
+			    AddImage(489, 93, 96, 1102);
+
+                #endregion
+                break;
+
+                #endregion
+
+                #region Tournament Rounds
+
+                case ArenaPageType.TournamentMatches:
                 break;
 
                 #endregion
@@ -1556,6 +1722,7 @@ namespace Server
             {
                 //Guide
                 case 1:
+                    closeGump = false;
                 break;
 
                 //Page: Available Matches
@@ -1566,7 +1733,7 @@ namespace Server
                     closeGump = false;
                 break;
 
-                //Page: Scheduled Events
+                //Page: Scheduled Tournaments
                 case 3:
                     m_ArenaGumpObject.m_ArenaPage = ArenaPageType.ScheduledTournaments;
                     m_Player.SendSound(ChangePageSound);
@@ -1574,9 +1741,17 @@ namespace Server
                     closeGump = false;
                 break;
 
-                //Page: Records and Teams
+                //Page: Ranks and Records
                 case 4:
-                    m_ArenaGumpObject.m_ArenaPage = ArenaPageType.RecordsAndTeams;
+                    m_ArenaGumpObject.m_ArenaPage = ArenaPageType.RanksAndRecords;
+                    m_Player.SendSound(ChangePageSound);
+
+                    closeGump = false;
+                break;
+
+                //Page: Credits and Rewards
+                case 5:
+                    m_ArenaGumpObject.m_ArenaPage = ArenaPageType.CreditsAndRewards;
                     m_Player.SendSound(ChangePageSound);
 
                     closeGump = false;
