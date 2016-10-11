@@ -35,6 +35,8 @@ namespace Server
         public ArenaFight m_ArenaFight;
         public List<ArenaTeam> m_Teams = new List<ArenaTeam>();
 
+        public List<PlayerMobile> m_BannedPlayers = new List<PlayerMobile>();
+
         [Constructable]
         public ArenaMatch(ArenaGroupController arenaGroupController, PlayerMobile player): base(0x0)
         {
@@ -66,6 +68,9 @@ namespace Server
 
         public ArenaParticipant GetParticipant(PlayerMobile player)
         {
+            if (player == null)
+                return null;
+
             foreach (ArenaTeam arenaTeam in m_Teams)
             {
                 if (arenaTeam == null) continue;
@@ -214,7 +219,7 @@ namespace Server
 
             if (m_Creator == player)
                 return true;
-
+           
             if (m_Creator.Guild != null &&  m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.GuildOnly)
             {
                 if (m_Creator.Guild == null) return false;
@@ -418,6 +423,12 @@ namespace Server
             {
                 writer.Write(m_Teams[a]);
             }
+
+            writer.Write(m_BannedPlayers.Count);
+            for (int a = 0; a < m_BannedPlayers.Count; a++)
+            {
+                writer.Write(m_BannedPlayers[a]);
+            }
         }
 
         public override void Deserialize(GenericReader reader)
@@ -442,6 +453,12 @@ namespace Server
                 for (int a = 0; a < m_TeamsCount; a++)
                 {
                     m_Teams.Add(reader.ReadItem() as ArenaTeam);
+                }
+
+                int m_BannedPlayersCount = reader.ReadInt();
+                for (int a = 0; a < m_BannedPlayersCount; a++)
+                {
+                    m_BannedPlayers.Add(reader.ReadMobile() as PlayerMobile);
                 }
             }
         }

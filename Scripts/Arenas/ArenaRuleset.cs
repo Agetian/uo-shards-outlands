@@ -170,11 +170,11 @@ namespace Server
         public MatchTypeType m_MatchType = MatchTypeType.Unranked1vs1;
         public ListingModeType m_ListingMode = ListingModeType.Public;
         public RoundDurationType m_RoundDuration = RoundDurationType.TenMinutes;
-        public SuddenDeathModeType m_SuddenDeathMode = SuddenDeathModeType.DamageIncreasedTwentyFivePercentPerMinute;
-        public EquipmentAllowedType m_EquipmentAllowed = EquipmentAllowedType.GMRegularMaterials;
+        public SuddenDeathModeType m_SuddenDeathMode = SuddenDeathModeType.DamageIncreasedTwentyFivePercentPerMinute;       
         public PoisonedWeaponsStartingRestrictionType m_PoisonedWeaponsRestriction = PoisonedWeaponsStartingRestrictionType.None;
         public MountsRestrictionType m_MountsRestriction = MountsRestrictionType.NotAllowed;
         public FollowersRestrictionType m_FollowersRestrictionType = FollowersRestrictionType.None;
+        public EquipmentAllowedType m_EquipmentAllowed = EquipmentAllowedType.GMRegularMaterials;
         public ResourceConsumptionType m_ResourceConsumption = ResourceConsumptionType.Normal;
         public ItemDurabilityDamageType m_ItemDurabilityDamage = ItemDurabilityDamageType.Normal;
 
@@ -294,26 +294,26 @@ namespace Server
                     m_Rules.Add(new ArenaRuleDetails(typeof(MatchTypeType), AccessLevel.Player));
                     m_Rules.Add(new ArenaRuleDetails(typeof(ListingModeType), AccessLevel.Player));
                     m_Rules.Add(new ArenaRuleDetails(typeof(RoundDurationType), AccessLevel.Player));
-                    m_Rules.Add(new ArenaRuleDetails(typeof(SuddenDeathModeType), AccessLevel.Player));
-                    m_Rules.Add(new ArenaRuleDetails(typeof(EquipmentAllowedType), AccessLevel.Player));
+                    m_Rules.Add(new ArenaRuleDetails(typeof(SuddenDeathModeType), AccessLevel.Player));                   
                     m_Rules.Add(new ArenaRuleDetails(typeof(PoisonedWeaponsStartingRestrictionType), AccessLevel.Player));
                     m_Rules.Add(new ArenaRuleDetails(typeof(MountsRestrictionType), AccessLevel.Player));
                     m_Rules.Add(new ArenaRuleDetails(typeof(FollowersRestrictionType), AccessLevel.Player));
 
-                    m_Rules.Add(new ArenaRuleDetails(typeof(ResourceConsumptionType), AccessLevel.Seer));
-                    m_Rules.Add(new ArenaRuleDetails(typeof(ItemDurabilityDamageType), AccessLevel.Seer));
+                    m_Rules.Add(new ArenaRuleDetails(typeof(EquipmentAllowedType), AccessLevel.Player));
+                    //m_Rules.Add(new ArenaRuleDetails(typeof(ResourceConsumptionType), AccessLevel.Seer));
+                    //m_Rules.Add(new ArenaRuleDetails(typeof(ItemDurabilityDamageType), AccessLevel.Seer));
                 break;
 
                 case ArenaRulesetType.Tournament:
                     m_Rules.Add(new ArenaRuleDetails(typeof(MatchTypeType), AccessLevel.Player));
                     m_Rules.Add(new ArenaRuleDetails(typeof(ListingModeType), AccessLevel.Player));
                     m_Rules.Add(new ArenaRuleDetails(typeof(RoundDurationType), AccessLevel.Player));
-                    m_Rules.Add(new ArenaRuleDetails(typeof(SuddenDeathModeType), AccessLevel.Player));
-                    m_Rules.Add(new ArenaRuleDetails(typeof(EquipmentAllowedType), AccessLevel.Player));
+                    m_Rules.Add(new ArenaRuleDetails(typeof(SuddenDeathModeType), AccessLevel.Player));                   
                     m_Rules.Add(new ArenaRuleDetails(typeof(PoisonedWeaponsStartingRestrictionType), AccessLevel.Player));
                     m_Rules.Add(new ArenaRuleDetails(typeof(MountsRestrictionType), AccessLevel.Player));
                     m_Rules.Add(new ArenaRuleDetails(typeof(FollowersRestrictionType), AccessLevel.Player));
 
+                    m_Rules.Add(new ArenaRuleDetails(typeof(EquipmentAllowedType), AccessLevel.Player));
                     m_Rules.Add(new ArenaRuleDetails(typeof(ResourceConsumptionType), AccessLevel.Seer));
                     m_Rules.Add(new ArenaRuleDetails(typeof(ItemDurabilityDamageType), AccessLevel.Seer));
                 break;

@@ -89,7 +89,7 @@ namespace Server
                         }
                     }
 
-                    RestoreAndClearEffects(player);
+                    RestoreAndClearEffects(player);                    
 
                     foreach (Mobile mobile in player.AllFollowers)
                     {
@@ -127,6 +127,9 @@ namespace Server
                         StartPostBattle(winningTeam, false);
                         return;
                     }
+
+                    else
+                        InvalidatePlayers();
                 }                
             }
         }
@@ -174,6 +177,8 @@ namespace Server
                     creature.ResurrectPet();
 
                 RestoreAndClearEffects(creature);
+
+                InvalidatePlayers();
             });
         }
         
@@ -265,7 +270,9 @@ namespace Server
                         bc_Creature.ResurrectPet();
 
                     RestoreAndClearEffects(bc_Creature);
-                }                
+                }
+
+                InvalidatePlayers();
             });
 
             ArenaTeam winningTeam = CheckForTeamVictory();
@@ -275,6 +282,9 @@ namespace Server
                 StartPostBattle(winningTeam, false);
                 return;
             }
+
+            else
+                InvalidatePlayers();
         }
 
         public virtual bool AllowFreeConsume(PlayerMobile player)
@@ -617,6 +627,34 @@ namespace Server
             }
         }
 
+        public void InvalidateMobile(Mobile mobile)
+        {
+            mobile.InvalidateProperties();
+            mobile.SendIncomingPacket();
+            mobile.SendEverything();
+            mobile.Delta(MobileDelta.Noto);
+        }
+
+        public void InvalidatePlayers()
+        {
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return;
+
+            List<ArenaParticipant> m_Participants = m_ArenaMatch.GetParticipants();
+
+            foreach (ArenaParticipant participant in m_Participants)
+            {
+                if (participant == null) continue;
+                if (participant.Deleted) continue;
+                if (participant.m_Player == null) continue;
+
+                participant.m_Player.InvalidateProperties();
+                participant.m_Player.SendIncomingPacket();
+                participant.m_Player.SendEverything();
+                participant.m_Player.Delta(MobileDelta.Noto);
+            }
+        }
+
         public void StartCountdown()
         {
             if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
@@ -624,6 +662,8 @@ namespace Server
 
             m_FightPhase = FightPhaseType.StartCountdown;
             m_PhaseTimeRemaining = TimeSpan.FromSeconds(10);
+
+            InvalidatePlayers();
         }
 
         public void StartFight()
@@ -653,17 +693,20 @@ namespace Server
 
             m_FightPhase = FightPhaseType.Fight;
             m_PhaseTimeRemaining = TimeSpan.FromDays(1);
+
+            InvalidatePlayers();
         }
 
         public void StartSuddenDeath()
         {
+            InvalidatePlayers();
         }
         
         public void StartPostBattle(ArenaTeam winningTeam, bool forcedSuddenDeathVictory)
         {
             if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
                 return;
-
+            
             //Announce Resolution
             
             foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
@@ -706,6 +749,8 @@ namespace Server
             
             m_FightPhase = FightPhaseType.PostBattle;
             m_PhaseTimeRemaining = TimeSpan.FromSeconds(10);
+
+            InvalidatePlayers();
         }
 
         public void FightCompleted()
@@ -815,6 +860,8 @@ namespace Server
                 m_Timer.Stop();
                 m_Timer = null;
             }
+
+            InvalidatePlayers();
 
             Delete();
         }

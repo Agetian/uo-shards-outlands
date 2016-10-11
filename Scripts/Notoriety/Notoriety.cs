@@ -116,18 +116,77 @@ namespace Server.Misc
 
             PlayerMobile pm_From = from as PlayerMobile;
             PlayerMobile pm_Target = target as PlayerMobile;
+
+            BaseCreature bc_From = from as BaseCreature;
             BaseCreature bc_Target = target as BaseCreature;
+
+            //Arena
+            if (ArenaGroupController.GetArenaGroupRegionAtLocation(from.Location, from.Map) != null || ArenaGroupController.GetArenaGroupRegionAtLocation(target.Location, target.Map) != null)
+            {
+                ArenaController fromArenaController = ArenaController.GetArenaAtLocation(from.Location, from.Map);
+                ArenaController targetArenaController = ArenaController.GetArenaAtLocation(target.Location, target.Map);
+
+                if (fromArenaController != null && targetArenaController != null && fromArenaController == targetArenaController)
+                {
+                    if (fromArenaController.m_ArenaFight != null)
+                    {
+                        if (fromArenaController.m_ArenaFight.m_FightPhase == ArenaFight.FightPhaseType.Fight)
+                        {
+                            if (fromArenaController.m_ArenaFight.m_ArenaMatch != null)
+                            {
+                                ArenaMatch arenaMatch = fromArenaController.m_ArenaFight.m_ArenaMatch;
+
+                                if (ArenaMatch.IsValidArenaMatch(arenaMatch, null, false))
+                                {
+                                    PlayerMobile rootPlayerFrom = null;
+                                    PlayerMobile rootPlayerTarget = null;
+
+                                    if (pm_From != null)
+                                        rootPlayerFrom = pm_From;
+
+                                    if (pm_Target != null)
+                                        rootPlayerTarget = pm_Target;
+
+                                    if (bc_From != null)
+                                    {
+                                        if (bc_From.ControlMaster is PlayerMobile)
+                                            rootPlayerFrom = bc_From.ControlMaster as PlayerMobile;
+                                    }
+
+                                    if (bc_Target != null)
+                                    {
+                                        if (bc_Target.ControlMaster is PlayerMobile)
+                                            rootPlayerTarget = bc_Target.ControlMaster as PlayerMobile;
+                                    }
+
+                                    ArenaParticipant fromArenaParticipant = fromArenaController.m_ArenaFight.m_ArenaMatch.GetParticipant(rootPlayerFrom);
+                                    ArenaParticipant targetArenaParticipant = fromArenaController.m_ArenaFight.m_ArenaMatch.GetParticipant(rootPlayerTarget);
+
+                                    if (fromArenaParticipant != null && targetArenaParticipant != null)
+                                    {
+                                        if (fromArenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive && targetArenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive)
+                                            return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
 
             Map map = from.Map;
 
-            #region Youngs inFelucca
+            // Young Players in Felucca
             if (from.Player && target.Player && (((PlayerMobile)target).Young || ((PlayerMobile)from).Young) && !(target.Criminal || from.Criminal))
                 return false;   // Old players cannot attack youngs and vice versa unless young is crim
-            #endregion
-
-            if (map != null && ((map.Rules & MapRules.BeneficialRestrictions) == 0) || Server.Spells.SpellHelper.IsFireDungeon(target.Map, target.Location))
+            
+            //Felucca
+            if (map != null && ((map.Rules & MapRules.BeneficialRestrictions) == 0))
                 return true; // In felucca, anything goes. Special case fire dungeon as players can access it in fel or trammel under fel rules
 
+            //Other Maps
             BaseCreature bc = from as BaseCreature;
 
             if (!from.Player && !(bc != null && bc.GetMaster() != null && bc.GetMaster().AccessLevel == AccessLevel.Player))
@@ -196,7 +255,7 @@ namespace Server.Misc
 
                 int actual = Notoriety.CanBeAttacked;
 
-                if (target.Kills >= 5 || (body.IsMonster && IsSummoned(target.Owner as BaseCreature)) || (target.Owner is BaseCreature && (((BaseCreature)target.Owner).IsMurderer() || ((BaseCreature)target.Owner).IsAnimatedDead)))
+                if (target.Kills >= Mobile.MurderCountsRequiredForMurderer || (body.IsMonster && IsSummoned(target.Owner as BaseCreature)) || (target.Owner is BaseCreature && (((BaseCreature)target.Owner).IsMurderer() || ((BaseCreature)target.Owner).IsAnimatedDead)))
                     actual = Notoriety.Murderer;
 
                 if (DateTime.UtcNow >= (target.TimeOfDeath + Corpse.MonsterLootRightSacrifice))
@@ -217,7 +276,7 @@ namespace Server.Misc
 
             else
             {
-                if (target.Kills >= 5 || (body.IsMonster && IsSummoned(target.Owner as BaseCreature)) || (target.Owner is BaseCreature && (((BaseCreature)target.Owner).IsMurderer() || ((BaseCreature)target.Owner).IsAnimatedDead)))
+                if (target.Kills >= Mobile.MurderCountsRequiredForMurderer || (body.IsMonster && IsSummoned(target.Owner as BaseCreature)) || (target.Owner is BaseCreature && (((BaseCreature)target.Owner).IsMurderer() || ((BaseCreature)target.Owner).IsAnimatedDead)))
                     return Notoriety.Murderer;
 
                 if (target.Criminal)
@@ -274,7 +333,7 @@ namespace Server.Misc
 
         public static int MobileNotoriety(Mobile source, Mobile target)
         {
-            return DetermineMobileNotoriety(source, target, true);
+            return DetermineMobileNotoriety(source, target, false);
         }
 
         public static int DetermineMobileNotoriety(Mobile source, Mobile target, bool useVengeance)
@@ -305,7 +364,79 @@ namespace Server.Misc
                 m_TargetController = bc_Target.ControlMaster as Mobile;
                 bc_TargetController = bc_Target.ControlMaster as BaseCreature;
                 pm_TargetController = bc_Target.ControlMaster as PlayerMobile;
-            }           
+            }
+
+            ArenaController fromArenaController = ArenaController.GetArenaAtLocation(source.Location, source.Map);
+            ArenaController targetArenaController = ArenaController.GetArenaAtLocation(target.Location, target.Map);
+
+            if (fromArenaController != null && targetArenaController != null && fromArenaController == targetArenaController)
+            {
+                if (fromArenaController.m_ArenaFight != null)
+                {
+                    if (fromArenaController.m_ArenaFight.m_FightPhase == ArenaFight.FightPhaseType.Fight)
+                    {
+                        if (fromArenaController.m_ArenaFight.m_ArenaMatch != null)
+                        {
+                            ArenaMatch arenaMatch = fromArenaController.m_ArenaFight.m_ArenaMatch;
+
+                            if (ArenaMatch.IsValidArenaMatch(arenaMatch, null, false))
+                            {
+                                PlayerMobile rootPlayerFrom = null;
+                                PlayerMobile rootPlayerTarget = null;
+
+                                if (pm_Source != null)
+                                    rootPlayerFrom = pm_Source;
+
+                                if (pm_Target != null)
+                                    rootPlayerTarget = pm_Target;
+
+                                if (pm_SourceController != null)
+                                    rootPlayerFrom = pm_SourceController;
+
+                                if (pm_TargetController != null)                            
+                                    rootPlayerTarget = pm_TargetController;                            
+
+                                ArenaParticipant fromArenaParticipant = fromArenaController.m_ArenaFight.m_ArenaMatch.GetParticipant(rootPlayerFrom);
+                                ArenaParticipant targetArenaParticipant = fromArenaController.m_ArenaFight.m_ArenaMatch.GetParticipant(rootPlayerTarget);
+                                
+                                if (fromArenaParticipant != null && targetArenaParticipant != null)
+                                {
+                                    if (fromArenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive && targetArenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive)
+                                    {
+                                        ArenaTeam fromTeam = null;
+                                        ArenaTeam targetTeam = null;
+
+                                        foreach (ArenaTeam team in arenaMatch.m_Teams)
+                                        {
+                                            if (team == null) continue;
+                                            if (team.Deleted) continue;
+
+                                            ArenaParticipant participant = team.GetPlayerParticipant(rootPlayerFrom);
+
+                                            if (participant != null)
+                                                fromTeam = team;
+
+                                            participant = team.GetPlayerParticipant(rootPlayerTarget);
+
+                                            if (participant != null)
+                                                targetTeam = team;
+                                        }
+
+                                        if (fromTeam != null && targetTeam != null)
+                                        {
+                                            if (fromTeam == targetTeam)
+                                                return Notoriety.Ally;
+
+                                            if (fromTeam != targetTeam)
+                                                return Notoriety.Enemy;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             //Berserk Creatures
             if (bc_Source != null && (source is BladeSpirits || source is EnergyVortex))

@@ -1452,7 +1452,7 @@ namespace Server.Mobiles
         { 
             get 
             {
-                if (m_ActiveArenaFight != null)
+                if (ArenaGroupController.GetArenaGroupRegionAtLocation(Location, Map) != null)
                     return true;
 
                 return (AccessLevel > AccessLevel.Player); 

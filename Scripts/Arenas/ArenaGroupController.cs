@@ -106,10 +106,7 @@ namespace Server
             {
                 if (arenaGroupController == null) continue;
                 if (arenaGroupController.Deleted) continue;
-
-                //TEST
-                Console.Write(arenaGroupController.ArenaGroupRegionBoundary.ToString() + " vs " + location.ToString() + "\n");
-
+                
                 if (arenaGroupController.ArenaGroupRegionBoundary.Contains(location) && arenaGroupController.Map == map)
                     return arenaGroupController;
             }
@@ -186,6 +183,9 @@ namespace Server
                     m_FilteredMatches.Add(arenaMatch);
                     continue;
                 }
+
+                if (arenaMatch.m_BannedPlayers.Contains(player))
+                    continue;
 
                 if (arenaMatch.m_Ruleset.m_ListingMode == ArenaRuleset.ListingModeType.GuildOnly)
                 {   
