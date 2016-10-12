@@ -21,6 +21,16 @@ namespace Server
             PostBattle
         }
 
+        public enum VictoryType
+        {
+            None,
+            PlayersEliminated,
+            SuddenDeathHitPointsRemaining,
+            SuddenDeathDamageDealt,
+            SuddenDeathDamageReceived,
+            Randomized
+        }
+
         public ArenaController m_ArenaController;
 
         public ArenaMatch m_ArenaMatch;
@@ -53,6 +63,23 @@ namespace Server
         }
 
         #region OnEvents
+
+        public virtual void AnnouncerMessage(string message, int hue)
+        {
+            if (m_ArenaController == null) return;
+            if (m_ArenaController.Deleted) return;
+
+            foreach (ArenaAnnouncer arenaAnnouncer in ArenaAnnouncer.m_Instances)
+            {
+                if (arenaAnnouncer == null) continue;
+                if (arenaAnnouncer.Deleted) continue;
+
+                if (arenaAnnouncer.m_ArenaController != m_ArenaMatch.m_ArenaFight.m_ArenaController)
+                    continue;
+
+                arenaAnnouncer.PublicOverheadMessage(MessageType.Regular, hue, false, message);
+            }
+        }
 
         public virtual void OnMapChanged(PlayerMobile player)
         {
@@ -124,7 +151,7 @@ namespace Server
 
                     if (winningTeam != null)
                     {
-                        StartPostBattle(winningTeam, false);
+                        StartPostBattle(winningTeam, VictoryType.PlayersEliminated);
                         return;
                     }
 
@@ -279,7 +306,7 @@ namespace Server
 
             if (winningTeam != null)
             {
-                StartPostBattle(winningTeam, false);
+                StartPostBattle(winningTeam, VictoryType.PlayersEliminated);
                 return;
             }
 
@@ -465,10 +492,101 @@ namespace Server
             if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
                 return;
 
-            //TEST: FIX AND FINISH
-            ArenaTeam winningTeam = new ArenaTeam();
+            int team1HitsRemaining = 0;
+            int team2HitsRemaining = 0;
 
-            StartPostBattle(winningTeam, true);
+            int team1TotalDamageDealt = 0;
+            int team2TotalDamageDealt = 0;
+
+            int team1TotalDamageReceived = 0;
+            int team2TotalDamageReceived = 0;
+
+            ArenaTeam team1 = m_ArenaMatch.GetTeam(0);
+            ArenaTeam team2 = m_ArenaMatch.GetTeam(1);
+
+            foreach (ArenaParticipant arenaParticipant in team1.m_Participants)
+            {
+                if (arenaParticipant == null) continue;
+                if (arenaParticipant.Deleted) continue;
+                if (arenaParticipant.m_FightStatus != ArenaParticipant.FightStatusType.Alive) continue;
+                if (arenaParticipant.m_Player == null) continue;
+                if (!arenaParticipant.m_Player.Alive) continue;
+
+                team1HitsRemaining += arenaParticipant.m_Player.Hits;
+                team1TotalDamageDealt += arenaParticipant.m_DamageDealt;
+                team1TotalDamageReceived += arenaParticipant.m_DamageReceived;
+            }
+
+            foreach (ArenaParticipant arenaParticipant in team2.m_Participants)
+            {
+                if (arenaParticipant == null) continue;
+                if (arenaParticipant.Deleted) continue;
+                if (arenaParticipant.m_FightStatus != ArenaParticipant.FightStatusType.Alive) continue;
+                if (arenaParticipant.m_Player == null) continue;
+                if (!arenaParticipant.m_Player.Alive) continue;
+
+                team2HitsRemaining += arenaParticipant.m_Player.Hits;
+                team2TotalDamageDealt += arenaParticipant.m_DamageDealt;
+                team2TotalDamageReceived += arenaParticipant.m_DamageReceived;
+            }
+
+            ArenaTeam winningTeam = null;
+            VictoryType victoryType = VictoryType.None;
+
+            if (team1HitsRemaining > team2HitsRemaining)
+            {
+                winningTeam = team1;
+                victoryType = VictoryType.SuddenDeathHitPointsRemaining;
+            }
+
+            if (team2HitsRemaining > team1HitsRemaining)
+            {
+                winningTeam = team2;
+                victoryType = VictoryType.SuddenDeathHitPointsRemaining;
+            }
+
+            if (winningTeam == null)
+            {
+                if (team1TotalDamageDealt > team2TotalDamageDealt)
+                {
+                    winningTeam = team1;
+                    victoryType = VictoryType.SuddenDeathDamageDealt;
+                }
+
+                if (team2TotalDamageDealt > team1TotalDamageDealt)
+                {
+                    winningTeam = team2;
+                    victoryType = VictoryType.SuddenDeathDamageDealt;
+                }
+            }
+
+            if (winningTeam == null)
+            {
+                if (team1TotalDamageReceived > team2TotalDamageReceived)
+                {
+                    winningTeam = team1;
+                    victoryType = VictoryType.SuddenDeathDamageDealt;
+                }
+
+                if (team2TotalDamageReceived > team1TotalDamageReceived)
+                {
+                    winningTeam = team2;
+                    victoryType = VictoryType.SuddenDeathDamageDealt;
+                }
+            }
+
+            if (winningTeam == null)
+            {
+                if (Utility.RandomDouble() <= .50)
+                    winningTeam = team1;
+
+                else
+                    winningTeam = team2;
+
+                victoryType = VictoryType.Randomized;
+            }
+
+            StartPostBattle(winningTeam, victoryType);
         }
 
         public void Initialize()
@@ -702,12 +820,25 @@ namespace Server
             InvalidatePlayers();
         }
         
-        public void StartPostBattle(ArenaTeam winningTeam, bool forcedSuddenDeathVictory)
+        public void StartPostBattle(ArenaTeam winningTeam, VictoryType victoryType)
         {
             if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
                 return;
-            
-            //Announce Resolution
+
+            string announcement = "";
+
+            announcement = "Match Complete!";
+
+            switch (victoryType)
+            {
+                case VictoryType.PlayersEliminated: announcement += " (team eliminated)"; break;
+                case VictoryType.SuddenDeathHitPointsRemaining: announcement += " (hit points remaining)"; break;
+                case VictoryType.SuddenDeathDamageDealt: announcement += " (most damage dealt)"; break;
+                case VictoryType.SuddenDeathDamageReceived: announcement += " (least damage taken)"; break;
+                case VictoryType.Randomized: announcement += " (random draw)"; break;
+            }
+
+            AnnouncerMessage(announcement, 63);
             
             foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
             {
@@ -721,6 +852,46 @@ namespace Server
                     if (arenaParticipant.m_Player == null) continue;                   
 
                     PlayerMobile player = arenaParticipant.m_Player;
+
+                    ArenaPlayerSettings.CheckCreateArenaPlayerSettings(player);
+
+                    switch (m_ArenaMatch.m_Ruleset.m_MatchType)
+                    {
+                        case ArenaRuleset.MatchTypeType.Ranked1vs1:
+                            if (arenaTeam == winningTeam)
+                                player.m_ArenaPlayerSettings.Ranked1vs1Wins++;
+
+                            else
+                                player.m_ArenaPlayerSettings.Ranked1vs1Losses++;
+
+                        break;
+
+                        case ArenaRuleset.MatchTypeType.Ranked2vs2:
+                            if (arenaTeam == winningTeam)
+                                player.m_ArenaPlayerSettings.Ranked2vs2Wins++;
+
+                            else
+                                player.m_ArenaPlayerSettings.Ranked2vs2Losses++;
+                        break;
+
+                        case ArenaRuleset.MatchTypeType.Ranked3vs3:
+                            if (arenaTeam == winningTeam)
+                                player.m_ArenaPlayerSettings.Ranked3vs3Wins++;
+
+                            else
+                                player.m_ArenaPlayerSettings.Ranked3vs3Losses++;
+                        break;
+
+                        case ArenaRuleset.MatchTypeType.Ranked4vs4:
+                            if (arenaTeam == winningTeam)
+                                player.m_ArenaPlayerSettings.Ranked4vs4Wins++;
+
+                            else
+                                player.m_ArenaPlayerSettings.Ranked4vs4Losses++;
+                        break;
+                    }
+
+                    //Send Match Summary Gump
 
                     if (IsWithinArena(player.Location, player.Map))                    
                         RestoreAndClearEffects(player);
@@ -931,7 +1102,7 @@ namespace Server
 
                         if (winningTeam != null)
                         {
-                            m_ArenaFight.StartPostBattle(winningTeam, false);
+                            m_ArenaFight.StartPostBattle(winningTeam, VictoryType.PlayersEliminated);
                             return;
                         }
 
