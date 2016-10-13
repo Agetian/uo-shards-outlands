@@ -593,9 +593,7 @@ namespace Server
         {
             if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
                 return;
-
-            //TEST: APPLY RULESET FEATURES
-
+            
             ArenaRuleset ruleset = m_ArenaMatch.m_Ruleset;
 
             m_RoundTimeRemaining = ArenaRuleset.GetRoundDuration(ruleset.m_RoundDuration);
@@ -645,10 +643,19 @@ namespace Server
                     if (participant == null) continue;
                     if (participant.Deleted) continue;
                     if (participant.m_Player == null) continue;
-                    if (participant.m_Player.Deleted) continue;
+                    if (participant.m_Player.Deleted) continue;                    
 
                     PlayerMobile player = participant.m_Player;
 
+                    int arenaCreditCost = m_ArenaMatch.m_Ruleset.GetArenaCreditsCost();
+
+                    player.m_ArenaAccountEntry.m_ArenaCredits -= arenaCreditCost;
+
+                    if (player.m_ArenaAccountEntry.m_ArenaCredits < 0)
+                        player.m_ArenaAccountEntry.m_ArenaCredits = 0;
+
+                    player.SendMessage(arenaCreditCost.ToString() + " arena credits have been deducted from your account (" + player.m_ArenaAccountEntry.m_ArenaCredits.ToString() + " remaining).");
+                    
                     RestoreAndClearEffects(player);                    
 
                     ArenaTile playerStartingTile = m_ArenaController.GetPlayerStartingTile(a, b);

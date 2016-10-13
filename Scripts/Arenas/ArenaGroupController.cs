@@ -305,6 +305,7 @@ namespace Server
                                     case ArenaRuleset.ArenaRulesetFailureType.PoisonedWeapon:message = player.RawName + ": Exceeds Allowed Number of Poisoned Weapons"; break;
                                     case ArenaRuleset.ArenaRulesetFailureType.Transformed: message = player.RawName + ": Transformed or Disguised"; break;
                                     case ArenaRuleset.ArenaRulesetFailureType.Young: message = player.RawName + ": Young Status"; break;
+                                    case ArenaRuleset.ArenaRulesetFailureType.NotEnoughArenaCredits: message = player.RawName + ": Insufficient Arena Credits"; break;
                                 }
 
                                 if (message != "")

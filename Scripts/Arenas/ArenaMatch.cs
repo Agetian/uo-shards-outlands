@@ -30,6 +30,13 @@ namespace Server
 
         public static TimeSpan ReadyCheckInterval = TimeSpan.FromSeconds(30);
 
+        public static int ArenaCreditGoldCost = 200;
+        public static int ArenaCreditDonationCoinCost = 5;
+
+        public static int ArenaMatchCreditsCost = 1;
+        public static int ArenaRankedMatchCreditsCost = 5;
+        public static int ArenaTournamentCreditsCost = 50;
+
         public MatchStatusType m_MatchStatus = MatchStatusType.Listed;        
         public ArenaRuleset m_Ruleset = new ArenaRuleset();        
         public ArenaFight m_ArenaFight;

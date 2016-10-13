@@ -57,6 +57,9 @@ namespace Server
             if (m_ArenaGumpObject == null) return;
             if (m_ArenaGumpObject.m_ArenaRuleset == null) return;
             if (m_ArenaGumpObject.m_ArenaGroupController == null) return;
+
+            ArenaPersistance.CheckAndCreateArenaAccountEntry(player);
+            ArenaPlayerSettings.CheckCreateArenaPlayerSettings(player);
                         
             #region Background Images
 
@@ -230,6 +233,10 @@ namespace Server
             AddLabel(605, 35, 90, "Credits");
             AddLabel(617, 48, 90, "and");
             AddLabel(605, 61, 90, "Rewards");
+
+            //TEST
+            m_Player.m_ArenaAccountEntry.m_ArenaCredits += 10;
+            m_Player.SendMessage("10 Arena Credits added to account.");
 
             #endregion
 
@@ -1692,6 +1699,7 @@ namespace Server
             if (m_ArenaGumpObject.m_ArenaRuleset == null) return;
             if (m_ArenaGumpObject.m_ArenaGroupController == null) return;
 
+            ArenaPersistance.CheckAndCreateArenaAccountEntry(m_Player);
             ArenaPlayerSettings.CheckCreateArenaPlayerSettings(m_Player);
 
             ArenaMatch selectedArenaMatch = null;
@@ -1712,6 +1720,9 @@ namespace Server
             ArenaTeam arenaTeam2 = null;
 
             ArenaTeam newTeam = null;
+
+            int arenaCreditsNeeded = 0;
+            int playerArenaCreditsAvailable = 0;
             
             bool closeGump = true;
 
@@ -1883,7 +1894,7 @@ namespace Server
                     if (newTeamIndex > -1 && m_AvailableMatches.Count > 0)
                     {
                         selectedArenaMatch = m_AvailableMatches[matchIndex];
-
+                        
                         if (!ArenaMatch.IsValidArenaMatch(selectedArenaMatch, m_Player, true))
                         {
                             m_ArenaGumpObject.m_ArenaPage = ArenaPageType.AvailableMatches;
@@ -1909,7 +1920,10 @@ namespace Server
 
                             return;
                         }
-
+                        
+                        arenaCreditsNeeded = selectedArenaMatch.m_Ruleset.GetArenaCreditsCost();
+                        playerArenaCreditsAvailable = m_Player.m_ArenaAccountEntry.m_ArenaCredits;
+                                               
                         int teamSize = selectedArenaMatch.m_Ruleset.TeamSize;                            
 
                         arenaTeam1 = selectedArenaMatch.GetTeam(0);
@@ -2050,6 +2064,9 @@ namespace Server
                                 else if (m_Player.Young)
                                     m_Player.SendMessage("You must renounce your Young status before you may partake in matches.");
 
+                                else if (arenaCreditsNeeded > playerArenaCreditsAvailable)                                
+                                    m_Player.SendMessage("Participating in that match requires " + arenaCreditsNeeded.ToString() + " arena credits (your account has " + playerArenaCreditsAvailable.ToString() + " available). Additional credits can be acquired through the Credits and Rewards page." );
+                                
                                 else
                                 {
                                     selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);
@@ -2074,6 +2091,9 @@ namespace Server
 
                                 else if (m_Player.Young)
                                     m_Player.SendMessage("You must renounce your Young status before you may partake in matches.");
+
+                                else if (arenaCreditsNeeded > playerArenaCreditsAvailable)
+                                    m_Player.SendMessage("Participating in that match requires " + arenaCreditsNeeded.ToString() + " arena credits (your account has " + playerArenaCreditsAvailable.ToString() + " available). Additional credits can be acquired through the Credits and Rewards page.");
 
                                 else
                                 {
@@ -2456,6 +2476,9 @@ namespace Server
                     if (m_ArenaGumpObject.m_SettingsPage < 0)
                         m_ArenaGumpObject.m_SettingsPage = 0;
 
+                    arenaCreditsNeeded = selectedArenaMatch.m_Ruleset.GetArenaCreditsCost();
+                    playerArenaCreditsAvailable = m_Player.m_ArenaAccountEntry.m_ArenaCredits;
+                       
                     switch (info.ButtonID)
                     {
                         //Leave or Cancel Match
@@ -2548,6 +2571,9 @@ namespace Server
                                 else if (m_Player.Young)
                                     m_Player.SendMessage("You must renounce your Young status before you may partake in matches.");
 
+                                else if (arenaCreditsNeeded > playerArenaCreditsAvailable)
+                                    m_Player.SendMessage("Participating in that match requires " + arenaCreditsNeeded.ToString() + " arena credits (your account has " + playerArenaCreditsAvailable.ToString() + " available). Additional credits can be acquired through the Credits and Rewards page.");
+
                                 else
                                 {
                                     selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);                                    
@@ -2634,6 +2660,9 @@ namespace Server
 
                                 else if (m_Player.Young)
                                     m_Player.SendMessage("You must renounce your Young status before you may partake in matches.");
+
+                                else if (arenaCreditsNeeded > playerArenaCreditsAvailable)
+                                    m_Player.SendMessage("Participating in that match requires " + arenaCreditsNeeded.ToString() + " arena credits (your account has " + playerArenaCreditsAvailable.ToString() + " available). Additional credits can be acquired through the Credits and Rewards page.");
 
                                 else
                                 {
@@ -3001,9 +3030,9 @@ namespace Server
                 m_Player.SendMessage("That match is no longer accessible.");
                 return;
             }
-
-            ArenaPlayerSettings.CheckCreateArenaPlayerSettings(m_TargetPlayer);
             
+            ArenaPlayerSettings.CheckCreateArenaPlayerSettings(m_TargetPlayer);
+                        
             AddImage(4, 3, 1248, 2401);
 
             AddLabel(44, 13, 163, "Team Member:");

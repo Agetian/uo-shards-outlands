@@ -29,7 +29,7 @@ namespace Server
                 else
                     return null;
             } 
-        }
+        }       
 
         #region Stored Records
 
@@ -71,6 +71,8 @@ namespace Server
         public static void OnLogin(PlayerMobile player)
         {
             CheckCreateArenaPlayerSettings(player);
+
+
         }
 
         public static void CheckCreateArenaPlayerSettings(PlayerMobile player)

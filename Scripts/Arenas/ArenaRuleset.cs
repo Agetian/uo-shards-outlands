@@ -37,6 +37,7 @@ namespace Server
             Mount,
             Follower,
             PackAnimal,
+            NotEnoughArenaCredits
         }
 
         public enum ArenaRulesetType
@@ -436,7 +437,25 @@ namespace Server
             gumpRuleset.SetItemRestriction(typeof(BaseExplosionPotion), playerRuleset.GetItemRestriction(typeof(BaseExplosionPotion)).m_RestrictionMode);
             gumpRuleset.SetItemRestriction(typeof(BasePoisonPotion), playerRuleset.GetItemRestriction(typeof(BasePoisonPotion)).m_RestrictionMode);
             gumpRuleset.SetItemRestriction(typeof(BaseMagicResistPotion), playerRuleset.GetItemRestriction(typeof(BaseMagicResistPotion)).m_RestrictionMode);
-        }       
+        }
+
+        public int GetArenaCreditsCost()
+        {
+            switch (m_MatchType)
+            {
+                case ArenaRuleset.MatchTypeType.Unranked1vs1: return ArenaMatch.ArenaMatchCreditsCost; break;
+                case ArenaRuleset.MatchTypeType.Unranked2vs2: return ArenaMatch.ArenaMatchCreditsCost; break;
+                case ArenaRuleset.MatchTypeType.Unranked3vs3: return ArenaMatch.ArenaMatchCreditsCost; break;
+                case ArenaRuleset.MatchTypeType.Unranked4vs4: return ArenaMatch.ArenaMatchCreditsCost; break;
+
+                case ArenaRuleset.MatchTypeType.Ranked1vs1: return ArenaMatch.ArenaRankedMatchCreditsCost; break;
+                case ArenaRuleset.MatchTypeType.Ranked2vs2: return ArenaMatch.ArenaRankedMatchCreditsCost; break;
+                case ArenaRuleset.MatchTypeType.Ranked3vs3: return ArenaMatch.ArenaRankedMatchCreditsCost; break;
+                case ArenaRuleset.MatchTypeType.Ranked4vs4: return ArenaMatch.ArenaRankedMatchCreditsCost; break;
+            }
+
+            return 0;
+        }
 
         public static TimeSpan GetRoundDuration(ArenaRuleset.RoundDurationType durationType)
         {
@@ -1741,6 +1760,12 @@ namespace Server
 
             if (!arenaMatch.m_ArenaGroupController.ArenaGroupRegionBoundary.Contains(player.Location) || arenaMatch.m_ArenaGroupController.Map != player.Map)
                 return ArenaRulesetFailureType.NotInArenaRegion;
+
+            int arenaCreditsNeeded = arenaMatch.m_Ruleset.GetArenaCreditsCost();
+            int playerArenaCreditsAvailable = player.m_ArenaAccountEntry.m_ArenaCredits;
+            
+            if (arenaCreditsNeeded > playerArenaCreditsAvailable)
+                return ArenaRulesetFailureType.NotEnoughArenaCredits;
 
             //Polymorphed / Transformed / Disguise Kit / Incognito
             if (!player.CanBeginAction(typeof(PolymorphSpell)))

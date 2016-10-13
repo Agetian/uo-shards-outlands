@@ -1125,9 +1125,10 @@ namespace Server.Mobiles
             MHSPersistance.CheckAndCreateMHSAccountEntry(player);
             EventCalendarPersistance.CheckAndCreateEventCalendarAccount(player);
             Societies.OnLogin(player);
-            ArenaPlayerSettings.OnLogin(player);
+            ArenaPersistance.OnLogin(player);
+            ArenaPlayerSettings.OnLogin(player);            
 
-            //Dungeon Armor
+            //Aspect Armor
             AspectGear.CheckForAndUpdateAspectArmorProperties(player);
 
             //OverloadProtectionSystem
@@ -1469,6 +1470,7 @@ namespace Server.Mobiles
         public EventCalendarAccount m_EventCalendarAccount = null;
         public MHSPlayerEntry m_MHSPlayerEntry = null;
         public WorldChatAccountEntry m_WorldChatAccountEntry = null;
+        public ArenaAccountEntry m_ArenaAccountEntry = null;
 
         public static int SkillCap = 7000;
         public static int MaxSkillCap = 7200;
