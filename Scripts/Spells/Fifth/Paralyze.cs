@@ -103,7 +103,7 @@ namespace Server.Spells.Fifth
 				HarmfulSpell( m );
 			}
 
-            ArenaRuleset.SpellCompletion(Caster, typeof(ParalyzeSpell));
+            ArenaFight.SpellCompletion(Caster, typeof(ParalyzeSpell));
 
 			FinishSequence();
 		}

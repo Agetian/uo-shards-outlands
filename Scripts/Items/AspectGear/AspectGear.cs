@@ -579,7 +579,7 @@ namespace Server.Items
                         player.RevealingAction();
                     }
 
-                    player.PlaySound(0x56B);
+                    player.SendSound(0x56B);
                     player.SendMessage("Your aspect effect fades.");
                 }
             }

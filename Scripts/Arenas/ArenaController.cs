@@ -79,6 +79,19 @@ namespace Server
         {
         }
 
+        public bool IsWithinArena(Point3D location, Map map)
+        {
+            Point2D sourcePoint = new Point2D(location.X, location.Y);
+
+            if (Map != map)
+                return false;
+
+            if (m_ArenaBoundary.Contains(sourcePoint))
+                return true;
+
+            return false;
+        }
+
         public static ArenaController GetArenaAtLocation(Point3D location, Map map)
         {
             foreach (ArenaController arenaController in m_Instances)
@@ -99,20 +112,7 @@ namespace Server
                 return true;
 
             return false;
-        }
-
-        public bool IsWithinArena(Point3D location, Map map)
-        {
-            Point2D sourcePoint = new Point2D(location.X, location.Y);
-
-            if (Map != map)
-                return false;
-
-            if (m_ArenaBoundary.Contains(sourcePoint))
-                return true;
-
-            return false;
-        }
+        }       
 
         public ArenaTile GetRandomExitTile()
         {

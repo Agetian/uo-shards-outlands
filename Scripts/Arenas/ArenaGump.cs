@@ -6,6 +6,7 @@ using Server.Mobiles;
 using Server.Gumps;
 using System.Collections;
 using System.Collections.Generic;
+using Server.Prompts;
 
 namespace Server
 {
@@ -21,6 +22,14 @@ namespace Server
             CreateMatch,
             MatchInfo,
             TournamentMatches
+        }
+
+        public enum ArenaMessageType
+        {
+            Player,
+            Team,
+            OpposingTeam,
+            AllPlayers
         }
                 
         public PlayerMobile m_Player;
@@ -232,11 +241,7 @@ namespace Server
 
             AddLabel(605, 35, 90, "Credits");
             AddLabel(617, 48, 90, "and");
-            AddLabel(605, 61, 90, "Rewards");
-
-            //TEST
-            m_Player.m_ArenaAccountEntry.m_ArenaCredits += 10;
-            m_Player.SendMessage("10 Arena Credits added to account.");
+            AddLabel(605, 61, 90, "Rewards");            
 
             #endregion
 
@@ -1773,6 +1778,10 @@ namespace Server
 
                     m_Player.SendSound(ChangePageSound);
 
+                    //TEST
+                    m_Player.m_ArenaAccountEntry.m_ArenaCredits += 10;
+                    m_Player.SendMessage("10 Arena Credits added to account.");
+
                     closeGump = false;
                 break;
             }
@@ -2503,22 +2512,8 @@ namespace Server
                         case 11:
                             if (playerParticipant != null)
                             {
-                                List<ArenaParticipant> m_ArenaParticipants = selectedArenaMatch.GetParticipants();
-
-                                foreach (ArenaParticipant participant in m_ArenaParticipants)
-                                {
-                                    if (participant == null) continue;
-                                    if (participant.Deleted) continue;
-                                    if (participant.m_Player == null) continue;
-
-                                    if (participant.m_Player == m_Player)
-                                        continue;
-
-                                    //TEST: CHANGE TO TEXT PROMPT
-                                    string message = "[Arena: " + m_Player.RawName + "] " + "TEST.";
-
-                                    participant.m_Player.SendMessage(message, 2550);
-                                } 
+                                m_Player.SendMessage("*Send Message (All Players)*");
+                                m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.AllPlayers, null);                         
                             }
 
                             closeGump = false;
@@ -2594,21 +2589,24 @@ namespace Server
                         //Team 1: Message
                         case 21:
                             if (playerParticipant != null)
-                            { 
-                                foreach (ArenaParticipant participant in arenaTeam1.m_Participants)
+                            {
+                                if (m_Player.AccessLevel > AccessLevel.Player)
                                 {
-                                    if (participant == null) continue;
-                                    if (participant.Deleted) continue;
-                                    if (participant.m_Player == null) continue;
+                                    m_Player.SendMessage("*Send Message (To Team)*");
+                                    m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.Team, null);
+                                }
 
-                                    if (participant.m_Player == m_Player)
-                                        continue;
+                                else if (playerIsOnTeam1)
+                                {
+                                    m_Player.SendMessage("*Send Message (Your Team)*");
+                                    m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.Team, null);
+                                }
 
-                                    //TEST: CHANGE TO TEXT PROMPT
-                                    string message = "[Arena: "+ m_Player.RawName + "] " + "TEST.";
-
-                                    participant.m_Player.SendMessage(message, 2550);
-                                }                                
+                                else
+                                {
+                                    m_Player.SendMessage("*Send Message (Opposing Team)*");
+                                    m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.OpposingTeam, null);
+                                }
                             }
 
                             closeGump = false;
@@ -2685,20 +2683,24 @@ namespace Server
                         case 23:
                             if (playerParticipant != null)
                             {
-                                foreach (ArenaParticipant participant in arenaTeam2.m_Participants)
+
+                                if (m_Player.AccessLevel > AccessLevel.Player)
                                 {
-                                    if (participant == null) continue;
-                                    if (participant.Deleted) continue;
-                                    if (participant.m_Player == null) continue;
+                                    m_Player.SendMessage("*Send Message (To Team)*");
+                                    m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.Team, null);
+                                }
 
-                                    if (participant.m_Player == m_Player)
-                                        continue;
+                                else if (playerIsOnTeam2)
+                                {
+                                    m_Player.SendMessage("*Send Message (Your Team)*");
+                                    m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.Team, null);
+                                }
 
-                                    //TEST: CHANGE TO TEXT PROMPT
-                                    string message = "[Arena: " + m_Player.RawName + "] " + "TEST.";
-
-                                    participant.m_Player.SendMessage(message, 2550);
-                                } 
+                                else
+                                {
+                                    m_Player.SendMessage("*Send Message (Opposing Team)*");
+                                    m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.OpposingTeam, null);
+                                }
                             }
 
                             closeGump = false;
@@ -3118,7 +3120,9 @@ namespace Server
                 //Send Message
                 case 1:
                     if (m_ArenaMatch == m_Player.m_ArenaPlayerSettings.m_ArenaMatch)
-                    {
+                    {  
+                        m_Player.SendMessage("*Send Message (To Player)*");
+                        m_Player.Prompt = new ArenaMessagePrompt(m_Player, m_ArenaMatch, ArenaGump.ArenaMessageType.Player, m_TargetPlayer);                                               
                     }
                 break;
 
@@ -3189,6 +3193,217 @@ namespace Server
                 m_Player.CloseGump(typeof(ArenaGump));
                 m_Player.SendGump(new ArenaGump(m_Player, m_Player.m_ArenaGumpObject));
             }           
+        }        
+    }
+
+    public class ArenaMatchResultGump : Gump
+    {
+        public PlayerMobile m_Player;
+        public ArenaMatchResultEntry m_ArenaMatchResultEntry;
+
+        public int WhiteTextHue = 2499;
+
+        public static int OpenGumpSound = 0x055;
+        public static int ChangePageSound = 0x057;
+        public static int SelectionSound = 0x4D2;
+        public static int LargeSelectionSound = 0x4D3;
+        public static int CloseGumpSound = 0x058;
+
+        public ArenaMatchResultGump(PlayerMobile player, ArenaMatchResultEntry arenaMatchResultEntry): base(10, 10)
+        {
+            m_Player = player;
+            m_ArenaMatchResultEntry = arenaMatchResultEntry;
+
+            if (m_Player == null) return;
+            if (m_ArenaMatchResultEntry == null)
+            {
+                m_Player.SendMessage("Records of that match are no longer available.");
+                return;
+            }
+
+            if (m_ArenaMatchResultEntry.Deleted)
+            {
+                m_Player.SendMessage("Records of that match are no longer available.");
+                return;
+            }  
+                        
+            AddBackground(8, 8, 509, 398, 9390);
+
+            int startY = 10;
+
+            AddLabel(204, startY, 2606, "Tournament Match");
+
+            startY += 30;
+
+            AddLabel(148, startY, 2603, "Match Status");
+            AddItem(237, startY - 4, 7960);
+            AddLabel(286, startY, 63, "Completed");
+
+            startY += 25;
+
+            AddLabel(147, startY, 2603, "Match Winner");
+            AddLabel(286, startY, 2599, "Outland Rangers");
+
+            startY += 25;
+
+            AddLabel(136, startY, 2603, "Match Duration");
+            AddLabel(286, startY, WhiteTextHue, "8m 47s");
+
+            startY += 25;
+
+            AddLabel(54, startY, 149, "Team and Player");
+            AddLabel(193, startY, 149, "Lowest HP");
+            AddLabel(267, startY, 149, "Time Alive");
+            AddLabel(342, startY, 149, "Dmg Dealt");
+            AddLabel(415, startY, 149, "Dmg Taken");
+
+            startY += 25;
+
+            AddImage(24, startY, 96, 2525);
+            AddImage(179, startY, 96, 2525);
+            AddImage(324, startY, 96, 2525);
+
+            startY += 10;
+
+            //Team 1
+            AddLabel(48, startY, 2599, "Outlands Rangers");
+            AddLabel(222, startY, 2599, "-");
+            AddLabel(294, startY, 2599, "-");
+            AddLabel(352, startY, 2599, "4,500");
+            AddLabel(427, startY, 2599, "2,000");
+
+            startY += 20;
+
+            AddButton(46, startY, 1210, 248, 0, GumpButtonType.Reply, 0);
+            AddLabel(66, startY, 2599, "Luthius");
+            AddLabel(217, startY, WhiteTextHue, "25");
+            AddLabel(276, startY, WhiteTextHue, "8m 47s");
+            AddLabel(354, startY, WhiteTextHue, "1,500");
+            AddLabel(432, startY, WhiteTextHue, "500");
+
+            startY += 20;
+
+            AddLabel(250, startY, 149, "vs");
+
+            //Team 2         
+        }
+
+        public override void OnResponse(NetState sender, RelayInfo info)
+        {
+            if (m_Player == null) return;
+            if (m_ArenaMatchResultEntry == null)
+            {
+                m_Player.SendMessage("Records of that match are no longer available.");
+                return;
+            }
+
+            if (m_ArenaMatchResultEntry.Deleted)
+            {
+                m_Player.SendMessage("Records of that match are no longer available.");
+                return;
+            } 
+ 
+
+        }
+    }
+
+    public class ArenaMessagePrompt : Prompt
+    {
+        public PlayerMobile m_Player;
+        public ArenaMatch m_ArenaMatch;
+        public ArenaGump.ArenaMessageType m_MessageType = ArenaGump.ArenaMessageType.Team;
+        public PlayerMobile m_TargetPlayer;
+
+        public ArenaMessagePrompt(PlayerMobile player, ArenaMatch arenaMatch, ArenaGump.ArenaMessageType messageType, PlayerMobile targetPlayer)
+        {
+            m_Player = player;
+            m_ArenaMatch = arenaMatch;
+            m_MessageType = messageType;
+            m_TargetPlayer = targetPlayer;
+        }
+
+        public override void OnResponse(Mobile from, string text)
+        {
+            if (m_Player == null) return;
+            if (m_Player.Deleted) return;
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, m_Player, true))
+            {
+                m_Player.SendMessage("That arena match is no longer accessible.");
+                return;
+            }
+
+            List<ArenaParticipant> m_ArenaParticipants = m_ArenaMatch.GetParticipants();
+
+            ArenaParticipant playerParticipant = m_ArenaMatch.GetParticipant(m_Player);
+            ArenaTeam playerTeam = playerParticipant.GetPlayerTeam();
+
+            if (playerParticipant == null)
+            {
+                m_Player.SendMessage("That arena match is no longer accessible.");
+                return;
+            }
+
+            if (playerTeam == null)
+            {
+                m_Player.SendMessage("That arena match is no longer accessible.");
+                return;
+            }
+
+            for (int a = 0; a < m_ArenaMatch.m_Teams.Count; a++)
+            {
+                ArenaTeam team = m_ArenaMatch.m_Teams[a];
+
+                for (int b = 0; b < team.m_Participants.Count; b++)
+                {
+                    ArenaParticipant participant = team.m_Participants[b];
+
+                    if (participant == null) continue;
+                    if (participant.Deleted == null) continue;
+                    if (participant.m_Player == null) continue;
+
+                    switch (m_MessageType)
+                    {
+                        case ArenaGump.ArenaMessageType.Player:
+                            if (participant.m_Player != m_TargetPlayer)
+                                continue;
+
+                            if (m_Player.AccessLevel > AccessLevel.Player)
+                                participant.m_Player.SendMessage(63, "[" + m_Player.RawName + ": Staff] " + text);
+
+                            else if (participant.GetPlayerTeam() == playerTeam)
+                                participant.m_Player.SendMessage(2599, "[" + m_Player.RawName + ": Team] " + text);
+
+                            else
+                                participant.m_Player.SendMessage(1256, "[" + m_Player.RawName + ": Opposing Team] " + text);
+                            break;
+
+                        case ArenaGump.ArenaMessageType.Team:
+                            if (participant.GetPlayerTeam() == playerTeam)
+                                participant.m_Player.SendMessage(2599, "[" + m_Player.RawName + ": Team] " + text);
+                            break;
+
+                        case ArenaGump.ArenaMessageType.OpposingTeam:
+                            if (participant.GetPlayerTeam() != playerTeam)
+                                participant.m_Player.SendMessage(1256, "[" + m_Player.RawName + ": Opposing Team] " + text);
+                            break;
+
+                        case ArenaGump.ArenaMessageType.AllPlayers:
+                            if (m_Player.AccessLevel > AccessLevel.Player)
+                                participant.m_Player.SendMessage(63, "[" + m_Player.RawName + ": Staff] " + text);
+
+                            else if (participant.GetPlayerTeam() == playerTeam)
+                                participant.m_Player.SendMessage(2599, "[" + m_Player.RawName + ": Team] " + text);
+
+                            else
+                                participant.m_Player.SendMessage(1256, "[" + m_Player.RawName + ": Opposing Team] " + text);
+                            break;
+                    }
+                }
+            }
+        }
+
+        public override void OnCancel(Mobile from)
+        {
         }
     }
 }

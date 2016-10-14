@@ -133,7 +133,7 @@ namespace Server.Spells.Eighth
                     CustomizationAbilities.Tremor(Caster, range);
             }
 
-            ArenaRuleset.SpellCompletion(Caster, typeof(EarthquakeSpell));
+            ArenaFight.SpellCompletion(Caster, typeof(EarthquakeSpell));
 
             FinishSequence();
         }

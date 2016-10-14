@@ -177,7 +177,7 @@ namespace Server.Spells.Seventh
                 }
             }
 
-            ArenaRuleset.SpellCompletion(Caster, typeof(MeteorSwarmSpell));
+            ArenaFight.SpellCompletion(Caster, typeof(MeteorSwarmSpell));
 
             FinishSequence();
         }

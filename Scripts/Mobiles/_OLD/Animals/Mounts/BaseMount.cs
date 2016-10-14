@@ -127,6 +127,33 @@ namespace Server.Mobiles
 			if ( IsDeadFollower )
 				return;
 
+            PlayerMobile player = from as PlayerMobile;
+
+            if (player == null)
+                return;
+
+            ArenaFight arenaFight = player.m_ActiveInsideArenaFight;
+
+            if (arenaFight != null)
+            {
+                if (arenaFight.m_ArenaMatch != null)
+                {
+                    if (arenaFight.m_ArenaMatch.m_Ruleset != null)
+                    {
+                        switch (arenaFight.m_ArenaMatch.m_Ruleset.m_MountsRestriction)
+                        {
+                            case ArenaRuleset.MountsRestrictionType.Allowed:
+                            break;
+
+                            case ArenaRuleset.MountsRestrictionType.NotAllowed:
+                                from.SendMessage("Rules of this match do not allow mounts.");
+                                return;
+                            break;
+                        }                        
+                    }
+                }               
+            }
+
 			if ( from.IsBodyMod && !from.Body.IsHuman )
 			{
 				from.SendLocalizedMessage( 1061628 ); // You can't do that while polymorphed.

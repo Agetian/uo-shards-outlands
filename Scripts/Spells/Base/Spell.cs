@@ -522,12 +522,9 @@ namespace Server.Spells
             if (m_Caster.Player)
             {
                 PlayerMobile player = m_Caster as PlayerMobile;
-                
-                if (player.m_ActiveArenaRuleset != null)
-                {
-                    if (!player.m_ActiveArenaRuleset.AttemptUseSpell(player, this.GetType()))
-                        return false;
-                }                
+
+                if (!ArenaFight.AttemptSpellUsage(player, this.GetType()))
+                    return false;               
 
                 Item item = m_Caster.FindItemOnLayer(Layer.OneHanded);
 

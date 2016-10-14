@@ -14,7 +14,13 @@ namespace Server
     {
         public static ArenaPersistanceItem PersistanceItem;
 
+        public static TimeSpan MatchResultExpiration = TimeSpan.FromHours(24);
+        public static TimeSpan TournamentMatchResultExpiration = TimeSpan.FromDays(30);
+
         public static List<ArenaAccountEntry> m_ArenaAccountEntries = new List<ArenaAccountEntry>();
+        public static List<ArenaMatchResultEntry> m_ArenaMatchResultEntries = new List<ArenaMatchResultEntry>();
+
+        public static Timer m_Timer;
         
         public static void Initialize()
         {
@@ -23,6 +29,52 @@ namespace Server
                 if (PersistanceItem == null)
                     PersistanceItem = new ArenaPersistanceItem();               
             });
+
+            Timer.DelayCall(TimeSpan.FromSeconds(1), delegate
+            {                
+                if (m_Timer != null)
+                {
+                    m_Timer.Stop();
+                    m_Timer = null;
+                }
+
+                m_Timer = new ArenaPersistanceTimer();
+                m_Timer.Start();                
+            });
+        }
+
+        public class ArenaPersistanceTimer : Timer
+        {
+            public ArenaPersistanceTimer(): base(TimeSpan.Zero, TimeSpan.FromHours(12))
+            {
+                Priority = TimerPriority.OneMinute;
+            }
+
+            protected override void OnTick()
+            {
+                Queue m_Queue = new Queue();
+
+                foreach (ArenaMatchResultEntry arenaMatchResultEntry in m_ArenaMatchResultEntries)
+                {
+                    if (arenaMatchResultEntry == null) continue;
+                    if (arenaMatchResultEntry.Deleted) continue;
+
+                    TimeSpan expirationLength = MatchResultExpiration;
+
+                    //Test: Add Tournament Expiration
+
+                    if (arenaMatchResultEntry.m_CompletionDate + expirationLength <= DateTime.UtcNow)                    
+                        m_Queue.Enqueue(arenaMatchResultEntry);                    
+                }
+
+                while (m_Queue.Count > 0)
+                {
+                    ArenaMatchResultEntry entryResult = (ArenaMatchResultEntry)m_Queue.Dequeue();
+
+                    if (entryResult != null)
+                        entryResult.Delete();
+                }
+            }
         }
 
         public static void OnLogin(PlayerMobile player)
@@ -147,7 +199,7 @@ namespace Server
         {
             m_AccountUsername = accountName;
 
-            //-----
+            //-----    
 
             ArenaPersistance.m_ArenaAccountEntries.Add(this);
 
@@ -157,6 +209,14 @@ namespace Server
 
         public ArenaAccountEntry(Serial serial): base(serial)
         {
+        }
+
+        public override void OnDelete()
+        {
+            if (ArenaPersistance.m_ArenaAccountEntries.Contains(this))
+                ArenaPersistance.m_ArenaAccountEntries.Remove(this);
+
+            base.OnDelete();
         }
 
         public override void Serialize(GenericWriter writer)
@@ -182,6 +242,159 @@ namespace Server
             //-----
 
             ArenaPersistance.m_ArenaAccountEntries.Add(this);
+        }
+    }
+
+    public class ArenaMatchResultEntry : Item
+    {
+        public DateTime m_CompletionDate = DateTime.UtcNow;
+        public ArenaRuleset.MatchTypeType m_MatchType = ArenaRuleset.MatchTypeType.Ranked1vs1;
+        public TimeSpan m_MatchDuration = TimeSpan.FromSeconds(0);
+
+        public List<ArenaMatchTeamResultEntry> m_TeamResultEntries = new List<ArenaMatchTeamResultEntry>();
+
+        [Constructable]
+        public ArenaMatchResultEntry(): base(0x0)
+        {
+            ArenaPersistance.m_ArenaMatchResultEntries.Add(this);
+
+            Visible = false;
+            Movable = false;
+        }
+
+        public ArenaMatchResultEntry(Serial serial): base(serial)
+        {
+        }
+
+        public override void OnDelete()
+        {
+            if (ArenaPersistance.m_ArenaMatchResultEntries.Contains(this))
+                ArenaPersistance.m_ArenaMatchResultEntries.Remove(this);
+
+            base.OnDelete();
+        }
+
+        public override void Serialize(GenericWriter writer)
+        {
+            base.Serialize(writer);
+            writer.Write((int)0);
+
+            //Version 0 
+            writer.Write(m_CompletionDate);
+            writer.Write((int)m_MatchType);
+            writer.Write(m_MatchDuration);
+
+            writer.Write(m_TeamResultEntries.Count);
+            for (int a = 0; a < m_TeamResultEntries.Count; a++)
+            {
+                ArenaMatchTeamResultEntry teamResultEntry = m_TeamResultEntries[a];
+
+                writer.Write(teamResultEntry.m_Winner);
+                writer.Write(teamResultEntry.m_TeamName);
+
+                writer.Write(teamResultEntry.m_PlayerResultEntries.Count);
+                for (int b = 0; b < teamResultEntry.m_PlayerResultEntries.Count; b++)
+                {
+                    ArenaMatchPlayerResultEntry playerResultEntry = teamResultEntry.m_PlayerResultEntries[b];
+
+                    writer.Write(playerResultEntry.m_Player);
+                    writer.Write(playerResultEntry.m_PlayerName);
+                    writer.Write(playerResultEntry.m_Alive);
+                    writer.Write(playerResultEntry.m_LowestHP);
+                    writer.Write(playerResultEntry.m_TimeAlive);
+                    writer.Write(playerResultEntry.m_DamageDealt);
+                    writer.Write(playerResultEntry.m_DamageReceived);
+                }
+            }
+        }
+
+        public override void Deserialize(GenericReader reader)
+        {
+            base.Deserialize(reader);
+            int version = reader.ReadInt();
+
+            //Version 0
+            if (version >= 0)
+            {
+                DateTime completionDate = reader.ReadDateTime();
+                ArenaRuleset.MatchTypeType matchType = (ArenaRuleset.MatchTypeType)reader.ReadInt();
+                TimeSpan matchDuration = reader.ReadTimeSpan();
+
+                int teamResultEntriesCount = reader.ReadInt();
+                for (int a = 0; a < teamResultEntriesCount; a++)
+                {
+                    bool winner = reader.ReadBool();
+                    string teamName = reader.ReadString();
+
+                    List<ArenaMatchPlayerResultEntry> m_playerResultEntries = new List<ArenaMatchPlayerResultEntry>();
+
+                    int playerResultEntriesCount = reader.ReadInt();
+                    for (int b = 0; b < playerResultEntriesCount; b++)
+                    {
+                        PlayerMobile player = reader.ReadMobile() as PlayerMobile;
+                        string playerName = reader.ReadString();
+                        bool alive = reader.ReadBool();
+                        int lowestHP = reader.ReadInt();
+                        TimeSpan timeAlive = reader.ReadTimeSpan();
+                        int damageDealt = reader.ReadInt();
+                        int damageReceived = reader.ReadInt();
+
+                        ArenaMatchPlayerResultEntry playerResultEntry = new ArenaMatchPlayerResultEntry(player, playerName, alive, lowestHP, timeAlive, damageDealt, damageReceived);
+
+                        m_playerResultEntries.Add(playerResultEntry);
+                    }
+
+                    ArenaMatchTeamResultEntry teamResultEntry = new ArenaMatchTeamResultEntry(winner, teamName, m_playerResultEntries);
+
+                    m_TeamResultEntries.Add(teamResultEntry);
+                }
+            }
+
+            //-----
+
+            ArenaPersistance.m_ArenaMatchResultEntries.Add(this);
+        }
+    }
+
+    public class ArenaMatchTeamResultEntry
+    {
+        public bool m_Winner = true;
+        public string m_TeamName = "";
+        public List<ArenaMatchPlayerResultEntry> m_PlayerResultEntries = new List<ArenaMatchPlayerResultEntry>();
+
+        public ArenaMatchTeamResultEntry(bool winner, string teamName, List<ArenaMatchPlayerResultEntry> playerResultEntries)
+        {
+            m_Winner = winner;
+            m_TeamName = teamName;
+
+            foreach (ArenaMatchPlayerResultEntry entry in playerResultEntries)
+            {
+                m_PlayerResultEntries.Add(entry);
+            }
+        }
+    }
+
+    public class ArenaMatchPlayerResultEntry
+    {
+        public PlayerMobile m_Player;
+        public string m_PlayerName = "";
+
+        public bool m_Alive = true;
+
+        public int m_LowestHP = 100;
+        public TimeSpan m_TimeAlive = TimeSpan.FromSeconds(0);
+        public int m_DamageDealt = 0;
+        public int m_DamageReceived = 0;
+
+        public ArenaMatchPlayerResultEntry(PlayerMobile player, string playerName, bool alive, int lowestHP, TimeSpan timeAlive, int damageDealt, int damageReceived)
+        {
+            m_Player = player;
+            m_PlayerName = playerName;
+            m_Alive = alive;
+            m_LowestHP = lowestHP;
+            m_TimeAlive = timeAlive;
+            m_DamageDealt = damageDealt;
+            m_DamageReceived = damageReceived;
         }
     }
 }

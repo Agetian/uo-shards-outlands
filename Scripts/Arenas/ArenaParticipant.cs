@@ -29,9 +29,10 @@ namespace Server
 
         public FightStatusType m_FightStatus = FightStatusType.Alive;
 
+        public int m_LowestHealth = 100;
+        public TimeSpan m_TimeAlive = TimeSpan.FromSeconds(0);
         public int m_DamageDealt = 0;
-        public int m_DamageReceived = 0;
-        public int m_LowestHealth = 0;
+        public int m_DamageReceived = 0;        
 
         public List<ArenaSpellUsage> m_SpellUsages = new List<ArenaSpellUsage>();
         public List<ArenaItemUsage> m_ItemUsages = new List<ArenaItemUsage>();
@@ -70,9 +71,10 @@ namespace Server
 
         public void ResetArenaFightValues()
         {
+            m_LowestHealth = 100;
+            m_TimeAlive = TimeSpan.FromSeconds(0);
             m_DamageDealt = 0;
-            m_DamageReceived = 0;
-            m_LowestHealth = 0;
+            m_DamageReceived = 0;            
 
             foreach(ArenaItemUsage arenaItemUsage in m_ItemUsages)
             {
@@ -89,6 +91,28 @@ namespace Server
 
                 arenaSpellUsage.m_Uses = 0;
             }
+        }
+
+        public ArenaTeam GetPlayerTeam()
+        {
+            if (m_Player == null)
+                return null;
+
+            ArenaTeam arenaTeam = null;
+
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                return null;
+
+            foreach (ArenaTeam team in m_ArenaMatch.m_Teams)
+            {
+                if (team == null) continue;
+                if (team.Deleted) continue;
+
+                if (team.GetPlayerParticipant(m_Player) != null)
+                    return team;
+            }
+
+            return arenaTeam;
         }
 
         public ArenaSpellUsage AdjustSpellUsage(Type type, int amount)
@@ -175,9 +199,11 @@ namespace Server
 
             writer.Write(m_ReadyToggled);
             writer.Write((int)m_FightStatus);
+
+            writer.Write(m_LowestHealth);
+            writer.Write(m_TimeAlive);
             writer.Write(m_DamageDealt);
             writer.Write(m_DamageReceived);
-            writer.Write(m_LowestHealth);
 
             writer.Write(m_SpellUsages.Count);
             for (int a = 0; a < m_SpellUsages.Count; a++)
@@ -212,9 +238,11 @@ namespace Server
 
                 m_ReadyToggled = reader.ReadBool();
                 m_FightStatus = (FightStatusType)reader.ReadInt();
+
+                m_LowestHealth = reader.ReadInt();
+                m_TimeAlive = reader.ReadTimeSpan();
                 m_DamageDealt = reader.ReadInt();
                 m_DamageReceived = reader.ReadInt();
-                m_LowestHealth = reader.ReadInt();
 
                 int spellUsages = reader.ReadInt();
                 for (int a = 0; a < spellUsages; a++)

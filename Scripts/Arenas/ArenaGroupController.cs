@@ -100,6 +100,19 @@ namespace Server
         {
         }
 
+        public bool IsWithinArenaGroupRegion(Point3D location, Map map)
+        {
+            Point2D sourcePoint = new Point2D(location.X, location.Y);
+
+            if (Map != map)
+                return false;
+
+            if (ArenaGroupRegionBoundary.Contains(sourcePoint))
+                return true;
+
+            return false;
+        }
+
         public static ArenaGroupController GetArenaGroupRegionAtLocation(Point3D location, Map map)
         {
             foreach (ArenaGroupController arenaGroupController in m_Instances)
@@ -123,7 +136,7 @@ namespace Server
             if (player == null)
                 return;
 
-            if (player.m_ActiveArenaParticipant != null)
+            if (player.m_ArenaFight != null)
             {
                 player.SendMessage("You are already in the middle of a match.");
                 return;

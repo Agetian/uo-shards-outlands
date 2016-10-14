@@ -1390,64 +1390,75 @@ namespace Server.Mobiles
 
         public ArenaGumpObject m_ArenaGumpObject;
 
-        public ArenaMatch m_ActiveArenaMatch
+        #region Arena Properties
+
+        public ArenaMatch m_ArenaMatch
         {
             get
             {
                 if (m_ArenaPlayerSettings == null) return null;
                 if (m_ArenaPlayerSettings.Deleted) return null;
+
                 if (!ArenaMatch.IsValidArenaMatch(m_ArenaPlayerSettings.m_ArenaMatch, this, false)) return null;
-
-                if (m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
-
+                
                 return m_ArenaPlayerSettings.m_ArenaMatch;
             }
         }
 
-        public ArenaParticipant m_ActiveArenaParticipant
+        public ArenaParticipant m_ArenaParticipant
         {
             get
             {
                 if (m_ArenaPlayerSettings == null) return null;
                 if (m_ArenaPlayerSettings.Deleted) return null;
+
                 if (!ArenaMatch.IsValidArenaMatch(m_ArenaPlayerSettings.m_ArenaMatch, this, false)) return null;
-
-                if (m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
-
+                
                 return m_ArenaPlayerSettings.m_ArenaMatch.GetParticipant(this);
             }
         }
 
-        public ArenaRuleset m_ActiveArenaRuleset
-        {
-            get 
-            {
-                if (m_ArenaPlayerSettings == null) return null;
-                if (m_ArenaPlayerSettings.Deleted) return null;
-                if (!ArenaMatch.IsValidArenaMatch(m_ArenaPlayerSettings.m_ArenaMatch, this, false)) return null;
-
-                if (m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
-
-                return m_ArenaPlayerSettings.m_ArenaMatch.m_Ruleset;
-            }          
-        }
-
-        public ArenaFight m_ActiveArenaFight
+        public ArenaFight m_ArenaFight
         {
             get
             {
                 if (m_ArenaPlayerSettings == null) return null;
                 if (m_ArenaPlayerSettings.Deleted) return null;
+
                 if (!ArenaMatch.IsValidArenaMatch(m_ArenaPlayerSettings.m_ArenaMatch, this, false)) return null;
-
-                if (m_ArenaPlayerSettings.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return null;
-
+                
                 if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight == null) return null;
                 if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight.Deleted) return null;
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight.m_ArenaController == null) return null;
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight.m_ArenaController.Deleted) return null;
 
                 return m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight;
             }
         }
+
+        public ArenaFight m_ActiveInsideArenaFight
+        {
+            get
+            {
+                if (m_ArenaPlayerSettings == null) return null;
+                if (m_ArenaPlayerSettings.Deleted) return null;
+
+                if (!ArenaMatch.IsValidArenaMatch(m_ArenaPlayerSettings.m_ArenaMatch, this, false)) return null;
+
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight == null) return null;
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight.Deleted) return null;
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight.m_ArenaController == null) return null;
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight.m_ArenaController.Deleted) return null;
+
+                if (m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight.IsWithinArena(Location, Map))
+                    return m_ArenaPlayerSettings.m_ArenaMatch.m_ArenaFight;
+
+                return null;
+            }
+        }
+
+
+        #endregion
 
         public override bool KeepsItemsOnDeath 
         { 
@@ -1458,7 +1469,7 @@ namespace Server.Mobiles
 
                 return (AccessLevel > AccessLevel.Player); 
             }
-        }
+        }       
 
         public DateTime NextEmoteAllowed = DateTime.UtcNow;
         public static TimeSpan EmoteCooldownLong = TimeSpan.FromSeconds(120);
@@ -2038,11 +2049,8 @@ namespace Server.Mobiles
 
         public override bool AllowItemUse(Item item)
         {
-            if (m_ActiveArenaRuleset != null)
-            {
-                if (!m_ActiveArenaRuleset.AttemptItemUsage(this, item))
-                    return false;
-            }   
+            if (!ArenaFight.AttemptItemUsage(this, item))
+                return false;
 
             return DesignContext.Check(this);
         }
@@ -2732,9 +2740,9 @@ namespace Server.Mobiles
 
             if (ns != null)
             {
-                if (m_ActiveArenaFight != null)
+                if (m_ArenaFight != null)
                 {
-                    if (m_ActiveArenaFight.m_FightPhase == ArenaFight.FightPhaseType.StartCountdown)
+                    if (m_ArenaFight.m_FightPhase == ArenaFight.FightPhaseType.StartCountdown)
                         return false;
                 }
 
@@ -3118,11 +3126,7 @@ namespace Server.Mobiles
         protected override void OnLocationChange(Point3D oldLocation)
         {
             CheckLightLevels(false);
-
-            // Check For Entering a Stat-Loss Triggering Zone
-            if (SpellHelper.IsFeluccaDungeon(Map, Location) || SpellHelper.IsDungeonBossArea(Map, Location) || SpellHelper.IsGraveYardArea(Map, Location))
-                EnterContestedRegion(false);
-
+            
             BaseShip ship = BaseShip.FindShipAt(Location, Map);
 
             if (ship == null)
@@ -3130,8 +3134,8 @@ namespace Server.Mobiles
             else
                 ShipOccupied = ship;
 
-            if (m_ActiveArenaFight != null)
-                m_ActiveArenaFight.OnLocationChanged(this);
+            if (m_ArenaFight != null)
+                m_ArenaFight.OnLocationChanged(this);
             
             DesignContext context = m_DesignContext;
 
@@ -3203,8 +3207,8 @@ namespace Server.Mobiles
                 if (Mount != null)
                     Mount.Rider = null;
 
-            if (m_ActiveArenaFight != null)
-                m_ActiveArenaFight.OnMapChanged(this);
+            if (m_ArenaFight != null)
+                m_ArenaFight.OnMapChanged(this);
             
             DesignContext context = m_DesignContext;
 
@@ -3327,17 +3331,25 @@ namespace Server.Mobiles
 
         public override void Resurrect()
         {
-            if (m_ActiveArenaFight == null)
+            bool arenaOverride = false;
+
+            if (m_ArenaMatch != null)
             {
-                if (MurderCounts > Mobile.MurderCountsRequiredForMurderer && AccessLevel == AccessLevel.Player)
+                if (m_ArenaFight != null)
                 {
-                    SendMessage(63, "Select a resurrection option and click 'Apply' twice to proceed.");
-
-                    CloseGump(typeof(MurderPenaltyGump));
-                    SendGump(new MurderPenaltyGump(this, false, 0, false));
-
-                    return;
+                    if (m_ArenaMatch.m_ArenaGroupController.IsWithinArenaGroupRegion(Location, Map))
+                        arenaOverride = true;
                 }
+            }
+
+            if (!arenaOverride && MurderCounts > Mobile.MurderCountsRequiredForMurderer && AccessLevel == AccessLevel.Player)
+            {
+                SendMessage(63, "Select a resurrection option and click 'Apply' twice to proceed.");
+
+                CloseGump(typeof(MurderPenaltyGump));
+                SendGump(new MurderPenaltyGump(this, false, 0, false));
+
+                return;
             }
 
             m_TimeSpanResurrected = this.GameTime;
@@ -3419,7 +3431,18 @@ namespace Server.Mobiles
             if (reborn)
                 CustomizationAbilities.Reborn(this);
 
-            if (m_ActiveArenaFight == null)
+            bool arenaOverride = false;
+
+            if (m_ArenaMatch != null)
+            {
+                if (m_ArenaFight != null)
+                {
+                    if (m_ArenaMatch.m_ArenaGroupController.IsWithinArenaGroupRegion(Location, Map))
+                        arenaOverride = true;
+                }
+            }
+
+            if (!arenaOverride)
                 AspectGear.PlayerResurrected(this);
 
             Stam = StamMax;
@@ -3844,8 +3867,8 @@ namespace Server.Mobiles
             if ((carnage || violentDeath))
                 CustomizationAbilities.PlayerDeathExplosion(Location, Map, carnage, violentDeath);
             
-            if (m_ActiveArenaFight != null)
-                m_ActiveArenaFight.OnDeath(this, corpse);         
+            if (m_ArenaFight != null)
+                m_ArenaFight.OnDeath(this, corpse);         
             
             if (m_BuffTable != null)
             {

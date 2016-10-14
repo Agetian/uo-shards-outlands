@@ -30,13 +30,6 @@ namespace Server.Spells.Third
         public override void OnCast()
         {
             PlayerMobile player = Caster as PlayerMobile;
-
-            if (player != null)
-            {
-                if (player.m_ActiveArenaRuleset != null)
-                    player.m_ActiveArenaRuleset.AttemptUseSpell(player, typeof(PoisonSpell));
-            }
-
             BaseCreature casterCreature = Caster as BaseCreature;
 
             if (casterCreature != null)
@@ -204,7 +197,7 @@ namespace Server.Spells.Third
                 }
             }
 
-            ArenaRuleset.SpellCompletion(Caster, typeof(PoisonSpell));
+            ArenaFight.SpellCompletion(Caster, typeof(PoisonSpell));
 
             FinishSequence();
         }

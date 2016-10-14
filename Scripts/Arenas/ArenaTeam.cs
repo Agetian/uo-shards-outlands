@@ -10,6 +10,7 @@ namespace Server
 {
     public class ArenaTeam : Item
     {
+        public string m_TeamName = "";
         public List<ArenaParticipant> m_Participants = new List<ArenaParticipant>();
 
         [Constructable]
@@ -43,6 +44,8 @@ namespace Server
             writer.Write((int)0);
 
             //Version 0
+            writer.Write(m_TeamName);
+
             writer.Write(m_Participants.Count);
             for (int a = 0; a < m_Participants.Count; a++)
             {
@@ -58,6 +61,8 @@ namespace Server
             //Version 0
             if (version >= 0)
             {
+                m_TeamName = reader.ReadString();
+
                 int participantsCount = reader.ReadInt();
                 for (int a = 0; a < participantsCount; a++)
                 {

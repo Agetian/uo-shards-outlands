@@ -2847,7 +2847,7 @@
     <Compile Include="Misc\MondainsLegacy.cs" />
     <Compile Include="Misc\NameList.cs" />
     <Compile Include="Misc\NameVerification.cs" />
-    <Compile Include="Notoriety\Notoriety.cs" />
+    <Compile Include="Main\Notoriety.cs" />
     <Compile Include="Misc\Paperdoll.cs" />
     <Compile Include="Misc\Poison.cs" />
     <Compile Include="Misc\ProfanityProtection.cs" />

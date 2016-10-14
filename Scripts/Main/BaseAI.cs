@@ -1923,9 +1923,9 @@ namespace Server.Mobiles
                     }
 
                     //Owner in Arena but Pet is Not
-                    if (pm_Owner.m_ActiveArenaFight != null)
+                    if (pm_Owner.m_ArenaFight != null)
                     {
-                        if (!pm_Owner.m_ActiveArenaFight.IsWithinArena(bc_Creature.Location, bc_Creature.Map))
+                        if (!pm_Owner.m_ArenaFight.IsWithinArena(bc_Creature.Location, bc_Creature.Map))
                         {
                             if (bc_Creature.ControlOrder != OrderType.Stop)
                             {

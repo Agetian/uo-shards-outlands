@@ -7,8 +7,16 @@ using Server.Gumps;
 using Server.Items;
 using Server.Mobiles;
 using Server.Network;
-using Server.Spells;
 using Server.Targeting;
+using Server.Spells;
+using Server.Spells.First;
+using Server.Spells.Second;
+using Server.Spells.Third;
+using Server.Spells.Fourth;
+using Server.Spells.Fifth;
+using Server.Spells.Sixth;
+using Server.Spells.Seventh;
+using Server.Spells.Eighth;
 
 namespace Server
 {
@@ -62,7 +70,318 @@ namespace Server
         {
         }
 
-        #region OnEvents
+        public static bool AttemptSpellUsage(PlayerMobile player, Type spellType)
+        {
+            if (player == null) return true;
+            if (player.m_ArenaMatch == null) return true;
+            if (player.m_ArenaFight == null) return true;            
+
+            if (!player.m_ArenaFight.IsWithinArena(player.Location, player.Map)) return true;
+            if (player.m_ArenaFight.m_FightPhase == FightPhaseType.StartCountdown) return false;
+            if (player.m_ArenaFight.m_FightPhase == FightPhaseType.PostBattle) return false;
+
+            ArenaRuleset ruleset = player.m_ArenaMatch.m_Ruleset;
+            ArenaParticipant participant = player.m_ArenaParticipant;
+
+            if (participant == null)
+                return true;
+
+            bool restrictedSpell = false;
+
+            if (spellType == typeof(TelekinesisSpell)) restrictedSpell = true;
+            if (spellType == typeof(RecallSpell)) restrictedSpell = true;
+            if (spellType == typeof(BladeSpirits)) restrictedSpell = true;
+            if (spellType == typeof(IncognitoSpell)) restrictedSpell = true;
+            if (spellType == typeof(SummonCreatureSpell)) restrictedSpell = true;
+            if (spellType == typeof(InvisibilitySpell)) restrictedSpell = true;
+            if (spellType == typeof(MarkSpell)) restrictedSpell = true;
+            if (spellType == typeof(GateTravelSpell)) restrictedSpell = true;
+            if (spellType == typeof(PolymorphSpell)) restrictedSpell = true;
+            if (spellType == typeof(AirElementalSpell)) restrictedSpell = true;
+            if (spellType == typeof(EarthElementalSpell)) restrictedSpell = true;
+            if (spellType == typeof(EnergyVortexSpell)) restrictedSpell = true;
+            if (spellType == typeof(FireElementalSpell)) restrictedSpell = true;
+            if (spellType == typeof(ResurrectionSpell)) restrictedSpell = true;
+            if (spellType == typeof(SummonDaemonSpell)) restrictedSpell = true;
+            if (spellType == typeof(WaterElementalSpell)) restrictedSpell = true;
+
+            if (restrictedSpell)
+            {
+                player.SendMessage("That spell is not allowed here.");
+                return false;
+            }
+
+            foreach (ArenaSpellRestriction spellRestriction in ruleset.m_SpellRestrictions)
+            {
+                if (spellRestriction == null)
+                    continue;
+
+                if (spellRestriction.m_SpellType == spellType)
+                {
+                    int maxUsesAllowed = 0;
+
+                    switch (spellRestriction.m_RestrictionMode)
+                    {
+                        case ArenaSpellRestriction.SpellRestrictionModeType.Disabled: maxUsesAllowed = 0; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.OneUse: maxUsesAllowed = 1; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.ThreeUses: maxUsesAllowed = 3; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.FiveUses: maxUsesAllowed = 5; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.TenUses: maxUsesAllowed = 10; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.TwentyFiveUses: maxUsesAllowed = 25; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.FiftyUses: maxUsesAllowed = 50; break;
+                        case ArenaSpellRestriction.SpellRestrictionModeType.Unlimited: return true; break;
+                    }
+
+                    if (maxUsesAllowed == 0)
+                    {
+                        player.SendMessage("That spell has been restricted for this match.");
+                        return false;
+                    }
+
+                    ArenaSpellUsage arenaSpellUsage = participant.GetSpellUsage(spellType);
+
+                    if (arenaSpellUsage != null)
+                    {
+                        if (arenaSpellUsage.m_Uses >= maxUsesAllowed)
+                        {
+                            player.SendMessage("You have exceeded the maximum uses of that spell allowed for this match.");
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public static void SpellCompletion(Mobile mobile, Type spellType)
+        {
+            PlayerMobile player = mobile as PlayerMobile;
+            
+            if (player == null) return;
+            if (player.m_ArenaMatch == null) return;
+            if (player.m_ArenaFight == null) return;
+
+            if (!player.m_ArenaFight.IsWithinArena(player.Location, player.Map)) return;
+            if (player.m_ArenaFight.m_FightPhase == FightPhaseType.StartCountdown) return;
+            if (player.m_ArenaFight.m_FightPhase == FightPhaseType.PostBattle) return;
+
+            ArenaRuleset ruleset = player.m_ArenaMatch.m_Ruleset;
+            ArenaParticipant participant = player.m_ArenaParticipant;
+
+            if (participant == null)
+                return;
+
+            participant.AdjustSpellUsage(spellType, 1);
+
+            ArenaSpellUsage arenaSpellUsage = participant.GetSpellUsage(spellType);
+
+            int spellUses = 0;
+
+            if (arenaSpellUsage != null)
+                spellUses = arenaSpellUsage.m_Uses;
+
+            ArenaSpellRestriction arenaSpellRestriction = ruleset.GetSpellRestriction(spellType);
+
+            if (arenaSpellRestriction != null)
+            {
+                int maxUsesAllowed = 0;
+
+                switch (arenaSpellRestriction.m_RestrictionMode)
+                {
+                    case ArenaSpellRestriction.SpellRestrictionModeType.Disabled: maxUsesAllowed = 0; break;
+                    case ArenaSpellRestriction.SpellRestrictionModeType.OneUse: maxUsesAllowed = 1; break;
+                    case ArenaSpellRestriction.SpellRestrictionModeType.ThreeUses: maxUsesAllowed = 3; break;
+                    case ArenaSpellRestriction.SpellRestrictionModeType.FiveUses: maxUsesAllowed = 5; break;
+                    case ArenaSpellRestriction.SpellRestrictionModeType.TenUses: maxUsesAllowed = 10; break;
+                    case ArenaSpellRestriction.SpellRestrictionModeType.TwentyFiveUses: maxUsesAllowed = 25; break;
+                    case ArenaSpellRestriction.SpellRestrictionModeType.FiftyUses: maxUsesAllowed = 50; break;
+                    case ArenaSpellRestriction.SpellRestrictionModeType.Unlimited: maxUsesAllowed = 10000; break;
+                }
+
+                if (spellUses > 0 && (maxUsesAllowed > 0 && maxUsesAllowed <= 100))
+                {
+                    string spellName = "";
+
+                    if (spellType == typeof(PoisonSpell)) spellName = "Poison";
+                    if (spellType == typeof(PoisonFieldSpell)) spellName = "Poison Field";
+                    if (spellType == typeof(ParalyzeSpell)) spellName = "Paralyze";
+                    if (spellType == typeof(ParalyzeFieldSpell)) spellName = "Paralyze Field";
+                    if (spellType == typeof(MeteorSwarmSpell)) spellName = "Meteor Swarm";
+                    if (spellType == typeof(ChainLightningSpell)) spellName = "Chain Lightning";
+                    if (spellType == typeof(EarthquakeSpell)) spellName = "Earthquake";
+
+                    player.SendMessage(spellName + " Casts Allowed: " + spellUses.ToString() + " / " + maxUsesAllowed.ToString());
+                }
+            }            
+        }
+
+        public static bool AttemptItemUsage(PlayerMobile player, Item item)
+        {
+            if (player == null) return true;
+            if (player.m_ArenaMatch == null) return true;
+            if (player.m_ArenaFight == null) return true;
+
+            if (!player.m_ArenaFight.IsWithinArena(player.Location, player.Map)) return true;
+            if (player.m_ArenaFight.m_FightPhase == FightPhaseType.StartCountdown)
+            {
+                if (item is BaseContainer)
+                {
+                    if (item is TrapableContainer)
+                    {
+                        TrapableContainer container = item as TrapableContainer;
+
+                        if (container.TrapType != TrapType.None)
+                        {
+                            player.SendMessage("Trapped containers may not be used during match countdowns.");
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }            
+
+            ArenaRuleset ruleset = player.m_ArenaMatch.m_Ruleset;
+            ArenaParticipant participant = player.m_ArenaParticipant;
+
+            if (participant == null)
+                return true;
+
+            if (item is Corpse)
+                return false;
+
+            bool allowedItem = false;
+
+            if (item is Bandage)
+                allowedItem = true;
+
+            if (item is BaseHealPotion || item is BaseCurePotion || item is BaseRefreshPotion || item is BaseStrengthPotion ||
+                item is BaseAgilityPotion || item is BaseExplosionPotion || item is BaseMagicResistPotion || item is BasePoisonPotion)
+                allowedItem = true;
+
+            if (item is BaseContainer)            
+                allowedItem = true;
+
+            if (!allowedItem)
+            {
+                player.SendMessage("That item is not allowed during arena matches.");
+                return false;
+            }
+
+            Type itemType = item.GetType();
+
+            if (item is BaseAgilityPotion) itemType = typeof(BaseAgilityPotion);
+            if (item is BaseCurePotion) itemType = typeof(BaseCurePotion);
+            if (item is BaseExplosionPotion) itemType = typeof(BaseExplosionPotion);
+            if (item is BaseHealPotion) itemType = typeof(BaseHealPotion);
+            if (item is BaseMagicResistPotion) itemType = typeof(BaseMagicResistPotion);
+            if (item is BasePoisonPotion) itemType = typeof(BasePoisonPotion);
+            if (item is BaseRefreshPotion) itemType = typeof(BaseRefreshPotion);
+            if (item is BaseStrengthPotion) itemType = typeof(BaseStrengthPotion);
+
+            if (item is TrapableContainer)
+            {
+                TrapableContainer container = item as TrapableContainer;
+
+                if (container.TrapType != TrapType.None)
+                    itemType = typeof(Pouch);
+            }
+
+            ArenaItemRestriction itemRestriction = ruleset.GetItemRestriction(itemType);
+
+            if (itemRestriction != null)
+            {
+                int maxUsesAllowed = 0;
+
+                switch (itemRestriction.m_RestrictionMode)
+                {
+                    case ArenaItemRestriction.ItemRestrictionModeType.Disabled: maxUsesAllowed = 0; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.OneUse: maxUsesAllowed = 1; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.ThreeUses: maxUsesAllowed = 3; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.FiveUses: maxUsesAllowed = 5; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.TenUses: maxUsesAllowed = 10; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.TwentyFiveUses: maxUsesAllowed = 25; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.FiftyUses: maxUsesAllowed = 50; break;
+                    case ArenaItemRestriction.ItemRestrictionModeType.Unlimited: return true; break;
+                }
+
+                if (maxUsesAllowed == 0)
+                {
+                    player.SendMessage("That item has been restricted for this match.");
+                    return false;
+                }
+
+                ArenaItemUsage arenaItemUsage = participant.GetItemUsage(itemType);
+
+                if (arenaItemUsage != null)
+                {
+                    if (arenaItemUsage.m_Uses >= maxUsesAllowed)
+                    {
+                        player.SendMessage("You have exceeded the maximum uses of that item allowed for this match.");
+                        return false;
+                    }
+
+                    else
+                    {
+                        arenaItemUsage.m_Uses++;
+
+                        string itemName = "";
+
+                        if (itemType == typeof(BaseAgilityPotion)) itemName = "Agility Potion";
+                        if (itemType == typeof(BaseCurePotion)) itemName = "Cure Potion";
+                        if (itemType == typeof(BaseExplosionPotion)) itemName = "Explosion Potion";
+                        if (itemType == typeof(BaseHealPotion)) itemName = "Heal Potion";
+                        if (itemType == typeof(BaseMagicResistPotion)) itemName = "Magic Resist Potion";
+                        if (itemType == typeof(BasePoisonPotion)) itemName = "Poison Potion";
+                        if (itemType == typeof(BaseRefreshPotion)) itemName = "Refresh Potion";
+                        if (itemType == typeof(BaseStrengthPotion)) itemName = "Strength Potion";
+                        if (itemType == typeof(Pouch)) itemName = "Trapped Container";
+
+                        player.SendMessage(itemName + " Uses Allowed: " + arenaItemUsage.m_Uses.ToString() + " / " + maxUsesAllowed.ToString());
+
+                        return true;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+
+        public virtual bool AllowFreeConsume(PlayerMobile player)
+        {
+            return true;
+        }
+
+        public virtual bool AllowItemEquip(PlayerMobile player, Item item)
+        {
+            return true;
+        }
+
+        public virtual bool AllowItemRemove(PlayerMobile player, Item item)
+        {
+            return true;
+        }
+
+        public virtual bool AllowSkillUse(PlayerMobile player, SkillName skill)
+        {
+            return true;
+        }
+
+        public virtual void CancelSpell(Mobile mobile)
+        {
+            if (mobile == null)
+                return;
+
+            if (mobile.Spell is Spell)
+            {
+                Spell spell = mobile.Spell as Spell;
+                spell.Disturb(DisturbType.Kill);
+            }
+        }
 
         public virtual void AnnouncerMessage(string message, int hue)
         {
@@ -88,77 +407,75 @@ namespace Server
 
         public virtual void OnLocationChanged(PlayerMobile player)
         {
-            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false)) return;
             if (player == null) return;
+            if (m_ArenaMatch == null) return;
 
-            ArenaParticipant arenaParticipant = m_ArenaMatch.GetParticipant(player);
+            ArenaParticipant participant = m_ArenaMatch.GetParticipant(player);
 
-            if (arenaParticipant != null && m_ArenaController != null)
+            if (participant == null) return;
+            if (participant.m_FightStatus != ArenaParticipant.FightStatusType.Alive) return;
+            if (IsWithinArena(player.Location, player.Map)) return;
+
+            participant.m_FightStatus = ArenaParticipant.FightStatusType.Eliminated;
+
+            ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+
+            if (player.Map == Map.Internal)
             {
-                if (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive && !IsWithinArena(player.Location, player.Map))
+                if (exitTile != null)
                 {
-                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Eliminated;
+                    player.LogoutLocation = exitTile.Location;
+                    player.LogoutMap = exitTile.Map;
+                }
 
-                    ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
-
-                    if (player.Map == Map.Internal)
-                    {
-                        if (exitTile != null)
-                        {
-                            player.LogoutLocation = exitTile.Location;
-                            player.LogoutMap = exitTile.Map;
-                        }
-
-                        else
-                        {
-                            player.LogoutLocation = m_ArenaController.Location;
-                            player.LogoutMap = m_ArenaController.Map;
-                        }
-                    }
-
-                    RestoreAndClearEffects(player);                    
-
-                    foreach (Mobile mobile in player.AllFollowers)
-                    {
-                        BaseCreature bc_Creature = mobile as BaseCreature;
-
-                        if (bc_Creature == null) continue;
-                        if (bc_Creature.Deleted) continue;
-                        if (!m_ArenaMatch.m_ArenaFight.IsWithinArena(bc_Creature.Location, bc_Creature.Map)) continue;
-
-                        if ((!bc_Creature.Alive || bc_Creature.IsDeadFollower) && !bc_Creature.IsBonded)
-                            continue;
-
-                        if (exitTile != null)
-                        {
-                            bc_Creature.Location = exitTile.Location;
-                            bc_Creature.Map = exitTile.Map;
-                        }
-
-                        else
-                        {
-                            bc_Creature.Location = m_ArenaController.Location;
-                            bc_Creature.Map = m_ArenaController.Map;
-                        }
-
-                        if (bc_Creature.IsDeadBondedFollower)
-                            bc_Creature.ResurrectPet();
-
-                        RestoreAndClearEffects(bc_Creature);
-                    }
-
-                    ArenaTeam winningTeam = CheckForTeamVictory();
-
-                    if (winningTeam != null)
-                    {
-                        StartPostBattle(winningTeam, VictoryType.PlayersEliminated);
-                        return;
-                    }
-
-                    else
-                        InvalidatePlayers();
-                }                
+                else
+                {
+                    player.LogoutLocation = m_ArenaController.Location;
+                    player.LogoutMap = m_ArenaController.Map;
+                }
             }
+
+            RestoreAndClearEffects(player);
+
+            foreach (Mobile mobile in player.AllFollowers)
+            {
+                BaseCreature bc_Creature = mobile as BaseCreature;
+
+                if (bc_Creature == null) continue;
+                if (bc_Creature.Deleted) continue;
+                if (!m_ArenaMatch.m_ArenaFight.IsWithinArena(bc_Creature.Location, bc_Creature.Map)) continue;
+
+                if ((!bc_Creature.Alive || bc_Creature.IsDeadFollower) && !bc_Creature.IsBonded)
+                    continue;
+
+                if (exitTile != null)
+                {
+                    bc_Creature.Location = exitTile.Location;
+                    bc_Creature.Map = exitTile.Map;
+                }
+
+                else
+                {
+                    bc_Creature.Location = m_ArenaController.Location;
+                    bc_Creature.Map = m_ArenaController.Map;
+                }
+
+                if (bc_Creature.IsDeadBondedFollower)
+                    bc_Creature.ResurrectPet();
+
+                RestoreAndClearEffects(bc_Creature);
+            }
+
+            ArenaTeam winningTeam = CheckForTeamVictory();
+
+            if (winningTeam != null)
+            {
+                StartPostBattle(winningTeam, VictoryType.PlayersEliminated);
+                return;
+            }
+
+            else
+                InvalidatePlayers();
         }
 
         public virtual bool IsWithinArena(Point3D location, Map map)
@@ -167,6 +484,14 @@ namespace Server
                 return false;
 
             return m_ArenaController.IsWithinArena(location, map);
+        }
+
+        public virtual bool IsWithinArenaGroupRegion(Point3D location, Map map)
+        {
+            if (m_ArenaController == null) return false;
+            if (m_ArenaController.m_ArenaGroupController == null) return false;
+
+            return m_ArenaController.m_ArenaGroupController.IsWithinArenaGroupRegion(location, map);
         }
 
         public virtual void FollowerOnDeath(BaseCreature creature, Container corpseContainer)
@@ -211,15 +536,16 @@ namespace Server
         
         public virtual void OnDeath(PlayerMobile player, Container corpseContainer)
         {
-            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false)) return;
-            if (player == null)  return;
+            if (player == null) return;
+            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false)) return;   
+            if (!IsWithinArena(player.Location, player.Map)) return;
 
-            ArenaParticipant arenaParticipant = m_ArenaMatch.GetParticipant(player);
+            ArenaParticipant participant = m_ArenaMatch.GetParticipant(player);
 
-            if (arenaParticipant != null)
+            if (participant != null)
             {
-                if (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive)
-                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.Eliminated;
+                if (participant.m_FightStatus == ArenaParticipant.FightStatusType.Alive)
+                    participant.m_FightStatus = ArenaParticipant.FightStatusType.Eliminated;
             }
 
             Queue m_Queue = new Queue();
@@ -244,31 +570,45 @@ namespace Server
             
             Timer.DelayCall(TimeSpan.FromSeconds(4.0), delegate
             {
-                if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false)) return;
-                if (player == null) return;
-                if (m_ArenaController == null) return;
+                if (player == null)
+                    return;
 
-                if (!player.Alive)
-                    player.Resurrect(); 
+                Point3D newLocation = player.Location;
+                Map newMap = player.Map;
 
-                RestoreAndClearEffects(player);                               
-                                
-                ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+                bool foundNewLocation = false;
+                bool playerWithinArena = false;
 
-                if (IsWithinArena(player.Location, player.Map))
+                if (ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false) && m_ArenaController != null)
                 {
+                    ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
+
                     if (exitTile != null)
                     {
-                        player.Location = exitTile.Location;
-                        player.Map = exitTile.Map;
+                        newLocation = exitTile.Location;
+                        newMap = exitTile.Map;
+
+                        foundNewLocation = true;
                     }
 
-                    else
-                    {
-                        player.Location = m_ArenaController.Location;
-                        player.Map = m_ArenaController.Map;
-                    }
+                    if (IsWithinArena(player.Location, player.Map))
+                        playerWithinArena = true;
                 }
+
+                if (!foundNewLocation)
+                {
+                    //TEST: CREATE FALLBACK PLAYER + CREATURE DROP LOCATION
+                    //newLocation = Prevalia Bank
+                    //newMap = Prevalia Bank Map
+                }
+                
+                player.Location = newLocation;
+                player.Map = newMap;                
+
+                if (!player.Alive)
+                    player.Resurrect();
+
+                RestoreAndClearEffects(player);    
 
                 foreach (Mobile mobile in player.AllFollowers)
                 {
@@ -276,22 +616,13 @@ namespace Server
 
                     if (bc_Creature == null) continue;
                     if (bc_Creature.Deleted) continue;
-                    if (!m_ArenaMatch.m_ArenaFight.IsWithinArena(bc_Creature.Location, bc_Creature.Map)) continue;
+                    if (!IsWithinArena(bc_Creature.Location, bc_Creature.Map)) continue;
 
                     if ((!bc_Creature.Alive || bc_Creature.IsDeadFollower) && !bc_Creature.IsBonded)
                         continue;
 
-                    if (exitTile != null)
-                    {
-                        bc_Creature.Location = exitTile.Location;
-                        bc_Creature.Map = exitTile.Map;
-                    }
-
-                    else
-                    {
-                        bc_Creature.Location = m_ArenaController.Location;
-                        bc_Creature.Map = m_ArenaController.Map;
-                    }
+                    bc_Creature.Location = newLocation;
+                    bc_Creature.Map = newMap;
 
                     if (bc_Creature.IsDeadBondedFollower)
                         bc_Creature.ResurrectPet();
@@ -312,48 +643,6 @@ namespace Server
 
             else
                 InvalidatePlayers();
-        }
-
-        public virtual bool AllowFreeConsume(PlayerMobile player)
-        {
-            return true;
-        }
-
-        public virtual bool AllowItemEquip(PlayerMobile player, Item item)
-        {
-            return true;
-        }
-
-        public virtual bool AllowItemRemove(PlayerMobile player, Item item)
-        {
-            return true;
-        }
-
-        public virtual bool AllowItemUse(PlayerMobile player, Item item)
-        {
-            return true;
-        }
-
-        public virtual bool AllowSkillUse(PlayerMobile player, SkillName skill)
-        {
-            return true;
-        }
-
-        public virtual bool AllowSpellCast(PlayerMobile player, Spell spell)
-        {
-            return true;
-        }
-
-        public virtual void CancelSpell(Mobile mobile)
-        {
-            if (mobile == null)
-                return;
-
-            if (mobile.Spell is Spell)
-            {
-                Spell spell = mobile.Spell as Spell;
-                spell.Disturb(DisturbType.Kill);
-            }
         }
                 
         public virtual void RestoreAndClearEffects(Mobile mobile)
@@ -431,8 +720,6 @@ namespace Server
                 }
             }        
         }
-
-        #endregion
         
         public ArenaTeam CheckForTeamVictory()
         {
@@ -846,14 +1133,28 @@ namespace Server
             }
 
             AnnouncerMessage(announcement, 63);
+
+            ArenaMatchResultEntry arenaMatchResultEntry = new ArenaMatchResultEntry();
             
-            foreach (ArenaTeam arenaTeam in m_ArenaMatch.m_Teams)
+            for (int a = 0; a < m_ArenaMatch.m_Teams.Count; a++)
             {
+                ArenaTeam arenaTeam = m_ArenaMatch.m_Teams[a];
+
                 if (arenaTeam == null) continue;
                 if (arenaTeam.Deleted) continue;
 
-                foreach (ArenaParticipant arenaParticipant in arenaTeam.m_Participants)
+                bool isWinningTeam = (arenaTeam == winningTeam);
+                string teamName = arenaTeam.m_TeamName;
+                
+                if (teamName == "")
+                    teamName = "Team " + (a + 1).ToString();
+
+                List<ArenaMatchPlayerResultEntry> arenaMatchPlayerResultEntries = new List<ArenaMatchPlayerResultEntry>();
+
+                for (int b = 0; b < arenaTeam.m_Participants.Count; b++)
                 {
+                    ArenaParticipant arenaParticipant = arenaTeam.m_Participants[b];
+
                     if (arenaParticipant == null) continue;
                     if (arenaParticipant.Deleted) continue;
                     if (arenaParticipant.m_Player == null) continue;                   
@@ -865,7 +1166,7 @@ namespace Server
                     switch (m_ArenaMatch.m_Ruleset.m_MatchType)
                     {
                         case ArenaRuleset.MatchTypeType.Ranked1vs1:
-                            if (arenaTeam == winningTeam)
+                            if (isWinningTeam)
                                 player.m_ArenaPlayerSettings.Ranked1vs1Wins++;
 
                             else
@@ -874,7 +1175,7 @@ namespace Server
                         break;
 
                         case ArenaRuleset.MatchTypeType.Ranked2vs2:
-                            if (arenaTeam == winningTeam)
+                            if (isWinningTeam)
                                 player.m_ArenaPlayerSettings.Ranked2vs2Wins++;
 
                             else
@@ -882,7 +1183,7 @@ namespace Server
                         break;
 
                         case ArenaRuleset.MatchTypeType.Ranked3vs3:
-                            if (arenaTeam == winningTeam)
+                            if (isWinningTeam)
                                 player.m_ArenaPlayerSettings.Ranked3vs3Wins++;
 
                             else
@@ -890,7 +1191,7 @@ namespace Server
                         break;
 
                         case ArenaRuleset.MatchTypeType.Ranked4vs4:
-                            if (arenaTeam == winningTeam)
+                            if (isWinningTeam)
                                 player.m_ArenaPlayerSettings.Ranked4vs4Wins++;
 
                             else
@@ -898,7 +1199,11 @@ namespace Server
                         break;
                     }
 
-                    //Send Match Summary Gump
+                    bool alive = (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive);
+
+                    ArenaMatchPlayerResultEntry arenaMatchPlayerResultEntry = new ArenaMatchPlayerResultEntry(player, player.RawName, true, arenaParticipant.m_LowestHealth, arenaParticipant.m_TimeAlive, arenaParticipant.m_DamageDealt, arenaParticipant.m_DamageReceived);
+
+                    arenaMatchPlayerResultEntries.Add(arenaMatchPlayerResultEntry);
 
                     if (IsWithinArena(player.Location, player.Map))                    
                         RestoreAndClearEffects(player);
@@ -912,17 +1217,29 @@ namespace Server
 
                         RestoreAndClearEffects(bc_Creature);
                     }
-
-                    if (arenaTeam == winningTeam)
-                    {
-                    }
-
-                    else
-                    {
-                    }
                     
-                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.PostBattle;
+                    arenaParticipant.m_FightStatus = ArenaParticipant.FightStatusType.PostBattle;                   
                 }
+
+                ArenaMatchTeamResultEntry arenaMatchTeamResultEntry = new ArenaMatchTeamResultEntry(isWinningTeam, teamName, arenaMatchPlayerResultEntries);
+            
+                arenaMatchResultEntry.m_TeamResultEntries.Add(arenaMatchTeamResultEntry);
+            }
+
+            List<ArenaParticipant> m_MatchParticipants = m_ArenaMatch.GetParticipants();
+
+            foreach (ArenaParticipant participant in m_MatchParticipants)
+            {
+                if (participant == null) continue;
+                if (participant.Deleted) continue;
+                if (participant.m_Player == null) continue;
+
+                if (!m_ArenaMatch.m_ArenaGroupController.ArenaGroupRegionBoundary.Contains(participant.m_Player))
+                    continue;
+
+                participant.m_Player.SendSound(0x055);
+                participant.m_Player.CloseGump(typeof(ArenaMatchResultGump));
+                participant.m_Player.SendGump(new ArenaMatchResultGump(participant.m_Player, arenaMatchResultEntry));
             }
             
             m_FightPhase = FightPhaseType.PostBattle;
@@ -934,7 +1251,7 @@ namespace Server
         public void FightCompleted()
         {
             if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
-                return;
+                return;            
 
             Queue m_ItemsToTrashQueue = new Queue();
             Queue m_ItemsToDeleteQueue = new Queue();
