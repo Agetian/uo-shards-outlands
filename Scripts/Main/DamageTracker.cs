@@ -108,18 +108,22 @@ namespace Server
             if (player.m_DamageTracker == null)
                 player.m_DamageTracker = new DamageTracker(player);
 
-            #region Ship Damage to Creature: For Doubloon Distribution on Death
-
+            BaseCreature bc_From = from as BaseCreature;
             BaseCreature bc_Target = target as BaseCreature;
+
+            PlayerMobile pm_From = from as PlayerMobile;
+            PlayerMobile pm_Target = target as PlayerMobile;
+
+            PlayerMobile rootPlayerFrom = pm_From;
+            PlayerMobile rootPlayerTarget = pm_Target;
+
+            #region Ship Damage to Creature: For Doubloon Distribution on Death
 
             if (bc_Target != null)
             {
                 if (bc_Target.DoubloonValue > 0)
                 {
-                    BaseShip shipFrom = null;
-
-                    BaseCreature bc_From = from as BaseCreature;
-                    PlayerMobile pm_From = from as PlayerMobile;
+                    BaseShip shipFrom = null;                   
 
                     if (bc_From != null)
                     {
@@ -161,7 +165,40 @@ namespace Server
                 }
             }
 
-            #endregion
+            #endregion           
+            
+            #region Arena
+
+            bool checkArenaDamage = false;
+
+            if (bc_From != null)
+            {
+                if (bc_From.ControlMaster is PlayerMobile)
+                    rootPlayerFrom = bc_From.ControlMaster as PlayerMobile;
+            }
+
+            if (bc_Target != null)
+            {
+                if (bc_Target.ControlMaster is PlayerMobile)
+                    rootPlayerTarget = bc_Target.ControlMaster as PlayerMobile;
+            }
+
+            if (rootPlayerFrom != null && rootPlayerTarget != null)
+            {
+                ArenaGroupController arenaGroupControllerFrom = ArenaGroupController.GetArenaGroupRegionAtLocation(rootPlayerFrom.Location, rootPlayerFrom.Map);
+                ArenaGroupController arenaGroupControllerTarget = ArenaGroupController.GetArenaGroupRegionAtLocation(rootPlayerFrom.Location, rootPlayerFrom.Map);
+
+                if (arenaGroupControllerFrom != null && arenaGroupControllerTarget != null && arenaGroupControllerFrom == arenaGroupControllerTarget)
+                {
+                    if (rootPlayerFrom.m_ArenaMatch != null && rootPlayerTarget.m_ArenaMatch != null && rootPlayerFrom.m_ArenaMatch == rootPlayerTarget.m_ArenaMatch)
+                    {
+                        if (rootPlayerFrom.m_ArenaMatch.m_MatchStatus == ArenaMatch.MatchStatusType.Fighting)
+                            checkArenaDamage = true;
+                    }
+                }
+            }
+        
+            #endregion            
 
             switch (damageType)
             {
@@ -171,7 +208,10 @@ namespace Server
 
                     if (player.m_ShowMeleeDamage == DamageDisplayMode.PrivateOverhead)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerMeleeDamageTextHue, false, "-" + amount.ToString(), player.NetState);
-                    break;
+
+                    if (checkArenaDamage)
+                        ArenaFight.CheckArenaDamage(player, DamageType.MeleeDamage, amount);
+                break;
 
                 case DamageType.SpellDamage:
                     if (player.m_ShowSpellDamage == DamageDisplayMode.PrivateMessage)
@@ -179,7 +219,10 @@ namespace Server
 
                     if (player.m_ShowSpellDamage == DamageDisplayMode.PrivateOverhead)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerSpellDamageTextHue, false, "-" + amount.ToString(), player.NetState);
-                    break;
+
+                    if (checkArenaDamage)
+                        ArenaFight.CheckArenaDamage(player, DamageType.SpellDamage, amount);
+                break;
 
                 case DamageType.FollowerDamage:
                     if (player.m_ShowFollowerDamage == DamageDisplayMode.PrivateMessage)
@@ -187,7 +230,10 @@ namespace Server
 
                     if (player.m_ShowFollowerDamage == DamageDisplayMode.PrivateOverhead)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerFollowerDamageTextHue, false, "-" + amount.ToString(), player.NetState);
-                    break;
+
+                    if (checkArenaDamage)
+                        ArenaFight.CheckArenaDamage(player, DamageType.FollowerDamage, amount);
+                break;
 
                 case DamageType.ProvocationDamage:
                     if (player.m_ShowProvocationDamage == DamageDisplayMode.PrivateMessage)
@@ -195,7 +241,10 @@ namespace Server
 
                     if (player.m_ShowProvocationDamage == DamageDisplayMode.PrivateOverhead)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerProvocationDamageTextHue, false, "-" + amount.ToString(), player.NetState);
-                    break;
+
+                    if (checkArenaDamage)
+                        ArenaFight.CheckArenaDamage(player, DamageType.ProvocationDamage, amount);
+                break;
 
                 case DamageType.PoisonDamage:
                     if (player.m_ShowPoisonDamage == DamageDisplayMode.PrivateMessage)
@@ -203,7 +252,10 @@ namespace Server
 
                     if (player.m_ShowPoisonDamage == DamageDisplayMode.PrivateOverhead)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerPoisonDamageTextHue, false, "-" + amount.ToString(), player.NetState);
-                    break;
+
+                    if (checkArenaDamage)
+                        ArenaFight.CheckArenaDamage(player, DamageType.PoisonDamage, amount);
+                break;
 
                 case DamageType.DamageTaken:
                     if (player.m_ShowDamageTaken == DamageDisplayMode.PrivateMessage)
@@ -211,7 +263,10 @@ namespace Server
 
                     if (player.m_ShowDamageTaken == DamageDisplayMode.PrivateOverhead)
                         player.PrivateOverheadMessage(MessageType.Regular, player.PlayerDamageTakenTextHue, false, "-" + amount.ToString(), player.NetState);
-                    break;
+
+                    if (checkArenaDamage)
+                        ArenaFight.CheckArenaDamage(player, DamageType.DamageTaken, amount);
+                break;
 
                 case DamageType.FollowerDamageTaken:
                     if (player.m_ShowFollowerDamageTaken == DamageDisplayMode.PrivateMessage)
@@ -219,7 +274,7 @@ namespace Server
 
                     if (player.m_ShowFollowerDamageTaken == DamageDisplayMode.PrivateOverhead && player.NetState != null)
                         target.PrivateOverheadMessage(MessageType.Regular, player.PlayerFollowerDamageTakenTextHue, false, "-" + amount.ToString(), player.NetState);
-                    break;
+                break;
             }
 
             if (!player.m_DamageTracker.m_Running)

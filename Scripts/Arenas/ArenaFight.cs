@@ -45,12 +45,13 @@ namespace Server
         public FightPhaseType m_FightPhase = FightPhaseType.StartCountdown;
         public TimeSpan m_PhaseTimeRemaining = TimeSpan.FromSeconds(10);
         public TimeSpan m_RoundTimeRemaining = TimeSpan.FromMinutes(3);
+        public TimeSpan m_TimeElapsed = TimeSpan.FromSeconds(0);
 
         public bool m_SuddenDeath = false;
         public int m_SuddenDeathTickCounter = 0;
         public TimeSpan m_SuddenDeathTimeRemaining = TimeSpan.FromMinutes(3);
-        
         public static TimeSpan TimerTickDuration = TimeSpan.FromSeconds(1);
+
 
         public Timer m_Timer;
         
@@ -68,6 +69,43 @@ namespace Server
 
         public ArenaFight(Serial serial) : base(serial)
         {
+        }
+
+        public static void CheckArenaDamage(PlayerMobile player, DamageTracker.DamageType damageType, int amount)
+        {
+            if (player == null)
+                return;
+
+            ArenaMatch arenaMatch = player.m_ArenaMatch;
+            ArenaMatch arenaFight = null;
+
+            if (arenaMatch == null) return;
+            if (arenaMatch.Deleted) return;
+            
+            if (arenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting)
+                return;
+                                        
+            ArenaParticipant participant = arenaMatch.GetParticipant(player);
+
+            if (participant == null) return;
+            if (participant.Deleted) return;
+            if (participant.m_Player == null) return;
+                        
+            switch (damageType)
+            {
+                case DamageTracker.DamageType.MeleeDamage: participant.m_DamageDealt += amount; break;
+                case DamageTracker.DamageType.SpellDamage: participant.m_DamageDealt += amount; break;
+                case DamageTracker.DamageType.PoisonDamage: participant.m_DamageDealt += amount; break;
+                case DamageTracker.DamageType.FollowerDamage: participant.m_DamageDealt += amount; break;
+                case DamageTracker.DamageType.ProvocationDamage: participant.m_DamageDealt += amount; break;
+
+                case DamageTracker.DamageType.DamageTaken:
+                    participant.m_DamageReceived += amount;
+
+                    if (participant.m_Player.Hits < participant.m_LowestHealth)
+                        participant.m_LowestHealth = participant.m_Player.Hits;
+                break;
+            }            
         }
 
         public static bool AttemptSpellUsage(PlayerMobile player, Type spellType)
@@ -350,7 +388,6 @@ namespace Server
             return true;
         }
 
-
         public virtual bool AllowFreeConsume(PlayerMobile player)
         {
             return true;
@@ -417,6 +454,7 @@ namespace Server
             if (IsWithinArena(player.Location, player.Map)) return;
 
             participant.m_FightStatus = ArenaParticipant.FightStatusType.Eliminated;
+            participant.m_LowestHealth = 0;
 
             ArenaTile exitTile = m_ArenaController.GetRandomExitTile();
 
@@ -545,7 +583,10 @@ namespace Server
             if (participant != null)
             {
                 if (participant.m_FightStatus == ArenaParticipant.FightStatusType.Alive)
-                    participant.m_FightStatus = ArenaParticipant.FightStatusType.Eliminated;
+                {
+                    participant.m_FightStatus = ArenaParticipant.FightStatusType.Dead;
+                    participant.m_LowestHealth = 0;
+                }
             }
 
             Queue m_Queue = new Queue();
@@ -1134,7 +1175,18 @@ namespace Server
 
             AnnouncerMessage(announcement, 63);
 
-            ArenaMatchResultEntry arenaMatchResultEntry = new ArenaMatchResultEntry();
+            ArenaMatchResultEntry arenaMatchResultEntry = m_ArenaMatch.m_ArenaMatchResultEntry;
+
+            if (arenaMatchResultEntry == null)
+                arenaMatchResultEntry = new ArenaMatchResultEntry();
+
+            //Set to Now Be Free Floating
+            arenaMatchResultEntry.m_ArenaMatch = null;
+
+            arenaMatchResultEntry.m_MatchStatus = ArenaMatchResultEntry.ArenaMatchResultStatusType.Completed;
+            arenaMatchResultEntry.m_MatchType = m_ArenaMatch.m_Ruleset.m_MatchType;
+            arenaMatchResultEntry.m_CompletionDate = DateTime.UtcNow;
+            arenaMatchResultEntry.m_MatchDuration = m_TimeElapsed;
             
             for (int a = 0; a < m_ArenaMatch.m_Teams.Count; a++)
             {
@@ -1148,6 +1200,9 @@ namespace Server
                 
                 if (teamName == "")
                     teamName = "Team " + (a + 1).ToString();
+
+                if (isWinningTeam)
+                    arenaMatchResultEntry.m_WinningTeam = teamName;
 
                 List<ArenaMatchPlayerResultEntry> arenaMatchPlayerResultEntries = new List<ArenaMatchPlayerResultEntry>();
 
@@ -1201,7 +1256,7 @@ namespace Server
 
                     bool alive = (arenaParticipant.m_FightStatus == ArenaParticipant.FightStatusType.Alive);
 
-                    ArenaMatchPlayerResultEntry arenaMatchPlayerResultEntry = new ArenaMatchPlayerResultEntry(player, player.RawName, true, arenaParticipant.m_LowestHealth, arenaParticipant.m_TimeAlive, arenaParticipant.m_DamageDealt, arenaParticipant.m_DamageReceived);
+                    ArenaMatchPlayerResultEntry arenaMatchPlayerResultEntry = new ArenaMatchPlayerResultEntry(player, player.RawName, alive, arenaParticipant.m_LowestHealth, arenaParticipant.m_TimeAlive, arenaParticipant.m_DamageDealt, arenaParticipant.m_DamageReceived);
 
                     arenaMatchPlayerResultEntries.Add(arenaMatchPlayerResultEntry);
 
@@ -1226,21 +1281,49 @@ namespace Server
                 arenaMatchResultEntry.m_TeamResultEntries.Add(arenaMatchTeamResultEntry);
             }
 
-            List<ArenaParticipant> m_MatchParticipants = m_ArenaMatch.GetParticipants();
-
-            foreach (ArenaParticipant participant in m_MatchParticipants)
+            Timer.DelayCall(TimeSpan.FromSeconds(5.0), delegate
             {
-                if (participant == null) continue;
-                if (participant.Deleted) continue;
-                if (participant.m_Player == null) continue;
+                if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                    return;
 
-                if (!m_ArenaMatch.m_ArenaGroupController.ArenaGroupRegionBoundary.Contains(participant.m_Player))
-                    continue;
+                List<ArenaParticipant> m_MatchParticipants = m_ArenaMatch.GetParticipants();
 
-                participant.m_Player.SendSound(0x055);
-                participant.m_Player.CloseGump(typeof(ArenaMatchResultGump));
-                participant.m_Player.SendGump(new ArenaMatchResultGump(participant.m_Player, arenaMatchResultEntry));
-            }
+                //Update Entries (OnDeath Delay Prevents Last Damage Entry From Being Added)
+                foreach (ArenaParticipant participant in m_MatchParticipants)
+                {
+                    if (participant == null) continue;
+                    if (participant.Deleted) continue;
+                    if (participant.m_Player == null) continue;
+
+                    ArenaMatchPlayerResultEntry playerResultEntry = arenaMatchResultEntry.GetPlayerMatchResultEntry(participant.m_Player);
+
+                    if (playerResultEntry != null)
+                    {
+                        playerResultEntry.m_LowestHP = participant.m_LowestHealth;
+                        playerResultEntry.m_TimeAlive = participant.m_TimeAlive;
+                        playerResultEntry.m_DamageDealt = participant.m_DamageDealt;
+                        playerResultEntry.m_DamageReceived = participant.m_DamageReceived;
+                    }
+                }
+
+                foreach (ArenaParticipant participant in m_MatchParticipants)
+                {
+                    if (participant == null) continue;
+                    if (participant.Deleted) continue;
+                    if (participant.m_Player == null) continue;                   
+
+                    if (!m_ArenaMatch.m_ArenaGroupController.ArenaGroupRegionBoundary.Contains(participant.m_Player))
+                        continue;
+
+                    participant.m_Player.SendSound(0x055);
+                    participant.m_Player.CloseGump(typeof(ArenaMatchResultGump));
+                    participant.m_Player.SendGump(new ArenaMatchResultGump(participant.m_Player, arenaMatchResultEntry));
+                }
+            });            
+
+            //New Blank Match Result Entry
+            m_ArenaMatch.m_ArenaMatchResultEntry = new ArenaMatchResultEntry();
+            m_ArenaMatch.m_ArenaMatchResultEntry.m_ArenaMatch = m_ArenaMatch;
             
             m_FightPhase = FightPhaseType.PostBattle;
             m_PhaseTimeRemaining = TimeSpan.FromSeconds(10);
@@ -1403,8 +1486,6 @@ namespace Server
                 switch (m_ArenaFight.m_FightPhase)
                 {
                     case FightPhaseType.StartCountdown:
-                        m_ArenaFight.m_ArenaController.PublicOverheadMessage(MessageType.Regular, 0, false, "Start Countdown");
-
                         if (m_ArenaFight.m_PhaseTimeRemaining.TotalSeconds <= 0)
                         {
                             m_ArenaFight.SendArenaParticipantsSound(0x4B7); //0x0F5 //0x4D5 //0x485 //0x100
@@ -1422,6 +1503,20 @@ namespace Server
                     break;
 
                     case FightPhaseType.Fight:
+                        m_ArenaFight.m_TimeElapsed = m_ArenaFight.m_TimeElapsed + TimerTickDuration;
+
+                        List<ArenaParticipant> m_Participants = m_ArenaFight.m_ArenaMatch.GetParticipants();
+
+                        foreach (ArenaParticipant participant in m_Participants)
+                        {
+                            if (participant == null) continue;
+                            if (participant.Deleted) continue;
+                            if (participant.m_Player == null) continue;
+
+                            if (participant.m_FightStatus == ArenaParticipant.FightStatusType.Alive)
+                                participant.m_TimeAlive = participant.m_TimeAlive + TimerTickDuration;
+                        }
+
                         ArenaTeam winningTeam = m_ArenaFight.CheckForTeamVictory();
 
                         if (winningTeam != null)
@@ -1433,9 +1528,9 @@ namespace Server
                         if (m_ArenaFight.m_SuddenDeath)
                         {
                             m_ArenaFight.m_SuddenDeathTickCounter++;
-                            m_ArenaFight.m_SuddenDeathTimeRemaining = m_ArenaFight.m_SuddenDeathTimeRemaining.Subtract(ArenaFight.TimerTickDuration);
+                            m_ArenaFight.m_SuddenDeathTimeRemaining = m_ArenaFight.m_SuddenDeathTimeRemaining.Subtract(ArenaFight.TimerTickDuration);                           
 
-                            m_ArenaFight.m_ArenaController.PublicOverheadMessage(MessageType.Regular, 0, false, "Sudden Death: " + m_ArenaFight.m_SuddenDeathTimeRemaining.TotalSeconds.ToString());
+                            //m_ArenaFight.m_ArenaController.PublicOverheadMessage(MessageType.Regular, 0, false, "Sudden Death: " + m_ArenaFight.m_SuddenDeathTimeRemaining.TotalSeconds.ToString());
 
                             if (m_ArenaFight.m_SuddenDeathTimeRemaining.TotalSeconds <= 0)
                             {
@@ -1448,7 +1543,7 @@ namespace Server
                         {
                             m_ArenaFight.m_RoundTimeRemaining = m_ArenaFight.m_RoundTimeRemaining.Subtract(ArenaFight.TimerTickDuration);
 
-                            m_ArenaFight.m_ArenaController.PublicOverheadMessage(MessageType.Regular, 0, false, "Fight: " + m_ArenaFight.m_RoundTimeRemaining.TotalSeconds.ToString());
+                            //m_ArenaFight.m_ArenaController.PublicOverheadMessage(MessageType.Regular, 0, false, "Fight: " + m_ArenaFight.m_RoundTimeRemaining.TotalSeconds.ToString());
                         
                             if (m_ArenaFight.m_RoundTimeRemaining.TotalSeconds <= 0)
                             {
@@ -1464,8 +1559,6 @@ namespace Server
                     break;
 
                     case FightPhaseType.PostBattle:
-                        m_ArenaFight.m_ArenaController.PublicOverheadMessage(MessageType.Regular, 0, false, "PostBattle");
-
                         if (m_ArenaFight.m_PhaseTimeRemaining.TotalSeconds <= 0)
                         {
                             m_ArenaFight.FightCompleted();
@@ -1492,6 +1585,7 @@ namespace Server
             writer.Write((int)m_FightPhase);
             writer.Write(m_PhaseTimeRemaining);
             writer.Write(m_RoundTimeRemaining);
+            writer.Write(m_TimeElapsed);
 
             writer.Write(m_SuddenDeath);
             writer.Write(m_SuddenDeathTickCounter);
@@ -1511,6 +1605,7 @@ namespace Server
                 m_FightPhase = (FightPhaseType)reader.ReadInt();
                 m_PhaseTimeRemaining = reader.ReadTimeSpan();
                 m_RoundTimeRemaining = reader.ReadTimeSpan();
+                m_TimeElapsed = reader.ReadTimeSpan();
 
                 m_SuddenDeath = reader.ReadBool();
                 m_SuddenDeathTickCounter = reader.ReadInt();

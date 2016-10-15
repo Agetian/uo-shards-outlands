@@ -2258,6 +2258,9 @@ namespace Server
 
                                 arenaGroupController.m_MatchListings.Add(arenaMatch);
 
+                                arenaMatch.m_ArenaMatchResultEntry = new ArenaMatchResultEntry();
+                                arenaMatch.m_ArenaMatchResultEntry.m_ArenaMatch = arenaMatch;
+
                                 m_Player.m_ArenaPlayerSettings.m_ArenaMatch = arenaMatch;
 
                                 m_Player.SendMessage(63, "You create a new match listing.");
@@ -3225,67 +3228,333 @@ namespace Server
             {
                 m_Player.SendMessage("Records of that match are no longer available.");
                 return;
-            }  
-                        
+            }
+
             AddBackground(8, 8, 509, 398, 9390);
 
             int startY = 10;
 
-            AddLabel(204, startY, 2606, "Tournament Match");
+            #region Populate From Current Arena Match Listing
 
-            startY += 30;
+            if (m_ArenaMatchResultEntry.m_ArenaMatch != null)
+            {
+                ArenaMatch arenaMatch = m_ArenaMatchResultEntry.m_ArenaMatch;
 
-            AddLabel(148, startY, 2603, "Match Status");
-            AddItem(237, startY - 4, 7960);
-            AddLabel(286, startY, 63, "Completed");
+                string matchName = "";
+                int matchNameHue = WhiteTextHue;
 
-            startY += 25;
+                switch (arenaMatch.m_Ruleset.m_MatchType)
+                {
+                    case ArenaRuleset.MatchTypeType.Unranked1vs1: matchName = "Unranked Match: 1 vs 1"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Unranked2vs2: matchName = "Unranked Match: 2 vs 2"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Unranked3vs3: matchName = "Unranked Match: 3 vs 3"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Unranked4vs4: matchName = "Unranked Match: 4 vs 4"; matchNameHue = 2606; break;
 
-            AddLabel(147, startY, 2603, "Match Winner");
-            AddLabel(286, startY, 2599, "Outland Rangers");
+                    case ArenaRuleset.MatchTypeType.Ranked1vs1: matchName = "Ranked Match: 1 vs 1"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Ranked2vs2: matchName = "Ranked Match: 2 vs 2"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Ranked3vs3: matchName = "Ranked Match: 3 vs 3"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Ranked4vs4: matchName = "Ranked Match: 4 vs 4"; matchNameHue = 2606; break;
+                }
 
-            startY += 25;
+                AddLabel(Utility.CenteredTextOffset(240, matchName), startY, matchNameHue, matchName);
 
-            AddLabel(136, startY, 2603, "Match Duration");
-            AddLabel(286, startY, WhiteTextHue, "8m 47s");
+                startY += 30;
 
-            startY += 25;
+                switch (arenaMatch.m_MatchStatus)
+                {
+                    case ArenaMatch.MatchStatusType.Listed:
+                        AddLabel(148, startY, 2603, "Match Status");
+                        AddItem(237, startY - 4, 7960);
+                        AddLabel(286, startY, WhiteTextHue, "Waiting");
 
-            AddLabel(54, startY, 149, "Team and Player");
-            AddLabel(193, startY, 149, "Lowest HP");
-            AddLabel(267, startY, 149, "Time Alive");
-            AddLabel(342, startY, 149, "Dmg Dealt");
-            AddLabel(415, startY, 149, "Dmg Taken");
+                        startY += 25;
+                    break;
 
-            startY += 25;
+                    case ArenaMatch.MatchStatusType.Fighting:
+                        AddLabel(148, startY, 2603, "Match Status");
+                        AddItem(237, startY - 4, 7960);
+                        AddLabel(286, startY, WhiteTextHue, "In Progress");
 
-            AddImage(24, startY, 96, 2525);
-            AddImage(179, startY, 96, 2525);
-            AddImage(324, startY, 96, 2525);
+                        startY += 25;
 
-            startY += 10;
+                        AddLabel(136, startY, 2603, "Match Duration");
+                        AddLabel(286, startY, WhiteTextHue, Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + arenaMatch.m_ArenaFight.m_TimeElapsed, true, true, true, true, true));
 
-            //Team 1
-            AddLabel(48, startY, 2599, "Outlands Rangers");
-            AddLabel(222, startY, 2599, "-");
-            AddLabel(294, startY, 2599, "-");
-            AddLabel(352, startY, 2599, "4,500");
-            AddLabel(427, startY, 2599, "2,000");
+                        startY += 25;
+                    break;
+                }
 
-            startY += 20;
+                AddLabel(54, startY, 149, "Team and Player");
+                AddLabel(193, startY, 149, "Lowest HP");
+                AddLabel(267, startY, 149, "Time Alive");
+                AddLabel(342, startY, 149, "Dmg Dealt");
+                AddLabel(415, startY, 149, "Dmg Taken");
 
-            AddButton(46, startY, 1210, 248, 0, GumpButtonType.Reply, 0);
-            AddLabel(66, startY, 2599, "Luthius");
-            AddLabel(217, startY, WhiteTextHue, "25");
-            AddLabel(276, startY, WhiteTextHue, "8m 47s");
-            AddLabel(354, startY, WhiteTextHue, "1,500");
-            AddLabel(432, startY, WhiteTextHue, "500");
+                startY += 25;
 
-            startY += 20;
+                AddImage(24, startY, 96, 2525);
+                AddImage(179, startY, 96, 2525);
+                AddImage(324, startY, 96, 2525);
 
-            AddLabel(250, startY, 149, "vs");
+                startY += 10;
 
-            //Team 2         
+                int playerCount = 0;
+
+                for (int a = 0; a < arenaMatch.m_Teams.Count; a++)
+                {
+                    ArenaTeam team = arenaMatch.m_Teams[a];
+
+                    if (team == null)
+                        continue;
+
+                    string teamName = team.m_TeamName;
+
+                    if (teamName == "")
+                        teamName = "Team " + (a + 1).ToString();
+                    
+                    AddLabel(48, startY, WhiteTextHue, teamName);
+
+                    string teamDamageDealt = Utility.CreateCurrencyString(team.GetTotalDamageDealt());
+                    string teamDamageReceived = Utility.CreateCurrencyString(team.GetTotalDamageReceived());
+
+                    if (arenaMatch.m_MatchStatus == ArenaMatch.MatchStatusType.Listed)
+                    {
+                        teamDamageDealt = "-";
+                        teamDamageReceived = "-";
+                    }
+
+                    AddLabel(Utility.CenteredTextOffset(230, "-"), startY, WhiteTextHue, "-");
+                    AddLabel(Utility.CenteredTextOffset(300, "-"), startY, WhiteTextHue, "-");
+                    AddLabel(Utility.CenteredTextOffset(375, teamDamageDealt), startY, WhiteTextHue, teamDamageDealt);
+                    AddLabel(Utility.CenteredTextOffset(460, teamDamageReceived), startY, WhiteTextHue, teamDamageReceived);
+
+                    startY += 20;
+
+                    for (int b = 0; b < team.m_Participants.Count; b++)
+                    {
+                        ArenaParticipant participant = team.m_Participants[b];
+
+                        if (participant == null)
+                            continue;
+
+                        string lowestHP = participant.m_LowestHealth.ToString();
+                        string timeAlive = Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + participant.m_TimeAlive, true, true, true, true, true);
+                        string damageDealt = Utility.CreateCurrencyString(participant.m_DamageDealt);
+                        string damageReceived = Utility.CreateCurrencyString(participant.m_DamageReceived);
+                        
+                        if (arenaMatch.m_MatchStatus == ArenaMatch.MatchStatusType.Listed)
+                        {
+                            lowestHP = "-";
+                            timeAlive = "-";
+                            damageDealt = "-";
+                            damageReceived = "-";
+                        }
+
+                        bool alive = true;
+
+                        if (arenaMatch.m_MatchStatus == ArenaMatch.MatchStatusType.Fighting)
+                        {
+                            if (participant.m_FightStatus != ArenaParticipant.FightStatusType.Alive)
+                            {
+                                alive = false;
+                                lowestHP = "0";
+                            }
+                        }
+
+                        AddButton(46, startY + 3, 1210, 1209, 10 + playerCount, GumpButtonType.Reply, 0);
+                        if (alive)                        
+                            AddLabel(66, startY, WhiteTextHue, participant.m_Player.RawName);                        
+
+                        else
+                        {
+                            AddItem(48, startY + 4, 6884, 0);
+                            AddLabel(81, startY, 2401, participant.m_Player.RawName);
+                        }
+
+                        AddLabel(Utility.CenteredTextOffset(230, lowestHP), startY, WhiteTextHue, lowestHP);
+                        AddLabel(Utility.CenteredTextOffset(300, timeAlive), startY, WhiteTextHue, timeAlive);
+                        AddLabel(Utility.CenteredTextOffset(375, damageDealt), startY, WhiteTextHue, damageDealt);
+                        AddLabel(Utility.CenteredTextOffset(460, damageReceived), startY, WhiteTextHue, damageReceived);
+
+                        startY += 20;
+
+                        playerCount++;
+                    }
+
+                    if (a == 0)
+                    {
+                        AddLabel(250, startY, 149, "vs");
+                        startY += 20;
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Pull From Stored Match Result Entry
+
+            else
+            {
+                string matchName = "";
+                int matchNameHue = WhiteTextHue;
+
+                switch (m_ArenaMatchResultEntry.m_MatchType)
+                {
+                    case ArenaRuleset.MatchTypeType.Unranked1vs1: matchName = "Unranked Match: 1 vs 1"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Unranked2vs2: matchName = "Unranked Match: 2 vs 2"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Unranked3vs3: matchName = "Unranked Match: 3 vs 3"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Unranked4vs4: matchName = "Unranked Match: 4 vs 4"; matchNameHue = 2606; break;
+
+                    case ArenaRuleset.MatchTypeType.Ranked1vs1: matchName = "Ranked Match: 1 vs 1"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Ranked2vs2: matchName = "Ranked Match: 2 vs 2"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Ranked3vs3: matchName = "Ranked Match: 3 vs 3"; matchNameHue = 2606; break;
+                    case ArenaRuleset.MatchTypeType.Ranked4vs4: matchName = "Ranked Match: 4 vs 4"; matchNameHue = 2606; break;
+                }
+
+                AddLabel(Utility.CenteredTextOffset(240, matchName), startY, matchNameHue, matchName);
+
+                startY += 30;
+
+                switch (m_ArenaMatchResultEntry.m_MatchStatus)
+                {
+                    case ArenaMatchResultEntry.ArenaMatchResultStatusType.Waiting:
+                        AddLabel(148, startY, 2603, "Match Status");
+                        AddItem(237, startY - 4, 7960);
+                        AddLabel(286, startY, 63, "Waiting");
+
+                        startY += 25;
+                        break;
+
+                    case ArenaMatchResultEntry.ArenaMatchResultStatusType.Fighting:
+                        AddLabel(148, startY, 2603, "Match Status");
+                        AddItem(237, startY - 4, 7960);
+                        AddLabel(286, startY, 63, "In Progress");
+
+                        startY += 25;
+
+                        AddLabel(136, startY, 2603, "Match Duration");
+                        AddLabel(286, startY, WhiteTextHue, Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + m_ArenaMatchResultEntry.m_MatchDuration, true, true, true, true, true));
+
+                        startY += 25;
+                        break;
+
+                    case ArenaMatchResultEntry.ArenaMatchResultStatusType.Completed:
+                        AddLabel(148, startY, 2603, "Match Status");
+                        AddItem(237, startY - 4, 7960);
+                        AddLabel(286, startY, 63, "Completed");
+
+                        startY += 25;
+
+                        AddLabel(136, startY, 2603, "Match Duration");
+                        AddLabel(286, startY, WhiteTextHue, Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + m_ArenaMatchResultEntry.m_MatchDuration, true, true, true, true, true));
+
+                        startY += 25;
+
+                        AddLabel(147, startY, 2603, "Match Winner");
+                        AddLabel(286, startY, 2599, m_ArenaMatchResultEntry.m_WinningTeam);
+
+                        startY += 25;
+                        break;
+                }
+
+                AddLabel(54, startY, 149, "Team and Player");
+                AddLabel(193, startY, 149, "Lowest HP");
+                AddLabel(267, startY, 149, "Time Alive");
+                AddLabel(342, startY, 149, "Dmg Dealt");
+                AddLabel(415, startY, 149, "Dmg Taken");
+
+                startY += 25;
+
+                AddImage(24, startY, 96, 2525);
+                AddImage(179, startY, 96, 2525);
+                AddImage(324, startY, 96, 2525);
+
+                startY += 10;
+
+                int playerCount = 0;
+
+                for (int a = 0; a < m_ArenaMatchResultEntry.m_TeamResultEntries.Count; a++)
+                {
+                    ArenaMatchTeamResultEntry teamEntry = m_ArenaMatchResultEntry.m_TeamResultEntries[a];
+
+                    if (teamEntry == null)
+                        continue;
+
+                    int teamTextHue = WhiteTextHue;
+
+                    if (m_ArenaMatchResultEntry.m_MatchStatus != ArenaMatchResultEntry.ArenaMatchResultStatusType.Completed)
+                        AddLabel(48, startY, WhiteTextHue, teamEntry.m_TeamName);
+
+                    else if (teamEntry.m_Winner)
+                    {
+                        teamTextHue = 2599;
+                        AddLabel(48, startY, teamTextHue, teamEntry.m_TeamName);
+                    }
+
+                    else
+                    {
+                        teamTextHue = 2401;
+                        AddLabel(48, startY, teamTextHue, teamEntry.m_TeamName);
+                    }
+
+                    string teamDamageDealt = Utility.CreateCurrencyString(teamEntry.GetTotalDamageDealt());
+                    string teamDamageReceived = Utility.CreateCurrencyString(teamEntry.GetTotalDamageReceived());
+
+                    AddLabel(Utility.CenteredTextOffset(230, "-"), startY, teamTextHue, "-");
+                    AddLabel(Utility.CenteredTextOffset(300, "-"), startY, teamTextHue, "-");
+                    AddLabel(Utility.CenteredTextOffset(375, teamDamageDealt), startY, teamTextHue, teamDamageDealt);
+                    AddLabel(Utility.CenteredTextOffset(460, teamDamageReceived), startY, teamTextHue, teamDamageReceived);
+
+                    startY += 20;
+
+                    for (int b = 0; b < teamEntry.m_PlayerResultEntries.Count; b++)
+                    {
+                        ArenaMatchPlayerResultEntry playerEntry = teamEntry.m_PlayerResultEntries[b];
+
+                        if (playerEntry == null)
+                            continue;
+
+                        string lowestHP = playerEntry.m_LowestHP.ToString();
+                        string timeAlive = Utility.CreateTimeRemainingString(DateTime.UtcNow, DateTime.UtcNow + playerEntry.m_TimeAlive, true, true, true, true, true);
+                        string damageDealt = Utility.CreateCurrencyString(playerEntry.m_DamageDealt);
+                        string damageReceived = Utility.CreateCurrencyString(playerEntry.m_DamageReceived);
+
+                        if (!playerEntry.m_Alive)
+                            lowestHP = "0";
+                        
+                        //-----
+
+                        AddButton(46, startY + 3, 1210, 1209, 10 + playerCount, GumpButtonType.Reply, 0);
+                        if (playerEntry.m_Alive)
+                            AddLabel(66, startY, WhiteTextHue, playerEntry.m_PlayerName);
+
+                        else
+                        {
+                            AddItem(48, startY + 4, 6884, 0);
+                            AddLabel(81, startY, 2401, playerEntry.m_PlayerName);
+                        }
+
+                        //-----
+
+                        AddLabel(Utility.CenteredTextOffset(230, lowestHP), startY, WhiteTextHue, lowestHP);
+                        AddLabel(Utility.CenteredTextOffset(300, timeAlive), startY, WhiteTextHue, timeAlive);
+                        AddLabel(Utility.CenteredTextOffset(375, damageDealt), startY, WhiteTextHue, damageDealt);
+                        AddLabel(Utility.CenteredTextOffset(460, damageReceived), startY, WhiteTextHue, damageReceived);
+
+                        startY += 20;
+
+                        playerCount++;
+                    }
+
+                    if (a == 0)
+                    {
+                        AddLabel(250, startY, 149, "vs");
+                        startY += 20;
+                    }
+                }
+            }
+
+            #endregion
         }
 
         public override void OnResponse(NetState sender, RelayInfo info)

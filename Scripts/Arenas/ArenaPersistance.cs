@@ -247,9 +247,20 @@ namespace Server
 
     public class ArenaMatchResultEntry : Item
     {
+        public enum ArenaMatchResultStatusType
+        {
+            Waiting,
+            Fighting,
+            Completed
+        }
+
+        public ArenaMatch m_ArenaMatch;
+
+        public ArenaMatchResultStatusType m_MatchStatus = ArenaMatchResultStatusType.Waiting;
         public DateTime m_CompletionDate = DateTime.UtcNow;
         public ArenaRuleset.MatchTypeType m_MatchType = ArenaRuleset.MatchTypeType.Ranked1vs1;
         public TimeSpan m_MatchDuration = TimeSpan.FromSeconds(0);
+        public string m_WinningTeam = "";
 
         public List<ArenaMatchTeamResultEntry> m_TeamResultEntries = new List<ArenaMatchTeamResultEntry>();
 
@@ -266,6 +277,26 @@ namespace Server
         {
         }
 
+        public ArenaMatchPlayerResultEntry GetPlayerMatchResultEntry(PlayerMobile player)
+        {
+            foreach (ArenaMatchTeamResultEntry teamResult in m_TeamResultEntries)
+            {
+                if (teamResult == null)
+                    continue;
+
+                foreach (ArenaMatchPlayerResultEntry playerResult in teamResult.m_PlayerResultEntries)
+                {
+                    if (playerResult == null)
+                        continue;
+
+                    if (playerResult.m_Player == player)
+                        return playerResult;
+                }
+            }
+
+            return null;
+        }
+
         public override void OnDelete()
         {
             if (ArenaPersistance.m_ArenaMatchResultEntries.Contains(this))
@@ -280,9 +311,13 @@ namespace Server
             writer.Write((int)0);
 
             //Version 0 
+            writer.Write(m_ArenaMatch);
+
+            writer.Write((int)m_MatchStatus);
             writer.Write(m_CompletionDate);
             writer.Write((int)m_MatchType);
             writer.Write(m_MatchDuration);
+            writer.Write(m_WinningTeam);
 
             writer.Write(m_TeamResultEntries.Count);
             for (int a = 0; a < m_TeamResultEntries.Count; a++)
@@ -316,9 +351,13 @@ namespace Server
             //Version 0
             if (version >= 0)
             {
-                DateTime completionDate = reader.ReadDateTime();
-                ArenaRuleset.MatchTypeType matchType = (ArenaRuleset.MatchTypeType)reader.ReadInt();
-                TimeSpan matchDuration = reader.ReadTimeSpan();
+                m_ArenaMatch = reader.ReadItem() as ArenaMatch;
+
+                m_MatchStatus = (ArenaMatchResultStatusType)reader.ReadInt();
+                m_CompletionDate = reader.ReadDateTime();
+                m_MatchType = (ArenaRuleset.MatchTypeType)reader.ReadInt();
+                m_MatchDuration = reader.ReadTimeSpan();
+                m_WinningTeam = reader.ReadString();
 
                 int teamResultEntriesCount = reader.ReadInt();
                 for (int a = 0; a < teamResultEntriesCount; a++)
@@ -353,6 +392,9 @@ namespace Server
             //-----
 
             ArenaPersistance.m_ArenaMatchResultEntries.Add(this);
+
+            if (m_ArenaMatch != null)
+                m_ArenaMatch.m_ArenaMatchResultEntry = this;
         }
     }
 
@@ -371,6 +413,36 @@ namespace Server
             {
                 m_PlayerResultEntries.Add(entry);
             }
+        }
+
+        public int GetTotalDamageDealt()
+        {
+            int totalDamageDealt = 0;
+
+            foreach (ArenaMatchPlayerResultEntry playerEntry in m_PlayerResultEntries)
+            {
+                if (playerEntry == null) 
+                    continue;
+
+                totalDamageDealt += playerEntry.m_DamageDealt;
+            }
+
+            return totalDamageDealt;
+        }
+
+        public int GetTotalDamageReceived()
+        {
+            int totalDamageReceived = 0;
+
+            foreach (ArenaMatchPlayerResultEntry playerEntry in m_PlayerResultEntries)
+            {
+                if (playerEntry == null)
+                    continue;
+
+                totalDamageReceived += playerEntry.m_DamageReceived;
+            }
+
+            return totalDamageReceived;
         }
     }
 

@@ -38,6 +38,36 @@ namespace Server
             return null;
         }
 
+        public int GetTotalDamageDealt()
+        {
+            int totalDamageDealt = 0;
+
+            foreach (ArenaParticipant participant in m_Participants)
+            {
+                if (participant == null)
+                    continue;
+
+                totalDamageDealt += participant.m_DamageDealt;
+            }
+
+            return totalDamageDealt;
+        }
+
+        public int GetTotalDamageReceived()
+        {
+            int totalDamageReceived = 0;
+
+            foreach (ArenaParticipant participant in m_Participants)
+            {
+                if (participant == null)
+                    continue;
+
+                totalDamageReceived += participant.m_DamageReceived;
+            }
+
+            return totalDamageReceived;
+        }
+
         public override void Serialize(GenericWriter writer)
         {
             base.Serialize(writer);

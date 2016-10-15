@@ -44,6 +44,8 @@ namespace Server
 
         public List<PlayerMobile> m_BannedPlayers = new List<PlayerMobile>();
 
+        public ArenaMatchResultEntry m_ArenaMatchResultEntry;
+        
         [Constructable]
         public ArenaMatch(ArenaGroupController arenaGroupController, PlayerMobile player): base(0x0)
         {
@@ -405,6 +407,9 @@ namespace Server
                 if (m_ArenaGroupController.m_MatchListings.Contains(this))
                     m_ArenaGroupController.m_MatchListings.Remove(this);
             }
+
+            if (m_ArenaMatchResultEntry != null)            
+                m_ArenaMatchResultEntry.Delete();            
 
             base.OnDelete();
         }
