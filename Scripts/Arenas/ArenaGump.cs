@@ -420,44 +420,44 @@ namespace Server
                         {
                             //Unranked
                             case ArenaRuleset.MatchTypeType.Unranked1vs1:
-                                AddLabel(137, startY, playerCountTextHue, "1 vs 1");
-                                //AddLabel(128, startY + 20, 2550, "Unranked"); 
+                                AddLabel(137, startY, 2550, "1 vs 1");
                             break;
 
                             case ArenaRuleset.MatchTypeType.Unranked2vs2:
-                                AddLabel(137, startY, playerCountTextHue, "2 vs 2");
-                                //AddLabel(128, startY + 20, 2550, "Unranked");
+                                AddLabel(137, startY, 2550, "2 vs 2");
                             break;
 
                             case ArenaRuleset.MatchTypeType.Unranked3vs3:
-                                AddLabel(137, startY, playerCountTextHue, "3 vs 3");
-                                //AddLabel(128, startY + 20, 2550, "Unranked");
+                                AddLabel(137, startY, 2550, "3 vs 3");
                             break;
 
                             case ArenaRuleset.MatchTypeType.Unranked4vs4:
-                                AddLabel(137, startY, playerCountTextHue, "4 vs 4");
-                                //AddLabel(128, startY + 20, 2550, "Unranked");
+                                AddLabel(137, startY, 2550, "4 vs 4");
                             break;
 
                             //Ranked
                             case ArenaRuleset.MatchTypeType.Ranked1vs1:
-                                AddLabel(137, startY, playerCountTextHue, "1 vs 1");
-                                //AddLabel(128, startY + 20, 2606, "Ranked");
+                                AddLabel(137, startY, 2606, "1 vs 1");
+                                AddItem(167, startY - 1, 4029, 0);
+                                AddItem(173, startY - 3, 4031, 0);
                             break;
 
                             case ArenaRuleset.MatchTypeType.Ranked2vs2:
-                                AddLabel(137, startY, playerCountTextHue, "2 vs 2");
-                                //AddLabel(128, startY + 20, 2606, "Ranked");
+                                AddLabel(137, startY, 2606, "2 vs 2");
+                                AddItem(167, startY - 1, 4029, 0);
+                                AddItem(173, startY - 3, 4031, 0);
                             break;
 
                             case ArenaRuleset.MatchTypeType.Ranked3vs3:
-                                AddLabel(137, startY, playerCountTextHue, "3 vs 3");
-                                //AddLabel(128, startY + 20, 2606, "Ranked");
+                                AddLabel(137, startY, 2606, "3 vs 3");
+                                AddItem(167, startY - 1, 4029, 0);
+                                AddItem(173, startY - 3, 4031, 0);
                             break;
 
                             case ArenaRuleset.MatchTypeType.Ranked4vs4:
-                                AddLabel(137, startY, playerCountTextHue, "4 vs 4");
-                                //AddLabel(128, startY + 20, 2606, "Ranked");
+                                AddLabel(137, startY, 2606, "4 vs 4");
+                                AddItem(167, startY - 1, 4029, 0);
+                                AddItem(173, startY - 3, 4031, 0);
                             break;
                         }
 
@@ -662,14 +662,14 @@ namespace Server
 
                         if (isOnTeam1 || isOnTeam2)
                         {
-                            AddLabel(217, startY, 63, "Match Info");
-                            AddButton(243, startY + 20, 30008, 30009, 40 + a, GumpButtonType.Reply, 0);
+                            AddLabel(227, startY, 63, "Match Info");
+                            AddButton(253, startY + 20, 30008, 30009, 40 + a, GumpButtonType.Reply, 0);
                         }
 
                         else
                         {
-                            AddLabel(217, startY, 149, "Match Info");
-                            AddButton(243, startY + 20, 30008, 30009, 40 + a, GumpButtonType.Reply, 0);
+                            AddLabel(227, startY, 149, "Match Info");
+                            AddButton(253, startY + 20, 30008, 30009, 40 + a, GumpButtonType.Reply, 0);
                         }
 
                         startY += rowSpacing;
@@ -765,7 +765,17 @@ namespace Server
                             AddItem(startX - 40, startY - 17, 15178, 0);
                             AddLabel(startX, startY, 149, "Match Type:");
                             AddLabel(startX + 78, startY, basicRuleDetail.m_Line1Hue, basicRuleDetail.m_Line1Text);
-                            AddLabel(startX + 133, startY, basicRuleDetail.m_Line2Hue, "(" + basicRuleDetail.m_Line2Text + ")");
+                            
+                            if (basicRuleDetail.m_Line2Text == "Ranked")
+                            {
+                                AddItem(startX + 117, startY - 1, 4029, 0);
+                                AddItem(startX + 123, startY - 3, 4031, 0);
+
+                                AddLabel(startX + 161, startY, basicRuleDetail.m_Line2Hue, "(" + basicRuleDetail.m_Line2Text + ")");                                
+                            }
+
+                            else                            
+                                AddLabel(startX + 133, startY, basicRuleDetail.m_Line2Hue, "(" + basicRuleDetail.m_Line2Text + ")");                             
                         }
 
                         if (ruleDetail.m_RuleType == typeof(ArenaRuleset.ListingModeType))
@@ -1374,7 +1384,17 @@ namespace Server
                             AddItem(startX - 40, startY - 17, 15178, 0);
                             AddLabel(startX, startY, 149, "Match Type:");
                             AddLabel(startX + 78, startY, basicRuleDetail.m_Line1Hue, basicRuleDetail.m_Line1Text);
-                            AddLabel(startX + 133, startY, basicRuleDetail.m_Line2Hue, "(" + basicRuleDetail.m_Line2Text + ")");
+
+                            if (basicRuleDetail.m_Line2Text == "Ranked")
+                            {
+                                AddItem(startX + 117, startY - 1, 4029, 0);
+                                AddItem(startX + 123, startY - 3, 4031, 0);
+
+                                AddLabel(startX + 161, startY, basicRuleDetail.m_Line2Hue, "(" + basicRuleDetail.m_Line2Text + ")");
+                            }
+
+                            else
+                                AddLabel(startX + 133, startY, basicRuleDetail.m_Line2Hue, "(" + basicRuleDetail.m_Line2Text + ")"); 
                         }
 
                         if (ruleDetail.m_RuleType == typeof(ArenaRuleset.ListingModeType))
@@ -1831,6 +1851,8 @@ namespace Server
                                 else
                                 {
                                     m_Player.m_ArenaPlayerSettings.m_ArenaMatch.LeaveMatch(m_Player, true, true);
+
+                                    m_Player.SendSound(CloseGumpSound);
                                     m_Player.SendMessage("You leave your current match.");
                                 }
                             }                           
@@ -2237,7 +2259,10 @@ namespace Server
                         //Create Match
                         case 12:
                             if (m_Player.m_ArenaPlayerSettings.CurrentlyInMatch())                            
-                                m_Player.SendMessage("You must leave your current match before you may create a new one.");                            
+                                m_Player.SendMessage("You must leave your current match before you may create a new one.");
+
+                            else if (arenaCreditsNeeded > playerArenaCreditsAvailable)
+                                m_Player.SendMessage("Creating that match requires " + arenaCreditsNeeded.ToString() + " arena credits (your account has " + playerArenaCreditsAvailable.ToString() + " available). Additional credits can be acquired through the Credits and Rewards page.");
 
                             else
                             {
@@ -2501,9 +2526,11 @@ namespace Server
                             else if (playerIsOnTeam1 || playerIsOnTeam2)
                             {
                                 selectedArenaMatch.LeaveMatch(m_Player, true, true);
-
+                                
                                 m_Player.SendMessage("You leave the match.");
                             }
+
+                            m_Player.SendSound(CloseGumpSound);
 
                             m_ArenaGumpObject.m_ArenaPage = ArenaPageType.AvailableMatches;
                             m_ArenaGumpObject.m_ArenaPage = 0;
@@ -2519,6 +2546,8 @@ namespace Server
                                 m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.AllPlayers, null);                         
                             }
 
+                            m_Player.SendSound(SelectionSound);
+
                             closeGump = false;
                         break;
 
@@ -2526,8 +2555,8 @@ namespace Server
                         case 20:
                             if (playerParticipant != null)
                             {
-                                if (playerIsOnTeam1)
-                                    playerParticipant.m_ReadyToggled = !playerParticipant.m_ReadyToggled;
+                                if (playerIsOnTeam1)                                
+                                    playerParticipant.m_ReadyToggled = !playerParticipant.m_ReadyToggled;       
 
                                 else
                                 {
@@ -2548,7 +2577,7 @@ namespace Server
                                         else
                                             arenaTeam1.m_Participants.Add(playerParticipant);
 
-                                        selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);
+                                        selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has switched teams.", 0);                                        
 
                                         selectedArenaMatch.ParticipantsForceGumpUpdate();
                                     }
@@ -2586,6 +2615,8 @@ namespace Server
                                 }
                             }
 
+                            m_Player.SendSound(LargeSelectionSound);
+
                             closeGump = false;
                         break;
 
@@ -2595,22 +2626,24 @@ namespace Server
                             {
                                 if (m_Player.AccessLevel > AccessLevel.Player)
                                 {
-                                    m_Player.SendMessage("*Send Message (To Team)*");
+                                    m_Player.SendMessage("What message do you wish to send to that team?");
                                     m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.Team, null);
                                 }
 
                                 else if (playerIsOnTeam1)
                                 {
-                                    m_Player.SendMessage("*Send Message (Your Team)*");
+                                    m_Player.SendMessage("What message do you wish to send to your team?");
                                     m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.Team, null);
                                 }
 
                                 else
                                 {
-                                    m_Player.SendMessage("*Send Message (Opposing Team)*");
+                                    m_Player.SendMessage("What message do you wish to send to their team?");
                                     m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.OpposingTeam, null);
                                 }
                             }
+
+                            m_Player.SendSound(SelectionSound);
 
                             closeGump = false;
                         break;
@@ -2641,7 +2674,7 @@ namespace Server
                                         else
                                             arenaTeam2.m_Participants.Add(playerParticipant);
 
-                                        selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has joined the match.", 0);
+                                        selectedArenaMatch.BroadcastMessage(m_Player.RawName + " has switched teams.", 0);
 
                                         selectedArenaMatch.ParticipantsForceGumpUpdate();
                                     }
@@ -2679,6 +2712,8 @@ namespace Server
                                 }
                             }
 
+                            m_Player.SendSound(LargeSelectionSound);
+
                             closeGump = false;
                         break;
 
@@ -2686,25 +2721,26 @@ namespace Server
                         case 23:
                             if (playerParticipant != null)
                             {
-
                                 if (m_Player.AccessLevel > AccessLevel.Player)
                                 {
-                                    m_Player.SendMessage("*Send Message (To Team)*");
+                                    m_Player.SendMessage("What message do you wish to send to that team?");
                                     m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.Team, null);
                                 }
 
                                 else if (playerIsOnTeam2)
                                 {
-                                    m_Player.SendMessage("*Send Message (Your Team)*");
+                                    m_Player.SendMessage("What message do you wish to send to your team?");
                                     m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.Team, null);
                                 }
 
                                 else
                                 {
-                                    m_Player.SendMessage("*Send Message (Opposing Team)*");
+                                    m_Player.SendMessage("What message do you wish to send to their team?");
                                     m_Player.Prompt = new ArenaMessagePrompt(m_Player, selectedArenaMatch, ArenaMessageType.OpposingTeam, null);
                                 }
                             }
+
+                            m_Player.SendSound(SelectionSound);
 
                             closeGump = false;
                         break;
@@ -2715,6 +2751,8 @@ namespace Server
                         case 13:
                             m_ArenaGumpObject.m_ArenaPage = ArenaPageType.AvailableMatches;
                             m_ArenaGumpObject.m_ArenaPage = 0;
+
+                            m_Player.SendSound(CloseGumpSound);
 
                             closeGump = false;
                         break;
@@ -2838,7 +2876,7 @@ namespace Server
 
                                 m_ArenaGumpObject.ArenaRulesetEdited = false;
 
-                                m_Player.SendSound(SelectionSound);
+                                m_Player.SendSound(LargeSelectionSound);
 
                                 selectedArenaMatch.ParticipantsForceGumpUpdate();
                             }
@@ -2854,6 +2892,8 @@ namespace Server
 
                                 ArenaRuleset.CopyRulesetSettings(selectedArenaMatch.m_Ruleset, m_ArenaGumpObject.m_ArenaRuleset);
                             }
+
+                            m_Player.SendSound(ChangePageSound);
 
                             closeGump = false;
                         break;
@@ -2880,12 +2920,13 @@ namespace Server
                                 m_Player.CloseGump(typeof(ArenaGump));
                                 m_Player.SendGump(new ArenaGump(m_Player, m_ArenaGumpObject));
 
+                                m_Player.SendSound(OpenGumpSound);
                                 m_Player.SendGump(new ArenaPlayerInfoGump(m_Player,  targetParticipant.m_Player, selectedArenaMatch, m_ArenaGumpObject));
 
                                 return; 
                             }
                         }
-
+                        
                         closeGump = false;
                     }
 
@@ -2903,6 +2944,7 @@ namespace Server
                                 m_Player.CloseGump(typeof(ArenaGump));
                                 m_Player.SendGump(new ArenaGump(m_Player, m_ArenaGumpObject));
 
+                                m_Player.SendSound(OpenGumpSound);
                                 m_Player.SendGump(new ArenaPlayerInfoGump(m_Player, targetParticipant.m_Player, selectedArenaMatch, m_ArenaGumpObject));
 
                                 return;
@@ -3090,15 +3132,18 @@ namespace Server
             AddLabel(Utility.CenteredTextOffset(106, m_TargetPlayer.m_ArenaPlayerSettings.Tournament4vs4EventsWon.ToString()), 302, WhiteTextHue, m_TargetPlayer.m_ArenaPlayerSettings.Tournament4vs4EventsWon.ToString());
             AddLabel(Utility.CenteredTextOffset(176, m_TargetPlayer.m_ArenaPlayerSettings.Tournament4vs4RoundsWon.ToString()), 302, WhiteTextHue, m_TargetPlayer.m_ArenaPlayerSettings.Tournament4vs4RoundsWon.ToString());
             AddLabel(Utility.CenteredTextOffset(243, m_TargetPlayer.m_ArenaPlayerSettings.Tournament4vs4RoundsLost.ToString()), 302, WhiteTextHue, m_TargetPlayer.m_ArenaPlayerSettings.Tournament4vs4RoundsLost.ToString());
-            
-            AddLabel(65, 370, 63, "Send Message");
-            AddButton(34, 365, 2151, 2154, 1, GumpButtonType.Reply, 0);
 
-            AddLabel(191, 370, 53, "Kick from Match");
-            AddButton(160, 365, 9721, 9724, 2, GumpButtonType.Reply, 0);
+            if (m_Player != m_TargetPlayer)
+            {
+                AddLabel(65, 370, 63, "Send Message");
+                AddButton(34, 365, 2151, 2154, 1, GumpButtonType.Reply, 0);
 
-            AddButton(89, 326, 2473, 2473, 3, GumpButtonType.Reply, 0);
-            AddLabel(118, 330, 2115, "Ban From Match");            
+                AddLabel(191, 370, 53, "Kick from Match");
+                AddButton(160, 365, 9721, 9724, 2, GumpButtonType.Reply, 0);
+
+                AddButton(89, 326, 2473, 2473, 3, GumpButtonType.Reply, 0);
+                AddLabel(118, 330, 2115, "Ban From Match");
+            }
         }
 
         public override void OnResponse(NetState sender, RelayInfo info)
@@ -3122,16 +3167,29 @@ namespace Server
             {
                 //Send Message
                 case 1:
-                    if (m_ArenaMatch == m_Player.m_ArenaPlayerSettings.m_ArenaMatch)
+                    if (m_ArenaMatch == m_Player.m_ArenaPlayerSettings.m_ArenaMatch && m_Player != m_TargetPlayer)
                     {  
-                        m_Player.SendMessage("*Send Message (To Player)*");
-                        m_Player.Prompt = new ArenaMessagePrompt(m_Player, m_ArenaMatch, ArenaGump.ArenaMessageType.Player, m_TargetPlayer);                                               
+                        m_Player.SendMessage("What message will you send this player?");
+                        m_Player.Prompt = new ArenaMessagePrompt(m_Player, m_ArenaMatch, ArenaGump.ArenaMessageType.Player, m_TargetPlayer);
+
+                        m_Player.SendSound(SelectionSound);
+
+                        if (m_Player.HasGump(typeof(ArenaGump)) && m_Player.m_ArenaGumpObject != null)
+                        {
+                            m_Player.CloseGump(typeof(ArenaGump));
+                            m_Player.SendGump(new ArenaGump(m_Player, m_Player.m_ArenaGumpObject));
+                        }
+
+                        m_Player.CloseGump(typeof(ArenaPlayerInfoGump));
+                        m_Player.SendGump(new ArenaPlayerInfoGump(m_Player, m_TargetPlayer, m_ArenaMatch, m_ArenaGumpObject));
+
+                        return;
                     }
                 break;
 
                 //Kick Player
                 case 2:
-                    if (m_ArenaMatch.m_Creator == m_Player)
+                    if (m_ArenaMatch.m_Creator == m_Player && m_Player != m_TargetPlayer)
                     {
                         ArenaParticipant participant = m_ArenaMatch.GetParticipant(m_TargetPlayer);
 
@@ -3154,13 +3212,15 @@ namespace Server
                         }
 
                         else                        
-                            m_Player.SendMessage("That player is no longer part of that match.");                        
+                            m_Player.SendMessage("That player is no longer part of that match.");
+
+                        m_Player.SendSound(LargeSelectionSound);
                     }
                 break;
 
                 //Ban Player
                 case 3:
-                    if (m_ArenaMatch.m_Creator == m_Player)
+                    if (m_ArenaMatch.m_Creator == m_Player && m_Player != m_TargetPlayer)
                     {
                         ArenaParticipant participant = m_ArenaMatch.GetParticipant(m_TargetPlayer);
 
@@ -3186,18 +3246,25 @@ namespace Server
                         }
 
                         else
-                            m_Player.SendMessage("That player is no longer part of that match."); 
+                            m_Player.SendMessage("That player is no longer part of that match.");
+
+                        m_Player.SendSound(LargeSelectionSound);
                     }
                 break;
             }
 
-            if (m_Player.HasGump(typeof(ArenaGump)) && m_Player.m_ArenaGumpObject != null)
+            if (!closeGump)
             {
-                m_Player.CloseGump(typeof(ArenaGump));
-                m_Player.SendGump(new ArenaGump(m_Player, m_Player.m_ArenaGumpObject));
-            }           
+                m_Player.CloseGump(typeof(ArenaPlayerInfoGump));
+                m_Player.SendGump(new ArenaPlayerInfoGump(m_Player, m_TargetPlayer, m_ArenaMatch, m_ArenaGumpObject));
+            }
+
+            else
+                m_Player.SendSound(CloseGumpSound);
         }        
     }
+
+    #region Arena Match Result Gump
 
     public class ArenaMatchResultGump : Gump
     {
@@ -3571,10 +3638,12 @@ namespace Server
                 m_Player.SendMessage("Records of that match are no longer available.");
                 return;
             } 
- 
-
         }
     }
+
+    #endregion
+
+    #region Arena Message Prompt
 
     public class ArenaMessagePrompt : Prompt
     {
@@ -3675,4 +3744,6 @@ namespace Server
         {
         }
     }
+
+    #endregion
 }

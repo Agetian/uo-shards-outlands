@@ -2822,7 +2822,10 @@ namespace Server.Mobiles
 		};
 
         public override bool AllowSkillUse(SkillName skill)
-        {       
+        {
+            if (!ArenaFight.AllowSkillUse(this, skill))            
+                return false;            
+
             return DesignContext.Check(this);
         }
 

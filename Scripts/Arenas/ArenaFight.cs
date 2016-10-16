@@ -388,6 +388,58 @@ namespace Server
             return true;
         }
 
+        public static bool AllowSkillUse(PlayerMobile player, SkillName skill)
+        {
+            List<SkillName> arenaGroupRegionRestrictedSkills = new List<SkillName>()
+            {
+                SkillName.AnimalTaming,
+                SkillName.Herding,
+                SkillName.Snooping,
+                SkillName.Stealing,
+                SkillName.Discordance,
+                SkillName.Peacemaking,
+                SkillName.Provocation,
+            };
+
+            List<SkillName> arenaRestrictedSkills = new List<SkillName>()
+            {               
+                SkillName.Hiding
+            };
+
+            if (player == null)
+                return true;
+
+            ArenaPlayerSettings.CheckCreateArenaPlayerSettings(player);
+
+            ArenaGroupController arenaGroupController = ArenaGroupController.GetArenaGroupRegionAtLocation(player.Location, player.Map);
+            
+            if (arenaGroupRegionRestrictedSkills.Contains(skill))
+            {
+                player.SendMessage("That skill is not allowed within this area.");
+                return false;
+            }
+
+            if (player.m_ArenaMatch != null)
+            {
+                if (player.m_ArenaMatch.m_MatchStatus == ArenaMatch.MatchStatusType.Fighting)
+                {
+                    if (player.m_ArenaMatch.m_ArenaFight != null)
+                    {
+                        if (player.m_ArenaMatch.m_ArenaFight.IsWithinArena(player.Location, player.Map))
+                        {
+                            if (arenaRestrictedSkills.Contains(skill))
+                            {
+                                player.SendMessage("That skill is not allowed within matches.");
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }            
+
+            return true;
+        }
+
         public virtual bool AllowFreeConsume(PlayerMobile player)
         {
             return true;
@@ -401,12 +453,7 @@ namespace Server
         public virtual bool AllowItemRemove(PlayerMobile player, Item item)
         {
             return true;
-        }
-
-        public virtual bool AllowSkillUse(PlayerMobile player, SkillName skill)
-        {
-            return true;
-        }
+        }        
 
         public virtual void CancelSpell(Mobile mobile)
         {
@@ -982,7 +1029,7 @@ namespace Server
                     if (player.m_ArenaAccountEntry.m_ArenaCredits < 0)
                         player.m_ArenaAccountEntry.m_ArenaCredits = 0;
 
-                    player.SendMessage(arenaCreditCost.ToString() + " arena credits have been deducted from your account (" + player.m_ArenaAccountEntry.m_ArenaCredits.ToString() + " remaining).");
+                    player.SendMessage(63, arenaCreditCost.ToString() + " Arena Credits have been deducted from your account (" + player.m_ArenaAccountEntry.m_ArenaCredits.ToString() + " remaining).");
                     
                     RestoreAndClearEffects(player);                    
 
