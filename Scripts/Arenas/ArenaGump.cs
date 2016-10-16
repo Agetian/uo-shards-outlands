@@ -152,9 +152,9 @@ namespace Server
             AddLabel(331, 2, 2515, "Arena");
 
             //Guide
-            AddButton(7, 4, 2094, 2095, 1, GumpButtonType.Reply, 0);
-            AddLabel(30, 4, 149, "Guide");
-
+            AddButton(7, 2, 2094, 2095, 1, GumpButtonType.Reply, 0);
+            AddLabel(30, 2, 149, "Guide");
+            
             #region Available Matches
 
             AddItem(15, 28, 8454, 2515);
@@ -438,26 +438,26 @@ namespace Server
                             //Ranked
                             case ArenaRuleset.MatchTypeType.Ranked1vs1:
                                 AddLabel(137, startY, 2606, "1 vs 1");
-                                AddItem(167, startY - 1, 4029, 0);
-                                AddItem(173, startY - 3, 4031, 0);
+                                AddItem(177, startY - 1, 4029, 0);
+                                AddItem(183, startY - 3, 4031, 0);
                             break;
 
                             case ArenaRuleset.MatchTypeType.Ranked2vs2:
                                 AddLabel(137, startY, 2606, "2 vs 2");
-                                AddItem(167, startY - 1, 4029, 0);
-                                AddItem(173, startY - 3, 4031, 0);
+                                AddItem(177, startY - 1, 4029, 0);
+                                AddItem(183, startY - 3, 4031, 0);
                             break;
 
                             case ArenaRuleset.MatchTypeType.Ranked3vs3:
                                 AddLabel(137, startY, 2606, "3 vs 3");
-                                AddItem(167, startY - 1, 4029, 0);
-                                AddItem(173, startY - 3, 4031, 0);
+                                AddItem(177, startY - 1, 4029, 0);
+                                AddItem(183, startY - 3, 4031, 0);
                             break;
 
                             case ArenaRuleset.MatchTypeType.Ranked4vs4:
                                 AddLabel(137, startY, 2606, "4 vs 4");
-                                AddItem(167, startY - 1, 4029, 0);
-                                AddItem(173, startY - 3, 4031, 0);
+                                AddItem(177, startY - 1, 4029, 0);
+                                AddItem(183, startY - 3, 4031, 0);
                             break;
                         }
 
@@ -1594,6 +1594,95 @@ namespace Server
                 break;
 
                 #endregion
+                    
+                #region Credits and Rewards
+
+                case ArenaPageType.CreditsAndRewards:
+                    AddButton(23, 483, 4014, 4016, 0, GumpButtonType.Reply, 0);
+                    AddLabel(57, 483, WhiteTextHue, "Previous Rewards");
+			        AddButton(544, 483, 4005, 4007, 0, GumpButtonType.Reply, 0);
+                    AddLabel(580, 483, WhiteTextHue, "More Rewards");
+			        AddLabel(304, 84, 2603, "Arena Credits");
+			        AddLabel(33, 106, 149, "Arena Credits on Account:");
+			        AddLabel(204, 106, 63, "0");
+			        AddLabel(33, 141, 2603, "Unranked Match:");
+			        AddLabel(33, 166, 2606, "Ranked Match:");
+			        AddLabel(33, 191, 53, "Tournament Entry:");
+			        AddLabel(142, 141, WhiteTextHue, "Costs 1 Credit");
+                    AddLabel(131, 166, WhiteTextHue, "Costs 5 Credits");
+                    AddLabel(156, 191, WhiteTextHue, "Costs 50 Credits");
+			        AddItem(489, 139, 3823);
+			        AddButton(461, 138, 2151, 2154, 0, GumpButtonType.Reply, 0);
+			        AddLabel(459, 106, 63, "Purchase 5 Arena Credits");
+                    AddLabel(533, 141, WhiteTextHue, "1000 Gold");
+			        AddItem(483, 191, 7157, 2963);
+			        AddButton(461, 186, 2151, 2154, 0, GumpButtonType.Reply, 0);
+                    AddLabel(533, 191, WhiteTextHue, "10 Jade");
+			        AddItem(480, 195, 7157, 2963);
+			        AddLabel(204, 484, 2599, "Reward Points:");
+			        AddLabel(308, 484, 63, "3");
+			        AddLabel(360, 484, 2401, "Black Reward Points:");
+			        AddLabel(503, 484, 63, "1");
+			        AddItem(47, 262, 11764, 2587);
+			        AddLabel(109, 262, 149, "Random Champion Reward Box");
+			        AddButton(243, 300, 2151, 248, 0, GumpButtonType.Reply, 0);
+			        AddLabel(181, 302, 63, "Purchase");
+			        AddButton(141, 305, 1210, 248, 0, GumpButtonType.Reply, 0);
+			        AddLabel(109, 302, 2550, "Info");
+                    AddLabel(109, 282, WhiteTextHue, "Cost:");
+			        AddLabel(149, 282, 2599, "2 Reward Points");
+			        AddLabel(471, 376, 149, "True Black Vest");
+			        AddButton(605, 414, 2151, 248, 0, GumpButtonType.Reply, 0);
+			        AddLabel(543, 416, 63, "Purchase");
+			        AddButton(503, 419, 1210, 248, 0, GumpButtonType.Reply, 0);
+			        AddLabel(471, 416, 2550, "Info");
+                    AddLabel(471, 396, WhiteTextHue, "Cost:");
+			        AddLabel(511, 396, 2401, "2 Black Reward Points");
+			        AddItem(53, 393, 3622, 1102);
+			        AddLabel(109, 376, 149, "True Black Clothing Dye");
+			        AddButton(243, 414, 2151, 248, 0, GumpButtonType.Reply, 0);
+			        AddLabel(181, 416, 63, "Purchase");
+			        AddButton(141, 419, 1210, 248, 0, GumpButtonType.Reply, 0);
+			        AddLabel(109, 416, 2550, "Info");
+                    AddLabel(109, 396, WhiteTextHue, "Cost:");
+			        AddLabel(149, 396, 2401, "1 Black Reward Point");
+			        AddItem(414, 250, 5416);
+			        AddLabel(471, 262, 149, "Champion's Statue");
+			        AddButton(605, 300, 2151, 248, 0, GumpButtonType.Reply, 0);
+			        AddLabel(543, 302, 63, "Purchase");
+			        AddButton(503, 305, 1210, 248, 0, GumpButtonType.Reply, 0);
+			        AddLabel(471, 302, 2550, "Info");
+                    AddLabel(471, 282, WhiteTextHue, "Cost:");
+			        AddLabel(511, 282, 2599, "10 Reward Points");
+			        AddBackground(400, 373, 64, 69, 9270);
+			        AddBackground(410, 382, 45, 49, 3000);
+			        AddItem(409, 393, 10145, 2052);
+			        AddItem(261, 120, 11550);
+			        AddItem(341, 121, 11967);
+			        AddItem(314, 117, 11968);
+			        AddItem(311, 137, 11564);
+			        AddItem(325, 109, 3851);
+			        AddItem(320, 113, 3847);
+			        AddItem(329, 116, 3852);
+			        AddItem(341, 151, 7028);
+			        AddItem(308, 143, 3936);
+			        AddItem(318, 134, 11564);
+			        AddItem(304, 130, 3903);
+			        AddItem(305, 132, 3903);
+			        AddImage(18, 224, 96, 1102);
+			        AddImage(173, 224, 96, 1102);
+			        AddImage(300, 224, 96, 1102);
+			        AddImage(409, 224, 96, 1102);
+			        AddImage(491, 224, 96, 1102);
+			        AddImage(18, 223, 96, 1102);
+			        AddImage(173, 223, 96, 1102);
+			        AddImage(300, 223, 96, 1102);
+			        AddImage(409, 223, 96, 1102);
+			        AddImage(491, 223, 96, 1102);
+			        AddLabel(320, 212, 90, "Rewards");
+                break;
+
+                #endregion
 
                 #region Scheduled Tournaments
 
@@ -1764,7 +1853,7 @@ namespace Server
                 //Page: Available Matches
                 case 2:
                     m_ArenaGumpObject.m_ArenaPage = ArenaPageType.AvailableMatches;
-                    m_ArenaGumpObject.m_ArenaPage = 0;
+                    m_ArenaGumpObject.m_Page = 0;
 
                     m_Player.SendSound(ChangePageSound);
 
@@ -1774,7 +1863,7 @@ namespace Server
                 //Page: Scheduled Tournaments
                 case 3:
                     m_ArenaGumpObject.m_ArenaPage = ArenaPageType.ScheduledTournaments;
-                    m_ArenaGumpObject.m_ArenaPage = 0;
+                    m_ArenaGumpObject.m_Page = 0;
 
                     m_Player.SendSound(ChangePageSound);
 
@@ -1784,7 +1873,7 @@ namespace Server
                 //Page: Ranks and Records
                 case 4:
                     m_ArenaGumpObject.m_ArenaPage = ArenaPageType.RanksAndRecords;
-                    m_ArenaGumpObject.m_ArenaPage = 0;
+                    m_ArenaGumpObject.m_Page = 0;
 
                     m_Player.SendSound(ChangePageSound);
 
@@ -1794,7 +1883,7 @@ namespace Server
                 //Page: Credits and Rewards
                 case 5:
                     m_ArenaGumpObject.m_ArenaPage = ArenaPageType.CreditsAndRewards;
-                    m_ArenaGumpObject.m_ArenaPage = 0;
+                    m_ArenaGumpObject.m_Page = 0;
 
                     m_Player.SendSound(ChangePageSound);
 
@@ -1807,7 +1896,7 @@ namespace Server
             }
 
             #endregion
-
+            
             //Page Content
             switch (m_ArenaGumpObject.m_ArenaPage)
             {
@@ -3011,7 +3100,7 @@ namespace Server
 
                 #endregion
             }
-
+            
             if (!closeGump)
             {
                 m_Player.CloseGump(typeof(ArenaGump));
