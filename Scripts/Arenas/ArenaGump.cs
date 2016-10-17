@@ -1744,9 +1744,9 @@ namespace Server
 			    AddLabel(47, 158, 149, "Info");
 			    AddButton(29, 162, 1210, 248, 0, GumpButtonType.Reply, 0);
 			    AddItem(29, 128, 7960);
-			    AddLabel(97, 383, 63, "Chosen Destiny");
+			    AddLabel(97, 383, 63, "Vengeance Inc");
 			    AddLabel(132, 368, 63, "vs");
-			    AddLabel(96, 353, 63, "Azure Paladins");
+			    AddLabel(96, 353, 63, "Black Templars");
 			    AddLabel(47, 383, 63, "Info");
 			    AddItem(-3, 352, 3937);
 			    AddItem(23, 353, 3936);
@@ -1754,7 +1754,7 @@ namespace Server
 			    AddItem(32, 426, 6169);
                 AddLabel(84, 454, WhiteTextHue, "Skull and Crossbones");
                 AddLabel(132, 439, WhiteTextHue, "vs");
-                AddLabel(103, 424, WhiteTextHue, "Deathwatch");
+                AddLabel(103, 424, WhiteTextHue, "Nightmares");
 			    AddLabel(47, 454, 149, "Info");
 			    AddButton(29, 458, 1210, 248, 0, GumpButtonType.Reply, 0);
 			    AddItem(248, 354, 6169);

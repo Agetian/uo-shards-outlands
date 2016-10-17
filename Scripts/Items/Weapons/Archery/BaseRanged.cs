@@ -88,9 +88,12 @@ namespace Server.Items
         public override void OnHit(Mobile attacker, Mobile defender, double damageBonus)
         {
             double arrowChance = 0.4;
-            
-            if (attacker.Player && !defender.Player && (defender.Body.IsAnimal || defender.Body.IsMonster) && arrowChance >= Utility.RandomDouble())            
-                defender.AddToBackpack(Ammo);            
+
+            if (!ArenaFight.AllowFreeConsume(attacker, typeof(Arrow)))
+            {
+                if (attacker.Player && !defender.Player && (defender.Body.IsAnimal || defender.Body.IsMonster) && arrowChance >= Utility.RandomDouble())
+                    defender.AddToBackpack(Ammo);
+            }
 
             base.OnHit(attacker, defender, damageBonus);
 
@@ -102,8 +105,11 @@ namespace Server.Items
         {
             double arrowChance = 0.4;
 
-            if (attacker.Player && arrowChance >= Utility.RandomDouble())
-                Ammo.MoveToWorld(new Point3D(defender.X + Utility.RandomMinMax(-1, 1), defender.Y + Utility.RandomMinMax(-1, 1), defender.Z), defender.Map);
+            if (!ArenaFight.AllowFreeConsume(attacker, typeof(Arrow)))
+            {
+                if (attacker.Player && arrowChance >= Utility.RandomDouble())
+                    Ammo.MoveToWorld(new Point3D(defender.X + Utility.RandomMinMax(-1, 1), defender.Y + Utility.RandomMinMax(-1, 1), defender.Z), defender.Map);
+            }
 
             base.OnMiss(attacker, defender);
         }
@@ -112,12 +118,18 @@ namespace Server.Items
         {
             Container pack = attacker.Backpack;
 
-            if (attacker.Player && (pack == null || !pack.ConsumeTotal(AmmoType, 1)))
+            if (attacker.Player)
             {
-                attacker.StealthAttackActive = false;
-                attacker.StealthAttackReady = false;
+                if (!ArenaFight.AllowFreeConsume(attacker, typeof(Arrow)))
+                {
+                    if (pack == null || !pack.ConsumeTotal(AmmoType, 1))
+                    {
+                        attacker.StealthAttackActive = false;
+                        attacker.StealthAttackReady = false;
 
-                return false;
+                        return false;
+                    }
+                }
             }
 
             attacker.MovingEffect(defender, EffectID, 18, 1, false, false);

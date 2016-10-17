@@ -144,19 +144,16 @@ namespace Server.Items
                     else if (from.InRange(m_Bandage.GetWorldLocation(), Bandage.Range))
                     {
                         PlayerMobile playerTarget = targeted as PlayerMobile;
-                        
+
                         if (BandageContext.BeginHeal(from, (Mobile)targeted) != null)
-                            m_Bandage.Consume();                        
+                        {
+                            if (!ArenaFight.AllowFreeConsume(from, typeof(Bandage)))
+                                m_Bandage.Consume();
+                        }
                     }
 
                     else
                         from.SendLocalizedMessage(500295); // You are too far away to do that.                    
-                }
-
-                else if (targeted is PlagueBeastInnard)
-                {
-                    if (((PlagueBeastInnard)targeted).OnBandage(from))
-                        m_Bandage.Consume();
                 }
 
                 else
@@ -165,14 +162,7 @@ namespace Server.Items
 
             protected override void OnNonlocalTarget(Mobile from, object targeted)
             {
-                if (targeted is PlagueBeastInnard)
-                {
-                    if (((PlagueBeastInnard)targeted).OnBandage(from))
-                        m_Bandage.Consume();
-                }
-
-                else
-                    base.OnNonlocalTarget(from, targeted);
+                base.OnNonlocalTarget(from, targeted);
             }
         }
     }
@@ -338,6 +328,12 @@ namespace Server.Items
                         patientNumber = 502391; // Thou can not be resurrected there!
                     }
 
+                    else if (ArenaController.GetArenaAtLocation(m_Patient.Location, m_Patient.Map) != null)
+                    {
+                        healerNumber = 501042; // Target can not be resurrected at that location.
+                        patientNumber = 502391; // Thou can not be resurrected there!
+                    }
+
                     else
                     {
                         healerNumber = 500965; // You are able to resurrect your patient.
@@ -349,15 +345,7 @@ namespace Server.Items
                         if (petPatient != null && petPatient.IsDeadFollower)
                         {
                             Mobile master = petPatient.ControlMaster;
-
-                            /*
-                            if (!petPatient.CanBeResurrectedThroughVeterinary)
-                            {
-                                m_Healer.SendMessage("Another item is required to resurrect this creature");
-                                healerNumber = 500966; // You are unable to resurrect your patient.
-                            }
-                             * */
-
+                            
                             if (master != null && master.InRange(petPatient, 3))
                             {
                                 healerNumber = 503255; // You are able to resurrect the creature.

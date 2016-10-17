@@ -440,9 +440,58 @@ namespace Server
             return true;
         }
 
-        public virtual bool AllowFreeConsume(PlayerMobile player)
+        public static bool AllowFreeConsume(Mobile mobile, Type itemType)
         {
-            return true;
+            PlayerMobile player = mobile as PlayerMobile;
+
+            if (player == null) return false;
+            if (player.m_ArenaMatch == null) return false;            
+            if (player.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return false;
+            if (player.m_ArenaMatch.m_ArenaFight == null) return false;
+            if (!player.m_ArenaMatch.m_ArenaFight.IsWithinArena(player.Location, player.Map)) return false;
+
+            switch (player.m_ArenaMatch.m_Ruleset.m_ResourceConsumption)
+            {
+                case ArenaRuleset.ResourceConsumptionType.Normal:
+                break;
+
+                case ArenaRuleset.ResourceConsumptionType.UnlimitedReagentsBandagesArrows:
+                    if (itemType == typeof(BaseReagent)) return true;
+                    if (itemType == typeof(Bandage)) return true;
+                    if (itemType == typeof(Arrow)) return true;
+                    if (itemType == typeof(Bolt)) return true;
+                break;
+
+                case ArenaRuleset.ResourceConsumptionType.UnlimitedEverything:
+                    if (itemType == typeof(BaseReagent)) return true;
+                    if (itemType == typeof(Bandage)) return true;
+                    if (itemType == typeof(Arrow)) return true;
+                    if (itemType == typeof(Bolt)) return true;
+
+                    if (itemType == typeof(BasePotion)) return true;
+                break;
+            }
+
+            return false;
+        }
+
+        public static bool AllowDurabilityImmunity(Mobile mobile)
+        {
+            PlayerMobile player = mobile as PlayerMobile;
+
+            if (player == null) return false;
+            if (player.m_ArenaMatch == null) return false;
+            if (player.m_ArenaMatch.m_MatchStatus != ArenaMatch.MatchStatusType.Fighting) return false;
+            if (player.m_ArenaMatch.m_ArenaFight == null) return false;
+            if (!player.m_ArenaMatch.m_ArenaFight.IsWithinArena(player.Location, player.Map)) return false;
+
+            switch (player.m_ArenaMatch.m_Ruleset.m_ItemDurabilityDamage)
+            {
+                case ArenaRuleset.ItemDurabilityDamageType.Normal: break;
+                case ArenaRuleset.ItemDurabilityDamageType.NoDamage: return true; break;
+            }
+
+            return false;
         }
 
         public virtual bool AllowItemEquip(PlayerMobile player, Item item)

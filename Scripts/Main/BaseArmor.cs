@@ -1362,18 +1362,23 @@ namespace Server.Items
             if (durabilityLossChance < .02)
                 durabilityLossChance = .02;
 
-            if (Utility.RandomDouble() <= durabilityLossChance)
+            Mobile parent = Parent as Mobile;
+
+            if (!ArenaFight.AllowDurabilityImmunity(parent))
             {
-                HitPoints--;
-
-                if (HitPoints == 5)
+                if (Utility.RandomDouble() <= durabilityLossChance)
                 {
-                    if (Parent is Mobile)
-                        ((Mobile)Parent).LocalOverheadMessage(MessageType.Regular, 0x3B2, 1061121); // Your equipment is severely damaged.
-                }
+                    HitPoints--;
 
-                else if (HitPoints == 0)
-                    Delete();
+                    if (HitPoints == 5)
+                    {
+                        if (Parent is Mobile)
+                            ((Mobile)Parent).LocalOverheadMessage(MessageType.Regular, 0x3B2, 1061121); // Your equipment is severely damaged.
+                    }
+
+                    else if (HitPoints == 0)
+                        Delete();
+                }
             }
 
             return damageTaken;

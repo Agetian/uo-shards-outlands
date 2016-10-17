@@ -111,22 +111,25 @@ namespace Server.Items
 
                 owner.FixedEffect(0x37B9, 10, 16);
 
-                if (Utility.RandomDouble() <= DurabilityLossChance && LootType != LootType.Blessed && MaxHitPoints > 0)
+                if (!ArenaFight.AllowDurabilityImmunity(owner))
                 {
-                    if (HitPoints > 1)
+                    if (Utility.RandomDouble() <= DurabilityLossChance && LootType != LootType.Blessed && MaxHitPoints > 0)
                     {
-                        HitPoints--;
-
-                        if (HitPoints == 5)
+                        if (HitPoints > 1)
                         {
-                            if (Parent is Mobile)
-                                ((Mobile)Parent).LocalOverheadMessage(MessageType.Regular, 0x3B2, 1061121); // Your equipment is severely damaged.
-                        }
-                    }
+                            HitPoints--;
 
-                    else
-                        Delete();
-                }  
+                            if (HitPoints == 5)
+                            {
+                                if (Parent is Mobile)
+                                    ((Mobile)Parent).LocalOverheadMessage(MessageType.Regular, 0x3B2, 1061121); // Your equipment is severely damaged.
+                            }
+                        }
+
+                        else
+                            Delete();
+                    }
+                }
             }
 
             return damage;

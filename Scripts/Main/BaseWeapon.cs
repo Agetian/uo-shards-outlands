@@ -1223,18 +1223,21 @@ namespace Server.Items
             //Weapon Takes Durability Loss on Hit
             if (LootType != Server.LootType.Blessed && ParentEntity is PlayerMobile)
             {
-                if (Utility.RandomDouble() <= .05)
+                if (!ArenaFight.AllowDurabilityImmunity(defender))
                 {
-                    HitPoints--;
-
-                    if (HitPoints == 5)
+                    if (Utility.RandomDouble() <= .05)
                     {
-                        if (Parent is Mobile)
-                            ((Mobile)Parent).LocalOverheadMessage(MessageType.Regular, 0x3B2, 1061121); // Your equipment is severely damaged.
-                    }
+                        HitPoints--;
 
-                    if (HitPoints == 0)
-                        Delete();
+                        if (HitPoints == 5)
+                        {
+                            if (Parent is Mobile)
+                                ((Mobile)Parent).LocalOverheadMessage(MessageType.Regular, 0x3B2, 1061121); // Your equipment is severely damaged.
+                        }
+
+                        if (HitPoints == 0)
+                            Delete();
+                    }
                 }
             }
 

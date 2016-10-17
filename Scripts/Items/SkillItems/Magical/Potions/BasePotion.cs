@@ -2,6 +2,7 @@ using System;
 using Server;
 using Server.Engines.Craft;
 using System.Collections.Generic;
+using Server.Mobiles;
 
 namespace Server.Items
 {
@@ -185,16 +186,23 @@ namespace Server.Items
 
 		public abstract void Drink( Mobile from );
 
-		public static void PlayDrinkEffect( Mobile m )
+		public static void PlayDrinkEffect( Mobile mobile )
 		{
-			m.RevealingAction();
+			mobile.RevealingAction();
+			mobile.PlaySound( 0x2D6 );
 
-			m.PlaySound( 0x2D6 );
-			
-			m.AddToBackpack( new Bottle() );			
+            bool dropBottle = true;
 
-			if ( m.Body.IsHuman /*&& !m.Mounted*/ )
-				m.Animate( 34, 5, 1, true, false, 0 );
+            PlayerMobile player = mobile as PlayerMobile;
+
+            if (ArenaFight.AllowFreeConsume(player, typeof(BasePotion)))
+                dropBottle = false;
+            
+			if (dropBottle)
+			    mobile.AddToBackpack( new Bottle() );			
+
+			if ( mobile.Body.IsHuman /*&& !m.Mounted*/ )
+				mobile.Animate( 34, 5, 1, true, false, 0 );
 		}
 
 		public static int EnhancePotions( Mobile m )

@@ -239,10 +239,13 @@ namespace Server.Items
                 return;
 
             // 12/8/13 Xiani - Nullifying an explosion when in an ArenaRegion.
+            
+            //TEST: CHECK THIS
             if (from.CombatProhibited)
                 return;
 
-            Consume();
+            if (!ArenaFight.AllowFreeConsume(from, typeof(BasePotion)))
+                Consume();
 
             for (int i = 0; m_Users != null && i < m_Users.Count; ++i)
             {

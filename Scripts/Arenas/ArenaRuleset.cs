@@ -139,7 +139,6 @@ namespace Server
         public enum ItemDurabilityDamageType
         {
             Normal,
-            HalfDamage,
             NoDamage,
         }
    
@@ -1088,11 +1087,6 @@ namespace Server
                     case ItemDurabilityDamageType.Normal:
                         basicRuleDetail.m_Line1Text = "Normal Durability Loss";
                         basicRuleDetail.m_Line1Hue = 2499;
-                    break;
-
-                    case ItemDurabilityDamageType.HalfDamage:
-                        basicRuleDetail.m_Line1Text = "-50% Durability Loss";
-                        basicRuleDetail.m_Line1Hue = 2599;
                     break;
 
                     case ItemDurabilityDamageType.NoDamage:

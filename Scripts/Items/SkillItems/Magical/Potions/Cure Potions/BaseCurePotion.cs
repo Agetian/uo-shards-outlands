@@ -92,8 +92,9 @@ namespace Server.Items
 
 				from.FixedParticles( 0x373A, 10, 15, 5012, EffectLayer.Waist );
 				from.PlaySound( 0x1E0 );
-				
-				Consume();
+
+                if (!ArenaFight.AllowFreeConsume(from, typeof(BasePotion)))
+				    Consume();
 			}
 
 			else			

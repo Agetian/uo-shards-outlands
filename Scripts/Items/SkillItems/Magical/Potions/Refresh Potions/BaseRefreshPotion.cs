@@ -37,8 +37,9 @@ namespace Server.Items
 				from.Stam += Scale( from, (int)(Refresh * from.StamMax) );
 
 				BasePotion.PlayDrinkEffect( from );
-				
-				Consume();
+
+                if (!ArenaFight.AllowFreeConsume(from, typeof(BasePotion)))
+				    Consume();
 			}
 
 			else			

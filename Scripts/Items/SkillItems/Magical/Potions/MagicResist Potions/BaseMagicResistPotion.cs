@@ -60,7 +60,8 @@ namespace Server.Items
 			{
 				BasePotion.PlayDrinkEffect( from );
 
-				Consume();
+                if (!ArenaFight.AllowFreeConsume(from, typeof(BasePotion)))
+				    Consume();
 			}
 		}
 	}
