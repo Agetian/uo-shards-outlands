@@ -163,7 +163,7 @@ namespace Server.Spells.Third
 	
 					foreach ( Item item in eable )
 					{
-						if ( item is Server.Spells.Sixth.ParalyzeFieldSpell.InternalItem || item is Server.Spells.Fifth.PoisonFieldSpell.InternalItem || item is Server.Spells.Fourth.FireFieldSpell.FireFieldItem )
+						if ( item is Server.Spells.Sixth.ParalyzeFieldSpell.ParalyzeFieldItem || item is Server.Spells.Fifth.PoisonFieldSpell.PoisonFieldItem || item is Server.Spells.Fourth.FireFieldSpell.FireFieldItem )
 							item.OnMoveOver( m );
 					}
 	

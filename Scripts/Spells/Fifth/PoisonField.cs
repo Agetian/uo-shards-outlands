@@ -89,7 +89,7 @@ namespace Server.Spells.Fifth
                 {
                     Point3D loc = new Point3D(eastToWest ? p.X + i : p.X, eastToWest ? p.Y : p.Y + i, p.Z);
 
-                    InternalItem item = new InternalItem(itemID, loc, Caster, Caster.Map, duration, i);
+                    PoisonFieldItem item = new PoisonFieldItem(itemID, loc, Caster, Caster.Map, duration, i);
 
                     if (enhancedSpellcast)                    
                         item.m_Enhanced = true;                    
@@ -118,7 +118,7 @@ namespace Server.Spells.Fifth
         }
 
         [DispellableField]
-        public class InternalItem : Item
+        public class PoisonFieldItem : Item
         {
             private Timer m_Timer;
             private DateTime m_End;
@@ -128,7 +128,7 @@ namespace Server.Spells.Fifth
 
             public override bool BlocksFit { get { return true; } }
 
-            public InternalItem(int itemID, Point3D loc, Mobile caster, Map map, TimeSpan duration, int val): base(itemID)
+            public PoisonFieldItem(int itemID, Point3D loc, Mobile caster, Map map, TimeSpan duration, int val): base(itemID)
             {
                 bool canFit = SpellHelper.AdjustField(ref loc, map, 12, false);
 
@@ -162,7 +162,7 @@ namespace Server.Spells.Fifth
                     m_Timer.Stop();
             }
 
-            public InternalItem(Serial serial): base(serial)
+            public PoisonFieldItem(Serial serial): base(serial)
             {
             }
 
@@ -302,12 +302,12 @@ namespace Server.Spells.Fifth
 
             private class InternalTimer : Timer
             {
-                private InternalItem m_Item;
+                private PoisonFieldItem m_Item;
                 private bool m_InLOS, m_CanFit;
 
                 private static Queue m_Queue = new Queue();
 
-                public InternalTimer(InternalItem item, TimeSpan delay, bool inLOS, bool canFit): base(delay, TimeSpan.FromSeconds(1.5))
+                public InternalTimer(PoisonFieldItem item, TimeSpan delay, bool inLOS, bool canFit): base(delay, TimeSpan.FromSeconds(1.5))
                 {
                     m_Item = item;
                     m_InLOS = inLOS;

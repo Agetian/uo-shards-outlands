@@ -91,7 +91,7 @@ namespace Server.Spells.Sixth
                     if (!canFit)
                         continue;
 
-                    InternalItem item = new InternalItem(Caster, itemID, loc, Caster.Map, duration);
+                    ParalyzeFieldItem item = new ParalyzeFieldItem(Caster, itemID, loc, Caster.Map, duration);
 
                     if (enhancedSpellcast)
                         item.m_Enhanced = true;
@@ -106,7 +106,7 @@ namespace Server.Spells.Sixth
         }
 
         [DispellableField]
-        public class InternalItem : Item
+        public class ParalyzeFieldItem : Item
         {
             private Timer m_Timer;
             private Mobile m_Caster;
@@ -115,7 +115,7 @@ namespace Server.Spells.Sixth
 
             public override bool BlocksFit { get { return true; } }
 
-            public InternalItem(Mobile caster, int itemID, Point3D loc, Map map, TimeSpan duration): base(itemID)
+            public ParalyzeFieldItem(Mobile caster, int itemID, Point3D loc, Map map, TimeSpan duration): base(itemID)
             {
                 Visible = false;
                 Movable = false;
@@ -151,7 +151,7 @@ namespace Server.Spells.Sixth
                     m_Timer.Stop();
             }
 
-            public InternalItem(Serial serial): base(serial)
+            public ParalyzeFieldItem(Serial serial): base(serial)
             {
             }
 

@@ -89,6 +89,12 @@ namespace Server
             if (player == null || vendor == null)
                 return;
 
+            if (ArenaController.GetArenaAtLocation(player.Location, player.Map) != null)
+            {
+                player.SendMessage("You cannot access stables while at that location.");
+                return;
+            }
+
             if (!player.Alive)
             {
                 player.SendMessage("You must be alive to do that.");
@@ -133,6 +139,12 @@ namespace Server
                 if (m_Player == null) return;
                 if (m_Vendor == null) return;     
                 if (m_Vendor.Deleted || !m_Vendor.Alive) return;
+
+                if (ArenaController.GetArenaAtLocation(m_Player.Location, m_Player.Map) != null)
+                {
+                    m_Player.SendMessage("You cannot access stables while at that location.");
+                    return;
+                }
 
                 if (!m_Player.Alive)
                 {
@@ -547,6 +559,13 @@ namespace Server
                 return;
             }
 
+            if (ArenaController.GetArenaAtLocation(m_Player.Location, m_Player.Map) != null)
+            {
+                m_Player.SendMessage("You cannot access stables while in that location.");
+
+                return;
+            }
+
             bool closeGump = true;
 
             int usedStableSlots = Stables.GetUsedStableSlots(m_Player);
@@ -851,6 +870,13 @@ namespace Server
 
                 m_Player.CloseGump(typeof(StableGump));
                 m_Player.SendGump(new StableGump(m_Vendor, m_Player, m_Page));
+
+                return;
+            }
+
+            if (ArenaController.GetArenaAtLocation(m_Player.Location, m_Player.Map) != null)
+            {
+                m_Player.SendMessage("You cannot access stables while in that location.");                
 
                 return;
             }

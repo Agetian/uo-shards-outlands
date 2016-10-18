@@ -1312,11 +1312,11 @@ namespace Server.Spells
 
         public static bool CheckTown(Point3D loc, Mobile caster, bool forceAllow = false)
         {
-            if (IsTown(loc, caster) && !forceAllow)
+            if (IsTown(loc, caster) && !forceAllow && ArenaController.GetArenaAtLocation(loc, caster.Map) == null && ArenaController.GetArenaAtLocation(caster.Location, caster.Map) == null)
             {
                 caster.SendLocalizedMessage(500946); // You cannot cast this in town!
                 return false;
-            }
+            }            
 
             return true;
         }

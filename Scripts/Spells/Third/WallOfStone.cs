@@ -101,7 +101,7 @@ namespace Server.Spells.Third
                     if (!canFit)
                         continue;
 
-                    Item item = new InternalItem(loc, Caster.Map, Caster);
+                    Item item = new WallOfStoneItem(loc, Caster.Map, Caster);
                     Effects.SendLocationParticles(item, 0x376A, 9, 10, 5025);
                 }
             }
@@ -113,14 +113,14 @@ namespace Server.Spells.Third
         }
 
         [DispellableField]
-        private class InternalItem : Item
+        public class WallOfStoneItem : Item
         {
-            private Timer m_Timer;
-            private DateTime m_End;
+            public Timer m_Timer;
+            public DateTime m_End;
 
             public override bool BlocksFit { get { return true; } }
 
-            public InternalItem(Point3D loc, Map map, Mobile caster): base(128)
+            public WallOfStoneItem(Point3D loc, Map map, Mobile caster): base(128)
             {
                 Visible = false;
                 Movable = false;
@@ -149,8 +149,7 @@ namespace Server.Spells.Third
                 m_End = DateTime.UtcNow + TimeSpan.FromSeconds(10.0);
             }
 
-            public InternalItem(Serial serial)
-                : base(serial)
+            public WallOfStoneItem(Serial serial): base(serial)
             {
             }
 
@@ -203,9 +202,9 @@ namespace Server.Spells.Third
 
             private class InternalTimer : Timer
             {
-                private InternalItem m_Item;
+                private WallOfStoneItem m_Item;
 
-                public InternalTimer(InternalItem item, TimeSpan duration): base(duration)
+                public InternalTimer(WallOfStoneItem item, TimeSpan duration): base(duration)
                 {
                     m_Item = item;
                 }

@@ -64,6 +64,12 @@ namespace Server.Mobiles
                 {
                     e.Handled = true;
 
+                    if (ArenaController.GetArenaAtLocation(player.Location, player.Map) != null)
+                    {
+                        player.SendMessage("You cannot access stables while at that location.");
+                        return;
+                    } 
+
                     player.CloseGump(typeof(StableGump));
                     player.SendGump(new StableGump(this, player, 0));
 
@@ -94,6 +100,12 @@ namespace Server.Mobiles
 
                 if (player == null)
                     return;
+
+                if (ArenaController.GetArenaAtLocation(player.Location, player.Map) != null)
+                {
+                    player.SendMessage("You cannot access stables while at that location.");
+                    return;
+                }
 
                 player.CloseGump(typeof(StableGump));
                 player.SendGump(new StableGump(m_Vendor, player, 0));

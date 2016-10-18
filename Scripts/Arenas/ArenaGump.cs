@@ -2347,6 +2347,9 @@ namespace Server
 
                         //Create Match
                         case 12:
+                            arenaCreditsNeeded = m_ArenaGumpObject.m_ArenaRuleset.GetArenaCreditsCost();
+                            playerArenaCreditsAvailable = m_Player.m_ArenaAccountEntry.m_ArenaCredits;
+
                             if (m_Player.m_ArenaPlayerSettings.CurrentlyInMatch())                            
                                 m_Player.SendMessage("You must leave your current match before you may create a new one.");
 

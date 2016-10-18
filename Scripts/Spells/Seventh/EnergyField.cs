@@ -117,7 +117,7 @@ namespace Server.Spells.Seventh
                     if (!canFit)
                         continue;
 
-                    Item item = new InternalItem(loc, Caster.Map, duration, itemID, Caster);
+                    Item item = new EnergyFieldItem(loc, Caster.Map, duration, itemID, Caster);
                     item.ProcessDelta();
 
                     Effects.SendLocationParticles(EffectItem.Create(loc, Caster.Map, EffectItem.DefaultDuration), 0x376A, 9, 10, 5051);
@@ -128,13 +128,13 @@ namespace Server.Spells.Seventh
         }
 
         [DispellableField]
-        private class InternalItem : Item
+        public class EnergyFieldItem : Item
         {
             private Timer m_Timer;
 
             public override bool BlocksFit { get { return true; } }
 
-            public InternalItem(Point3D loc, Map map, TimeSpan duration, int itemID, Mobile caster): base(itemID)
+            public EnergyFieldItem(Point3D loc, Map map, TimeSpan duration, int itemID, Mobile caster): base(itemID)
             {
                 Visible = false;
                 Movable = false;
@@ -158,7 +158,7 @@ namespace Server.Spells.Seventh
                 m_Timer.Start();
             }
 
-            public InternalItem(Serial serial)
+            public EnergyFieldItem(Serial serial)
                 : base(serial)
             {
                 m_Timer = new InternalTimer(this, TimeSpan.FromSeconds(5.0));
@@ -204,9 +204,9 @@ namespace Server.Spells.Seventh
 
             private class InternalTimer : Timer
             {
-                private InternalItem m_Item;
+                private EnergyFieldItem m_Item;
 
-                public InternalTimer(InternalItem item, TimeSpan duration)
+                public InternalTimer(EnergyFieldItem item, TimeSpan duration)
                     : base(duration)
                 {
                     Priority = TimerPriority.OneSecond;

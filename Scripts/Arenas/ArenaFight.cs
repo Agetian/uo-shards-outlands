@@ -279,6 +279,9 @@ namespace Server
                     return true;
                 }
 
+                if (item is Spellbook)                
+                    return true;                
+
                 return false;
             }            
 
@@ -301,6 +304,9 @@ namespace Server
                 allowedItem = true;
 
             if (item is BaseContainer)            
+                allowedItem = true;
+
+            if (item is Spellbook)
                 allowedItem = true;
 
             if (!allowedItem)
@@ -1479,6 +1485,12 @@ namespace Server
 
             foreach (Object targetObject in arenaObjects)
             {
+                if (targetObject is WallOfStoneSpell.WallOfStoneItem) m_ItemsToDeleteQueue.Enqueue(targetObject);
+                if (targetObject is FireFieldSpell.FireFieldItem) m_ItemsToDeleteQueue.Enqueue(targetObject);
+                if (targetObject is PoisonFieldSpell.PoisonFieldItem) m_ItemsToDeleteQueue.Enqueue(targetObject);
+                if (targetObject is EnergyFieldSpell.EnergyFieldItem) m_ItemsToDeleteQueue.Enqueue(targetObject);
+                if (targetObject is ParalyzeFieldSpell.ParalyzeFieldItem) m_ItemsToDeleteQueue.Enqueue(targetObject);
+
                 if (targetObject is Item)
                 {
                     Item item = targetObject as Item;
