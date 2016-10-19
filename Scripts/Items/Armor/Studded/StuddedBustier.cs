@@ -9,11 +9,13 @@ namespace Server.Items
         public static int GetSBPurchaseValue() { return 1; }
         public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
-		public override int InitMinHits{ get{ return 35; } }
-		public override int InitMaxHits{ get{ return 45; } }
-		
-		public override int ArmorBase{ get{ return 20; } }
+        public override int ArmorBase { get { return ArmorValues.StuddedLeatherBaseArmorValue; } }
         public override int OldDexBonus { get { return 0; } }
+
+        public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorValues.StuddedLeatherMeditationAllowed; } }
+
+        public override int InitMinHits { get { return ArmorValues.StuddedLeatherDurability; } }
+        public override int InitMaxHits { get { return ArmorValues.StuddedLeatherDurability; } }
 
         public override int IconItemId { get { return 7181; } }
         public override int IconHue { get { return Hue; } }
@@ -22,8 +24,6 @@ namespace Server.Items
 
         public override ArmorMaterialType MaterialType { get { return ArmorMaterialType.Studded; } }
         public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }
-
-        public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorMeditationAllowance.ThreeQuarter; } }
 
 		public override bool AllowMaleWearer{ get{ return false; } }
 

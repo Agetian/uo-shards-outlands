@@ -641,6 +641,7 @@
     <Compile Include="Items\Weapons\Other\Wooden\ArcanistsWildStaff.cs" />
     <Compile Include="Items\Weapons\Other\Wooden\HardenedWildStaff.cs" />
     <Compile Include="Items\Weapons\Other\Wooden\ThornedWildStaff.cs" />
+    <Compile Include="Main\ArmorValues.cs" />
     <Compile Include="Main\WeaponAnimations.cs" />
     <Compile Include="Main\GumpCollections.cs" />
     <Compile Include="Main\Stables.cs" />

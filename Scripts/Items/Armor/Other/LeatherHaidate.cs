@@ -23,7 +23,7 @@ namespace Server.Items
 		public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }
 
 
-		public override ArmorMeditationAllowance DefMedAllowance{ get{ return ArmorMeditationAllowance.All; } }
+		public override ArmorMeditationAllowance DefMedAllowance{ get{ return ArmorMeditationAllowance.OneHundredPercent; } }
 
 		[Constructable]
 		public LeatherHaidate() : base( 0x278A )

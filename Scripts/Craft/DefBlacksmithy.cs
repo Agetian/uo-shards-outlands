@@ -186,12 +186,12 @@ namespace Server.Engines.Craft
             int index = -1;
 
             //Ringmail
-            AddCraft(1, typeof(RingmailGorget), "Ringmail Armor", "Ringmail Gorget", 30, 55, typeof(IronIngot), 1044036, 4, 1044037);
-            AddCraft(1, typeof(RingmailGloves), "Ringmail Armor", "Ringmail Gloves", 35, 60, typeof(IronIngot), 1044036, 6, 1044037);
-            AddCraft(1, typeof(RingmailHelm), "Ringmail Armor", "Ringmail Helm", 40, 65, typeof(IronIngot), 1044036, 8, 1044037);  
-            AddCraft(1, typeof(RingmailArms), "Ringmail Armor", "Ringmail Arms", 45, 70, typeof(IronIngot), 1044036, 8, 1044037);
-            AddCraft(1, typeof(RingmailLegs), "Ringmail Armor", "Ringmail Legs", 50, 75, typeof(IronIngot), 1044036, 10, 1044037);
-            AddCraft(1, typeof(RingmailChest), "Ringmail Armor", "Ringmail Chest", 55, 80, typeof(IronIngot), 1044036, 14, 1044037);
+            AddCraft(1, typeof(RingmailGorget), "Ringmail Armor", "Ringmail Gorget", 20, 45, typeof(IronIngot), 1044036, 4, 1044037);
+            AddCraft(1, typeof(RingmailGloves), "Ringmail Armor", "Ringmail Gloves", 25, 50, typeof(IronIngot), 1044036, 6, 1044037);
+            AddCraft(1, typeof(RingmailHelm), "Ringmail Armor", "Ringmail Helm", 30, 55, typeof(IronIngot), 1044036, 8, 1044037);  
+            AddCraft(1, typeof(RingmailArms), "Ringmail Armor", "Ringmail Arms", 35, 60, typeof(IronIngot), 1044036, 8, 1044037);
+            AddCraft(1, typeof(RingmailLegs), "Ringmail Armor", "Ringmail Legs", 40, 65, typeof(IronIngot), 1044036, 10, 1044037);
+            AddCraft(1, typeof(RingmailChest), "Ringmail Armor", "Ringmail Chest", 45, 70, typeof(IronIngot), 1044036, 14, 1044037);
 
             //Chainmail
             AddCraft(1, typeof(ChainmailGorget), "Chainmail Armor", "Chainmail Gorget", 40, 65, typeof(IronIngot), 1044036, 4, 1044037);
@@ -202,18 +202,18 @@ namespace Server.Engines.Craft
             AddCraft(1, typeof(ChainmailChest), "Chainmail Armor", "Chainmail Chest", 65, 90, typeof(IronIngot), 1044036, 14, 1044037);
 
             //Platemail
-            AddCraft(1, typeof(PlateGorget), "Platemail Armor", "Plate Gorget", 50, 75, typeof(IronIngot), 1044036, 6, 1044037);
-            AddCraft(1, typeof(PlateGloves), "Platemail Armor", "Plate Gloves", 55, 80, typeof(IronIngot), 1044036, 8, 1044037);
-            AddCraft(1, typeof(PlateHelm), "Platemail Armor", "Plate Helm", 60, 85, typeof(IronIngot), 1044036, 10, 1044037);
-            AddCraft(1, typeof(PlateArms), "Platemail Armor", "Plate Arms", 65, 90, typeof(IronIngot), 1044036, 12, 1044037);
-            AddCraft(1, typeof(PlateLegs), "Platemail Armor", "Plate Legs", 70, 95, typeof(IronIngot), 1044036, 14, 1044037);
-            AddCraft(1, typeof(PlateChest), "Platemail Armor", "Plate Chest", 75, 120, typeof(IronIngot), 1044036, 16, 1044037);
-            AddCraft(1, typeof(FemalePlateChest), "Platemail Armor", "Female Plate Chest", 75, 120, typeof(IronIngot), 1044036, 16, 1044037);
+            AddCraft(1, typeof(PlateGorget), "Platemail Armor", "Plate Gorget", 60, 85, typeof(IronIngot), 1044036, 6, 1044037);
+            AddCraft(1, typeof(PlateGloves), "Platemail Armor", "Plate Gloves", 65, 90, typeof(IronIngot), 1044036, 8, 1044037);
+            AddCraft(1, typeof(PlateHelm), "Platemail Armor", "Plate Helm", 70, 95, typeof(IronIngot), 1044036, 10, 1044037);
+            AddCraft(1, typeof(PlateArms), "Platemail Armor", "Plate Arms", 75, 100, typeof(IronIngot), 1044036, 12, 1044037);
+            AddCraft(1, typeof(PlateLegs), "Platemail Armor", "Plate Legs", 80, 105, typeof(IronIngot), 1044036, 14, 1044037);
+            AddCraft(1, typeof(PlateChest), "Platemail Armor", "Plate Chest", 85, 120, typeof(IronIngot), 1044036, 16, 1044037);
 
+            AddCraft(1, typeof(FemalePlateChest), "Platemail Armor", "Female Plate Chest", 85, 120, typeof(IronIngot), 1044036, 16, 1044037);
             //Helmets
-            AddCraft(1, typeof(Bascinet), "Other Helmets", "Bascinet", 60, 85, typeof(IronIngot), 1044036, 10, 1044037);
-            AddCraft(1, typeof(CloseHelm), "Other Helmets", "Close Helm", 60, 85, typeof(IronIngot), 1044036, 10, 1044037);
-            AddCraft(1, typeof(NorseHelm), "Other Helmets", "Norse Helm", 60, 85, typeof(IronIngot), 1044036, 10, 1044037);
+            AddCraft(1, typeof(Bascinet), "Other Helmets", "Bascinet", 70, 95, typeof(IronIngot), 1044036, 10, 1044037);
+            AddCraft(1, typeof(CloseHelm), "Other Helmets", "Close Helm", 70, 95, typeof(IronIngot), 1044036, 10, 1044037);
+            AddCraft(1, typeof(NorseHelm), "Other Helmets", "Norse Helm", 70, 95, typeof(IronIngot), 1044036, 10, 1044037);
 
             //Shields
             AddCraft(1, typeof(Buckler), "Shields", "Buckler", 10, 35, typeof(IronIngot), 1044036, 6, 1044037);

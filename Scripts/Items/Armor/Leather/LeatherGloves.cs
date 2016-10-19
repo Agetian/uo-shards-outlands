@@ -9,11 +9,13 @@ namespace Server.Items
         public static int GetSBPurchaseValue() { return 1; }
         public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
-		public override int InitMinHits{ get{ return 31; } }
-		public override int InitMaxHits{ get{ return 37; } }		
-
-        public override int ArmorBase { get { return 15; } }
+        public override int ArmorBase { get { return ArmorValues.LeatherBaseArmorValue; } }
         public override int OldDexBonus { get { return 0; } }
+
+        public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorValues.LeatherMeditationAllowed; } }
+
+        public override int InitMinHits { get { return ArmorValues.LeatherDurability; } }
+        public override int InitMaxHits { get { return ArmorValues.LeatherDurability; } }
 
         public override int IconItemId { get { return 5070; } }
         public override int IconHue { get { return Hue; } }
@@ -22,8 +24,6 @@ namespace Server.Items
 
         public override ArmorMaterialType MaterialType { get { return ArmorMaterialType.Leather; } }
         public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }
-
-        public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorMeditationAllowance.All; } }
 
 		[Constructable]
 		public LeatherGloves() : base( 5070 )

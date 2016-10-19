@@ -141,9 +141,9 @@ namespace Server.Engines.Craft
             AddRes(index, typeof(Feather), 1044562, 10, 1044563);
             SetUseAllRes(index, true);
 
-            AddCraft(1, typeof(Bow), "Bowcraft and Fletching", "Bow", 35, 60, typeof(Board), 1044041, 10, 1044351);
-            AddCraft(1, typeof(Crossbow), "Bowcraft and Fletching", "Crossbow", 45, 70, typeof(Board), 1044041, 12, 1044351);
-            AddCraft(1, typeof(HeavyCrossbow), "Bowcraft and Fletching", "Heavy Crossbow", 55, 80, typeof(Board), 1044041, 14, 1044351);
+            AddCraft(1, typeof(Bow), "Bowcraft and Fletching", "Bow", 35, 70, typeof(Board), 1044041, 10, 1044351);
+            AddCraft(1, typeof(Crossbow), "Bowcraft and Fletching", "Crossbow", 50, 75, typeof(Board), 1044041, 12, 1044351);
+            AddCraft(1, typeof(HeavyCrossbow), "Bowcraft and Fletching", "Heavy Crossbow", 75, 120, typeof(Board), 1044041, 14, 1044351);
 
             //Weapons and Shields
             AddCraft(1, typeof(Club), "Weapons and Shields", "Club", 25, 50, typeof(Board), 1044041, 8, 1044351);

@@ -60,7 +60,7 @@ namespace Server.Items
         public static double ArmorRatingMaxDamageReductionScalar = .50;
 
         public override CraftResource DefaultResource { get { return CraftResource.Iron; } }
-
+        
         public virtual string BlessedInRegionName { get { return ""; } }
         
         public override void OnAfterDuped(Item newItem)
@@ -81,7 +81,7 @@ namespace Server.Items
             get
             {
                 if (DecorativeEquipment)
-                    return AMA.All;
+                    return AMA.OneHundredPercent;
 
                 return (m_Meditate == (AMA)(-1) ? Core.AOS ? AosMedAllowance : OldMedAllowance : m_Meditate);
             }
@@ -1714,10 +1714,11 @@ namespace Server.Items
 
     public enum ArmorMeditationAllowance
     {
-        All,
-        ThreeQuarter,
-        Half,
-        Quarter,
+        OneHundredPercent,
+        EightyPercent,
+        SixtyPercent,
+        FourtyPercent,
+        TwentyPercent,
         None
     }
 }

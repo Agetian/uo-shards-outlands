@@ -5,11 +5,16 @@ namespace Server.Items
 {
 	public class OrcHelmMask : BaseArmor
 	{
-        public override int InitMinHits { get { return 40; } }
-        public override int InitMaxHits { get { return 50; } }
+        public static int GetSBPurchaseValue() { return 1; }
+        public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
-        public override int ArmorBase { get { return 25; } }
+        public override int ArmorBase { get { return ArmorValues.LeatherBaseArmorValue; } }
         public override int OldDexBonus { get { return 0; } }
+
+        public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorValues.LeatherMeditationAllowed; } }
+
+        public override int InitMinHits { get { return ArmorValues.LeatherDurability; } }
+        public override int InitMaxHits { get { return ArmorValues.LeatherDurability; } }
 
         public override int IconItemId { get { return 7947; } }
         public override int IconHue { get { return Hue; } }
@@ -18,8 +23,6 @@ namespace Server.Items
 
         public override ArmorMaterialType MaterialType { get { return ArmorMaterialType.Leather; } }
         public override CraftResource DefaultResource { get { return CraftResource.RegularLeather; } }
-
-        public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorMeditationAllowance.All; } }
 
 		[Constructable]
 		public OrcHelmMask() : base( 7947 )

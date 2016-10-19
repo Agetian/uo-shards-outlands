@@ -8,11 +8,13 @@ namespace Server.Items
         public static int GetSBPurchaseValue() { return 1; }
         public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
-        public override int InitMinHits { get { return 95; } }
-        public override int InitMaxHits { get { return 95; } }
-        
-        public override int ArmorBase { get { return 16; } }
-        public override int OldDexBonus { get { return -4; } }
+        public override int ArmorBase { get { return ArmorValues.MetalKiteShieldArmorValue; } }
+        public override int OldDexBonus { get { return 0; } }
+
+        public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorValues.MetalKiteShieldMeditationAllowed; } }
+
+        public override int InitMinHits { get { return ArmorValues.MetalKiteShieldDurability; } }
+        public override int InitMaxHits { get { return ArmorValues.MetalKiteShieldDurability; } }
 
         public override int IconItemId { get { return 7029; } }
         public override int IconHue { get { return Hue; } }

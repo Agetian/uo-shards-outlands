@@ -372,7 +372,7 @@ namespace Server.Items
 			int baseCount = ( isShield ? 7 : 20 );
 			int baseOffset = ( isShield ? 0 : 4 );
 
-			if ( !isShield && armor.MeditationAllowance == ArmorMeditationAllowance.All )
+			if ( !isShield && armor.MeditationAllowance == ArmorMeditationAllowance.OneHundredPercent )
 				m_Props.Set( 3, true ); // remove mage armor from possible properties
 			if ( armor.Resource >= CraftResource.RegularLeather && armor.Resource <= CraftResource.BarbedLeather )
 			{

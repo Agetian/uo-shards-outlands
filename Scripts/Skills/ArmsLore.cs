@@ -499,10 +499,11 @@ namespace Server.SkillHandlers
                 switch (armor.MeditationAllowance)
                 {
                     case ArmorMeditationAllowance.None: meditationText = "0%"; break;
-                    case ArmorMeditationAllowance.Quarter: meditationText = "25%"; break;
-                    case ArmorMeditationAllowance.Half: meditationText = "50%"; break;
-                    case ArmorMeditationAllowance.ThreeQuarter: meditationText = "75%"; break;
-                    case ArmorMeditationAllowance.All: meditationText = "100%"; break;
+                    case ArmorMeditationAllowance.TwentyPercent: meditationText = "20%"; break;
+                    case ArmorMeditationAllowance.FourtyPercent: meditationText = "40%"; break;
+                    case ArmorMeditationAllowance.SixtyPercent: meditationText = "60%"; break;
+                    case ArmorMeditationAllowance.EightyPercent: meditationText = "80%"; break;
+                    case ArmorMeditationAllowance.OneHundredPercent: meditationText = "100%"; break;
                 }
 
                 switch (displayMode)

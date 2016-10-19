@@ -8,11 +8,13 @@ namespace Server.Items
         public static int GetSBPurchaseValue() { return 1; }
         public static int GetSBSellValue() { return Item.SBDetermineSellPrice(GetSBPurchaseValue()); }
 
-        public override int InitMinHits { get { return 85; } }
-        public override int InitMaxHits { get { return 85; } }
-        
-        public override int ArmorBase { get { return 14; } }
-        public override int OldDexBonus { get { return -3; } }
+        public override int ArmorBase { get { return ArmorValues.BronzeShieldArmorValue; } }
+        public override int OldDexBonus { get { return 0; } }
+
+        public override ArmorMeditationAllowance DefMedAllowance { get { return ArmorValues.BronzeShieldMeditationAllowed; } }
+
+        public override int InitMinHits { get { return ArmorValues.BronzeShieldDurability; } }
+        public override int InitMaxHits { get { return ArmorValues.BronzeShieldDurability; } }
 
         public override int IconItemId { get { return 7026; } }
         public override int IconHue { get { return Hue; } }
@@ -26,8 +28,7 @@ namespace Server.Items
             Weight = 6.0;
         }
 
-        public BronzeShield(Serial serial)
-            : base(serial)
+        public BronzeShield(Serial serial): base(serial)
         {
         }
 

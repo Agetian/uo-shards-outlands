@@ -119,18 +119,37 @@ namespace Server.Engines.Craft
         {
             int index = -1;
 
-            //Leather
-            AddCraft(1, typeof(LeatherGorget), "Leather Armor", "Leather Gorget", 50, 75, typeof(Leather), 1044462, 4, 1044463);            
-            AddCraft(1, typeof(LeatherGloves), "Leather Armor", "Leather Gloves", 55, 80, typeof(Leather), 1044462, 6, 1044463);
-            AddCraft(1, typeof(LeatherCap), "Leather Armor", "Leather Cap", 60, 85, typeof(Leather), 1044462, 8, 1044463);
-            AddCraft(1, typeof(LeatherArms), "Leather Armor", "Leather Arms", 65, 90, typeof(Leather), 1044462, 10, 1044463);
-            AddCraft(1, typeof(LeatherLegs), "Leather Armor", "Leather Legs", 70, 95, typeof(Leather), 1044462, 12, 1044463);
-            AddCraft(1, typeof(LeatherChest), "Leather Armor", "Leather Chest", 75, 100, typeof(Leather), 1044462, 14, 1044463);
+            //Bone Armor
+            index = AddCraft(1, typeof(BoneGorget), "Bone Armor", "Bone Gorget", 20, 45, typeof(Leather), 1044462, 2, 1044463);
+            AddRes(index, typeof(Bone), "Bone", 4, "You do not have the required number of bones needed to make this.");
 
-            AddCraft(1, typeof(LeatherShorts), "Leather Armor", "Leather Shorts", 70, 95, typeof(Leather), 1044462, 12, 1044463);
-            AddCraft(1, typeof(LeatherSkirt), "Leather Armor", "Leather Skirt", 70, 95, typeof(Leather), 1044462, 12, 1044463);
-            AddCraft(1, typeof(LeatherBustier), "Leather Armor", "Leather Bustier", 75, 100, typeof(Leather), 1044462, 14, 1044463);
-            AddCraft(1, typeof(FemaleLeatherChest), "Leather Armor", "Female Leather Chest", 75, 100, typeof(Leather), 1044462, 14, 1044463);           
+            index = AddCraft(1, typeof(BoneGloves), "Bone Armor", "Bone Gloves", 25, 50, typeof(Leather), 1044462, 3, 1044463);
+            AddRes(index, typeof(Bone), "Bone", 6, "You do not have the required number of bones needed to make this.");
+
+            index = AddCraft(1, typeof(BoneHelm), "Bone Armor", "Bone Helm", 30, 55, typeof(Leather), 1044462, 4, 1044463);
+            AddRes(index, typeof(Bone), "Bone", 8, "You do not have the required number of bones needed to make this.");
+
+            index = AddCraft(1, typeof(BoneArms), "Bone Armor", "Bone Arms", 35, 60, typeof(Leather), 1044462, 5, 1044463);
+            AddRes(index, typeof(Bone), "Bone", 10, "You do not have the required number of bones needed to make this.");
+
+            index = AddCraft(1, typeof(BoneLegs), "Bone Armor", "Bone Legs", 40, 65, typeof(Leather), 1044462, 6, 1044463);
+            AddRes(index, typeof(Bone), "Bone", 12, "You do not have the required number of bones needed to make this.");
+
+            index = AddCraft(1, typeof(BoneChest), "Bone Armor", "Bone Chest", 45, 70, typeof(Leather), 1044462, 7, 1044463);
+            AddRes(index, typeof(Bone), "Bone", 14, "You do not have the required number of bones needed to make this.");
+
+            //Leather
+            AddCraft(1, typeof(LeatherGorget), "Leather Armor", "Leather Gorget", 40, 65, typeof(Leather), 1044462, 4, 1044463);            
+            AddCraft(1, typeof(LeatherGloves), "Leather Armor", "Leather Gloves", 45, 70, typeof(Leather), 1044462, 6, 1044463);
+            AddCraft(1, typeof(LeatherCap), "Leather Armor", "Leather Cap", 50, 75, typeof(Leather), 1044462, 8, 1044463);
+            AddCraft(1, typeof(LeatherArms), "Leather Armor", "Leather Arms", 55, 80, typeof(Leather), 1044462, 10, 1044463);
+            AddCraft(1, typeof(LeatherLegs), "Leather Armor", "Leather Legs", 60, 85, typeof(Leather), 1044462, 12, 1044463);
+            AddCraft(1, typeof(LeatherChest), "Leather Armor", "Leather Chest", 65, 90, typeof(Leather), 1044462, 14, 1044463);
+
+            AddCraft(1, typeof(LeatherShorts), "Leather Armor", "Leather Shorts", 60, 85, typeof(Leather), 1044462, 12, 1044463);
+            AddCraft(1, typeof(LeatherSkirt), "Leather Armor", "Leather Skirt", 60, 85, typeof(Leather), 1044462, 12, 1044463);
+            AddCraft(1, typeof(LeatherBustier), "Leather Armor", "Leather Bustier", 65, 90, typeof(Leather), 1044462, 14, 1044463);
+            AddCraft(1, typeof(FemaleLeatherChest), "Leather Armor", "Female Leather Chest", 65, 90, typeof(Leather), 1044462, 14, 1044463);           
 
             //Studded
             AddCraft(1, typeof(StuddedGorget), "Studded Leather Armor", "Studded Gorget", 60, 85, typeof(Leather), 1044462, 4, 1044463);
@@ -138,30 +157,11 @@ namespace Server.Engines.Craft
             AddCraft(1, typeof(StuddedCap), "Studded Leather Armor", "Studded Cap", 70, 95, typeof(Leather), 1044462, 8, 1044463);
             AddCraft(1, typeof(StuddedArms), "Studded Leather Armor", "Studded Arms", 75, 100, typeof(Leather), 1044462, 10, 1044463);
             AddCraft(1, typeof(StuddedLegs), "Studded Leather Armor", "Studded Legs", 80, 105, typeof(Leather), 1044462, 12, 1044463);
-            AddCraft(1, typeof(StuddedChest), "Studded Leather Armor", "Studded Chest", 85, 110, typeof(Leather), 1044462, 14, 1044463);
+            AddCraft(1, typeof(StuddedChest), "Studded Leather Armor", "Studded Chest", 85, 120, typeof(Leather), 1044462, 14, 1044463);
 
-            AddCraft(1, typeof(StuddedBustier), "Studded Leather Armor", "Studded Bustier", 85, 110, typeof(Leather), 1044462, 14, 1044463);            
-            AddCraft(1, typeof(FemaleStuddedChest), "Studded Leather Armor", "Studded Female Chest", 85, 110, typeof(Leather), 1044462, 14, 1044463);
-
-            //Bone Armor
-            index = AddCraft(1, typeof(BoneGorget), "Bone Armor", "Bone Gorget", 70, 95, typeof(Leather), 1044462, 4, 1044463);
-            AddRes(index, typeof(Bone), 1049064, 1, 1049063);
-
-            index = AddCraft(1, typeof(BoneGloves), "Bone Armor", "Bone Gloves", 75, 100, typeof(Leather), 1044462, 6, 1044463);
-            AddRes(index, typeof(Bone), 1049064, 1, 1049063);
-
-            index = AddCraft(1, typeof(BoneHelm), "Bone Armor", "Bone Helm", 80, 105, typeof(Leather), 1044462, 8, 1044463);
-            AddRes(index, typeof(Bone), 1049064, 2, 1049063);
-
-            index = AddCraft(1, typeof(BoneArms), "Bone Armor", "Bone Arms", 85, 110, typeof(Leather), 1044462, 10, 1044463);
-            AddRes(index, typeof(Bone), 1049064, 3, 1049063);
-
-            index = AddCraft(1, typeof(BoneLegs), "Bone Armor", "Bone Legs", 90, 115, typeof(Leather), 1044462, 12, 1044463);
-            AddRes(index, typeof(Bone), 1049064, 4, 1049063);
-
-            index = AddCraft(1, typeof(BoneChest), "Bone Armor", "Bone Chest", 95, 120, typeof(Leather), 1044462, 14, 1044463);
-            AddRes(index, typeof(Bone), 1049064, 5, 1049063);
-
+            AddCraft(1, typeof(StuddedBustier), "Studded Leather Armor", "Studded Bustier", 85, 120, typeof(Leather), 1044462, 14, 1044463);            
+            AddCraft(1, typeof(FemaleStuddedChest), "Studded Leather Armor", "Studded Female Chest", 85, 120, typeof(Leather), 1044462, 14, 1044463);
+            
             //Hats
             AddCraft(1, typeof(SkullCap), "Hats", "Skull Cap", 0, 25.0, typeof(Cloth), 1044286, 4, 1044287);
             AddCraft(1, typeof(Bandana), "Hats", "Bandana", 0, 25.0, typeof(Cloth), 1044286, 4, 1044287);
@@ -225,12 +225,16 @@ namespace Server.Engines.Craft
             // Set the overridable material
             SetSubRes(typeof(Leather), "Leather");
 
+            AddSubRes(typeof(Leather), "Leather", 0, 1049311);   
+
+            /*
             // Add every material you want the player to be able to choose from
             // This will override the overridable material
-            AddSubRes(typeof(Leather), "Leather", 0, 1049311);
+            AddSubRes(typeof(Leather), "Leather", 0, 1049311);            
             AddSubRes(typeof(SpinedLeather), "Spined", 50, 1049311);
             AddSubRes(typeof(HornedLeather), "Horned", 75, 1049311);
             AddSubRes(typeof(BarbedLeather), "Barbed", 100, 1049311);
+            */
 
             Recycle = true;
             MarkOption = true;
