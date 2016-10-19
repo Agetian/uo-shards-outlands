@@ -54,6 +54,8 @@ namespace Server
         public static int ItemRulesPerCreateMatchPage = 9;
         public static int ItemRulesPerMatchInfoPage = 9;
 
+        public static int RewardItemsPerPage = 4;
+
         public List<ArenaMatch> m_AvailableMatches = new List<ArenaMatch>();
 
         public ArenaGump(PlayerMobile player, ArenaGumpObject arenaGumpObject): base(10, 10)
@@ -245,6 +247,9 @@ namespace Server
 
             #endregion
 
+            int startX = 0;
+            int startY = 0;
+
             switch (arenaGumpObject.m_ArenaPage)
             {
                 #region Available Matches
@@ -323,7 +328,7 @@ namespace Server
                     //Matches
                     int matchCount = matchEndIndex - matchStartIndex;
                                         
-                    int startY = 110;
+                    startY = 110;
                     int rowSpacing = 50;
                                         
                     for (int a = 0; a < matchCount + 1; a++)
@@ -743,7 +748,7 @@ namespace Server
 
                     int startingRuleIndex = (m_ArenaGumpObject.m_SettingsPage * BasicRulesPerCreateMatchPage);
 
-                    int startX = 65;
+                    startX = 65;
                     startY = 120;
                     rowSpacing = 40;
 
@@ -1598,65 +1603,10 @@ namespace Server
                 #region Credits and Rewards
 
                 case ArenaPageType.CreditsAndRewards:
-                    AddButton(23, 483, 4014, 4016, 0, GumpButtonType.Reply, 0);
-                    AddLabel(57, 483, WhiteTextHue, "Previous Rewards");
-			        AddButton(544, 483, 4005, 4007, 0, GumpButtonType.Reply, 0);
-                    AddLabel(580, 483, WhiteTextHue, "More Rewards");
-			        AddLabel(304, 84, 2603, "Arena Credits");
-			        AddLabel(33, 106, 149, "Arena Credits on Account:");
-			        AddLabel(204, 106, 63, "0");
-			        AddLabel(33, 141, 2603, "Unranked Match:");
-			        AddLabel(33, 166, 2606, "Ranked Match:");
-			        AddLabel(33, 191, 53, "Tournament Entry:");
-			        AddLabel(142, 141, WhiteTextHue, "Costs 1 Credit");
-                    AddLabel(131, 166, WhiteTextHue, "Costs 5 Credits");
-                    AddLabel(156, 191, WhiteTextHue, "Costs 50 Credits");
-			        AddItem(489, 139, 3823);
-			        AddButton(461, 138, 2151, 2154, 0, GumpButtonType.Reply, 0);
-			        AddLabel(459, 106, 63, "Purchase 5 Arena Credits");
-                    AddLabel(533, 141, WhiteTextHue, "1000 Gold");
-			        AddItem(483, 191, 7157, 2963);
-			        AddButton(461, 186, 2151, 2154, 0, GumpButtonType.Reply, 0);
-                    AddLabel(533, 191, WhiteTextHue, "10 Jade");
-			        AddItem(480, 195, 7157, 2963);
-			        AddLabel(204, 484, 2599, "Reward Points:");
-			        AddLabel(308, 484, 63, "3");
-			        AddLabel(360, 484, 2401, "Black Reward Points:");
-			        AddLabel(503, 484, 63, "1");
-			        AddItem(47, 262, 11764, 2587);
-			        AddLabel(109, 262, 149, "Random Champion Reward Box");
-			        AddButton(243, 300, 2151, 248, 0, GumpButtonType.Reply, 0);
-			        AddLabel(181, 302, 63, "Purchase");
-			        AddButton(141, 305, 1210, 248, 0, GumpButtonType.Reply, 0);
-			        AddLabel(109, 302, 2550, "Info");
-                    AddLabel(109, 282, WhiteTextHue, "Cost:");
-			        AddLabel(149, 282, 2599, "2 Reward Points");
-			        AddLabel(471, 376, 149, "True Black Vest");
-			        AddButton(605, 414, 2151, 248, 0, GumpButtonType.Reply, 0);
-			        AddLabel(543, 416, 63, "Purchase");
-			        AddButton(503, 419, 1210, 248, 0, GumpButtonType.Reply, 0);
-			        AddLabel(471, 416, 2550, "Info");
-                    AddLabel(471, 396, WhiteTextHue, "Cost:");
-			        AddLabel(511, 396, 2401, "2 Black Reward Points");
-			        AddItem(53, 393, 3622, 1102);
-			        AddLabel(109, 376, 149, "True Black Clothing Dye");
-			        AddButton(243, 414, 2151, 248, 0, GumpButtonType.Reply, 0);
-			        AddLabel(181, 416, 63, "Purchase");
-			        AddButton(141, 419, 1210, 248, 0, GumpButtonType.Reply, 0);
-			        AddLabel(109, 416, 2550, "Info");
-                    AddLabel(109, 396, WhiteTextHue, "Cost:");
-			        AddLabel(149, 396, 2401, "1 Black Reward Point");
-			        AddItem(414, 250, 5416);
-			        AddLabel(471, 262, 149, "Champion's Statue");
-			        AddButton(605, 300, 2151, 248, 0, GumpButtonType.Reply, 0);
-			        AddLabel(543, 302, 63, "Purchase");
-			        AddButton(503, 305, 1210, 248, 0, GumpButtonType.Reply, 0);
-			        AddLabel(471, 302, 2550, "Info");
-                    AddLabel(471, 282, WhiteTextHue, "Cost:");
-			        AddLabel(511, 282, 2599, "10 Reward Points");
-			        AddBackground(400, 373, 64, 69, 9270);
-			        AddBackground(410, 382, 45, 49, 3000);
-			        AddItem(409, 393, 10145, 2052);
+
+                    #region Images
+
+                    AddLabel(304, 84, 2603, "Arena Credits");			       
 			        AddItem(261, 120, 11550);
 			        AddItem(341, 121, 11967);
 			        AddItem(314, 117, 11968);
@@ -1680,6 +1630,119 @@ namespace Server
 			        AddImage(409, 223, 96, 1102);
 			        AddImage(491, 223, 96, 1102);
 			        AddLabel(320, 212, 90, "Rewards");
+
+                    #endregion
+
+                    //-----
+                    AddLabel(33, 106, 149, "Arena Credits on Account:");
+			        AddLabel(204, 106, 63, "0");
+
+                    AddLabel(33, 141, 2603, "Unranked Match:");
+			        AddLabel(142, 141, WhiteTextHue, "Costs 1 Credit");
+
+                    AddLabel(33, 166, 2606, "Ranked Match:");
+                    AddLabel(131, 166, WhiteTextHue, "Costs 5 Credits");
+
+			        AddLabel(33, 191, 53, "Tournament Entry:");  
+                    AddLabel(156, 191, WhiteTextHue, "Costs 50 Credits");
+
+                    AddItem(489, 139, 3823);
+			        AddButton(461, 138, 2151, 2154, 10, GumpButtonType.Reply, 0);
+			        AddLabel(459, 106, 63, "Purchase 5 Arena Credits");
+                    AddLabel(533, 141, WhiteTextHue, "1000 Gold");
+			       
+			        AddButton(461, 186, 2151, 2154, 11, GumpButtonType.Reply, 0);
+                    AddLabel(533, 191, WhiteTextHue, "10 Jade");
+                    AddItem(483, 191, 7157, 2963);
+			        AddItem(480, 195, 7157, 2963);	
+
+                    //-----
+                    
+                    int totalItems = ArenaRewards.ArenaRewardList.Count;
+                    int totalItemPages = (int)(Math.Ceiling((double)totalItems / (double)RewardItemsPerPage));
+
+                    if (m_ArenaGumpObject.m_Page >= totalItemPages)
+                        m_ArenaGumpObject.m_Page = 0;
+
+                    if (m_ArenaGumpObject.m_Page < 0)
+                        m_ArenaGumpObject.m_Page = 0;
+
+                    int itemStartIndex = m_ArenaGumpObject.m_Page * RewardItemsPerPage;
+                    int itemEndIndex = (m_ArenaGumpObject.m_Page * RewardItemsPerPage) + (RewardItemsPerPage - 1);
+
+                    if (itemEndIndex >= totalItems)
+                        itemEndIndex = totalItems - 1;
+
+                    int itemCount = itemEndIndex - itemStartIndex;
+
+                    for (int a = 0; a < itemCount + 1; a++)
+                    {
+                        if (totalItems == 0)
+                            continue;
+
+                        switch (a)
+                        {
+                            case 0: startX = 109; startY = 260; break;
+                            case 1: startX = 458; startY = 260; break;
+                            case 2: startX = 108; startY = 375; break;
+                            case 3: startX = 458; startY = 375; break;
+                        }                        
+
+                        int itemIndex = itemStartIndex + a;
+
+                        if (itemIndex >= ArenaRewards.ArenaRewardList.Count)
+                            continue;
+
+                        ArenaRewardDetail rewardDetail = ArenaRewards.ArenaRewardList[itemIndex];
+
+                        if (rewardDetail == null)
+                            continue;
+
+                        if (rewardDetail.GumpCollectionId != "")
+                            AddGumpCollection(GumpCollections.GetGumpCollection(rewardDetail.GumpCollectionId, -1), startX - 110, startY - 22);
+                        else
+                            AddItem(startX - 110 + rewardDetail.IconOffsetX, startY - 22 + rewardDetail.IconOffsetY, rewardDetail.IconItemID, rewardDetail.IconHue);
+                        
+                        AddLabel(startX, startY, rewardDetail.DisplayNameHue, rewardDetail.DisplayName);
+                        AddLabel(startX, startY + 20, WhiteTextHue, "Cost:");
+                        if (rewardDetail.ItemRewardPoints > 0)
+                            AddLabel(startX + 40, startY + 20, 2599, rewardDetail.ItemRewardPoints.ToString() + " Reward Points");
+                        else
+                            AddLabel(startX + 40, startY + 20, 2401, rewardDetail.ItemBlackRewardPoints.ToString() + " Black Reward Points");
+                        AddLabel(startX, startY + 40, 2550, "Info");
+                        AddButton(startX + 30, startY + 43, 1209, 1210, 30 + a, GumpButtonType.Reply, 0);
+                        AddLabel(startX + 70, startY + 40, 63, "Purchase");
+                        AddButton(startX + 133, startY + 39, 2151, 2154, 20 + a, GumpButtonType.Reply, 0);                        
+                    }
+
+                    bool previousPagesExist = false;
+                    bool morePagesExist = false;
+
+                    if (m_ArenaGumpObject.m_Page > 0)
+                        previousPagesExist = true;
+
+                    if (m_ArenaGumpObject.m_Page < totalItemPages - 1)
+                        morePagesExist = true;
+
+                    if (previousPagesExist)
+                    {
+                        AddButton(23, 483, 4014, 4016, 12, GumpButtonType.Reply, 0);
+                        AddLabel(57, 483, WhiteTextHue, "Previous Rewards");
+                    }
+
+                    if (morePagesExist)
+                    {
+                        AddButton(544, 483, 4005, 4007, 13, GumpButtonType.Reply, 0);
+                        AddLabel(580, 483, WhiteTextHue, "More Rewards");
+                    }
+                    
+                    //-----                   
+
+                    AddLabel(204, 484, 2599, "Reward Points:");
+			        AddLabel(303, 484, 63, "3");
+
+			        AddLabel(360, 484, 2401, "Black Reward Points:");
+			        AddLabel(498, 484, 63, "1");
                 break;
 
                 #endregion
@@ -1954,7 +2017,8 @@ namespace Server
                                 m_ArenaGumpObject.m_ArenaRuleset = new ArenaRuleset();
                                 m_ArenaGumpObject.m_ArenaRuleset.IsTemporary = true;
 
-                                m_ArenaGumpObject.m_ArenaPage = ArenaPageType.CreateMatch;                                
+                                m_ArenaGumpObject.m_ArenaPage = ArenaPageType.CreateMatch;
+                                m_ArenaGumpObject.m_Page = 0;
 
                                 m_Player.SendSound(ChangePageSound);
                             }                            
@@ -2283,7 +2347,8 @@ namespace Server
                             m_ArenaGumpObject.ArenaRulesetEdited = false;
 
                             m_ArenaGumpObject.m_ArenaMatchViewing = selectedArenaMatch;
-                            m_ArenaGumpObject.m_ArenaPage = ArenaPageType.MatchInfo;                             
+                            m_ArenaGumpObject.m_ArenaPage = ArenaPageType.MatchInfo;
+                            m_ArenaGumpObject.m_Page = 0;
 
                             m_Player.SendSound(SelectionSound);                            
                         }
@@ -2385,8 +2450,9 @@ namespace Server
 
                                 m_ArenaGumpObject.ArenaRulesetEdited = false;
 
-                                m_ArenaGumpObject.m_ArenaPage = ArenaPageType.MatchInfo;
                                 m_ArenaGumpObject.m_ArenaMatchViewing = arenaMatch;
+                                m_ArenaGumpObject.m_ArenaPage = ArenaPageType.MatchInfo;                                
+                                m_ArenaGumpObject.m_Page = 0;
 
                                 ArenaRuleset.CopyRulesetSettings(arenaMatch.m_Ruleset, m_ArenaGumpObject.m_ArenaRuleset);
                             }
@@ -3102,6 +3168,111 @@ namespace Server
                 break;
 
                 #endregion
+
+                #region Match Info
+
+                case ArenaPageType.CreditsAndRewards:
+                    int totalItems = ArenaRewards.ArenaRewardList.Count;
+                    int totalItemPages = (int)(Math.Ceiling((double)totalItems / (double)RewardItemsPerPage));
+
+                    if (m_ArenaGumpObject.m_Page >= totalItemPages)
+                        m_ArenaGumpObject.m_Page = 0;
+
+                    if (m_ArenaGumpObject.m_Page < 0)
+                        m_ArenaGumpObject.m_Page = 0;
+
+                    int itemStartIndex = m_ArenaGumpObject.m_Page * RewardItemsPerPage;
+                    int itemEndIndex = (m_ArenaGumpObject.m_Page * RewardItemsPerPage) + (RewardItemsPerPage - 1);
+
+                    if (itemEndIndex >= totalItems)
+                        itemEndIndex = totalItems - 1;
+
+                    int itemCount = itemEndIndex - itemStartIndex;
+
+                    bool previousPagesExist = false;
+                    bool morePagesExist = false;
+
+                    if (m_ArenaGumpObject.m_Page > 0)
+                        previousPagesExist = true;
+
+                    if (m_ArenaGumpObject.m_Page < totalItemPages - 1)
+                        morePagesExist = true;
+
+                    switch (info.ButtonID)
+                    {
+                        //Purchase Arena Credits (Gold)
+                        case 10:
+                            //TEST: FINISH!
+
+                            closeGump = false;
+                        break;
+
+                        //Purchase Arena Credits (Donation Currency)
+                        case 11:
+                            //TEST: FINISH!
+
+                            closeGump = false;
+                        break;
+
+                        //Previous Page
+                        case 12:
+                            if (previousPagesExist)
+                                m_ArenaGumpObject.m_Page--;
+
+                            m_Player.SendSound(ChangePageSound);
+
+                            closeGump = false;
+                        break;
+
+                        //Next Page
+                        case 13:
+                            if (morePagesExist)
+                                m_ArenaGumpObject.m_Page++;
+
+                            m_Player.SendSound(ChangePageSound);
+
+                            closeGump = false;
+                        break;
+                    }
+
+                    if (info.ButtonID >= 20 && info.ButtonID < 30)
+                    {
+                        int itemSelectionIndex = info.ButtonID - 20;
+                        int itemSelected = (m_ArenaGumpObject.m_Page * RewardItemsPerPage) + itemSelectionIndex;
+
+                        if (itemSelected >= totalItems)
+                            itemSelected = 0;
+
+                        ArenaRewardDetail rewardDetail = ArenaRewards.ArenaRewardList[itemSelected];
+
+                        if (rewardDetail == null)
+                            return;
+
+                        //TEST: FINISH!
+
+                        closeGump = false;
+                    }
+
+                    if (info.ButtonID >= 30 && info.ButtonID < 40)
+                    {
+                        int itemSelectionIndex = info.ButtonID - 30;
+                        int itemSelected = (m_ArenaGumpObject.m_Page * RewardItemsPerPage) + itemSelectionIndex;
+
+                        if (itemSelected >= totalItems)
+                            itemSelected = 0;
+
+                        ArenaRewardDetail rewardDetail = ArenaRewards.ArenaRewardList[itemSelected];
+
+                        if (rewardDetail == null)
+                            return;
+
+                        //TEST: FINISH!
+
+                        closeGump = false;
+                    }
+                break;
+
+                #endregion
             }
             
             if (!closeGump)
@@ -3113,29 +3284,9 @@ namespace Server
             else
                 m_Player.SendSound(CloseGumpSound);
         }
-    }
+    }    
 
-    public class ArenaGumpObject
-    {
-        public PlayerMobile m_Player;
-
-        public ArenaGroupController m_ArenaGroupController;
-        public ArenaGump.ArenaPageType m_ArenaPage = ArenaGump.ArenaPageType.AvailableMatches;
-        public int m_Page = 0;
-        public int m_SettingsPage = 0;
-
-        public ArenaRuleset m_ArenaRuleset;
-        public ArenaMatch m_ArenaMatchViewing;
-
-        public bool ArenaRulesetEdited = false;
-
-        public ArenaGumpObject(PlayerMobile player, ArenaGroupController arenaGroupController)
-        {
-            m_Player = player;
-            m_ArenaGroupController = arenaGroupController;
-            m_ArenaRuleset = new ArenaRuleset();
-        }
-    }
+    #region Player Info Gump
 
     public class ArenaPlayerInfoGump : Gump
     {
@@ -3161,14 +3312,7 @@ namespace Server
 
             if (m_Player == null) return;
             if (m_TargetPlayer == null) return;
-            if (m_ArenaMatch == null) return;
-            if (m_ArenaGumpObject == null) return;
-
-            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
-            {
-                m_Player.SendMessage("That match is no longer accessible.");
-                return;
-            }
+            if (m_ArenaGumpObject == null) return;            
             
             ArenaPlayerSettings.CheckCreateArenaPlayerSettings(m_TargetPlayer);
                         
@@ -3242,15 +3386,8 @@ namespace Server
         {
             if (m_Player == null) return;
             if (m_TargetPlayer == null) return;
-            if (m_ArenaMatch == null) return;
             if (m_ArenaGumpObject == null) return;
-
-            if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
-            {
-                m_Player.SendMessage("That match is no longer accessible.");
-                return;
-            }
-
+            
             ArenaPlayerSettings.CheckCreateArenaPlayerSettings(m_Player);
      
             bool closeGump = true;
@@ -3259,6 +3396,12 @@ namespace Server
             {
                 //Send Message
                 case 1:
+                    if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                    {
+                        m_Player.SendMessage("That match is no longer accessible.");
+                        return;
+                    }
+
                     if (m_ArenaMatch == m_Player.m_ArenaPlayerSettings.m_ArenaMatch && m_Player != m_TargetPlayer)
                     {  
                         m_Player.SendMessage("What message will you send this player?");
@@ -3281,6 +3424,12 @@ namespace Server
 
                 //Kick Player
                 case 2:
+                    if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                    {
+                        m_Player.SendMessage("That match is no longer accessible.");
+                        return;
+                    }
+
                     if (m_ArenaMatch.m_Creator == m_Player && m_Player != m_TargetPlayer)
                     {
                         ArenaParticipant participant = m_ArenaMatch.GetParticipant(m_TargetPlayer);
@@ -3312,6 +3461,12 @@ namespace Server
 
                 //Ban Player
                 case 3:
+                    if (!ArenaMatch.IsValidArenaMatch(m_ArenaMatch, null, false))
+                    {
+                        m_Player.SendMessage("That match is no longer accessible.");
+                        return;
+                    }
+
                     if (m_ArenaMatch.m_Creator == m_Player && m_Player != m_TargetPlayer)
                     {
                         ArenaParticipant participant = m_ArenaMatch.GetParticipant(m_TargetPlayer);
@@ -3355,6 +3510,8 @@ namespace Server
                 m_Player.SendSound(CloseGumpSound);
         }        
     }
+
+    #endregion
 
     #region Arena Match Result Gump
 
@@ -3729,7 +3886,77 @@ namespace Server
             {
                 m_Player.SendMessage("Records of that match are no longer available.");
                 return;
-            } 
+            }
+
+            if (info.ButtonID > 10)
+            {
+                if (m_ArenaMatchResultEntry.m_ArenaMatch != null)
+                {
+                    ArenaMatch arenaMatch = m_ArenaMatchResultEntry.m_ArenaMatch;
+
+                    int playerCount = 0;
+
+                    for (int a = 0; a < arenaMatch.m_Teams.Count; a++)
+                    {
+                        ArenaTeam team = arenaMatch.m_Teams[a];
+
+                        if (team == null) continue;
+                        if (team.Deleted) continue;
+
+                        for (int b = 0; b < team.m_Participants.Count; b++)
+                        {
+                            int playerButtonId = 10 + playerCount;
+
+                            if (playerButtonId == info.ButtonID)
+                            {
+                                ArenaParticipant participant = team.m_Participants[b];
+
+                                if (participant == null) continue;
+                                if (participant.Deleted) continue;
+                                if (participant.m_Player == null) continue;
+
+                                m_Player.SendSound(OpenGumpSound);
+
+                                m_Player.SendGump(new ArenaPlayerInfoGump(m_Player, participant.m_Player, arenaMatch, m_Player.m_ArenaGumpObject));
+                            }
+
+                            playerCount++;
+                        }
+                    }
+                }
+
+                else
+                {
+                    int playerCount = 0;
+
+                    for (int a = 0; a < m_ArenaMatchResultEntry.m_TeamResultEntries.Count; a++)
+                    {
+                        ArenaMatchTeamResultEntry teamResultEntry = m_ArenaMatchResultEntry.m_TeamResultEntries[a];
+
+                        if (teamResultEntry == null)
+                            continue;
+
+                        for (int b = 0; b < teamResultEntry.m_PlayerResultEntries.Count; b++)
+                        {
+                            ArenaMatchPlayerResultEntry playerResultEntry = teamResultEntry.m_PlayerResultEntries[b];
+
+                            if (playerResultEntry == null)
+                                continue;
+
+                            int playerButtonId = 10 + playerCount;
+
+                            if (playerButtonId == info.ButtonID)
+                            {
+                                m_Player.SendSound(OpenGumpSound);
+
+                                m_Player.SendGump(new ArenaPlayerInfoGump(m_Player, playerResultEntry.m_Player, null, m_Player.m_ArenaGumpObject));
+                            }
+
+                            playerCount++;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -3838,4 +4065,26 @@ namespace Server
     }
 
     #endregion
+
+    public class ArenaGumpObject
+    {
+        public PlayerMobile m_Player;
+
+        public ArenaGroupController m_ArenaGroupController;
+        public ArenaGump.ArenaPageType m_ArenaPage = ArenaGump.ArenaPageType.AvailableMatches;
+        public int m_Page = 0;
+        public int m_SettingsPage = 0;
+
+        public ArenaRuleset m_ArenaRuleset;
+        public ArenaMatch m_ArenaMatchViewing;
+
+        public bool ArenaRulesetEdited = false;
+
+        public ArenaGumpObject(PlayerMobile player, ArenaGroupController arenaGroupController)
+        {
+            m_Player = player;
+            m_ArenaGroupController = arenaGroupController;
+            m_ArenaRuleset = new ArenaRuleset();
+        }
+    }
 }

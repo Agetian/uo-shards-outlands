@@ -273,6 +273,10 @@ namespace Server.Gumps
                     case GumpCollectionObject.ObjectType.Image:
                         AddImage(startX + gumpCollectionObject.m_OffsetX, startY + gumpCollectionObject.m_OffsetY, gumpCollectionObject.m_ItemID, gumpCollectionObject.m_Hue);
                     break;
+
+                    case GumpCollectionObject.ObjectType.Background:                    
+                        AddBackground(startX + gumpCollectionObject.m_OffsetX, startY + gumpCollectionObject.m_OffsetY, gumpCollectionObject.m_Width, gumpCollectionObject.m_Height, gumpCollectionObject.m_ItemID);
+                    break;
                 }
             }
         }

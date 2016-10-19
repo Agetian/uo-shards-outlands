@@ -93,6 +93,7 @@
     <Compile Include="Arenas\ArenaGump.cs" />
     <Compile Include="Arenas\ArenaMatch.cs" />
     <Compile Include="Arenas\ArenaParticipant.cs" />
+    <Compile Include="Arenas\ArenaRewards.cs" />
     <Compile Include="Arenas\ArenaRuleset.cs" />
     <Compile Include="Arenas\ArenaTeam.cs" />
     <Compile Include="Arenas\ArenaTile.cs" />
