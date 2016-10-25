@@ -205,11 +205,11 @@ namespace Server.Engines.Craft
             AddCraft(1, typeof(ThighBoots), "Other Wearables", "Thigh Boots", 25, 50, typeof(Leather), 1044462, 4, 1044463);
 
             //Tools
-            AddCraft(1, typeof(TailoringMouldTier2), "Tools", "Tailoring Mould: Tier 1-2", 100, 100, typeof(Leather), 1044462, 150, 1044463);
-            AddCraft(1, typeof(TailoringMouldTier4), "Tools", "Tailoring Mould: Tier 3-4", 105, 105, typeof(Leather), 1044462, 175, 1044463);
-            AddCraft(1, typeof(TailoringMouldTier6), "Tools", "Tailoring Mould: Tier 5-6", 110, 110, typeof(Leather), 1044462, 200, 1044463);
-            AddCraft(1, typeof(TailoringMouldTier8), "Tools", "Tailoring Mould: Tier 7-8", 115, 115, typeof(Leather), 1044462, 225, 1044463);
-            AddCraft(1, typeof(TailoringMouldTier10), "Tools", "Tailoring Mould: Tier 9-10", 120, 120, typeof(Leather), 1044462, 250, 1044463);
+            AddCraft(1, typeof(BasicTailoringMould), "Tools", "Basic Tailoring Mould", 100, 100, typeof(Leather), 1044462, 150, 1044463);
+            AddCraft(1, typeof(AdvancedTailoringMould), "Tools", "Advanced Tailoring Mould", 105, 105, typeof(Leather), 1044462, 175, 1044463);
+            AddCraft(1, typeof(ExpertTailoringMould), "Tools", "Expert Tailoring Mould", 110, 110, typeof(Leather), 1044462, 200, 1044463);
+            AddCraft(1, typeof(MasterTailoringMould), "Tools", "Master Tailoring Mould", 115, 115, typeof(Leather), 1044462, 225, 1044463);
+            AddCraft(1, typeof(LegendaryTailoringMould), "Tools", "Legendary Tailoring Mould", 120, 120, typeof(Leather), 1044462, 250, 1044463);
 
             //Misc
             AddCraft(1, typeof(OilCloth), "Misc", "Oil Cloth", 25, 50, typeof(Cloth), 1044286, 6, 1044287);

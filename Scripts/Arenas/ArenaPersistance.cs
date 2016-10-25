@@ -193,6 +193,9 @@ namespace Server
         public string m_AccountUsername = "";
 
         public int m_ArenaCredits = 0;
+
+        public int m_ArenaRewardPoints = 0;
+        public int m_ArenaBlackRewardPoints = 0;
         
         [Constructable]
         public ArenaAccountEntry(string accountName): base(0x0)
@@ -226,6 +229,8 @@ namespace Server
 
             //Version 0
             writer.Write(m_AccountUsername);
+            writer.Write(m_ArenaRewardPoints);
+            writer.Write(m_ArenaBlackRewardPoints);
         }
 
         public override void Deserialize(GenericReader reader)
@@ -237,6 +242,8 @@ namespace Server
             if (version >= 0)
             {
                 m_AccountUsername = reader.ReadString();
+                m_ArenaRewardPoints = reader.ReadInt();
+                m_ArenaBlackRewardPoints = reader.ReadInt();
             }
 
             //-----

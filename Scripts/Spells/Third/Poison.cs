@@ -179,22 +179,6 @@ namespace Server.Spells.Third
                     mobile.FixedParticles(0x374A, 10, 15, 5021, 0, 0, EffectLayer.Waist);
                     mobile.PlaySound(0x474);
                 }
-
-                AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(Caster, null);
-
-                if (aspectArmor.MatchingSet && !Caster.RecentlyInPlayerCombat && mobile is BaseCreature)
-                {
-                    /*
-                    if (Utility.RandomDouble() <= aspectArmor.AspectArmorDetail.PoisonSpellNoManaCostChance)
-                    {
-                        Caster.Mana += 9;
-                        Caster.SendMessage("You feel a rush of energy from your armor, fueling mana into the spell.");
-
-                        Effects.PlaySound(Caster.Location, Caster.Map, 0x64B);
-                        Effects.SendLocationParticles(EffectItem.Create(Caster.Location, Caster.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, casterDungeonArmor.DungeonArmorDetail.EffectHue, 0, 5005, 0);
-                    }
-                    */
-                }
             }
 
             ArenaFight.SpellCompletion(Caster, typeof(PoisonSpell));

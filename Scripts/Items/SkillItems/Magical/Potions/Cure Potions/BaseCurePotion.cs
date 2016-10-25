@@ -69,6 +69,27 @@ namespace Server.Items
 				}
 			}
 
+            if (!cure)
+            {
+                AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(from);
+                        
+                //Poison Aspect
+                if (aspectArmorProfile != null)
+                {
+                    if (aspectArmorProfile.m_Aspect == AspectEnum.Poison)   
+                    {
+                        double extraCureChance = AspectGear.PoisonCureChanceBonus * (AspectGear.PoisonCureChanceBonusPerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                        if (Utility.RandomDouble() <= extraCureChance)
+                        {
+                            cure = true;
+
+                            //TEST: Add Aspect Visuals
+                        }
+                    }
+                } 
+            }
+
 			if ( cure && from.CurePoison( from ) )
 			{
 				from.SendLocalizedMessage( 500231 ); // You feel cured of poison!
@@ -76,6 +97,7 @@ namespace Server.Items
 				from.FixedEffect( 0x373A, 10, 15 );
 				from.PlaySound( 0x1E0 );
 			}
+
 			else if ( !cure )
 			{
 				from.SendLocalizedMessage( 500232 ); // That potion was not strong enough to cure your ailment!
@@ -87,14 +109,12 @@ namespace Server.Items
 			if ( from.Poisoned )
 			{
 				DoCure( from );
-
-				BasePotion.PlayDrinkEffect( from );
-
+                
 				from.FixedParticles( 0x373A, 10, 15, 5012, EffectLayer.Waist );
 				from.PlaySound( 0x1E0 );
 
-                if (!ArenaFight.AllowFreeConsume(from, typeof(BasePotion)))
-				    Consume();
+                if (!BasePotion.PlayDrinkEffect(from))
+                    Consume();
 			}
 
 			else			

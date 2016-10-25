@@ -73,6 +73,7 @@ namespace Server.Spells.First
                 double mageryScalar = .5 + (.5 * (Caster.Skills[SkillName.Magery].Value / 100));
                 double diminishedEffectScalar = 1.0;
                 double poisonScalar = 1.0;
+                double ressPenaltyScalar = 1.0;
 
                 if (Caster.SpellHealWindowEnd > DateTime.UtcNow)
                 {
@@ -90,12 +91,7 @@ namespace Server.Spells.First
                     Caster.LastSpellCount = 1;
                     Caster.SpellHealWindowEnd = DateTime.UtcNow + SpellHelper.SpellHealWindowDuration;
                 }
-
-                if (target.Poisoned)
-                    poisonScalar = SpellHelper.HealThroughPoisonScalar;
-
-                healAmount = (int)(Math.Round((double)healAmount * mageryScalar * diminishedEffectScalar * poisonScalar));
-
+                
                 if (healAmount < 1)
                     healAmount = 1;
 

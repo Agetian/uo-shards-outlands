@@ -50,6 +50,7 @@ namespace Server.Spells.Fourth
 			{
 				Caster.SendLocalizedMessage( 500237 ); // Target can not be seen.
 			}
+
 			else if ( CheckSequence() )
 			{
 				SpellHelper.Turn( Caster, p );
@@ -83,16 +84,39 @@ namespace Server.Spells.Fourth
 
 					for ( int i = 0; i < targets.Count; ++i )
 					{
-						Mobile m = targets[i];
+						Mobile mobile = targets[i];
 
-						if( m.Player )
-							Caster.DoBeneficial( m );
+						if( mobile.Player )
+							Caster.DoBeneficial( mobile );
 
-						if ( m.CurePoison( Caster ) )
+						if ( mobile.CurePoison( Caster ) )
 							++cured;
 
-                        m.FixedParticles(0x373A, 10, 15, 5012, spellHue, 0, EffectLayer.Waist);
-						m.PlaySound( 0x1E0 );
+                        if (mobile.Poisoned)
+                        {
+                            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(mobile);
+
+                            //Poison Aspect
+                            if (aspectArmorProfile != null)
+                            {
+                                if (aspectArmorProfile.m_Aspect == AspectEnum.Poison)
+                                {
+                                    double extraCureChance = AspectGear.PoisonCureChanceBonus * (AspectGear.PoisonCureChanceBonusPerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                                    if (Utility.RandomDouble() <= extraCureChance)
+                                    {
+                                        ++cured;
+
+                                        mobile.CurePoison(Caster);
+
+                                        //TEST: Add Aspect Visuals
+                                    }
+                                }
+                            } 
+                        }
+
+                        mobile.FixedParticles(0x373A, 10, 15, 5012, spellHue, 0, EffectLayer.Waist);
+						mobile.PlaySound( 0x1E0 );
 					}
 
 					if ( cured > 0 )

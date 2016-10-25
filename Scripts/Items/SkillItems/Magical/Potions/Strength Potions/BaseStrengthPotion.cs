@@ -48,10 +48,8 @@ namespace Server.Items
 		{
 			if ( DoStrength( from ) )
 			{
-				BasePotion.PlayDrinkEffect( from );
-
-                if (!ArenaFight.AllowFreeConsume(from, typeof(BasePotion)))
-				    Consume();
+                if (!BasePotion.PlayDrinkEffect(from))
+                    Consume();
 			}
 		}
 	}

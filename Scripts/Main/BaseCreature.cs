@@ -3567,11 +3567,19 @@ namespace Server.Mobiles
         {
             double damage = (double)amount;
 
+            double discordEffect = 0;
+            double focusedAggressionEffect = 0;
+            double commandAspectEffect = 0;
+            double lyricAspectEffect = 0;
+            double waterAspectEffect = 0;
+
             PlayerMobile pm_Master = null;
 
             BaseCreature bc_Source = from as BaseCreature;
             PlayerMobile pm_Source = from as PlayerMobile;
 
+            PlayerMobile fromRootPlayer = null;
+            
             if (from != null)
             {
                 pm_Master = GetPlayerMaster() as PlayerMobile;
@@ -3583,22 +3591,26 @@ namespace Server.Mobiles
 
                     if (bc_Source != null)
                     {
-                        PlayerMobile pm_SourceMaster = bc_Source.GetPlayerMaster() as PlayerMobile;
+                        fromRootPlayer = bc_Source.GetPlayerMaster() as PlayerMobile;
 
-                        if (pm_SourceMaster != null)
+                        if (fromRootPlayer != null)
                         {
-                            pm_SourceMaster.LastCombatTime = DateTime.UtcNow;
+                            fromRootPlayer = fromRootPlayer;
 
-                            if (pm_Master != null && pm_SourceMaster != pm_Master)
+                            fromRootPlayer.LastCombatTime = DateTime.UtcNow;
+
+                            if (pm_Master != null && fromRootPlayer != pm_Master)
                             {
-                                pm_SourceMaster.PlayerVsPlayerCombatOccured(pm_Master);
-                                pm_Master.PlayerVsPlayerCombatOccured(pm_SourceMaster);
+                                fromRootPlayer.PlayerVsPlayerCombatOccured(pm_Master);
+                                pm_Master.PlayerVsPlayerCombatOccured(fromRootPlayer);
                             }
                         }
                     }
 
                     if (pm_Source != null)
                     {
+                        fromRootPlayer = pm_Source;
+
                         pm_Source.LastCombatTime = DateTime.UtcNow;
 
                         if (pm_Master != null && pm_Source != pm_Master)
@@ -3607,20 +3619,61 @@ namespace Server.Mobiles
                             pm_Source.PlayerVsPlayerCombatOccured(pm_Master);
                         }
                     }
-                }                
+                }      
+          
+                AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(fromRootPlayer);
                 
                 if (bc_Source != null)
                 {
                     //Discordance
-                    damage *= 1 - bc_Source.DiscordEffect;
+                    discordEffect = -1 * bc_Source.DiscordEffect;
 
                     //Herding
                     if (bc_Source.FocusedAggressionTarget == this && bc_Source.FocusedAggressionExpiration > DateTime.UtcNow)
-                        damage *= 1 + (bc_Source.FocusedAggresionValue);
+                        focusedAggressionEffect = bc_Source.FocusedAggresionValue;
+
+                    //Command Aspect
+                    if (aspectArmorProfile != null)
+                    {
+                        if (aspectArmorProfile.m_Aspect == AspectEnum.Command)
+                            commandAspectEffect = AspectGear.CommandFollowerDamageDealtBonus * (AspectGear.CommandFollowerDamageDealtBonusPerTier * (double)aspectArmorProfile.m_TierLevel);
+                    }  
                 }
 
-                //This Creature is Discorded
-                damage *= 1 + DiscordEffect;
+                //Lyric Aspect
+                if ((IsBarded() || DiscordEffect != 0) && fromRootPlayer != null)
+                {
+                    if (aspectArmorProfile != null)
+                    {
+                        if (aspectArmorProfile.m_Aspect == AspectEnum.Lyric)                    
+                            lyricAspectEffect = AspectGear.LyricDamageBardedTargetsBonus * (AspectGear.LyricDamageToBardedTargetsBonusPerTier * (double)aspectArmorProfile.m_TierLevel);
+                    }
+                }
+
+                //Water Aspect
+                if (pm_Source != null)
+                {
+                    if (pm_Source.ShipOccupied != null && aspectArmorProfile != null)
+                    {
+                        if (aspectArmorProfile.m_Aspect == AspectEnum.Water)
+                            waterAspectEffect = AspectGear.WaterDamageDealtOnShips * (AspectGear.WaterDamageDealtOnShipsPerTier * (double)aspectArmorProfile.m_TierLevel);
+                    }
+                }
+            }
+
+            damage *= 1 + DiscordEffect + discordEffect + focusedAggressionEffect + commandAspectEffect + lyricAspectEffect + waterAspectEffect;
+
+            //Player Ress Penalty
+            if (pm_Source != null)
+            {
+                if (pm_Source.RessPenaltyExpiration > DateTime.UtcNow && pm_Source.m_RessPenaltyEffectivenessReductionCount > 0)
+                    damage *= 1 - (PlayerMobile.RessPenaltyDamageScalar * (double)pm_Source.m_RessPenaltyEffectivenessReductionCount);
+            }
+
+            else if (fromRootPlayer != null)
+            {
+                if (fromRootPlayer.RessPenaltyExpiration > DateTime.UtcNow && fromRootPlayer.m_RessPenaltyEffectivenessReductionCount > 0)
+                    damage *= 1 - (PlayerMobile.RessPenaltyDamageScalar * (double)fromRootPlayer.m_RessPenaltyEffectivenessReductionCount);
             }
 
             //Ship-Based Combat
@@ -3632,7 +3685,7 @@ namespace Server.Mobiles
             if (damage < 1)
                 damage = 1;
 
-            int finalDamage = (int)damage;
+            int finalDamage = (int)(Math.Round(damage));
 
             pm_Master = null;
 
@@ -6935,6 +6988,35 @@ namespace Server.Mobiles
             }
         }
 
+        public override void Heal(int amount, Mobile from, bool message)
+        {
+            double poisonScalar = 1.0;
+            double ressPenaltyScalar = 1.0;
+
+            if (Poisoned)
+                poisonScalar = SpellHelper.HealThroughPoisonScalar;
+            
+            PlayerMobile playerFrom = from as PlayerMobile;
+
+            if (playerFrom != null)
+            {
+                if (playerFrom.RecallRestrictionExpiration > DateTime.UtcNow && playerFrom.m_RessPenaltyEffectivenessReductionCount > 0)
+                {
+                    double newRessPenaltyScalar = 1 - ((double)playerFrom.m_RessPenaltyEffectivenessReductionCount * PlayerMobile.RessPenaltyHealingScalar);
+
+                    if (newRessPenaltyScalar < ressPenaltyScalar)
+                        ressPenaltyScalar = newRessPenaltyScalar;
+                }
+            }
+
+            int adjustedHealAmount = (int)(Math.Round((double)amount * poisonScalar * ressPenaltyScalar));
+
+            if (adjustedHealAmount < 1)
+                adjustedHealAmount = 1;
+
+            base.Heal(amount, from, message);
+        }
+
         public override void OnHeal(ref int amount, Mobile from)
         {
             SpecialAbilities.HealingOccured(from, this, amount);
@@ -7932,6 +8014,15 @@ namespace Server.Mobiles
                             double experienceChance = FollowerExperienceChanceOnKill();
                             int experienceValue = FollowerExperienceEarnedOnKill();
 
+                            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(creatureOwner);
+
+                            //Command Aspect
+                            if (aspectArmorProfile != null)
+                            {
+                                if (aspectArmorProfile.m_Aspect == AspectEnum.Command)
+                                    experienceChance *= 1 + (AspectGear.CommandFollowerExperienceBonus * (AspectGear.CommandFollowerExperienceBonusPerTier * (double)aspectArmorProfile.m_TierLevel));
+                            }  
+
                             if (Utility.RandomDouble() <= experienceChance)
                                 bc_Creature.Experience += experienceValue;
                         }                               
@@ -8648,131 +8739,7 @@ namespace Server.Mobiles
         private long m_NextRummageTime;
 
         public virtual bool IsDispellable { get { return Summoned && !IsAnimatedDead; } }
-
-        #region Healing
-
-        public virtual double MinHealDelay { get { return 2.0; } }
-        public virtual double HealScalar { get { return 1.0; } }
-        public virtual bool CanHeal { get { return false; } }
-        public virtual bool CanHealOwner { get { return false; } }
-
-        public double MaxHealDelay
-        {
-            get
-            {
-                if (ControlMaster != null)
-                {
-                    double max = ControlMaster.Hits / 10;
-
-                    if (max > 10)
-                        max = 10;
-                    if (max < 1)
-                        max = 1;
-
-                    return max;
-                }
-                else
-                    return 7;
-            }
-        }
-
-        private long m_NextHealTime = Core.TickCount;
-        private Timer m_HealTimer = null;
-
-        public virtual void HealStart()
-        {
-            if (!Alive)
-                return;
-
-            if (CanHeal && Hits != HitsMax)
-            {
-                RevealingAction();
-
-                double seconds = 10 - Dex / 12;
-
-                m_HealTimer = Timer.DelayCall(TimeSpan.FromSeconds(seconds), new TimerStateCallback(Heal_Callback), this);
-            }
-            else if (CanHealOwner && ControlMaster != null && ControlMaster.Hits < ControlMaster.HitsMax && InRange(ControlMaster, 2))
-            {
-                ControlMaster.RevealingAction();
-
-                double seconds = 10 - Dex / 15;
-                double resDelay = (ControlMaster.Alive ? 0.0 : 5.0);
-
-                seconds += resDelay;
-
-                ControlMaster.SendLocalizedMessage(1008078, false, Name); //  : Attempting to heal you.
-
-                m_HealTimer = Timer.DelayCall(TimeSpan.FromSeconds(seconds), new TimerStateCallback(Heal_Callback), ControlMaster);
-            }
-        }
-
-        private void Heal_Callback(object state)
-        {
-            if (state is Mobile)
-                Heal((Mobile)state);
-        }
-
-        public virtual void Heal(Mobile patient)
-        {
-            if (!Alive || !patient.Alive || !InRange(patient, 2))
-            {
-            }
-            else if (patient.Poisoned)
-            {
-                double healing = Skills.Healing.Value;
-                double anatomy = Skills.Anatomy.Value;
-                double chance = (healing - 30.0) / 50.0 - patient.Poison.Level * 0.1;
-
-                if ((healing >= 60.0 && anatomy >= 60.0) && chance > Utility.RandomDouble())
-                {
-                    if (patient.CurePoison(this))
-                    {
-                        patient.SendLocalizedMessage(1010059); // You have been cured of all poisons.                       
-                        patient.PlaySound(0x57);
-
-                        CheckSkill(SkillName.Healing, 0.0, 100.0, 1.0);
-                        CheckSkill(SkillName.Anatomy, 0.0, 100.0, 1.0);
-                    }
-                }
-            }
-            else
-            {
-                double healing = Skills.Healing.Value;
-                double anatomy = Skills.Anatomy.Value;
-                double chance = (healing + 10.0) / 100.0;
-
-                if (chance > Utility.RandomDouble())
-                {
-                    double min, max;
-
-                    min = (anatomy / 10.0) + (healing / 6.0) + 4.0;
-                    max = (anatomy / 8.0) + (healing / 3.0) + 4.0;
-
-                    if (patient == this)
-                        max += 10;
-
-                    double toHeal = min + (Utility.RandomDouble() * (max - min));
-
-                    toHeal *= HealScalar;
-
-                    patient.Heal((int)toHeal);
-                    patient.PlaySound(0x57);
-
-                    CheckSkill(SkillName.Healing, 0.0, 100.0, 1.0);
-                    CheckSkill(SkillName.Anatomy, 0.0, 100.0, 1.0);
-                }
-            }
-
-            if (m_HealTimer != null)
-                m_HealTimer.Stop();
-
-            m_HealTimer = null;
-
-            m_NextHealTime = Core.TickCount + (long)TimeSpan.FromSeconds(MinHealDelay + (Utility.RandomDouble() * MaxHealDelay)).TotalMilliseconds;
-        }
-        #endregion
-
+        
         public void ClearExpiredDamageEntries()
         {
             List<Mobile> m_ExpiredMobiles = new List<Mobile>();

@@ -121,8 +121,7 @@ namespace Server.SkillHandlers
         {
             private BaseInstrument m_Instrument;
 
-            public DiscordanceTarget(Mobile from, BaseInstrument inst)
-                : base(12, false, TargetFlags.None)
+            public DiscordanceTarget(Mobile from, BaseInstrument inst): base(12, false, TargetFlags.None)
             {
                 m_Instrument = inst;
             }
@@ -162,7 +161,16 @@ namespace Server.SkillHandlers
                         double creatureDifficulty = bc_Target.InitialDifficulty;
                         double effectiveBardSkill = from.Skills[SkillName.Discordance].Value + BaseInstrument.GetBardBonusSkill(from, bc_Target, m_Instrument);
 
+                        AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(from);
+
+                        if (aspectArmorProfile != null)
+                        {
+                            if (aspectArmorProfile.m_Aspect == AspectEnum.Lyric)
+                                effectiveBardSkill += AspectGear.LyricEffectiveBardingSkillBonus * (AspectGear.LyricEffectiveBardingSkillBonusPerTier * (double)aspectArmorProfile.m_TierLevel);
+                        }
+
                         double successChance = BaseInstrument.GetBardSuccessChance(effectiveBardSkill, creatureDifficulty);
+                        
                         TimeSpan effectDuration = BaseInstrument.GetBardDuration(bc_Target, creatureDifficulty);
 
                         if (BaseInstrument.CheckSkillGain(successChance))
@@ -181,18 +189,8 @@ namespace Server.SkillHandlers
 
                             double discordanceModifier = BaseInstrument.DiscordanceModifier;
 
-                            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(from, null);
-
-                            if (aspectArmor.MatchingSet && !from.RecentlyInPlayerCombat)
-                            {
-                                //discordanceModifier += aspectArmor.AspectArmorDetail.DiscordanceEffectBonus;
-                            }
-
                             DiscordanceInfo info = new DiscordanceInfo(from, bc_Target, discordanceModifier);
-
-                            //TEST
-                            from.Say("Discord Duration: " + effectDuration.ToString());
-
+                            
                             info.m_Duration = effectDuration;
                             info.m_EndTime = DateTime.UtcNow + effectDuration;
                             info.m_Timer = Timer.DelayCall<DiscordanceInfo>(TimeSpan.Zero, TimeSpan.FromSeconds(1), new TimerStateCallback<DiscordanceInfo>(ProcessDiscordance), info);
@@ -214,6 +212,24 @@ namespace Server.SkillHandlers
                             string failureMessage = BaseInstrument.GetFailureMessage(successChance, SkillName.Discordance);
 
                             from.SendMessage(failureMessage);
+
+                            if (aspectArmorProfile != null && from is PlayerMobile)
+                            {
+                                if (aspectArmorProfile.m_Aspect == AspectEnum.Lyric)
+                                {
+                                    double failedBardingAttemptDamageReduction = AspectGear.LyricDamageReceivedReductionFromFailedBardingTarget * (AspectGear.LyricDamageReceivedReductionFromFailedBardingTargetPerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                                    failedBardingAttemptDamageReduction *= (from.Skills.Discordance.Value / 120);
+
+                                    PlayerMobile player = from as PlayerMobile;
+
+                                    player.m_LyricAspectFailedBardingAttemptExpiration = DateTime.UtcNow + AspectGear.LyricDamageReceivedReductionFromFailedBardingDuration;
+
+                                    player.m_LyricAspectFailedBardingAttemptTargets.Clear();
+                                    player.m_LyricAspectFailedBardingAttemptTargets.Add(bc_Target);
+                                    player.m_LyricAspectFailedBardingAttemptDamageReduction = failedBardingAttemptDamageReduction;
+                                }
+                            }
                         }
                     }
 

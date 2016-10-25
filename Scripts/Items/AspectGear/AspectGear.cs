@@ -65,6 +65,81 @@ namespace Server.Items
         public static int BaseTactics = 10;
         public static int TacticsPerTier = 3;
 
+        public static double BaseArmorRatingBonus = .20;
+        public static double ArmorRatingBonusPerTier = .8;
+
+        //Aspect Armor Bonuses
+        public static double AirMeleeSwingSpeedBonus = .05;
+        public static double AirMeleeSwingSpeedBonusPerTier = .005;
+        public static double AirMeleeDodgeChance = .025;
+        public static double AirMeleeDodgeChancePerTier = .0025;
+        public static double AirMeleeAvoidMovementEffectAvoidance = .05;
+        public static double AirMeleeAvoidMovementEffectAvoidancePerTier = .005;
+
+        public static double CommandFollowerDamageDealtBonus = .1;
+        public static double CommandFollowerDamageDealtBonusPerTier = .01;
+        public static double CommandFollowerExperienceBonus = .25;
+        public static double CommandFollowerExperienceBonusPerTier = .025;
+
+        public static double EarthMeleeSpecialChance = .1;
+        public static double EarthMeleeSpecialChancePerTier = .01;
+        public static double EarthMeleeSpecialDamageBonus = .5;
+        public static double EarthDamageReduction = .1;
+        public static double EarthDamageReductionPerTier = .01;
+        public static double EarthKnockbackAvoidanceChance = .05;
+        public static double EarthKnockbackAvoidanceChancePerTier = .005;
+
+        public static double EldritchChargedSpellcastChanceBonus = .05;
+        public static double EldritchChargedSpellcastChanceBonusPerTier = .005;
+        public static double EldritchManaCostReductionChance = .10;
+        public static double EldritchManaCostReductionChancePerTier = .01;
+        public static double EldritchReagentCostReductionChance = .10;
+        public static double EldritchReagentCostReductionChancePerTier = .01;
+
+        public static double FireEffectOnAttackChance = .05;
+        public static double FireEffectOnAttackChancePerTier = .005;
+        public static double FireEffectOnHitChance = .1;
+        public static double FireEffectOnHitChancePerTier = .01;
+
+        public static double LyricEffectiveBardingSkillBonus = 5;
+        public static double LyricEffectiveBardingSkillBonusPerTier = 1;
+        public static double LyricDamageBardedTargetsBonus = .05;
+        public static double LyricDamageToBardedTargetsBonusPerTier = .005;
+        public static double LyricDamageReceivedReductionFromFailedBardingTarget = .10;
+        public static double LyricDamageReceivedReductionFromFailedBardingTargetPerTier = .01;
+        public static TimeSpan LyricDamageReceivedReductionFromFailedBardingDuration = TimeSpan.FromSeconds(5);
+
+        public static double PoisonDamageBonus = .1;
+        public static double PoisonDamageBonusPerTier = .01;
+        public static double PoisonDamageReceivedDamageReduction = .1;
+        public static double PoisonDamageReceivedDamageReductionPerTier = .01;
+        public static double PoisonCureChanceBonus = .10;
+        public static double PoisonCureChanceBonusPerTier = .1;
+
+        public static double ShadowBackstabDamageBonus = .25;
+        public static double ShadowBackstabDamageBonusPerTier = .025;
+        public static double ShadowPostBackstabDamageReceivedReduction = .25;
+        public static double ShadowPostBackstabDamageReceivedReductionPerTier = .025;
+        public static TimeSpan ShadowPostBackstabDamageReceivedReductionDuration = TimeSpan.FromSeconds(5);
+
+        public static double VoidWeaponSpecialAttackChanceBonus = .05;
+        public static double VoidWeaponSpecialAttackChanceBonusPerTier = .005;
+        public static double VoidChanceToRegenStatsOnAttack = .05;
+        public static double VoidChanceToRegenStatsOnAttackPerTier = .005;
+        public static double VoidChanceToNullifyDamageOnHit = .025;
+        public static double VoidChanceToNullifyDamageOnHitPerTier = .0025;
+
+        public static double WaterDamageDealtOnShips = .15;
+        public static double WaterDamageDealtOnShipsPerTier = .015;
+        public static double WaterHealingAmountReceived = .1;
+        public static double WaterHealingAmountReceivedPerTier = .01;
+        public static double WaterChanceForPotionNoConsume = .1;
+        public static double WaterChanceForPotionNoConsumePerTier = .01;
+        public static double WaterBleedDamageTakenReduction = .25;
+        public static double WaterBleedDamageTakenReductionPerTier = .025;      
+
+        //----
+
         public static double BaseXPGainScalar = .01;      
 
         public static double LowContributionThreshold = .05; //If Total Damage Inflicted is Lower Than This Percent of Total Hit Points
@@ -81,6 +156,8 @@ namespace Server.Items
 
         public static int BaselineDurability = 150;
         public static int IncreasedDurabilityPerTier = 20;
+
+        #region Aspect Properties and Functions
 
         public static AspectEnum GetRandomAspect()
         {
@@ -342,17 +419,87 @@ namespace Server.Items
             return null;
         }
 
+        #endregion
+
         #region Aspect Weapons
 
-        public static double GetSpecialEffectWeaponSpeedScalar(double speed)
+        public static AspectWeaponProfile GetAspectWeaponProfile(Mobile from)
+        {
+            if (!(from is PlayerMobile)) 
+                return null;
+
+            PlayerMobile player = from as PlayerMobile;
+
+            if (!player.Alive) return null;
+            if (player.RecentlyInPlayerCombat) return null;
+
+            if (player.m_AspectWeaponProfile == null)
+                player.m_AspectWeaponProfile = new AspectWeaponProfile();
+
+            if (player.m_AspectWeaponProfile.m_Aspect == AspectEnum.None || player.m_AspectWeaponProfile.m_TierLevel == 0)
+                return null;
+
+            BaseWeapon weapon = null;
+
+            BaseWeapon oneHandedWeapon = player.FindItemOnLayer(Layer.OneHanded) as BaseWeapon;
+            BaseWeapon twoHandedWeapon = player.FindItemOnLayer(Layer.TwoHanded) as BaseWeapon;
+
+            if (oneHandedWeapon != null)
+                weapon = oneHandedWeapon;
+
+            if (twoHandedWeapon != null)
+                weapon = twoHandedWeapon;
+
+            if (weapon == null)
+                return null;
+
+            if (weapon.Aspect == AspectEnum.None || weapon.TierLevel <= 0 || weapon.ArcaneCharges == 0)
+                return null;
+
+            return player.m_AspectWeaponProfile;
+        }
+
+        public static void OnWeaponEquip(Mobile from, BaseWeapon weapon)
+        {
+            if (from == null) return;
+            if (!(from is PlayerMobile)) return;
+
+            PlayerMobile player = from as PlayerMobile;
+
+            player.m_AspectWeaponProfile = new AspectWeaponProfile();
+
+            if (weapon == null) return;
+            if (weapon.Deleted) return;
+
+            player.m_AspectWeaponProfile.m_Aspect = weapon.Aspect;
+            player.m_AspectWeaponProfile.m_TierLevel = weapon.TierLevel;
+        }
+
+        public static void OnWeaponRemoved(object parent, BaseWeapon weapon)
+        {
+            if (!(parent is PlayerMobile)) 
+                return;
+
+            PlayerMobile player = parent as PlayerMobile;
+
+            player.m_AspectWeaponProfile = new AspectWeaponProfile();
+
+            player.m_AspectWeaponProfile.m_Aspect = AspectEnum.None;
+            player.m_AspectWeaponProfile.m_TierLevel = 0;
+        }
+
+        public static double GetEffectWeaponSpeedScalar(BaseWeapon weapon)
         {
             double scalar = 1.0;
+
+            if (weapon == null)
+                return scalar;          
 
             double minSpeed = 25;
             double maxSpeed = 60;
 
-            scalar += 1 * ((maxSpeed - speed) / (maxSpeed - minSpeed));
-
+            scalar += 1 * ((maxSpeed - weapon.Speed) / (maxSpeed - minSpeed));
+                        
             return scalar;
         }
 
@@ -437,7 +584,7 @@ namespace Server.Items
             if (weapon.TierLevel == 0) return;
 
             double effectChance = BaseEffectChance + ((double)weapon.TierLevel * BaseEffectChancePerTier);
-            double speedScalar = GetSpecialEffectWeaponSpeedScalar(weapon.Speed);
+            double speedScalar = GetEffectWeaponSpeedScalar(weapon);
 
             double finalChance = effectChance * speedScalar;
                         
@@ -453,8 +600,22 @@ namespace Server.Items
 
         #region Aspect Armor
 
-        public static void CheckForAndUpdateAspectArmorProperties(PlayerMobile player)
+        public static AspectArmorProfile GetAspectArmorProfile(Mobile from)
         {
+            if (!(from is PlayerMobile))
+                return null;
+
+            PlayerMobile player = from as PlayerMobile;
+
+            if (!player.Alive) return null;
+            if (player.RecentlyInPlayerCombat) return null;
+
+            if (player.m_AspectArmorProfile == null)
+                player.m_AspectArmorProfile = new AspectArmorProfile();
+
+            if (player.m_AspectArmorProfile.m_Aspect == AspectEnum.None || player.m_AspectArmorProfile.m_TierLevel == 0)
+                return null;
+
             List<Layer> m_Layers = new List<Layer>();
 
             m_Layers.Add(Layer.Helm);
@@ -464,36 +625,50 @@ namespace Server.Items
             m_Layers.Add(Layer.Gloves);
             m_Layers.Add(Layer.Pants);
 
-            BaseArmor armorPiece = null;
+            int aspectArmorCount = 0;
 
             for (int a = 0; a < m_Layers.Count; a++)
             {
-                armorPiece = player.FindItemOnLayer(m_Layers[a]) as BaseArmor;
+                BaseArmor armor = from.FindItemOnLayer(m_Layers[a]) as BaseArmor;
 
-                if (armorPiece != null)
-                {
-                    if (armorPiece.Aspect != AspectEnum.None && armorPiece.TierLevel > 0)
-                        break;
-                }
+                if (armor == null) return null;
+                if (armor.Aspect == AspectEnum.None) return null;
+                if (armor.TierLevel <= 0) return null;
+                if (armor.ArcaneCharges == 0) return null;
 
-                armorPiece = null;
+                aspectArmorCount++;
             }
 
-            if (armorPiece != null)
-                UpdateArmorProperties(player);
+            if (aspectArmorCount < 6)
+                return null;
+
+            return player.m_AspectArmorProfile;
+        }
+
+        public static void CheckForAndUpdateAspectArmorProperties(PlayerMobile player)
+        {
+            if (player == null)
+                return;
+
+            OnArmorEquip(player, null);
         }
 
         public static void UpdateArmorProperties(Mobile from)
         {
-            if (from == null)
+            if (!(from is PlayerMobile))
                 return;
 
-            AspectArmorProfile aspectArmor = new AspectArmorProfile(from, null);
+            PlayerMobile player = from as PlayerMobile;
 
-            bool matchingSet = false;
+            if (player.m_AspectArmorProfile == null)
+                player.m_AspectArmorProfile = new AspectArmorProfile();
 
-            if (aspectArmor.MatchingSet)
-                matchingSet = true;
+            bool validAspectArmorSet = false;
+
+            AspectArmorProfile aspectArmorProfile = GetAspectArmorProfile(from);
+
+            if (aspectArmorProfile != null)
+                validAspectArmorSet = true;
 
             List<Layer> m_Layers = new List<Layer>();
 
@@ -512,66 +687,99 @@ namespace Server.Items
                 {
                     armor.BaseArmorRating = armor.ArmorBase;
 
-                    if (matchingSet && !from.RecentlyInPlayerCombat)
-                        armor.BaseArmorRating = (int)(Math.Round(armor.ArmorBase * (1 + (aspectArmor.AspectArmorDetail.ArmorBonusPerTier * (double)aspectArmor.AspectArmorDetail.m_TierLevel))));
+                    if (validAspectArmorSet)
+                        armor.BaseArmorRating = armor.ArmorBase * (1 + AspectGear.BaseArmorRatingBonus + (AspectGear.ArmorRatingBonusPerTier * (double)armor.TierLevel));
+
+                    else if (armor.Aspect != AspectEnum.None && armor.TierLevel > 0)
+                        armor.BaseArmorRating = armor.ArmorBase * (1 + AspectGear.BaseArmorRatingBonus);
                 }
             }
-
-            PlayerMobile player = from as PlayerMobile;
-
-            if (player != null)
-                player.ResetRegenTimers();
         }
 
         public static void OnArmorEquip(Mobile from, BaseArmor armor)
         {
-            Timer.DelayCall(TimeSpan.FromMilliseconds(50), delegate
+            if (from == null) return;
+            if (!(from is PlayerMobile)) return;
+
+            PlayerMobile player = from as PlayerMobile;
+            
+            player.m_AspectArmorProfile = new AspectArmorProfile();
+
+            List<Layer> m_Layers = new List<Layer>();
+
+            m_Layers.Add(Layer.Helm);
+            m_Layers.Add(Layer.Neck);
+            m_Layers.Add(Layer.InnerTorso);
+            m_Layers.Add(Layer.Arms);
+            m_Layers.Add(Layer.Gloves);
+            m_Layers.Add(Layer.Pants);
+
+            AspectEnum currentAspect = AspectEnum.None;
+
+            int lowestTier = 1000;
+            int aspectArmorCount = 0;
+
+            for (int a = 0; a < m_Layers.Count; a++)
             {
-                if (armor == null) return;
-                if (armor.Deleted) return;
-                if (from == null) return;
-                if (from.Deleted) return;
-                if (!from.Alive) return;
+                BaseArmor targetArmor = player.FindItemOnLayer(m_Layers[a]) as BaseArmor;
 
-                AspectArmorProfile aspectArmor = new AspectArmorProfile(from, null);
+                if (targetArmor == null) return;
+                if (targetArmor.Deleted) return;
+                if (targetArmor.Aspect == AspectEnum.None || targetArmor.TierLevel == 0) return;
 
-                if (aspectArmor.MatchingSet && !from.RecentlyInPlayerCombat)
+                if (currentAspect == AspectEnum.None)
                 {
-                    armor.BaseArmorRating = (int)(Math.Round(armor.ArmorBase * (1 + (aspectArmor.AspectArmorDetail.ArmorBonusPerTier * (double)aspectArmor.AspectArmorDetail.m_TierLevel))));
-
-                    string aspectName = GetAspectName(aspectArmor.AspectArmorDetail.m_Aspect);
-
-                    int effectHue = AspectGear.GetAspectHue(aspectArmor.AspectArmorDetail.m_Aspect);
-                    int effectTextHue = AspectGear.GetAspectTextHue(aspectArmor.AspectArmorDetail.m_Aspect);
-
-                    if (from.Hidden)
-                    {
-                        from.AllowedStealthSteps = 0;
-                        from.RevealingAction();
-                    }
-
-                    from.FixedParticles(0x373A, 10, 15, 5036, effectHue, 0, EffectLayer.Head);
-                    from.SendSound(0x1ED);
-
-                    UpdateArmorProperties(from);
-
-                    if (from.NetState != null)
-                        from.PrivateOverheadMessage(MessageType.Emote, effectTextHue, false, "*" + aspectName + " Aspect*", from.NetState);
+                    currentAspect = targetArmor.Aspect;
+                    lowestTier = targetArmor.TierLevel;
                 }
-            });
+
+                else
+                {
+                    if (targetArmor.Aspect != currentAspect)
+                        return;
+
+                    if (targetArmor.TierLevel < lowestTier)
+                        lowestTier = targetArmor.TierLevel;
+                }
+
+                aspectArmorCount++;
+            }
+
+            if (aspectArmorCount == 6 && currentAspect != AspectEnum.None && lowestTier > 0 && lowestTier < 1000)
+            {
+                player.m_AspectArmorProfile.m_Aspect = currentAspect;
+                player.m_AspectArmorProfile.m_TierLevel = lowestTier;
+
+                string aspectName = GetAspectName(currentAspect);
+                int effectHue = AspectGear.GetAspectHue(currentAspect);
+                int effectTextHue = AspectGear.GetAspectTextHue(currentAspect);
+
+                if (from.Hidden)
+                {
+                    from.AllowedStealthSteps = 0;
+                    from.RevealingAction();
+                }
+
+                from.FixedParticles(0x373A, 10, 15, 5036, effectHue, 0, EffectLayer.Head);
+                from.SendSound(0x1ED);
+
+                if (from.NetState != null)
+                    from.PrivateOverheadMessage(MessageType.Emote, effectTextHue, false, "*" + aspectName + " Aspect*", from.NetState);
+            }
+
+            UpdateArmorProperties(from);
         }
 
         public static void OnArmorRemoved(object parent, BaseArmor armor)
         {
-            if (parent is PlayerMobile)
+            if (!(parent is PlayerMobile))
+                return;
+
+            PlayerMobile player = parent as PlayerMobile;
+
+            if (player.m_AspectArmorProfile != null)
             {
-                PlayerMobile player = parent as PlayerMobile;
-
-                AspectArmorProfile aspectArmor = new AspectArmorProfile(player, null);
-
-                UpdateArmorProperties(player);
-
-                if (aspectArmor.Pieces == 5)
+                if (player.m_AspectArmorProfile.m_Aspect != AspectEnum.None && player.m_AspectArmorProfile.m_TierLevel > 0)
                 {
                     if (player.Hidden)
                     {
@@ -583,94 +791,23 @@ namespace Server.Items
                     player.SendMessage("Your aspect effect fades.");
                 }
             }
+
+            player.m_AspectArmorProfile = new AspectArmorProfile();
+
+            UpdateArmorProperties(player);
         }
-
-        public class AspectArmorProfile
-        {
-            public AspectArmorDetail AspectArmorDetail = null;
-            public PlayerMobile Player = null;
-
-            public bool MatchingSet = false;
-            public int Pieces = 0;
-
-            BaseArmor lowestTierPiece = null;
-
-            public AspectArmorProfile(Mobile wearer, BaseArmor armorPiece)
-            {
-                Player = wearer as PlayerMobile;
-
-                if (Player == null)
-                {
-                    AspectArmorDetail = new AspectArmorDetail(AspectEnum.None, 1);
-                    return;
-                }
-                
-                AspectEnum currentAspect = AspectEnum.None;
-                int lowestTier = 1000;
-
-                List<Layer> m_Layers = new List<Layer>();
-
-                m_Layers.Add(Layer.Helm);
-                m_Layers.Add(Layer.Neck);
-                m_Layers.Add(Layer.InnerTorso);
-                m_Layers.Add(Layer.Arms);
-                m_Layers.Add(Layer.Gloves);
-                m_Layers.Add(Layer.Pants);
-
-                MatchingSet = true;
-
-                for (int a = 0; a < m_Layers.Count; a++)
-                {
-                    BaseArmor aspectArmor = Player.FindItemOnLayer(m_Layers[a]) as BaseArmor;
-
-                    if (aspectArmor == null)
-                    {
-                        MatchingSet = false;
-                        continue;
-                    }
-
-                    if (aspectArmor.Aspect == AspectEnum.None || aspectArmor.TierLevel == 0)
-                        MatchingSet = false;
-
-                    else
-                    {
-                        Pieces++;
-
-                        if (currentAspect == AspectEnum.None)
-                        {
-                            currentAspect = aspectArmor.Aspect;
-                            lowestTierPiece = aspectArmor;
-                        }
-
-                        else
-                        {
-                            if (currentAspect != aspectArmor.Aspect)
-                                MatchingSet = false;
-                        }
-
-                        if (aspectArmor.TierLevel < lowestTier)
-                        {
-                            lowestTier = aspectArmor.TierLevel;
-                            lowestTierPiece = aspectArmor;
-                        }
-                    }
-                }
-
-                //Single Piece of Armor Being Inspected
-                if (armorPiece != null)
-                {
-                    currentAspect = armorPiece.Aspect;
-                    lowestTier = armorPiece.TierLevel;
-                }
-
-                if (lowestTier == 1000)
-                    lowestTier = 1;
-
-                AspectArmorDetail = new AspectArmorDetail(currentAspect, lowestTier);
-            }
-        }  
-
+        
         #endregion
+    }
+
+    public class AspectWeaponProfile
+    {
+        public AspectEnum m_Aspect = AspectEnum.None;
+        public int m_TierLevel = 0;
+
+        public AspectWeaponProfile()
+        {
+        }
     }
 
     public class AspectWeaponDetail
@@ -680,6 +817,16 @@ namespace Server.Items
         public string m_EffectDescription = "Effect Description";
 
         public AspectWeaponDetail()
+        {
+        }
+    }
+
+    public class AspectArmorProfile
+    {
+        public AspectEnum m_Aspect = AspectEnum.None;
+        public int m_TierLevel = 0;
+
+        public AspectArmorProfile()
         {
         }
     }

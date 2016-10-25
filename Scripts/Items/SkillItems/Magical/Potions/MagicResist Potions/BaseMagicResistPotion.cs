@@ -58,10 +58,8 @@ namespace Server.Items
 		{
             if (DoMagicResist(from))
 			{
-				BasePotion.PlayDrinkEffect( from );
-
-                if (!ArenaFight.AllowFreeConsume(from, typeof(BasePotion)))
-				    Consume();
+                if (!BasePotion.PlayDrinkEffect(from))
+                    Consume();
 			}
 		}
 	}

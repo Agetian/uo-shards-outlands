@@ -33,8 +33,7 @@ namespace Server.SkillHandlers
         {
             private BaseInstrument m_Instrument;
 
-            public InternalFirstTarget(Mobile from, BaseInstrument instrument)
-                : base(BaseInstrument.GetBardRange(from, SkillName.Provocation), false, TargetFlags.None)
+            public InternalFirstTarget(Mobile from, BaseInstrument instrument): base(BaseInstrument.GetBardRange(from, SkillName.Provocation), false, TargetFlags.None)
             {
                 m_Instrument = instrument;
             }
@@ -82,8 +81,7 @@ namespace Server.SkillHandlers
             private BaseCreature bc_FirstCreature;
             private BaseInstrument m_Instrument;
 
-            public InternalSecondTarget(Mobile from, BaseInstrument instrument, BaseCreature creature)
-                : base(BaseInstrument.GetBardRange(from, SkillName.Provocation), false, TargetFlags.None)
+            public InternalSecondTarget(Mobile from, BaseInstrument instrument, BaseCreature creature): base(BaseInstrument.GetBardRange(from, SkillName.Provocation), false, TargetFlags.None)
             {
                 m_Instrument = instrument;
                 bc_FirstCreature = creature;
@@ -146,11 +144,20 @@ namespace Server.SkillHandlers
                             return;
 
                         double creatureDifficulty = Math.Max(bc_FirstCreature.InitialDifficulty, bc_Target.InitialDifficulty);
-                        double firstEffectiveBardSkill = from.Skills[SkillName.Peacemaking].Value + BaseInstrument.GetBardBonusSkill(from, bc_FirstCreature, m_Instrument);
-                        double secondEffectiveBardSkill = from.Skills[SkillName.Peacemaking].Value + BaseInstrument.GetBardBonusSkill(from, bc_Target, m_Instrument);
+                        double firstEffectiveBardSkill = from.Skills[SkillName.Provocation].Value + BaseInstrument.GetBardBonusSkill(from, bc_FirstCreature, m_Instrument);
+                        double secondEffectiveBardSkill = from.Skills[SkillName.Provocation].Value + BaseInstrument.GetBardBonusSkill(from, bc_Target, m_Instrument);
                         double effectiveBardSkill = Math.Max(firstEffectiveBardSkill, secondEffectiveBardSkill);
 
+                        AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(from);
+
+                        if (aspectArmorProfile != null)
+                        {
+                            if (aspectArmorProfile.m_Aspect == AspectEnum.Lyric)
+                                effectiveBardSkill += AspectGear.LyricEffectiveBardingSkillBonus * (AspectGear.LyricEffectiveBardingSkillBonusPerTier * (double)aspectArmorProfile.m_TierLevel);
+                        }
+
                         double successChance = BaseInstrument.GetBardSuccessChance(effectiveBardSkill, creatureDifficulty);
+                        
                         TimeSpan effectDuration = BaseInstrument.GetBardDuration(bc_Target, creatureDifficulty);
 
                         if (BaseInstrument.CheckSkillGain(successChance))
@@ -180,6 +187,25 @@ namespace Server.SkillHandlers
                             string failureMessage = BaseInstrument.GetFailureMessage(successChance, SkillName.Provocation);
 
                             from.SendMessage(failureMessage);
+
+                            if (aspectArmorProfile != null && from is PlayerMobile)
+                            {
+                                if (aspectArmorProfile.m_Aspect == AspectEnum.Lyric)
+                                {
+                                    double failedBardingAttemptDamageReduction = AspectGear.LyricDamageReceivedReductionFromFailedBardingTarget * (AspectGear.LyricDamageReceivedReductionFromFailedBardingTargetPerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                                    failedBardingAttemptDamageReduction *= (from.Skills.Provocation.Value / 120);
+
+                                    PlayerMobile player = from as PlayerMobile;
+
+                                    player.m_LyricAspectFailedBardingAttemptExpiration = DateTime.UtcNow + AspectGear.LyricDamageReceivedReductionFromFailedBardingDuration;
+
+                                    player.m_LyricAspectFailedBardingAttemptTargets.Clear();
+                                    player.m_LyricAspectFailedBardingAttemptTargets.Add(bc_FirstCreature);
+                                    player.m_LyricAspectFailedBardingAttemptTargets.Add(bc_Target);
+                                    player.m_LyricAspectFailedBardingAttemptDamageReduction = failedBardingAttemptDamageReduction;
+                                }
+                            }
                         }
                     }
 
@@ -222,9 +248,18 @@ namespace Server.SkillHandlers
                             }
 
                             double creatureDifficulty = bc_FirstCreature.InitialDifficulty;
-                            double effectiveBardSkill = from.Skills[SkillName.Peacemaking].Value + BaseInstrument.GetBardBonusSkill(from, bc_FirstCreature, m_Instrument);
+                            double effectiveBardSkill = from.Skills[SkillName.Provocation].Value + BaseInstrument.GetBardBonusSkill(from, bc_FirstCreature, m_Instrument);
+
+                            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(from);
+
+                            if (aspectArmorProfile != null)
+                            {
+                                if (aspectArmorProfile.m_Aspect == AspectEnum.Lyric)
+                                    effectiveBardSkill += AspectGear.LyricEffectiveBardingSkillBonus * (AspectGear.LyricEffectiveBardingSkillBonusPerTier * (double)aspectArmorProfile.m_TierLevel);
+                            }
 
                             double successChance = BaseInstrument.GetBardSuccessChance(effectiveBardSkill, creatureDifficulty);
+                            
                             TimeSpan effectDuration = BaseInstrument.GetBardDuration(bc_FirstCreature, creatureDifficulty);
 
                             if (BaseInstrument.CheckSkillGain(successChance))
@@ -254,6 +289,24 @@ namespace Server.SkillHandlers
                                 string failureMessage = BaseInstrument.GetFailureMessage(successChance, SkillName.Provocation);
 
                                 from.SendMessage(failureMessage);
+
+                                if (aspectArmorProfile != null && from is PlayerMobile)
+                                {
+                                    if (aspectArmorProfile.m_Aspect == AspectEnum.Lyric)
+                                    {
+                                        double failedBardingAttemptDamageReduction = AspectGear.LyricDamageReceivedReductionFromFailedBardingTarget * (AspectGear.LyricDamageReceivedReductionFromFailedBardingTargetPerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                                        failedBardingAttemptDamageReduction *= (from.Skills.Provocation.Value / 120);
+
+                                        player = from as PlayerMobile;
+
+                                        player.m_LyricAspectFailedBardingAttemptExpiration = DateTime.UtcNow + AspectGear.LyricDamageReceivedReductionFromFailedBardingDuration;
+
+                                        player.m_LyricAspectFailedBardingAttemptTargets.Clear();
+                                        player.m_LyricAspectFailedBardingAttemptTargets.Add(bc_FirstCreature);
+                                        player.m_LyricAspectFailedBardingAttemptDamageReduction = failedBardingAttemptDamageReduction;
+                                    }
+                                }
                             }
                         }
 

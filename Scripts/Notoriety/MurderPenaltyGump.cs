@@ -326,31 +326,34 @@ namespace Server
                             }  
                         }
 
+                        //Aggressive Action Restriction
                         if (m_SelectionIndex == 0)
                         {
-                            m_Player.m_RessPenaltyExpiration = DateTime.UtcNow + PlayerMobile.RessPenaltyDuration;
+                            m_Player.RessPenaltyExpiration = DateTime.UtcNow + PlayerMobile.RessPenaltyDuration;
                             m_Player.m_RessPenaltyAccountWideAggressionRestriction = true;
 
-                            string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_Player.m_RessPenaltyExpiration, false, true, true, true, false);
+                            string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_Player.RessPenaltyExpiration, false, true, true, true, false);
 
                             m_Player.SendMessage(2550, "Your murder counts have been reset to " + Mobile.MurderCountsRequiredForMurderer.ToString() + ". All characters on your account will be restricted from making aggressive actions for the next " + timeRemaining + ".");
                         }
 
+                        //Damage, Healing, Fizzle Penalty
                         else if (m_SelectionIndex == 1)
                         {   
-                            if (m_Player.m_RessPenaltyExpiration > DateTime.UtcNow)
+                            if (m_Player.RessPenaltyExpiration > DateTime.UtcNow)
                                 m_Player.m_RessPenaltyEffectivenessReductionCount++;
 
                             else
                                 m_Player.m_RessPenaltyEffectivenessReductionCount = 1;
 
-                            m_Player.m_RessPenaltyExpiration = DateTime.UtcNow + PlayerMobile.RessPenaltyDuration;
+                            m_Player.RessPenaltyExpiration = DateTime.UtcNow + PlayerMobile.RessPenaltyDuration;
 
-                            string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_Player.m_RessPenaltyExpiration, false, true, true, true, false);
+                            string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_Player.RessPenaltyExpiration, false, true, true, true, false);
                             
                             m_Player.SendMessage(2550, "Your murder counts have been reset to " + Mobile.MurderCountsRequiredForMurderer.ToString() + ". Your character's combat penalty will be active for the next " + timeRemaining + ".");
                         }
 
+                        //No Penalty
                         else if (m_SelectionIndex == 2)
                             m_Player.SendMessage(2550, "Your murder counts have been reset to " + Mobile.MurderCountsRequiredForMurderer.ToString() + " and you resurrect with no additional penalties.");
 

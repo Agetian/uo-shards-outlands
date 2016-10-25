@@ -131,7 +131,8 @@ namespace Server
         SpecialLoot,
         EventLoot,
         EventReward,
-        PurchasedReward
+        PurchasedReward,
+        ArenaReward,
     }
 
     public enum ItemRarityType

@@ -172,6 +172,23 @@ namespace Server.Spells
             if (pack == null)
                 return false;
 
+            double freeReagentChance = 0;
+
+            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(m_Caster);
+
+            if (aspectArmorProfile != null)
+            {
+                if (aspectArmorProfile.m_Aspect == AspectEnum.Eldritch)
+                    freeReagentChance = AspectGear.EldritchReagentCostReductionChance * (AspectGear.EldritchReagentCostReductionChancePerTier * (double)aspectArmorProfile.m_TierLevel);
+            }
+
+            if (Utility.RandomDouble() <= freeReagentChance)
+            {
+                //TEST: Add Aspect Visuals
+
+                return true;
+            }
+
             if (pack.ConsumeTotal(m_Info.Reagents, m_Info.Amounts) == -1)
                 return true;
 
@@ -254,8 +271,8 @@ namespace Server.Spells
                 }
             }
 
-            AspectGear.AspectArmorProfile casterAspectArmor = new AspectGear.AspectArmorProfile(m_Caster, null);
-            AspectGear.AspectArmorProfile defenderAspectArmor = new AspectGear.AspectArmorProfile(target, null);
+            AspectArmorProfile casterAspectArmorProfile = AspectGear.GetAspectArmorProfile(m_Caster);
+            AspectArmorProfile targetAspectArmorProfile = AspectGear.GetAspectArmorProfile(target);
 
             double damageScalar = SpellHelper.BaseDamageScalar;
 
@@ -265,16 +282,6 @@ namespace Server.Spells
             double slayerBonus = GetSlayerDamageBonus(target); 
             double spellDamageInflictedBonus = 0;
             double spellDamageReceivedBonus = 0;
-
-            if (casterAspectArmor.MatchingSet && !m_Caster.RecentlyInPlayerCombat)
-            {
-                //spellDamageInflictedBonus = casterAspectArmor.AspectArmorDetail.SpellDamageInflictedBonus;
-            }
-
-            if (defenderAspectArmor.MatchingSet && !target.RecentlyInPlayerCombat)
-            {
-                //spellDamageReceivedBonus = defenderAspectArmor.AspectArmorDetail.SpellDamageReceivedBonus;
-            }
 
             m_Caster.CheckSkill(SkillName.SpiritSpeak, 0.0, 120.0, 1.0);
 
@@ -816,11 +823,31 @@ namespace Server.Spells
                 
             else if (CheckFizzle())
             {
-                //Backlash Effect: Potential to Cancel Spell
-                double totalValue = 0;
-
                 BaseCreature bc_Creature = m_Caster as BaseCreature;
                 PlayerMobile player = m_Caster as PlayerMobile;
+
+                //Ress Penalty Fizzle Chance
+                if (this is WallOfStoneSpell || this is EnergyFieldSpell || this is ParalyzeSpell || this is ParalyzeFieldSpell)
+                {
+                    if (player != null)
+                    {
+                        double fizzleChance = 0.0;
+
+                        if (player.RessPenaltyExpiration > DateTime.UtcNow && player.m_RessPenaltyEffectivenessReductionCount > 0)                        
+                            fizzleChance = (double)player.m_RessPenaltyEffectivenessReductionCount * PlayerMobile.RessPenaltyFizzleScalar;                        
+
+                        if (Utility.RandomDouble() <= fizzleChance)
+                        {
+                            DoFizzle();
+                            m_Caster.SendMessage("Your current ressurection penalty sickness causes your spell to fizzle.");
+
+                            return false;
+                        }
+                    }
+                }
+
+                //Backlash Effect: Potential to Cancel Spell
+                double totalValue = 0;               
 
                 double backlashValue = m_Caster.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Backlash);
                
@@ -832,20 +859,26 @@ namespace Server.Spells
                     return false;
                 }
 
-                AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(m_Caster, null);
+                AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(Caster);
 
-                if (aspectArmor.MatchingSet && !m_Caster.RecentlyInPlayerCombat)
+                if (aspectArmorProfile != null)
                 {
-                    /*
-                    if (Utility.RandomDouble() <= casterDungeonArmor.DungeonArmorDetail.ReducedSpellManaCostChance)
+                    if (aspectArmorProfile.m_Aspect == AspectEnum.Eldritch)
                     {
-                        mana = (int)(Math.Round((double)mana * casterDungeonArmor.DungeonArmorDetail.ReducedSpellManaCostScalar));
-                        Caster.SendMessage("You feel a rush of energy from your armor, fueling mana into the spell.");
+                        double effectChance = AspectGear.EldritchManaCostReductionChance + (AspectGear.EldritchManaCostReductionChancePerTier * (double)aspectArmorProfile.m_TierLevel);
 
-                        Effects.PlaySound(Caster.Location, Caster.Map, 0x64B);
-                        Effects.SendLocationParticles(EffectItem.Create(Caster.Location, Caster.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, casterDungeonArmor.DungeonArmorDetail.EffectHue, 0, 5005, 0);
-                    }      
-                    */
+                        if (Utility.RandomDouble() <= effectChance)
+                        {
+                            mana = 0;
+
+                            //TEST: Add Aspect Visuals
+
+                            //Caster.SendMessage("You feel a rush of energy from your aspect armor, fueling mana into the spell.");
+
+                            //Effects.PlaySound(Caster.Location, Caster.Map, 0x64B);
+                            //Effects.SendLocationParticles(EffectItem.Create(Caster.Location, Caster.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, AspectGear.GetAspectHue(AspectEnum.Eldritch), 0, 5005, 0);
+                        }                    
+                    }
                 }
 
                 m_Caster.Mana -= mana;

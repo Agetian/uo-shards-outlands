@@ -30,6 +30,7 @@ namespace Server
 
         public static TimeSpan ReadyCheckInterval = TimeSpan.FromSeconds(30);
 
+        public static int ArenaCreditPurchaseNumber = 5;
         public static int ArenaCreditGoldCost = 200;
         public static int ArenaCreditDonationCoinCost = 5;
 

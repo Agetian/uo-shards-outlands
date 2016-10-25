@@ -73,8 +73,16 @@ namespace Server
 
         public static int AdjustDisplayedDamage(Mobile from, Mobile target, int amount)
         {
+            BaseCreature bc_Source = from as BaseCreature;
+            PlayerMobile pm_Source = from as PlayerMobile;
+
             BaseCreature bc_Target = target as BaseCreature;
             PlayerMobile pm_Target = target as PlayerMobile;
+            
+            PlayerMobile pm_SourceMaster = null;
+
+            if (pm_Source != null)            
+                pm_SourceMaster = bc_Source.GetPlayerMaster() as PlayerMobile;            
 
             double displayedDamage = amount;
 
@@ -86,6 +94,19 @@ namespace Server
                 //Ship Combat
                 if (BaseShip.UseShipBasedDamageModifer(from, bc_Target))
                     displayedDamage *= BaseShip.shipBasedDamageToCreatureScalar;
+            }
+
+            //Ress Penalty
+            if (pm_Source != null)
+            {
+                if (pm_Source.RessPenaltyExpiration > DateTime.UtcNow && pm_Source.m_RessPenaltyEffectivenessReductionCount > 0)
+                    displayedDamage *= 1 - (PlayerMobile.RessPenaltyDamageScalar * (double)pm_Source.m_RessPenaltyEffectivenessReductionCount);
+            }
+
+            else if (pm_SourceMaster != null)
+            {
+                if (pm_SourceMaster.RessPenaltyExpiration > DateTime.UtcNow && pm_SourceMaster.m_RessPenaltyEffectivenessReductionCount > 0)
+                    displayedDamage *= 1 - (PlayerMobile.RessPenaltyDamageScalar * (double)pm_SourceMaster.m_RessPenaltyEffectivenessReductionCount);
             }
 
             //Ship Combat

@@ -38,23 +38,23 @@ namespace Server.Spells.Fifth
                 Caster.Target = new InternalTarget(this);            
 		}
 
-		public void Target( Mobile m )
+		public void Target( Mobile mobile )
 		{
-            if (!Caster.CanSee(m) || m.Hidden)			
+            if (!Caster.CanSee(mobile) || mobile.Hidden)			
 				Caster.SendLocalizedMessage( 500237 ); // Target can not be seen.			
 
-			else if ( CheckHSequence( m ) )
+			else if ( CheckHSequence( mobile ) )
 			{
-				SpellHelper.Turn( Caster, m );
-				SpellHelper.CheckReflect( (int)this.Circle, Caster, ref m );
+				SpellHelper.Turn( Caster, mobile );
+				SpellHelper.CheckReflect( (int)this.Circle, Caster, ref mobile );
 
 				double duration;
 
-				if (m.Player)
+				if (mobile.Player)
 				{						
 					duration = 5 + (Caster.Skills[SkillName.Magery].Value * 0.05);
 
-					if (CheckMagicResist(m))
+					if (CheckMagicResist(mobile))
 						duration *= 0.5;
 				}
 
@@ -62,45 +62,60 @@ namespace Server.Spells.Fifth
 				{						
 					duration = 10.0 + (Caster.Skills[SkillName.Magery].Value * 0.2);
 
-					if (CheckMagicResist(m))
+					if (CheckMagicResist(mobile))
 						duration *= 0.75;
 				}				
                                 
-                bool enhancedSpellcast = SpellHelper.IsEnhancedSpell(Caster, m, EnhancedSpellbookType.Warlock, true, true);
+                bool enhancedSpellcast = SpellHelper.IsEnhancedSpell(Caster, mobile, EnhancedSpellbookType.Warlock, true, true);
 
                 int spellHue = 0;
 
-                if (enhancedSpellcast)
+                AspectArmorProfile defenderAspectArmorProfile = AspectGear.GetAspectArmorProfile(mobile);
+
+                double airAvoidanceChance = 0;
+
+                if (defenderAspectArmorProfile != null)
                 {
-                    if (m.Paralyze(Caster, duration * 5))
+                    if (defenderAspectArmorProfile.m_Aspect == AspectEnum.Air)
+                        airAvoidanceChance = AspectGear.AirMeleeAvoidMovementEffectAvoidance * (AspectGear.AirMeleeAvoidMovementEffectAvoidancePerTier * (double)defenderAspectArmorProfile.m_TierLevel);
+                }
+
+                if (Utility.RandomDouble() <= airAvoidanceChance)
+                {
+                    //TEST: Add Aspect Visuals
+                }
+
+                else if (enhancedSpellcast)
+                {
+                    if (mobile.Paralyze(Caster, duration * 5))
                     {
-                        m.FixedEffect(0x376A, 10, 30, spellHue, 0);
-                        m.PlaySound(0x204);         
+                        mobile.FixedEffect(0x376A, 10, 30, spellHue, 0);
+                        mobile.PlaySound(0x204);         
                     }
 
-                    else if (m is PlayerMobile)
+                    else if (mobile is PlayerMobile)
                     {
-                        m.FixedEffect(0x376A, 10, 30, spellHue, 0);
-                        m.PlaySound(0x204);   
+                        mobile.FixedEffect(0x376A, 10, 30, spellHue, 0);
+                        mobile.PlaySound(0x204);   
                     }
                 }
 
                 else
                 {
-                    if (m.Paralyze(Caster, duration))
+                    if (mobile.Paralyze(Caster, duration))
                     {
-                        m.FixedEffect(0x376A, 10, 15, spellHue, 0);
-                        m.PlaySound(0x204);      
+                        mobile.FixedEffect(0x376A, 10, 15, spellHue, 0);
+                        mobile.PlaySound(0x204);      
                     }
 
-                    else if (m is PlayerMobile)
+                    else if (mobile is PlayerMobile)
                     {
-                        m.FixedEffect(0x376A, 10, 15, spellHue, 0);
-                        m.PlaySound(0x204);  
+                        mobile.FixedEffect(0x376A, 10, 15, spellHue, 0);
+                        mobile.PlaySound(0x204);  
                     }
                 }				
 
-				HarmfulSpell( m );
+				HarmfulSpell( mobile );
 			}
 
             ArenaFight.SpellCompletion(Caster, typeof(ParalyzeSpell));

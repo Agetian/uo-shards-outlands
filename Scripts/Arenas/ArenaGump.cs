@@ -7,6 +7,7 @@ using Server.Gumps;
 using System.Collections;
 using System.Collections.Generic;
 using Server.Prompts;
+using Server.Items;
 
 namespace Server
 {
@@ -41,6 +42,7 @@ namespace Server
         public static int ChangePageSound = 0x057;
         public static int SelectionSound = 0x4D2; //0x051; //0x3E6
         public static int LargeSelectionSound = 0x4D3;
+        public static int PurchaseSound = 0x2E6;
         public static int CloseGumpSound = 0x058;
 
         public static int MatchListingsPerAvailableMatchesPage = 7;
@@ -3202,14 +3204,40 @@ namespace Server
                     {
                         //Purchase Arena Credits (Gold)
                         case 10:
-                            //TEST: FINISH!
+                            int bankBalance = Banker.GetBalance(m_Player);
+                            int arenaCreditsAdded = ArenaMatch.ArenaCreditPurchaseNumber;
+                            int goldCost = ArenaMatch.ArenaCreditPurchaseNumber * ArenaMatch.ArenaCreditGoldCost;
+
+                            if (bankBalance < goldCost)                            
+                                m_Player.SendMessage("You do not have enough gold in your bank box to afford this.");                             
+
+                            else
+                            {
+                                Banker.WithdrawUniqueCurrency(m_Player, typeof(Gold), goldCost, true);
+                                
+                                m_Player.SendMessage(63, "You add " + arenaCreditsAdded.ToString() + " Arena Credits to your account. (Current Balance: " + m_Player.m_ArenaAccountEntry.m_ArenaCredits.ToString());
+                                m_Player.m_ArenaAccountEntry.m_ArenaCredits += arenaCreditsAdded;
+                            }
 
                             closeGump = false;
                         break;
 
                         //Purchase Arena Credits (Donation Currency)
                         case 11:
-                            //TEST: FINISH!
+                            bankBalance = Banker.GetUniqueCurrencyBalance(m_Player, typeof(DragonCoin));
+                            arenaCreditsAdded = ArenaMatch.ArenaCreditPurchaseNumber;
+                            int donationCurrencyCost = ArenaMatch.ArenaCreditDonationCoinCost;
+
+                            if (bankBalance < donationCurrencyCost)                            
+                                m_Player.SendMessage("You do not have enough donation currency in your bank box to afford this.");                             
+
+                            else
+                            {
+                                Banker.WithdrawUniqueCurrency(m_Player, typeof(DragonCoin), donationCurrencyCost, true);
+                                
+                                m_Player.SendMessage(63, "You add " + arenaCreditsAdded.ToString() + " Arena Credits to your account. (Current Balance: " + m_Player.m_ArenaAccountEntry.m_ArenaCredits.ToString());
+                                m_Player.m_ArenaAccountEntry.m_ArenaCredits += arenaCreditsAdded;
+                            }
 
                             closeGump = false;
                         break;
@@ -3248,7 +3276,72 @@ namespace Server
                         if (rewardDetail == null)
                             return;
 
-                        //TEST: FINISH!
+                        //----
+
+                        bool purchaseAllowed = true;
+                                                
+                        Item rewardItem = (Item)Activator.CreateInstance(rewardDetail.ItemType);
+
+                        if (rewardItem == null)
+                        {
+                        }
+
+                        else if (!purchaseAllowed && m_Player.AccessLevel == AccessLevel.Player)
+                        {
+                            rewardItem.Delete();
+
+                            m_Player.SendMessage("Reward purchases are not allowed in this area.");
+                        }
+
+                        else if (rewardDetail.ItemRewardPoints > m_Player.m_ArenaAccountEntry.m_ArenaRewardPoints && m_Player.AccessLevel == AccessLevel.Player)
+                        {
+                            rewardItem.Delete();
+
+                            m_Player.SendMessage("You do not have enough reward points available to purchase that item.");
+                        }
+
+                        else if (rewardDetail.ItemBlackRewardPoints > m_Player.m_ArenaAccountEntry.m_ArenaBlackRewardPoints && m_Player.AccessLevel == AccessLevel.Player)
+                        {
+                            rewardItem.Delete();
+
+                            m_Player.SendMessage("You do not have enough black reward points available to purchase that item.");
+                        }
+
+                        else if (m_Player.Backpack.TotalItems + rewardItem.TotalItems > m_Player.Backpack.MaxItems && m_Player.AccessLevel == AccessLevel.Player)
+                        {
+                            rewardItem.Delete();
+
+                            m_Player.SendMessage("Your backpack contains too many items to purchase this item. Please remove some items and try again.");
+                        }
+
+                        else if (m_Player.Backpack.TotalWeight + rewardItem.TotalWeight > m_Player.MaxWeight && m_Player.AccessLevel == AccessLevel.Player)
+                        {
+                            rewardItem.Delete();
+
+                            m_Player.SendMessage("Your backpack is too heavy to purchase this item. Please remove some items and try again.");
+                        }
+
+                        else
+                        {
+                            if (m_Player.AccessLevel == AccessLevel.Player)
+                            {
+                               m_Player.m_ArenaAccountEntry.m_ArenaRewardPoints -= rewardDetail.ItemRewardPoints;
+                               m_Player.m_ArenaAccountEntry.m_ArenaBlackRewardPoints -= rewardDetail.ItemBlackRewardPoints;
+
+                               m_Player.SendMessage("You purchase the item.");
+                            }
+
+                            else
+                                m_Player.SendMessage("You use your godly powers to purchase the item.");
+
+                            m_Player.SendSound(PurchaseSound);                                
+
+                            rewardItem.ItemGroup = ItemGroupType.ArenaReward;
+
+                            m_Player.Backpack.DropItem(rewardItem);
+                        }
+
+                        //-----
 
                         closeGump = false;
                     }
@@ -3266,7 +3359,11 @@ namespace Server
                         if (rewardDetail == null)
                             return;
 
-                        //TEST: FINISH!
+                        for (int a = 0; a < rewardDetail.ItemDescription.Count; a++)
+                        {
+                            if (rewardDetail.ItemDescription[a] != "")
+                                m_Player.SendMessage(rewardDetail.ItemDescription[a]);
+                        }
 
                         closeGump = false;
                     }

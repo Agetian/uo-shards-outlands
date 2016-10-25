@@ -48,9 +48,7 @@ namespace Server.Items
 		{
 			if ( DoAgility( from ) )
 			{
-				BasePotion.PlayDrinkEffect( from );
-
-                if (!ArenaFight.AllowFreeConsume(from, typeof(BasePotion)))
+				if (!BasePotion.PlayDrinkEffect( from ))
 				    Consume();
 			}
 		}

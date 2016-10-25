@@ -413,14 +413,7 @@ namespace Server.Mobiles
                             if (target is BaseCreature)
                                 baseDamage *= BaseCreature.BreathDamageToCreatureScalar;
                         }
-
-                        AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(target, null);
-
-                        if (aspectArmor.MatchingSet && !target.RecentlyInPlayerCombat)
-                        {
-                            //baseDamage *= aspectArmor.AspectArmorDetail.BreathDamageReceivedScalar;
-                        }
-
+                        
                         switch (breathType)
                         {
                             case BreathAttackType.Fire:     

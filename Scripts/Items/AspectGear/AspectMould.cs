@@ -349,18 +349,18 @@ namespace Server.Items
 
     #region Smithing Moulds
 
-    public class SmithingMouldTier2 : AspectMould
+    public class BasicSmithingMould : AspectMould
     {
         [Constructable]
-        public SmithingMouldTier2(): base()
+        public BasicSmithingMould(): base()
         {
-            Name = "Smithing Mould: Tier 2";
+            Name = "Basic Smithing Mould";
 
             TierLevel = 2;
             MouldType = MouldSkillType.Blacksmithy;
         }
 
-        public SmithingMouldTier2(Serial serial): base(serial)
+        public BasicSmithingMould(Serial serial): base(serial)
         {
         }
 
@@ -382,18 +382,18 @@ namespace Server.Items
         }
     }
 
-    public class SmithingMouldTier4 : AspectMould
+    public class AdvancedSmithingMould : AspectMould
     {
         [Constructable]
-        public SmithingMouldTier4(): base()
+        public AdvancedSmithingMould(): base()
         {
-            Name = "Smithing Mould: Tier 4";
+            Name = "Advanced Smithing Mould";
 
             TierLevel = 4;
             MouldType = MouldSkillType.Blacksmithy;
         }
 
-        public SmithingMouldTier4(Serial serial): base(serial)
+        public AdvancedSmithingMould(Serial serial): base(serial)
         {
         }
 
@@ -415,18 +415,18 @@ namespace Server.Items
         }
     }
 
-    public class SmithingMouldTier6 : AspectMould
+    public class ExpertSmithingMould : AspectMould
     {
         [Constructable]
-        public SmithingMouldTier6(): base()
+        public ExpertSmithingMould(): base()
         {
-            Name = "Smithing Mould: Tier 6";
+            Name = "Expert Smithing Mould";
 
             TierLevel = 6;
             MouldType = MouldSkillType.Blacksmithy;
         }
 
-        public SmithingMouldTier6(Serial serial): base(serial)
+        public ExpertSmithingMould(Serial serial): base(serial)
         {
         }
 
@@ -448,18 +448,18 @@ namespace Server.Items
         }
     }
 
-    public class SmithingMouldTier8 : AspectMould
+    public class MasterSmithingMould : AspectMould
     {
         [Constructable]
-        public SmithingMouldTier8(): base()
+        public MasterSmithingMould(): base()
         {
-            Name = "Smithing Mould: Tier 8";
+            Name = "Master Smithing Mould";
 
             TierLevel = 8;
             MouldType = MouldSkillType.Blacksmithy;
         }
 
-        public SmithingMouldTier8(Serial serial): base(serial)
+        public MasterSmithingMould(Serial serial): base(serial)
         {
         }
 
@@ -481,18 +481,18 @@ namespace Server.Items
         }
     }
 
-    public class SmithingMouldTier10 : AspectMould
+    public class LegendarySmithingMould : AspectMould
     {
         [Constructable]
-        public SmithingMouldTier10(): base()
+        public LegendarySmithingMould(): base()
         {
-            Name = "Smithing Mould: Tier 10";
+            Name = "Legendary Smithing Mould";
 
             TierLevel = 10;
             MouldType = MouldSkillType.Blacksmithy;
         }
 
-        public SmithingMouldTier10(Serial serial): base(serial)
+        public LegendarySmithingMould(Serial serial): base(serial)
         {
         }
 
@@ -518,18 +518,18 @@ namespace Server.Items
 
     #region Carpentry Moulds
 
-    public class CarpentryMouldTier2 : AspectMould
+    public class BasicCarpentryMould : AspectMould
     {
         [Constructable]
-        public CarpentryMouldTier2(): base()
+        public BasicCarpentryMould(): base()
         {
-            Name = "Carpentry Mould: Tier 2";
+            Name = "Basic Carpentry Mould";
 
             TierLevel = 2;
             MouldType = MouldSkillType.Carpentry;
         }
 
-        public CarpentryMouldTier2(Serial serial): base(serial)
+        public BasicCarpentryMould(Serial serial): base(serial)
         {
         }
 
@@ -551,18 +551,18 @@ namespace Server.Items
         }
     }
 
-    public class CarpentryMouldTier4 : AspectMould
+    public class AdvancedCarpentryMould : AspectMould
     {
         [Constructable]
-        public CarpentryMouldTier4(): base()
+        public AdvancedCarpentryMould(): base()
         {
-            Name = "Carpentry Mould: Tier 4";
+            Name = "Advanced Carpentry Mould";
 
             TierLevel = 4;
             MouldType = MouldSkillType.Carpentry;
         }
 
-        public CarpentryMouldTier4(Serial serial): base(serial)
+        public AdvancedCarpentryMould(Serial serial): base(serial)
         {
         }
 
@@ -584,18 +584,18 @@ namespace Server.Items
         }
     }
 
-    public class CarpentryMouldTier6 : AspectMould
+    public class ExpertCarpentryMould : AspectMould
     {
         [Constructable]
-        public CarpentryMouldTier6(): base()
+        public ExpertCarpentryMould(): base()
         {
-            Name = "Carpentry Mould: Tier 6";
+            Name = "Expert Carpentry Mould";
 
             TierLevel = 6;
             MouldType = MouldSkillType.Carpentry;
         }
 
-        public CarpentryMouldTier6(Serial serial): base(serial)
+        public ExpertCarpentryMould(Serial serial): base(serial)
         {
         }
 
@@ -617,18 +617,18 @@ namespace Server.Items
         }
     }
 
-    public class CarpentryMouldTier8 : AspectMould
+    public class MasterCarpentryMould : AspectMould
     {
         [Constructable]
-        public CarpentryMouldTier8(): base()
+        public MasterCarpentryMould(): base()
         {
-            Name = "Carpentry Mould: Tier 8";
+            Name = "Master Carpentry Mould";
 
             TierLevel = 8;
             MouldType = MouldSkillType.Carpentry;
         }
 
-        public CarpentryMouldTier8(Serial serial): base(serial)
+        public MasterCarpentryMould(Serial serial): base(serial)
         {
         }
 
@@ -650,18 +650,18 @@ namespace Server.Items
         }
     }
 
-    public class CarpentryMouldTier10 : AspectMould
+    public class LegendaryCarpentryMould : AspectMould
     {
         [Constructable]
-        public CarpentryMouldTier10(): base()
+        public LegendaryCarpentryMould(): base()
         {
-            Name = "Carpentry Mould: Tier 10";
+            Name = "Legendary Carpentry Mould";
 
             TierLevel = 10;
             MouldType = MouldSkillType.Carpentry;
         }
 
-        public CarpentryMouldTier10(Serial serial): base(serial)
+        public LegendaryCarpentryMould(Serial serial): base(serial)
         {
         }
 
@@ -687,18 +687,18 @@ namespace Server.Items
 
     #region Tailoring Moulds
 
-    public class TailoringMouldTier2 : AspectMould
+    public class BasicTailoringMould : AspectMould
     {
         [Constructable]
-        public TailoringMouldTier2(): base()
+        public BasicTailoringMould(): base()
         {
-            Name = "Tailoring Mould: Tier 2";
+            Name = "Basic Tailoring Mould";
 
             TierLevel = 2;
             MouldType = MouldSkillType.Tailoring;
         }
 
-        public TailoringMouldTier2(Serial serial): base(serial)
+        public BasicTailoringMould(Serial serial): base(serial)
         {
         }
 
@@ -720,18 +720,18 @@ namespace Server.Items
         }
     }
 
-    public class TailoringMouldTier4 : AspectMould
+    public class AdvancedTailoringMould : AspectMould
     {
         [Constructable]
-        public TailoringMouldTier4(): base()
+        public AdvancedTailoringMould(): base()
         {
-            Name = "Tailoring Mould: Tier 4";
+            Name = "Advanced Tailoring Mould";
 
             TierLevel = 4;
             MouldType = MouldSkillType.Tailoring;
         }
 
-        public TailoringMouldTier4(Serial serial): base(serial)
+        public AdvancedTailoringMould(Serial serial): base(serial)
         {
         }
 
@@ -753,18 +753,18 @@ namespace Server.Items
         }
     }
 
-    public class TailoringMouldTier6 : AspectMould
+    public class ExpertTailoringMould : AspectMould
     {
         [Constructable]
-        public TailoringMouldTier6(): base()
+        public ExpertTailoringMould(): base()
         {
-            Name = "Tailoring Mould: Tier 6";
+            Name = "Expert Tailoring Mould";
 
             TierLevel = 6;
             MouldType = MouldSkillType.Tailoring;
         }
 
-        public TailoringMouldTier6(Serial serial): base(serial)
+        public ExpertTailoringMould(Serial serial): base(serial)
         {
         }
 
@@ -786,18 +786,18 @@ namespace Server.Items
         }
     }
 
-    public class TailoringMouldTier8 : AspectMould
+    public class MasterTailoringMould : AspectMould
     {
         [Constructable]
-        public TailoringMouldTier8() : base()
+        public MasterTailoringMould() : base()
         {
-            Name = "Tailoring Mould: Tier 8";
+            Name = "Master Tailoring Mould";
 
             TierLevel = 8;
             MouldType = MouldSkillType.Tailoring;
         }
 
-        public TailoringMouldTier8(Serial serial): base(serial)
+        public MasterTailoringMould(Serial serial): base(serial)
         {
         }
 
@@ -819,18 +819,18 @@ namespace Server.Items
         }
     }
 
-    public class TailoringMouldTier10 : AspectMould
+    public class LegendaryTailoringMould : AspectMould
     {
         [Constructable]
-        public TailoringMouldTier10(): base()
+        public LegendaryTailoringMould(): base()
         {
-            Name = "Tailoring Mould: Tier 10";
+            Name = "Legendary Tailoring Mould";
 
             TierLevel = 10;
             MouldType = MouldSkillType.Tailoring;
         }
 
-        public TailoringMouldTier10(Serial serial): base(serial)
+        public LegendaryTailoringMould(Serial serial): base(serial)
         {
         }
 

@@ -244,6 +244,7 @@ namespace Server.Items
             if (from.CombatProhibited)
                 return;
 
+            //TEST: CHECK THIS
             if (!ArenaFight.AllowFreeConsume(from, typeof(BasePotion)))
                 Consume();
 

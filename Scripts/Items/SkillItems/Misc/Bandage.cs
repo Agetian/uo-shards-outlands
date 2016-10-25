@@ -267,13 +267,7 @@ namespace Server.Items
 
             int effectHue = 0;
 
-            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(m_Healer, null);
-
-            if (aspectArmor.MatchingSet && !m_Healer.RecentlyInPlayerCombat)
-            {
-                //BandageHealThroughPoisonScalar += aspectArmor.AspectArmorDetail.BandageHealThroughPoisonScalar;
-                //effectHue = bandagerDungeonArmor.DungeonArmorDetail.EffectHue;                
-            }
+            AspectArmorProfile patientAspectArmorProfile = AspectGear.GetAspectArmorProfile(m_Patient);
 
             if (!m_Healer.Alive)
             {
@@ -411,8 +405,33 @@ namespace Server.Items
 
                 else
                 {
-                    healerNumber = 1010060; // You have failed to cure your target!
-                    patientNumber = -1;
+                    bool cured = false;
+
+                    AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(m_Patient);
+
+                    //Poison Aspect
+                    if (aspectArmorProfile != null)
+                    {
+                        if (aspectArmorProfile.m_Aspect == AspectEnum.Poison)
+                        {
+                            double extraCureChance = AspectGear.PoisonCureChanceBonus * (AspectGear.PoisonCureChanceBonusPerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                            if (Utility.RandomDouble() <= extraCureChance)
+                            {
+                                m_Patient.CurePoison(m_Healer);
+
+                                cured = true;
+
+                                //TEST: Add Aspect Visuals
+                            }
+                        }
+                    }
+
+                    if (!cured)
+                    {
+                        healerNumber = 1010060; // You have failed to cure your target!
+                        patientNumber = -1;
+                    }
                 }                
             }
 
@@ -456,9 +475,6 @@ namespace Server.Items
                         toHeal += m_Patient.HitsMax / 100;
                                        
                      toHeal -= m_Slips * 2.5;
-
-                    if (healThroughPoison)
-                        toHeal *= BandageHealThroughPoisonScalar;
 
                     PlayerMobile playerHealer = m_Healer as PlayerMobile;
 
@@ -569,17 +585,8 @@ namespace Server.Items
                 if (!patient.Alive)
                     resDelay += 5;
 
-                if (onSelf)
-                {
-                    seconds = SkillCooldown.HealingSelfCooldown;
-
-                    AspectGear.AspectArmorProfile aspectGear = new AspectGear.AspectArmorProfile(healer, null);
-
-                    if (aspectGear.MatchingSet && !healer.RecentlyInPlayerCombat)
-                    {
-                        //seconds -= aspectGear.AspectArmorDetail.BandageSelfTimeReduction;
-                    }
-                }
+                if (onSelf)                
+                    seconds = SkillCooldown.HealingSelfCooldown;                
 
                 else
                     seconds = SkillCooldown.HealingOtherCooldown + resDelay;

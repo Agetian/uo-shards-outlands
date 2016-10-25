@@ -19,6 +19,7 @@ namespace Server
         public static void Initialize()
         {
             ArenaRewardDetail rewardDetail = new ArenaRewardDetail();
+            rewardDetail.ItemType = typeof(WizardsHat);
             rewardDetail.DisplayName = "Random Champion Reward Box";
             rewardDetail.DisplayNameHue = 149;
             rewardDetail.ItemRewardPoints = 2;
@@ -38,6 +39,7 @@ namespace Server
             //-----
 
             rewardDetail = new ArenaRewardDetail();
+            rewardDetail.ItemType = typeof(WizardsHat);
             rewardDetail.DisplayName = "Champion's Statue";
             rewardDetail.DisplayNameHue = 149;
             rewardDetail.ItemRewardPoints = 10;
@@ -57,6 +59,7 @@ namespace Server
             //-----
 
             rewardDetail = new ArenaRewardDetail();
+            rewardDetail.ItemType = typeof(WizardsHat);
             rewardDetail.DisplayName = "True Black Clothing Dye";
             rewardDetail.DisplayNameHue = 149;
             rewardDetail.ItemRewardPoints = 0;
@@ -76,6 +79,7 @@ namespace Server
             //-----
 
             rewardDetail = new ArenaRewardDetail();
+            rewardDetail.ItemType = typeof(WizardsHat);
             rewardDetail.DisplayName = "True Black Champion's Vest";
             rewardDetail.DisplayNameHue = 149;
             rewardDetail.ItemRewardPoints = 0;
@@ -95,6 +99,7 @@ namespace Server
             //-----
 
             rewardDetail = new ArenaRewardDetail();
+            rewardDetail.ItemType = typeof(WizardsHat);
             rewardDetail.DisplayName = "True Black Champion's Vest";
             rewardDetail.DisplayNameHue = 149;
             rewardDetail.ItemRewardPoints = 0;
@@ -115,6 +120,8 @@ namespace Server
 
     public class ArenaRewardDetail
     {
+        public Type ItemType;
+
         public string DisplayName = "Reward Display Name";
         public int DisplayNameHue = 149;
 

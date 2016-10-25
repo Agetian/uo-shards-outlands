@@ -25,7 +25,7 @@ namespace Server.Items
         private AosArmorAttributes m_AosArmorAttributes;
         private AosSkillBonuses m_AosSkillBonuses;
         
-        private int m_ArmorBase = -1;
+        private double m_ArmorBase = -1;
         private int m_StrBonus = -1, m_DexBonus = -1, m_IntBonus = -1;
         private int m_StrReq = -1, m_DexReq = -1, m_IntReq = -1;
         private AMA m_Meditate = (AMA)(-1);
@@ -90,7 +90,7 @@ namespace Server.Items
         }
 
         [CommandProperty(AccessLevel.GameMaster)]
-        public int BaseArmorRating
+        public double BaseArmorRating
         {
             get
             {
@@ -1246,9 +1246,8 @@ namespace Server.Items
                 if (intBonus != 0)
                     from.AddStatMod(new StatMod(StatType.Int, modName + "Int", intBonus, TimeSpan.Zero));
             }
-
-            if (Aspect != AspectEnum.None && TierLevel > 0)
-                AspectGear.OnArmorEquip(from, this);
+           
+            AspectGear.OnArmorEquip(from, this);
 
             return base.OnEquip(from);
         }
@@ -1258,9 +1257,8 @@ namespace Server.Items
             if (parent is Mobile)
             {
                 Mobile mobile = (Mobile)parent;
-
-                if (Aspect != AspectEnum.None && TierLevel > 0)
-                    AspectGear.OnArmorRemoved(mobile, this);
+                
+                AspectGear.OnArmorRemoved(mobile, this);
 
                 string modName = this.Serial.ToString();
 

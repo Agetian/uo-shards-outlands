@@ -263,11 +263,11 @@ namespace Server.Engines.Craft
             AddCraft(1, typeof(Halberd), "Swordmanship Weapons", "Halberd", 35, 60, typeof(IronIngot), 1044036, 12, 1044037);
 
             //Tools
-            AddCraft(1, typeof(SmithingMouldTier2), "Tools", "Smithing Mould: Tier 1-2", 100, 100, typeof(IronIngot), "Iron Ingot", 150, 1044037);
-            AddCraft(1, typeof(SmithingMouldTier4), "Tools", "Smithing Mould: Tier 3-4", 105, 105, typeof(IronIngot), "Iron Ingot", 175, 1044037);
-            AddCraft(1, typeof(SmithingMouldTier6), "Tools", "Smithing Mould: Tier 5-6", 110, 110, typeof(IronIngot), "Iron Ingot", 200, 1044037);
-            AddCraft(1, typeof(SmithingMouldTier8), "Tools", "Smithing Mould: Tier 7-8", 115, 115, typeof(IronIngot), "Iron Ingot", 225, 1044037);
-            AddCraft(1, typeof(SmithingMouldTier10), "Tools", "Smithing Mould: Tier 9-10", 120, 120, typeof(IronIngot), "Iron Ingot", 250, 1044037);
+            AddCraft(1, typeof(BasicSmithingMould), "Tools", "Basic Smithing Mould", 100, 100, typeof(IronIngot), "Iron Ingot", 150, 1044037);
+            AddCraft(1, typeof(AdvancedSmithingMould), "Tools", "Advanced Smithing Mould", 105, 105, typeof(IronIngot), "Iron Ingot", 175, 1044037);
+            AddCraft(1, typeof(ExpertSmithingMould), "Tools", "Expert Smithing Mould", 110, 110, typeof(IronIngot), "Iron Ingot", 200, 1044037);
+            AddCraft(1, typeof(MasterSmithingMould), "Tools", "Master Smithing Mould", 115, 115, typeof(IronIngot), "Iron Ingot", 225, 1044037);
+            AddCraft(1, typeof(LegendarySmithingMould), "Tools", "Legendary Smithing Mould", 120, 120, typeof(IronIngot), "Iron Ingot", 250, 1044037);
 
             /*
             AddCraft(1, typeof(IronOreHuePlating), "Other", "iron ore hue plating", 70, 120, typeof(IronIngot), "iron ingot", 25, "You do not have the neccesary ingots to construct that.");

@@ -64,7 +64,7 @@ namespace Server.SkillHandlers
                     equipment.Add(legs);
                     equipment.Add(chest);
 
-                    //Each Piece of Armor that Has a Meditation Penalty Reduces Total Stealth Steps By 1
+                    /*
                     foreach (BaseArmor armor in equipment)
                     {
                         if (armor != null)
@@ -73,13 +73,7 @@ namespace Server.SkillHandlers
                                 steps--;
                         }
                     }
-
-                    AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(mobile, null);
-
-                    if (aspectArmor.MatchingSet && !mobile.RecentlyInPlayerCombat)
-                    {
-                        //steps += 6 + aspectArmor.AspectArmorDetail.BonusStealthSteps;      
-                    }
+                    */
 
                     if (steps < 1)
                         steps = 1;

@@ -212,25 +212,74 @@ namespace Server
 
             int newTier = targetItem.TierLevel + 1;
 
-            string requiredMouldName = m_AspectMould.GetDisplayName();
+            string requiredMouldName = "";
 
-            switch (newTier)
+            #region Mould Names
+
+            switch (m_AspectMould.MouldType)
             {
-                case 1: requiredMouldName += ": Tier 1-2"; break;
-                case 2: requiredMouldName += ": Tier 1-2"; break;
+                case AspectMould.MouldSkillType.Blacksmithy:
+                    switch(newTier)
+                    {
+                        case 1: requiredMouldName = "Basic Smithing Mould"; break;
+                        case 2: requiredMouldName = "Basic Smithing Mould"; break;
 
-                case 3: requiredMouldName += ": Tier 3-4"; break;
-                case 4: requiredMouldName += ": Tier 3-4"; break;
+                        case 3: requiredMouldName = "Advanced Smithing Mould"; break;
+                        case 4: requiredMouldName = "Advanced Smithing Mould"; break;
 
-                case 5: requiredMouldName += ": Tier 5-6"; break;
-                case 6: requiredMouldName += ": Tier 5-6"; break;
+                        case 5: requiredMouldName = "Expert Smithing Mould"; break;
+                        case 6: requiredMouldName = "Expert Smithing Mould"; break;
 
-                case 7: requiredMouldName += ": Tier 7-8"; break;
-                case 8: requiredMouldName += ": Tier 7-8"; break;
+                        case 7: requiredMouldName = "Master Smithing Mould"; break;
+                        case 8: requiredMouldName = "Master Smithing Mould"; break;
 
-                case 9: requiredMouldName += ": Tier 9-10"; break;
-                case 10: requiredMouldName += ": Tier 9-10"; break;
+                        case 9: requiredMouldName = "Legendary Smithing Mould"; break;
+                        case 10: requiredMouldName = "Legendary Smithing Mould"; break;
+                    }
+                break;
+
+                case AspectMould.MouldSkillType.Carpentry:
+                    switch (newTier)
+                    {
+                        case 1: requiredMouldName = "Basic Carpentry Mould"; break;
+                        case 2: requiredMouldName = "Basic Carpentry Mould"; break;
+
+                        case 3: requiredMouldName = "Advanced Carpentry Mould"; break;
+                        case 4: requiredMouldName = "Advanced Carpentry Mould"; break;
+
+                        case 5: requiredMouldName = "Expert Carpentry Mould"; break;
+                        case 6: requiredMouldName = "Expert Carpentry Mould"; break;
+
+                        case 7: requiredMouldName = "Master Carpentry Mould"; break;
+                        case 8: requiredMouldName = "Master Carpentry Mould"; break;
+
+                        case 9: requiredMouldName = "Legendary Carpentry Mould"; break;
+                        case 10: requiredMouldName = "Legendary Carpentry Mould"; break;
+                    }
+                break;
+
+                case AspectMould.MouldSkillType.Tailoring:
+                    switch (newTier)
+                    {
+                        case 1: requiredMouldName = "Basic Tailoring Mould"; break;
+                        case 2: requiredMouldName = "Basic Tailoring Mould"; break;
+
+                        case 3: requiredMouldName = "Advanced Tailoring Mould"; break;
+                        case 4: requiredMouldName = "Advanced Tailoring Mould"; break;
+
+                        case 5: requiredMouldName = "Expert Tailoring Mould"; break;
+                        case 6: requiredMouldName = "Expert Tailoring Mould"; break;
+
+                        case 7: requiredMouldName = "Master Tailoring Mould"; break;
+                        case 8: requiredMouldName = "Master Tailoring Mould"; break;
+
+                        case 9: requiredMouldName = "Legendary Tailoring Mould"; break;
+                        case 10: requiredMouldName = "Legendary Tailoring Mould"; break;
+                    }
+                break;
             }
+
+            #endregion
 
             string itemName = "";
             string itemAspectName = "";
@@ -278,7 +327,7 @@ namespace Server
 
                 double effectChance = AspectGear.BaseEffectChance + (AspectGear.BaseEffectChancePerTier * (double)newTier);
 
-                effectChance *= AspectGear.GetSpecialEffectWeaponSpeedScalar(weapon.Speed);
+                effectChance *= AspectGear.GetEffectWeaponSpeedScalar(weapon);
                
                 AddLabel(137, 168, WhiteTextHue, "Durability:");
                 AddLabel(214, 168, aspectTextHue, newDurability.ToString() + "/" + newDurability.ToString());

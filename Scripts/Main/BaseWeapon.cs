@@ -489,8 +489,29 @@ namespace Server.Items
                     bc.OnSwing(defender);
                 }
 
+                double airDodgeChance = 0;
+
+                AspectArmorProfile defenderAspectArmorProfile = AspectGear.GetAspectArmorProfile(defender);
+                        
+                //Air Aspect
+                if (attacker is BaseCreature && defenderAspectArmorProfile != null)
+                {
+                    if (defenderAspectArmorProfile.m_Aspect == AspectEnum.Air)
+                        airDodgeChance = AspectGear.AirMeleeDodgeChance * (AspectGear.AirMeleeDodgeChancePerTier * (double)defenderAspectArmorProfile.m_TierLevel);
+                }  
+
                 if (CheckHit(attacker, defender))
-                    OnHit(attacker, defender, damageBonus);
+                {
+                    if (Utility.RandomDouble() <= airDodgeChance)
+                    {
+                        //TEST: Add Aspect Visuals
+
+                        OnMiss(attacker, defender);
+                    }
+
+                    else
+                        OnHit(attacker, defender, damageBonus);
+                }
 
                 else
                     OnMiss(attacker, defender);
@@ -562,7 +583,18 @@ namespace Server.Items
             //Cripple Effect
             double crippleModifier = mobile.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Cripple);
 
-            delayInSeconds *= 1 + crippleModifier;            
+            //Air Aspect Effect
+            double airAspectEffect = 0;
+
+            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(mobile);
+
+            if (aspectArmorProfile != null)
+            {
+                if (aspectArmorProfile.m_Aspect == AspectEnum.Air)
+                    airAspectEffect = AspectGear.AirMeleeSwingSpeedBonus + (AspectGear.AirMeleeSwingSpeedBonusPerTier * (double)aspectArmorProfile.m_TierLevel);
+            }
+
+            delayInSeconds *= 1 + crippleModifier - airAspectEffect;            
 
             //Discordance Effect
             if (bc_Creature != null)            
@@ -679,17 +711,20 @@ namespace Server.Items
                 if (bc_Defender.Controlled && bc_Defender.ControlMaster is PlayerMobile)
                     TamedDefender = true;
             }
-            
-            AspectGear.AspectArmorProfile attackerAspectArmor = new AspectGear.AspectArmorProfile(attacker, null);
-            AspectGear.AspectArmorProfile defenderAspectArmor = new AspectGear.AspectArmorProfile(defender, null);
+
+            AspectArmorProfile attackerAspectArmorProfile = AspectGear.GetAspectArmorProfile(attacker);
+            AspectArmorProfile defenderAspectArmorProfile = AspectGear.GetAspectArmorProfile(defender);
 
             bool dungeonArmorStealth = false;
             int effectHue = 0;
 
-            if (attackerAspectArmor.MatchingSet && !attacker.RecentlyInPlayerCombat)
+            if (attackerAspectArmorProfile != null)
             {
-                dungeonArmorStealth = true;
-                effectHue = AspectGear.GetAspectHue(attackerAspectArmor.AspectArmorDetail.m_Aspect);
+                if (attackerAspectArmorProfile.m_Aspect == AspectEnum.Shadow)
+                {
+                    dungeonArmorStealth = true;
+                    effectHue = AspectGear.GetAspectHue(AspectEnum.Shadow);
+                }
             }
 
             #region Attack Visuals and Sound
@@ -699,6 +734,24 @@ namespace Server.Items
             {
                 attacker.PlaySound(0x51D);
                 defender.PlaySound(0x51D);
+
+                //Shadow Aspect
+                if (pm_Attacker != null && bc_Defender != null)
+                {
+                    AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(pm_Attacker);
+
+                    if (aspectArmorProfile != null)
+                    {
+                        if (aspectArmorProfile.m_Aspect == AspectEnum.Shadow)
+                        {
+                            double postBackstabDamageReceivedReduction = AspectGear.ShadowPostBackstabDamageReceivedReduction * (AspectGear.ShadowPostBackstabDamageReceivedReductionPerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                            pm_Attacker.m_ShadowAspectPostBackstabDamageReceivedReductionExpiration = DateTime.UtcNow + AspectGear.ShadowPostBackstabDamageReceivedReductionDuration;
+
+                            pm_Attacker.m_ShadowAspectPostBackstabDamageReceivedReduction = postBackstabDamageReceivedReduction;
+                        }
+                    }
+                }
 
                 doStealthAttack = true;
                 allowDungeonAttack = false;
@@ -773,10 +826,11 @@ namespace Server.Items
 
                     stealthBonus = 3.5;
                     stealthBonus += 4.5 * (double)speedBonus * speedScalar;
-                    
-                    if (attackerAspectArmor.MatchingSet && !attacker.RecentlyInPlayerCombat)
+
+                    if (attackerAspectArmorProfile != null)
                     {
-                        //stealthWeaponBonus *= attackerAspectArmor.AspectArmorDetail.BackstabDamageInflictedBonus;
+                        if (attackerAspectArmorProfile.m_Aspect == AspectEnum.Shadow)
+                            stealthWeaponBonus *= 1 + AspectGear.ShadowBackstabDamageBonus + (AspectGear.ShadowBackstabDamageBonusPerTier * (double)attackerAspectArmorProfile.m_TierLevel);
                     }
 
                     //Player Attacking
@@ -827,7 +881,7 @@ namespace Server.Items
                 double baseChance = 0.1;
                 double armsLoreSkillBonus = (attacker.Skills[SkillName.ArmsLore].Value / 100) * .1;
                 double stealthAttackBonus = 0;
-                double dungeonArmorBonus = 0;                
+                double voidAspectBonus = 0;                
 
                 //Special Ability Effect: Prowess
                 double prowessBonus = attacker.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Prowess);
@@ -835,13 +889,14 @@ namespace Server.Items
                 if (!doStealthAttack)
                     stealthAttackBonus = 0;
 
-                if (attackerAspectArmor.MatchingSet && !attacker.RecentlyInPlayerCombat && defender is BaseCreature)
+                if (attackerAspectArmorProfile != null)
                 {
-                    //dungeonArmorBonus = attackerAspectArmor.AspectArmorDetail.SpecialWeaponAttackBonus;
+                    if (attackerAspectArmorProfile.m_Aspect == AspectEnum.Void)
+                        voidAspectBonus = AspectGear.VoidWeaponSpecialAttackChanceBonus + (AspectGear.VoidWeaponSpecialAttackChanceBonusPerTier * (double)attackerAspectArmorProfile.m_TierLevel);
                 }
 
                 double result = Utility.RandomDouble();
-                double totalChance = baseChance + armsLoreSkillBonus + stealthAttackBonus + dungeonArmorBonus + prowessBonus;
+                double totalChance = baseChance + armsLoreSkillBonus + stealthAttackBonus + voidAspectBonus + prowessBonus;
 
                 //Success
                 if (result <= totalChance)
@@ -1022,43 +1077,22 @@ namespace Server.Items
 
             #endregion            
 
-            #region Dungeon Armor
-
-            double MeleeDamageInflictedBonus = 0;
-            double ProvokedCreatureDamageInflictedBonus = 0;
-
-            double MeleeDamageReceivedBonus = 0;
-
-            if (attackerAspectArmor.MatchingSet && !attacker.RecentlyInPlayerCombat)
+            //Earth Aspect
+            if (attackerAspectArmorProfile != null && defender is BaseCreature)
             {
-                //MeleeDamageInflictedBonus = attackerAspectArmor.AspectArmorDetail.MeleeDamageInflictedBonus;
-            }
-
-            if (defenderAspectArmor.MatchingSet && !defender.RecentlyInPlayerCombat)
-            {
-                //MeleeDamageReceivedBonus = defenderAspectArmor.AspectArmorDetail.MeleeDamageReceivedBonus;
-            }
-
-            if (bc_Attacker != null)
-            {
-                if (bc_Attacker.BardMaster != null)
+                if (attackerAspectArmorProfile.m_Aspect == AspectEnum.Earth)
                 {
-                    AspectGear.AspectArmorProfile bardMasterAspectArmor = new AspectGear.AspectArmorProfile(bc_Attacker.BardMaster, null);
+                    double earthEffectChance = AspectGear.EarthMeleeSpecialChance + (AspectGear.EarthMeleeSpecialChancePerTier * (double)attackerAspectArmorProfile.m_TierLevel);
 
-                    if (bardMasterAspectArmor.MatchingSet && !bc_Attacker.BardMaster.RecentlyInPlayerCombat)
+                    if (Utility.RandomDouble() <= earthEffectChance)
                     {
-                        //ProvokedCreatureDamageInflictedBonus = bardMasterAspectArmor.AspectArmorDetail.ProvokedCreatureDamageInflictedBonus;
-                    }
-                }
-            }
+                        //TEST: Add Aspect Visuals
 
-            damageScalar += MeleeDamageInflictedBonus;
-            damageScalar += ProvokedCreatureDamageInflictedBonus;
-
-            damageScalar -= MeleeDamageReceivedBonus;
-
-            #endregion   
-         
+                        damageScalar += AspectGear.EarthMeleeSpecialDamageBonus;
+                    }                    
+                }                    
+            } 
+                     
             double finalBaseDamage = damage * damageScalar;
 
             #region Final Base Damage Adjustments
@@ -1468,6 +1502,8 @@ namespace Server.Items
                 }
             }
 
+            AspectGear.OnWeaponEquip(from, this);
+
             return true;
         }
 
@@ -1509,7 +1545,9 @@ namespace Server.Items
                  BaseWeapon weapon = mobile.Weapon as BaseWeapon;
                 
                  if (weapon != null)                 
-                     mobile.NextSwingDelay = weapon.GetDelay(mobile, false);                                    
+                     mobile.NextSwingDelay = weapon.GetDelay(mobile, false);
+
+                 AspectGear.OnWeaponRemoved(mobile, this); 
             }
         }
 
@@ -1588,7 +1626,7 @@ namespace Server.Items
 
             BaseCreature bc_Attacker = attacker as BaseCreature;
             BaseCreature bc_Defender = defender as BaseCreature;
-
+            
             bool PlayerAttacker = (pm_Attacker != null);
             bool CreatureAttacker = (bc_Attacker != null);
             bool PlayerDefender = (pm_Defender != null);
@@ -1651,20 +1689,24 @@ namespace Server.Items
 
             #region Special Effects
 
-            //Special Ability Effect: Expertise  
+            //Expertise  
             double expertiseBonus = attacker.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Expertise);
+
             chance += expertiseBonus;
 
-            //Specil Ability Effect: Disorient
+            //Disorient
             double disorientReduction = attacker.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Disorient);
+
             chance -= disorientReduction;
 
-            //Special Ability Effect: Debilitation
+            //Debilitation
             double debilitationBonus = defender.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Debilitate);
+
             chance += debilitationBonus;          
 
-            //Special Ability Effect: Evasion
+            //Evasion
             double evasionReduction = defender.GetSpecialAbilityEntryValue(SpecialAbilityEffect.Evasion);
+
             chance -= evasionReduction;
 
             #endregion
@@ -2475,18 +2517,14 @@ namespace Server.Items
 
                         }
 
-                        if (UseSkillMod && (m_DamageLevel != WeaponDamageLevel.Regular) && Parent is Mobile)
-                        {
-                            OnEquip(Parent as Mobile);
-                        }
+                        if (UseSkillMod && (m_DamageLevel != WeaponDamageLevel.Regular) && Parent is Mobile)                        
+                            OnEquip(Parent as Mobile);                        
 
                         else if (UseSkillMod && Quality == Quality.Exceptional && Parent is Mobile)
                             OnEquip(Parent as Mobile);
 
-                        else if (UseSkillMod && (Aspect != AspectEnum.None && TierLevel > 0) && Parent is Mobile)
-                        {
-                            OnEquip(Parent as Mobile);
-                        }
+                        else if (UseSkillMod && (Aspect != AspectEnum.None && TierLevel > 0) && Parent is Mobile)                        
+                            OnEquip(Parent as Mobile);                        
 
                         if (GetSaveFlag(flags, SaveFlag.PoisonPercent))
                             reader.ReadInt(); // LEGACY (No longer used)

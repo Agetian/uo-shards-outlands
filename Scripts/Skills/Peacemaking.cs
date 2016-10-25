@@ -37,8 +37,7 @@ namespace Server.SkillHandlers
             private BaseInstrument m_Instrument;
             private bool m_SetSkillTime = true;
 
-            public InternalTarget(Mobile from, BaseInstrument instrument)
-                : base(12, false, TargetFlags.None)
+            public InternalTarget(Mobile from, BaseInstrument instrument): base(12, false, TargetFlags.None)
             {
                 m_Instrument = instrument;
             }
@@ -101,7 +100,16 @@ namespace Server.SkillHandlers
                         double creatureDifficulty = bc_Target.InitialDifficulty;
                         double effectiveBardSkill = from.Skills[SkillName.Peacemaking].Value + BaseInstrument.GetBardBonusSkill(from, bc_Target, m_Instrument);
 
+                        AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(from);
+
+                        if (aspectArmorProfile != null)
+                        {
+                            if (aspectArmorProfile.m_Aspect == AspectEnum.Lyric)
+                                effectiveBardSkill += AspectGear.LyricEffectiveBardingSkillBonus * (AspectGear.LyricEffectiveBardingSkillBonusPerTier * (double)aspectArmorProfile.m_TierLevel);
+                        }
+
                         double successChance = BaseInstrument.GetBardSuccessChance(effectiveBardSkill, creatureDifficulty);
+                        
                         TimeSpan effectDuration = BaseInstrument.GetBardDuration(bc_Target, creatureDifficulty);
 
                         if (BaseInstrument.CheckSkillGain(successChance))
@@ -135,6 +143,24 @@ namespace Server.SkillHandlers
                             string failureMessage = BaseInstrument.GetFailureMessage(successChance, SkillName.Peacemaking);
 
                             from.SendMessage(failureMessage);
+
+                            if (aspectArmorProfile != null && from is PlayerMobile)
+                            {
+                                if (aspectArmorProfile.m_Aspect == AspectEnum.Lyric)
+                                {
+                                    double failedBardingAttemptDamageReduction = AspectGear.LyricDamageReceivedReductionFromFailedBardingTarget * (AspectGear.LyricDamageReceivedReductionFromFailedBardingTargetPerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                                    failedBardingAttemptDamageReduction *= (from.Skills.Peacemaking.Value / 120);
+
+                                    PlayerMobile player = from as PlayerMobile;
+
+                                    player.m_LyricAspectFailedBardingAttemptExpiration = DateTime.UtcNow + AspectGear.LyricDamageReceivedReductionFromFailedBardingDuration;
+
+                                    player.m_LyricAspectFailedBardingAttemptTargets.Clear();
+                                    player.m_LyricAspectFailedBardingAttemptTargets.Add(bc_Target);
+                                    player.m_LyricAspectFailedBardingAttemptDamageReduction = failedBardingAttemptDamageReduction;
+                                }
+                            }
                         }
                     }
                 }

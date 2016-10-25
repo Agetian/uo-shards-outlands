@@ -66,14 +66,9 @@ namespace Server.Spells.Fourth
 				SpellHelper.Turn( Caster, target );
 
                 int healAmount = Utility.RandomMinMax(35, 45);
+
                 double mageryScalar = .5 + (.5 * (Caster.Skills[SkillName.Magery].Value / 100));
-                double poisonScalar = 1.0;
-
-                if (target.Poisoned)
-                    poisonScalar = SpellHelper.HealThroughPoisonScalar;
-
-                healAmount = (int)(Math.Round((double)healAmount * mageryScalar * poisonScalar));
-
+               
                 if (healAmount < 1)
                     healAmount = 1;
 

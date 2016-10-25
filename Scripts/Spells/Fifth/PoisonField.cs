@@ -94,22 +94,6 @@ namespace Server.Spells.Fifth
                     if (enhancedSpellcast)                    
                         item.m_Enhanced = true;                    
                 }
-
-                AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(Caster, null);
-
-                if (aspectArmor.MatchingSet && !Caster.RecentlyInPlayerCombat)
-                {
-                    /*
-                    if (Utility.RandomDouble() <= aspectArmor.AspectArmorDetail.FreePoisonCastChance)
-                    {
-                        Caster.Mana += 15;
-                        Caster.SendMessage("You feel a rush of energy from your armor, fueling mana into the spell.");
-
-                        Effects.PlaySound(Caster.Location, Caster.Map, 0x64B);
-                        Effects.SendLocationParticles(EffectItem.Create(Caster.Location, Caster.Map, EffectItem.DefaultDuration), 0x376A, 9, 32, aspectArmor.AspectArmorDetail.EffectHue, 0, 5005, 0);
-                    }
-                    */
-                }
             }
 
             ArenaFight.SpellCompletion(Caster, typeof(PoisonFieldSpell));

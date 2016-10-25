@@ -346,11 +346,11 @@ namespace Server.Engines.Craft
             index = AddCraft(1, typeof(CarrackDeed), "Ship Items", "Carrack Deed ", 90.0, 95.0, typeof(Board), "Ship Parts", 1000, "You do not have the neccessary number of ship parts to construct that ship.");
             index = AddCraft(1, typeof(GalleonDeed), "Ship Items", "Galleon Deed", 95.0, 100.0, typeof(Board), "Ship Parts", 1000, "You do not have the neccessary number of ship parts to construct that ship.");
             
-            AddCraft(1, typeof(CarpentryMouldTier2), "Tools", "Carpentry Mould: Tier 1-2", 100, 100, typeof(Board), 1044041, 200, 1044351);
-            AddCraft(1, typeof(CarpentryMouldTier4), "Tools", "Carpentry Mould: Tier 3-4", 105, 105, typeof(Board), 1044041, 225, 1044351);
-            AddCraft(1, typeof(CarpentryMouldTier6), "Tools", "Carpentry Mould: Tier 5-6", 110, 110, typeof(Board), 1044041, 250, 1044351);
-            AddCraft(1, typeof(CarpentryMouldTier8), "Tools", "Carpentry Mould: Tier 7-8", 115, 115, typeof(Board), 1044041, 275, 1044351);
-            AddCraft(1, typeof(CarpentryMouldTier10), "Tools", "Carpentry Mould: Tier 9-10", 120, 120, typeof(Board), 1044041, 300, 1044351);
+            AddCraft(1, typeof(BasicCarpentryMould), "Tools", "Basic Carpentry Mould", 100, 100, typeof(Board), 1044041, 200, 1044351);
+            AddCraft(1, typeof(AdvancedCarpentryMould), "Tools", "Advanced Carpentry Mould", 105, 105, typeof(Board), 1044041, 225, 1044351);
+            AddCraft(1, typeof(ExpertCarpentryMould), "Tools", "Expert Carpentry Mould", 110, 110, typeof(Board), 1044041, 250, 1044351);
+            AddCraft(1, typeof(MasterCarpentryMould), "Tools", "Master Carpentry Mould", 115, 115, typeof(Board), 1044041, 275, 1044351);
+            AddCraft(1, typeof(LegendaryCarpentryMould), "Tools", "Legendary Carpentry Mould", 120, 120, typeof(Board), 1044041, 300, 1044351);
             
             /*
             index = AddCraft(1, typeof(CampingFirepit), "Misc", "Camping Firepit", 80.0, 120, typeof(Board), 1044041, 50, 1044351);

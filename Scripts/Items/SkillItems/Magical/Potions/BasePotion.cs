@@ -186,24 +186,49 @@ namespace Server.Items
 
 		public abstract void Drink( Mobile from );
 
-		public static void PlayDrinkEffect( Mobile mobile )
-		{
-			mobile.RevealingAction();
-			mobile.PlaySound( 0x2D6 );
+		public static bool PlayDrinkEffect( Mobile mobile )
+        {
+            mobile.RevealingAction();
+            mobile.PlaySound(0x2D6);
 
+            bool freeConsume = false;
             bool dropBottle = true;
 
             PlayerMobile player = mobile as PlayerMobile;
 
             if (ArenaFight.AllowFreeConsume(player, typeof(BasePotion)))
+            {
+                freeConsume = true;
                 dropBottle = false;
-            
-			if (dropBottle)
-			    mobile.AddToBackpack( new Bottle() );			
+            }
 
-			if ( mobile.Body.IsHuman /*&& !m.Mounted*/ )
-				mobile.Animate( 34, 5, 1, true, false, 0 );
-		}
+            //Water Aspect
+            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(mobile);
+
+            if (aspectArmorProfile != null)
+            {
+                if (aspectArmorProfile.m_Aspect == AspectEnum.Water)
+                {
+                    double waterAspectChance = AspectGear.WaterChanceForPotionNoConsume * (AspectGear.WaterChanceForPotionNoConsumePerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                    if (Utility.RandomDouble() <= waterAspectChance)
+                    {
+                        freeConsume = true;
+                        dropBottle = false;
+
+                        //TEST: Add Aspect Visual
+                    }
+                }
+            } 
+
+            if (dropBottle)
+                mobile.AddToBackpack(new Bottle());
+
+            if (mobile.Body.IsHuman /*&& !m.Mounted*/ )
+                mobile.Animate(34, 5, 1, true, false, 0);
+
+            return freeConsume;
+        }
 
 		public static int EnhancePotions( Mobile m )
 		{

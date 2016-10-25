@@ -1277,6 +1277,13 @@ namespace Server.Mobiles
         public DateTime m_LastItemIdWorldItemCountSearch = DateTime.UtcNow;
         public int m_LastItemIdWorldItemCountSearchCount = 0;
 
+        public List<BaseCreature> m_LyricAspectFailedBardingAttemptTargets = new List<BaseCreature>();
+        public DateTime m_LyricAspectFailedBardingAttemptExpiration = DateTime.UtcNow;
+        public double m_LyricAspectFailedBardingAttemptDamageReduction = 0;
+
+        public DateTime m_ShadowAspectPostBackstabDamageReceivedReductionExpiration = DateTime.UtcNow;
+        public double m_ShadowAspectPostBackstabDamageReceivedReduction = 0;
+
         public DateTime m_LastPassiveTamingSkillGain = DateTime.MinValue;
         public DateTime m_LastExperienceGain = DateTime.MinValue; 
 
@@ -1384,7 +1391,10 @@ namespace Server.Mobiles
         public GuildMemberEntry m_GuildMemberEntry = null;
         public GuildSettings m_GuildSettings = null;
         public SocietiesPlayerSettings m_SocietiesPlayerSettings = null;
-        public ArenaPlayerSettings m_ArenaPlayerSettings = null;        
+        public ArenaPlayerSettings m_ArenaPlayerSettings = null;
+
+        public AspectWeaponProfile m_AspectWeaponProfile = new AspectWeaponProfile();
+        public AspectArmorProfile m_AspectArmorProfile = new AspectArmorProfile();
 
         public CompetitionContext m_CompetitionContext = null;
 
@@ -1669,7 +1679,38 @@ namespace Server.Mobiles
 
         public static TimeSpan RessPenaltyDuration = TimeSpan.FromHours(24);
 
-        public DateTime m_RessPenaltyExpiration = DateTime.UtcNow;
+        private DateTime m_RessPenaltyExpiration = DateTime.UtcNow;
+        [CommandProperty(AccessLevel.GameMaster)]
+        public DateTime RessPenaltyExpiration
+        {
+            get 
+            {
+                if (m_RessPenaltyExpiration <= DateTime.UtcNow)
+                {
+                    m_RessPenaltyAccountWideAggressionRestriction = false;
+                    m_RessPenaltyEffectivenessReductionCount = 0;
+                }
+
+                return m_RessPenaltyExpiration; 
+            }
+
+            set
+            {
+                m_RessPenaltyExpiration = value;
+
+                if (m_RessPenaltyExpiration <= DateTime.UtcNow)
+                {
+                    m_RessPenaltyAccountWideAggressionRestriction = false;
+                    m_RessPenaltyEffectivenessReductionCount = 0;
+                }
+            }
+        }
+
+        public bool CheckRessPenaltyFizzle()
+        {
+            return false;
+        }
+
         public bool m_RessPenaltyAccountWideAggressionRestriction = false;
         public int m_RessPenaltyEffectivenessReductionCount = 0;
 
@@ -1680,6 +1721,8 @@ namespace Server.Mobiles
         public static double RessPenaltyDamageScalar = .10;
         public static double RessPenaltyHealingScalar = .10;
         public static double RessPenaltyFizzleScalar = .10;
+
+        public static double PlayerVsCreaturePoisonDamageBonus = .5;
 
         public void EnterContestedRegion(bool ressingHere)
         {
@@ -1755,6 +1798,54 @@ namespace Server.Mobiles
                         check.Duration = MaximumPvPDuration;
                 }
             }
+        }
+
+        public override void Heal(int amount, Mobile from, bool message)
+        {
+            double healingAmount = (double)amount;
+
+            double poisonScalar = 0;
+
+            double ressPenaltyModifier = 0;
+            double waterAspectModifier = 0;
+
+            if (Poisoned)
+                poisonScalar = SpellHelper.HealThroughPoisonScalar;
+
+            if (RessPenaltyExpiration > DateTime.UtcNow && m_RessPenaltyEffectivenessReductionCount > 0)
+                ressPenaltyModifier = (double)m_RessPenaltyEffectivenessReductionCount * PlayerMobile.RessPenaltyHealingScalar;
+
+            PlayerMobile playerFrom = from as PlayerMobile;
+
+            if (playerFrom != null)
+            {
+                if (playerFrom.RessPenaltyExpiration > DateTime.UtcNow && playerFrom.m_RessPenaltyEffectivenessReductionCount > 0)
+                {
+                    double newRessPenaltyModifier = (double)playerFrom.m_RessPenaltyEffectivenessReductionCount * PlayerMobile.RessPenaltyHealingScalar;
+
+                    if (newRessPenaltyModifier > ressPenaltyModifier)
+                        ressPenaltyModifier = newRessPenaltyModifier;
+                }               
+            }
+
+            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(this);
+
+            //Water Aspect
+            if (aspectArmorProfile != null)
+            {
+                if (aspectArmorProfile.m_Aspect == AspectEnum.Water)
+                    waterAspectModifier = AspectGear.WaterHealingAmountReceived * (AspectGear.WaterHealingAmountReceivedPerTier * (double)aspectArmorProfile.m_TierLevel);
+            }
+
+            healingAmount = (double)amount * (1 - ressPenaltyModifier + waterAspectModifier);
+            healingAmount *= poisonScalar;
+
+            int adjustedHealingAmount = (int)(Math.Round(healingAmount));
+
+            if (adjustedHealingAmount < 1)
+                adjustedHealingAmount = 1;
+
+            base.Heal(amount, from, message);
         }
 
         public override void OnHeal(ref int amount, Mobile from)
@@ -4154,34 +4245,37 @@ namespace Server.Mobiles
 
         public virtual void OnGaveMeleeAttack(Mobile defender)
         {
-            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(this, null);
+            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(this);
 
-            if (aspectArmor.MatchingSet && !this.RecentlyInPlayerCombat && defender is BaseCreature)
+            if (aspectArmorProfile != null && defender is BaseCreature)
             {
-                /*
-                double flamestrikeChance = aspectArmor.AspectArmorDetail.FlamestrikeOnMeleeAttackChance;
-                double energySiphonChance = aspectArmor.AspectArmorDetail.EnergySiphonOnMeleeAttackChance;
-
-                int effectHue = AspectGear.GetAspectHue(aspectArmor.AspectArmorDetail.m_Aspect);
-
                 BaseWeapon weapon = Weapon as BaseWeapon;
 
-                if (weapon != null)
+                if (weapon == null)
+                    return;
+
+                double fireAspectEffectChance = 0;
+                double voidAspectEffectChance = 0;
+
+                if (aspectArmorProfile.m_Aspect == AspectEnum.Fire)
+                    fireAspectEffectChance = AspectGear.FireEffectOnAttackChance + (AspectGear.FireEffectOnAttackChancePerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                if (aspectArmorProfile.m_Aspect == AspectEnum.Void)
+                    voidAspectEffectChance = AspectGear.VoidChanceToRegenStatsOnAttack + (AspectGear.VoidChanceToRegenStatsOnAttackPerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                fireAspectEffectChance *= AspectGear.GetEffectWeaponSpeedScalar(weapon);
+
+                if (Utility.RandomDouble() <= fireAspectEffectChance)
                 {
-                    int weaponSpeedAdjusted = weapon.BaseSpeed;
-
-                    if (weaponSpeedAdjusted > 60)
-                        weaponSpeedAdjusted = 60;
-
-                    if (weaponSpeedAdjusted < 20)
-                        weaponSpeedAdjusted = 20;
-
-                    double speedScalar = 1 + ((60 - (double)weaponSpeedAdjusted) / 40);
-
-                    flamestrikeChance *= speedScalar;
-                    energySiphonChance *= speedScalar;
+                    //TEST: Add Aspect Visuals
                 }
 
+                else if (Utility.RandomDouble() <= voidAspectEffectChance)
+                {
+                    //TEST: Add Aspect Visuals
+                }
+
+                /*
                 int damage = Utility.RandomMinMax(40, 60);
 
                 if (Utility.RandomDouble() <= flamestrikeChance)
@@ -4201,13 +4295,21 @@ namespace Server.Mobiles
 
         public virtual void OnGotMeleeAttack(Mobile attacker)
         {
-            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(this, null);
+            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(this);
 
-            if (aspectArmor.MatchingSet && !this.RecentlyInPlayerCombat && attacker is BaseCreature)
+            if (aspectArmorProfile != null && attacker is BaseCreature)
             {
-                /*
-                double flamestrikeChance = aspectArmor.AspectArmorDetail.FlamestrikeOnReceiveMeleeHitChance;
+                double fireAspectEffectChance = 0;
 
+                if (aspectArmorProfile.m_Aspect == AspectEnum.Fire)
+                    fireAspectEffectChance = AspectGear.FireEffectOnHitChance + (AspectGear.FireEffectOnHitChancePerTier * (double)aspectArmorProfile.m_TierLevel);
+                
+                if (Utility.RandomDouble() <= fireAspectEffectChance)
+                {
+                    //TEST: Add Aspect Visuals
+                }
+
+                /*
                 int damage = Utility.RandomMinMax(40, 60);
 
                 if (Utility.RandomDouble() < flamestrikeChance)
@@ -4280,10 +4382,18 @@ namespace Server.Mobiles
         {
             double damage = (double)amount;
 
+            double discordEffect = 0;
+            double focusedAggressionEffect = 0;
+            double earthAspectEffect = 0;
+            double lyricAspectEffect = 0;
+            double shadowAspectEffect = 0;
+
             BaseCreature bc_Source = from as BaseCreature;
             PlayerMobile pm_Source = from as PlayerMobile;
 
             PlayerMobile pm_SourceMaster = null;
+
+            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(this);
             
             if (from != null)
             {
@@ -4315,22 +4425,74 @@ namespace Server.Mobiles
                 if (bc_Source != null)
                 {
                     //Discord
-                    damage *= (1 - bc_Source.DiscordEffect);
+                    discordEffect = -1 * bc_Source.DiscordEffect;
 
                     //Herding
                     if (bc_Source.FocusedAggressionTarget == this && bc_Source.FocusedAggressionExpiration > DateTime.UtcNow)
-                        damage *= 1 + (bc_Source.FocusedAggresionValue * BaseCreature.HerdingFocusedAggressionPvPDamageScalar);
+                        focusedAggressionEffect = (bc_Source.FocusedAggresionValue * BaseCreature.HerdingFocusedAggressionPvPDamageScalar);
+
+                    //Earth Aspect
+                    if (aspectArmorProfile != null)
+                    {
+                        if (aspectArmorProfile.m_Aspect == AspectEnum.Earth)
+                            earthAspectEffect = AspectGear.EarthDamageReduction + (AspectGear.EarthDamageReductionPerTier * (double)aspectArmorProfile.m_TierLevel);
+                    }
+
+                    //Lyric Aspect
+                    if (aspectArmorProfile != null)
+                    {
+                        if (aspectArmorProfile.m_Aspect == AspectEnum.Lyric && m_LyricAspectFailedBardingAttemptTargets.Contains(from) && m_LyricAspectFailedBardingAttemptExpiration > DateTime.UtcNow)
+                            lyricAspectEffect = m_LyricAspectFailedBardingAttemptDamageReduction;
+                    }
+
+                    //Shadow Aspect
+                    if (aspectArmorProfile != null)
+                    {
+                        if (aspectArmorProfile.m_Aspect == AspectEnum.Shadow && m_ShadowAspectPostBackstabDamageReceivedReductionExpiration > DateTime.UtcNow)
+                            shadowAspectEffect = m_ShadowAspectPostBackstabDamageReceivedReduction;
+                    }
                 }
+            }
+
+            damage *= 1 + discordEffect + focusedAggressionEffect - earthAspectEffect - lyricAspectEffect - shadowAspectEffect;
+
+            //Player Ress Penalty
+            if (pm_Source != null)
+            {
+                if (pm_Source.RessPenaltyExpiration > DateTime.UtcNow && pm_Source.m_RessPenaltyEffectivenessReductionCount > 0)
+                    damage *= 1 - (PlayerMobile.RessPenaltyDamageScalar * (double)pm_Source.m_RessPenaltyEffectivenessReductionCount);
+            }
+
+            else if (pm_SourceMaster != null)
+            {
+                if (pm_SourceMaster.RessPenaltyExpiration > DateTime.UtcNow && pm_SourceMaster.m_RessPenaltyEffectivenessReductionCount > 0)
+                    damage *= 1 - (PlayerMobile.RessPenaltyDamageScalar * (double)pm_SourceMaster.m_RessPenaltyEffectivenessReductionCount);
             }
 
             //Ship-Based Combat
             if (BaseShip.UseShipBasedDamageModifer(from, this))
-                damage *= BaseShip.shipBasedDamageToPlayerScalar;            
+                damage *= BaseShip.shipBasedDamageToPlayerScalar;
+
+            //Void Aspect
+            if (aspectArmorProfile != null && bc_Source != null)
+            {
+                if (aspectArmorProfile.m_Aspect == AspectEnum.Void)
+                {
+                    double voidNullifyChance = AspectGear.VoidChanceToNullifyDamageOnHit + (AspectGear.VoidChanceToNullifyDamageOnHitPerTier * (double)aspectArmorProfile.m_TierLevel);
+
+                    if (Utility.RandomDouble() <= voidNullifyChance)
+                    {
+                        damage = 1;
+
+                        //TEST: Add Aspect Visuals
+                    }                
+                }                    
+            }
 
             if (damage < 1)
                 damage = 1;
 
-            int finalDamage = (int)damage;
+            int finalDamage = (int)(Math.Round(damage));
 
             pm_SourceMaster = null;
 
@@ -4581,7 +4743,7 @@ namespace Server.Mobiles
             writer.Write((int)m_Flags);
             writer.Write(m_MurderCountDecayTimeRemaining);
             writer.Write(m_LifetimeMurderCounts);
-            writer.Write(m_RessPenaltyExpiration);
+            writer.Write(RessPenaltyExpiration);
             writer.Write(m_RessPenaltyAccountWideAggressionRestriction);
             writer.Write(m_RessPenaltyEffectivenessReductionCount);
             writer.Write(GameTime);
@@ -4681,7 +4843,7 @@ namespace Server.Mobiles
                 m_Flags = (PlayerFlag)reader.ReadInt();
                 m_MurderCountDecayTimeRemaining = reader.ReadTimeSpan();
                 m_LifetimeMurderCounts = reader.ReadInt();
-                m_RessPenaltyExpiration = reader.ReadDateTime();
+                RessPenaltyExpiration = reader.ReadDateTime();
                 m_RessPenaltyAccountWideAggressionRestriction = reader.ReadBool();
                 m_RessPenaltyEffectivenessReductionCount = reader.ReadInt();
 
@@ -4988,14 +5150,7 @@ namespace Server.Mobiles
 
             bool leaveFootsteps = false;
             double footstepChance = .33;
-
-            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(this, null);
-
-            /*
-            if (aspectArmor.MatchingSet && aspectArmor.AspectArmorDetail.StealthLeavesFootprints)
-                leaveFootsteps = true;
-            */
-
+            
             if (Hidden && DesignContext.Find(this) == null)	//Hidden & NOT customizing a house
             {
                 if (!Mounted && (Skills.Stealth.Value >= 20.0))

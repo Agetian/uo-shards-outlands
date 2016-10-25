@@ -18,14 +18,6 @@ namespace Server
             Register(new PoisonImpl("Greater", 2, 5, 15, 10.000, 3.5, 7.0, 10, 2)); //128 DPM or 2.133 DPS
             Register(new PoisonImpl("Deadly", 3, 10, 20, 15.000, 3.5, 6.0, 10, 2)); //200 DPM or 3.333 DPS
             Register(new PoisonImpl("Lethal", 4, 15, 25, 20.000, 3.5, 5.0, 10, 2));	//300 DPM or 5 DPS
-		
-            /*            
-            Register(new PoisonImpl("Lesser", 0, 4, 15, 2.500, 3.5, 10.0, 5, 2));
-            Register(new PoisonImpl("Regular", 1, 5, 26, 3.125, 3.5, 9.0, 10, 2));
-            Register(new PoisonImpl("Greater", 2, 6, 26, 6.250, 3.5, 8.0, 10, 2));
-            Register(new PoisonImpl("Deadly", 3, 7, 26, 12.500, 3.5, 6.5, 10, 2));
-            Register(new PoisonImpl("Lethal", 4, 9, 26, 25.000, 3.5, 5.0, 10, 2));	
-            */
 		}
 
 		public static Poison IncreaseLevel( Poison oldPoison )
@@ -117,38 +109,40 @@ namespace Server
 
                 if (pm_From != null && bc_Target != null)
                 {
-                    double poisonDamageScalar = 1.0;
+                    double poisonDamageBonus = 0;
 
-                    AspectGear.AspectArmorProfile poisonerAspectArmor = new AspectGear.AspectArmorProfile(pm_From, null);
+                    AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(pm_From);
 
-                    if (poisonerAspectArmor.MatchingSet && !pm_From.RecentlyInPlayerCombat)
+                    if (aspectArmorProfile != null)
                     {
-                        //poisonDamageScalar = poisonerAspectArmor.AspectArmorDetail.PoisonDamageInflictedScalar;
+                        if (aspectArmorProfile.m_Aspect == AspectEnum.Poison)
+                            poisonDamageBonus = AspectGear.PoisonDamageBonus + ((double)aspectArmorProfile.m_TierLevel * AspectGear.PoisonDamageBonusPerTier);
                     }
 
-                    minimum = (double)minimum * 1.5 * poisonDamageScalar;
-                    maximum = (double)maximum * 1.5 * poisonDamageScalar;
+                    minimum = minimum * (1 + PlayerMobile.PlayerVsCreaturePoisonDamageBonus + poisonDamageBonus);
+                    maximum = maximum * (1 + PlayerMobile.PlayerVsCreaturePoisonDamageBonus + poisonDamageBonus);
                 }
 
-                if (bc_From != null && pm_Target != null)
+                else if (bc_From != null && pm_Target != null)
                 {
-                    double poisonDamageScalar = 1.0;
+                    double poisonDamageReduction = 0;
 
-                    AspectGear.AspectArmorProfile defenderAspectArmor = new AspectGear.AspectArmorProfile(pm_Target, null);
+                    AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(pm_Target);
 
-                    if (defenderAspectArmor.MatchingSet && !pm_Target.RecentlyInPlayerCombat)
+                    if (aspectArmorProfile != null)
                     {
-                        //poisonDamageScalar = defenderAspectArmor.AspectArmorDetail.PoisonDamageReceivedScalar;
+                        if (aspectArmorProfile.m_Aspect == AspectEnum.Poison)
+                            poisonDamageReduction = AspectGear.PoisonDamageReceivedDamageReduction + ((double)aspectArmorProfile.m_TierLevel * AspectGear.PoisonDamageReceivedDamageReductionPerTier);
                     }
+
+                    minimum *= (1 - poisonDamageReduction);
+                    maximum *= (1 - poisonDamageReduction);    
 
                     if (bc_From.Controlled && bc_From.ControlMaster is PlayerMobile)
                     {
-                        minimum = (double)minimum * bc_From.PvPAbilityDamageScalar;
-                        maximum = (double)maximum * bc_From.PvPAbilityDamageScalar;
-                    }
-
-                    minimum *= poisonDamageScalar;
-                    maximum *= poisonDamageScalar;               
+                        minimum *= bc_From.PvPAbilityDamageScalar;
+                        maximum *= bc_From.PvPAbilityDamageScalar;
+                    }                               
                 }
 
                 if (damage < minimum)

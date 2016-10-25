@@ -139,16 +139,25 @@ namespace Server.Spells
 
                 if (bc_Target != null && bc_Target.ImmuneToChargedSpells)
                     return false;
-            }
-
+            }            
+            
             double baseChance = BaseChargedSpellChance;
             double skillChance = (caster.Skills[SkillName.SpiritSpeak].Value / 100) * SpiritSpeakChargedSpellExtraChance;
             double inscriptionChance = 0;
+            double eldritchAspectChance = 0;
             
             if (fromScroll)            
                inscriptionChance = (caster.Skills[SkillName.Inscribe].Value / 100) * InscriptionScrollChargedSpellExtraChance;
-                       
-            double chance = baseChance + skillChance + inscriptionChance;
+
+            AspectArmorProfile casterAspectProfile = AspectGear.GetAspectArmorProfile(caster);
+
+            if (casterAspectProfile != null && target is BaseCreature)
+            {
+                if (casterAspectProfile.m_Aspect == AspectEnum.Eldritch)
+                    eldritchAspectChance = AspectGear.EldritchChargedSpellcastChanceBonus * (AspectGear.EldritchChargedSpellcastChanceBonusPerTier * (double)casterAspectProfile.m_TierLevel);
+            }
+
+            double chance = baseChance + skillChance + inscriptionChance + eldritchAspectChance;
 
             if (!(caster is PlayerMobile))
                 chance *= CreatureChargedSpellChanceScalar;

@@ -91,7 +91,7 @@ namespace Server
             rowSpacing = 25;
 
             //Ress Penalties
-            if (m_Player.m_RessPenaltyExpiration > DateTime.UtcNow)
+            if (m_Player.RessPenaltyExpiration > DateTime.UtcNow)
             {
                 AddLabel(117, startY, 2599, "Current Resurrection Penalties");
                 startY += rowSpacing;
@@ -118,7 +118,7 @@ namespace Server
                     startY += rowSpacing;
                 }
 
-                string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_Player.m_RessPenaltyExpiration, true, true, true, true, false);
+                string timeRemaining = Utility.CreateTimeRemainingString(DateTime.UtcNow, m_Player.RessPenaltyExpiration, true, true, true, true, false);
 
                 AddItem(122, startY - 6, 6227);
                 AddLabel(160, startY, 63, "Expires in " + timeRemaining + ")");

@@ -120,6 +120,27 @@ namespace Server.Misc
             BaseCreature bc_From = from as BaseCreature;
             BaseCreature bc_Target = target as BaseCreature;
 
+            PlayerMobile fromRootPlayer = null;
+            PlayerMobile targetRootPlayer = null;
+
+            if (pm_From != null)
+                fromRootPlayer = pm_From;
+
+            if (pm_Target != null)
+                targetRootPlayer = pm_Target;
+
+            if (bc_From != null)
+            {
+                if (bc_From.ControlMaster is PlayerMobile)
+                    fromRootPlayer = bc_From.ControlMaster as PlayerMobile;
+            }
+
+            if (bc_Target != null)
+            {
+                if (bc_Target.ControlMaster is PlayerMobile)
+                    targetRootPlayer = bc_Target.ControlMaster as PlayerMobile;
+            }
+
             #region Arena 
 
             ArenaGroupController fromArenaGroupController = ArenaGroupController.GetArenaGroupRegionAtLocation(from.Location, from.Map);
@@ -127,31 +148,10 @@ namespace Server.Misc
 
             if (fromArenaGroupController != null || targetArenaGroupController != null)
             {
-                PlayerMobile fromRootPlayer = null;
-                PlayerMobile fromTargetPlayer = null;
-
-                if (pm_From != null)
-                    fromRootPlayer = pm_From;
-
-                if (pm_Target != null)
-                    fromTargetPlayer = pm_Target;
-
-                if (bc_From != null)
-                {
-                    if (bc_From.ControlMaster is PlayerMobile)
-                        fromRootPlayer = bc_From.ControlMaster as PlayerMobile;
-                }
-
-                if (bc_Target != null)
-                {
-                    if (bc_Target.ControlMaster is PlayerMobile)
-                        fromTargetPlayer = bc_Target.ControlMaster as PlayerMobile;
-                }
-
-                if (fromRootPlayer != null && fromTargetPlayer != null)
+                if (fromRootPlayer != null && targetRootPlayer != null)
                 {
                     ArenaFight fromArenaFight = fromRootPlayer.m_ArenaFight;
-                    ArenaFight targetArenaFight = fromTargetPlayer.m_ArenaFight;
+                    ArenaFight targetArenaFight = targetRootPlayer.m_ArenaFight;
 
                     if (fromArenaFight != null && targetArenaFight != null && fromArenaFight == targetArenaFight)
                     {
@@ -164,6 +164,16 @@ namespace Server.Misc
                 }
 
                 return false;
+            }
+
+            #endregion
+
+            #region Ress Penalty
+
+            if (fromRootPlayer != null && targetRootPlayer != null)
+            {
+                if (fromRootPlayer.RessPenaltyExpiration > DateTime.UtcNow && fromRootPlayer.m_RessPenaltyAccountWideAggressionRestriction)
+                    return false;
             }
 
             #endregion
@@ -187,16 +197,7 @@ namespace Server.Misc
                     return false;
 
                 return true; // Uncontrolled NPCs are only restricted by the young system
-            }
-
-            //TEST: GUILD
-            /*
-            Guild fromGuild = GetGuildFor(from.Guild as Guild, from);
-            Guild targetGuild = GetGuildFor(target.Guild as Guild, target);
-
-            if (fromGuild != null && targetGuild != null && (fromGuild == targetGuild || fromGuild.IsAlly(targetGuild) || fromGuild.IsEnemy(targetGuild)))
-                return true; // Guild allies or enemies can be harmful  
-            */        
+            }       
 
             if (target is BaseCreature && (((BaseCreature)target).Controlled || (((BaseCreature)target).Summoned && from != ((BaseCreature)target).SummonMaster)))
                 return false; // Cannot harm other controlled mobiles

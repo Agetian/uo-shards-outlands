@@ -800,11 +800,12 @@ namespace Server.Mobiles
                     value *= bc_Attacker.PvPAbilityDamageScalar;
             }
 
-            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(defender, null);
+            AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(defender);
 
-            if (aspectArmor.MatchingSet && !defender.RecentlyInPlayerCombat)
+            if (aspectArmorProfile != null)
             {
-                //value *= aspectArmor.AspectArmorDetail.BleedDamageReceivedScalar;
+                if (aspectArmorProfile.m_Aspect == AspectEnum.Water)
+                    value *= 1 - AspectGear.WaterBleedDamageTakenReduction - (AspectGear.WaterBleedDamageTakenReductionPerTier * (double)aspectArmorProfile.m_TierLevel);
             }
 
             int intervalFrequency = 2;
@@ -925,6 +926,23 @@ namespace Server.Mobiles
 
                 if (hinderValue <= 0)
                 {
+                    AspectArmorProfile defenderAspectArmorProfile = AspectGear.GetAspectArmorProfile(defender);
+
+                    double airAvoidanceChance = 0;
+
+                    if (defenderAspectArmorProfile != null)
+                    {
+                        if (defenderAspectArmorProfile.m_Aspect == AspectEnum.Air)
+                            airAvoidanceChance = AspectGear.AirMeleeAvoidMovementEffectAvoidance * (AspectGear.AirMeleeAvoidMovementEffectAvoidancePerTier * (double)defenderAspectArmorProfile.m_TierLevel);
+                    } 
+
+                    if (Utility.RandomDouble() <= airAvoidanceChance)
+                    {
+                        //TEST: Add Aspect Visuals
+
+                        return;
+                    }
+
                     if (showEffect)
                         defender.FixedEffect(0x5683, 10, 20);
 
@@ -1052,6 +1070,23 @@ namespace Server.Mobiles
 
                 if (hinderValue <= 0 || entangleValue <= 0)
                 {
+                    AspectArmorProfile defenderAspectArmorProfile = AspectGear.GetAspectArmorProfile(defender);
+
+                    double airAvoidanceChance = 0;
+
+                    if (defenderAspectArmorProfile != null)
+                    {
+                        if (defenderAspectArmorProfile.m_Aspect == AspectEnum.Air)
+                            airAvoidanceChance = AspectGear.AirMeleeAvoidMovementEffectAvoidance * (AspectGear.AirMeleeAvoidMovementEffectAvoidancePerTier * (double)defenderAspectArmorProfile.m_TierLevel);
+                    }
+
+                    if (Utility.RandomDouble() <= airAvoidanceChance)
+                    {
+                        //TEST: Add Aspect Visuals
+
+                        return;
+                    }
+
                     if (showEffect)
                         defender.FixedEffect(0x5683, 10, 20);
 
@@ -1089,7 +1124,6 @@ namespace Server.Mobiles
         public static void PetrifySpecialAbility(double chance, Mobile attacker, Mobile defender, double value, double expirationSeconds, int soundOverride, bool showEffect, string attackerMessage, string defenderMessage, string overheadMessage)
         {
             if (Utility.RandomDouble() > chance) return;
-
             if (!SpecialAbilities.Exists(defender)) return;
 
             PlayerMobile pm_Attacker = attacker as PlayerMobile;
@@ -1186,6 +1220,23 @@ namespace Server.Mobiles
 
                 if (petrifyValue <= 0)
                 {
+                    AspectArmorProfile defenderAspectArmorProfile = AspectGear.GetAspectArmorProfile(defender);
+
+                    double airAvoidanceChance = 0;
+
+                    if (defenderAspectArmorProfile != null)
+                    {
+                        if (defenderAspectArmorProfile.m_Aspect == AspectEnum.Air)
+                            airAvoidanceChance = AspectGear.AirMeleeAvoidMovementEffectAvoidance * (AspectGear.AirMeleeAvoidMovementEffectAvoidancePerTier * (double)defenderAspectArmorProfile.m_TierLevel);
+                    }
+
+                    if (Utility.RandomDouble() <= airAvoidanceChance)
+                    {
+                        //TEST: Add Aspect Visuals
+
+                        return;
+                    }
+
                     if (showEffect)
                         Effects.SendLocationParticles(EffectItem.Create(defender.Location, defender.Map, TimeSpan.FromSeconds(0.25)), 0x376A, 10, 20, 911, 0, 5029, 0);
 
@@ -1527,14 +1578,7 @@ namespace Server.Mobiles
                 if (bc_Attacker.Controlled && bc_Attacker.ControlMaster is PlayerMobile && pm_Defender != null)
                     value *= bc_Attacker.PvPAbilityDamageScalar;
             }
-
-            AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(defender, null);
-
-            if (aspectArmor.MatchingSet && !defender.RecentlyInPlayerCombat)
-            {
-                //value *= aspectArmor.AspectArmorDetail.DiseaseDamageReceivedScalar;
-            }
-
+            
             int intervalFrequency = 6;
             int numberOfIntervals = (int)(Math.Floor(expirationSeconds / intervalFrequency));
 
@@ -2021,14 +2065,7 @@ namespace Server.Mobiles
                             if (mobile is BaseCreature)
                                 damage *= BaseCreature.BreathDamageToCreatureScalar;
                         }
-
-                        AspectGear.AspectArmorProfile aspectArmor = new AspectGear.AspectArmorProfile(mobile, null);
-
-                        if (aspectArmor.MatchingSet && !mobile.RecentlyInPlayerCombat)
-                        {
-                            //damage *= aspectArmor.AspectArmorDetail.BreathDamageReceivedScalar;
-                        }
-
+                        
                         if (creature != null)
                             creature.DoHarmful(mobile);
 
@@ -2130,6 +2167,23 @@ namespace Server.Mobiles
 
             BaseCreature bc_Defender = defender as BaseCreature;
             PlayerMobile pm_Defender = defender as PlayerMobile;
+
+            AspectArmorProfile defenderAspectArmorProfile = AspectGear.GetAspectArmorProfile(defender);
+
+            double earthAvoidanceChance = 0;
+
+            if (defenderAspectArmorProfile != null)
+            {
+                if (defenderAspectArmorProfile.m_Aspect == AspectEnum.Earth)
+                    earthAvoidanceChance = AspectGear.EarthKnockbackAvoidanceChance * (AspectGear.EarthKnockbackAvoidanceChancePerTier * (double)defenderAspectArmorProfile.m_TierLevel);
+            }
+
+            if (Utility.RandomDouble() <= earthAvoidanceChance)
+            {
+                //TEST: Add Aspect Visuals
+
+                return;
+            }
 
             int distance = (int)expirationSeconds;
             double baseDamage = value;

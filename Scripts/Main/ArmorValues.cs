@@ -14,7 +14,7 @@ namespace Server
         public static int BoneBaseArmorValue = 30;
         public static int RingmailBaseArmorValue = 35;
         public static int ChainmailBaseArmorValue = 40;
-        public static int PlatemailBaseArmorValue = 50;
+        public static int PlatemailBaseArmorValue = 45;
 
         public static int LeatherDurability = 50;
         public static int StuddedLeatherDurability = 55;

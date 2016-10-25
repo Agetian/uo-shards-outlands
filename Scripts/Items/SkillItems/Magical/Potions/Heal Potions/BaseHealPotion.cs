@@ -54,11 +54,9 @@ namespace Server.Items
 				if ( from.BeginAction( typeof( BaseHealPotion ) ) )
 				{
 					DoHeal( from );
-
-					BasePotion.PlayDrinkEffect( from );
-
-                    if (!ArenaFight.AllowFreeConsume(from, typeof(BasePotion)))
-					    Consume();
+                    
+                    if (!BasePotion.PlayDrinkEffect(from))
+                        Consume();
 
 					Timer.DelayCall( TimeSpan.FromSeconds( Delay ), new TimerStateCallback( ReleaseHealLock ), from );
 				}
