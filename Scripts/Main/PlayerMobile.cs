@@ -4245,15 +4245,34 @@ namespace Server.Mobiles
 
         public virtual void OnGaveMeleeAttack(Mobile defender)
         {
+            BaseWeapon weapon = Weapon as BaseWeapon;
+
+            if (weapon == null)
+                return;
+
+            AspectWeaponProfile aspectWeaponProfile = AspectGear.GetAspectWeaponProfile(this);
             AspectArmorProfile aspectArmorProfile = AspectGear.GetAspectArmorProfile(this);
 
-            if (aspectArmorProfile != null && defender is BaseCreature)
+            bool aspectWeaponEffectTriggered = false;
+
+            if (aspectWeaponProfile != null && defender is BaseCreature)
             {
-                BaseWeapon weapon = Weapon as BaseWeapon;
+                BaseCreature bc_Defender = defender as BaseCreature;
 
-                if (weapon == null)
-                    return;
+                double aspectWeaponEffectChance = AspectGear.AspectWeaponEffectChance + (AspectGear.AspectWeaponEffectChancePerTier * (double)aspectWeaponProfile.m_TierLevel);
+                
+                aspectWeaponEffectChance *= AspectGear.GetEffectWeaponSpeedScalar(weapon);
 
+                if (Utility.RandomDouble() <= aspectWeaponEffectChance)
+                {
+                    aspectWeaponEffectTriggered = true;
+
+                    AspectGear.ResolveSpecialEffect(weapon, this, bc_Defender);
+                }                
+            }
+
+            if (!aspectWeaponEffectTriggered && aspectArmorProfile != null && defender is BaseCreature)
+            {
                 double fireAspectEffectChance = 0;
                 double voidAspectEffectChance = 0;
 

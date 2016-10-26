@@ -111,20 +111,9 @@ namespace Server.Items
 
         public override void OnSingleClick(Mobile from)
         {
-            LabelTo(from, GetDisplayName() + ": Tier " + (TierLevel -1).ToString() + "-" + TierLevel.ToString());
-            LabelTo(from, "[Uses Remaining: " + m_Charges.ToString() + "/" + MaxCharges + "]");           
-        }
-        
-        public string GetDisplayName()
-        {
-            switch (m_MouldType)
-            {
-                case MouldSkillType.Blacksmithy: return "Smithing Mould"; break;
-                case MouldSkillType.Carpentry: return "Carpentry Mould"; break;
-                case MouldSkillType.Tailoring: return "Tailoring Mould"; break;
-            }
+            base.OnSingleClick(from);
 
-            return "Aspect Mould";
+            LabelTo(from, "[Uses Remaining: " + m_Charges.ToString() + "/" + MaxCharges + "]");           
         }
 
         public override void OnDoubleClick(Mobile from)

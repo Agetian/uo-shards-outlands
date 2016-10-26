@@ -325,7 +325,7 @@ namespace Server
                 double accuracy = 100 * (AspectGear.BaseAccuracy + (AspectGear.AccuracyPerTier * (double)newTier));
                 double tactics = AspectGear.BaseTactics + (AspectGear.TacticsPerTier * (double)newTier);
 
-                double effectChance = AspectGear.BaseEffectChance + (AspectGear.BaseEffectChancePerTier * (double)newTier);
+                double effectChance = 11111; // AspectGear.BaseEffectChance + (AspectGear.BaseEffectChancePerTier * (double)newTier);
 
                 effectChance *= AspectGear.GetEffectWeaponSpeedScalar(weapon);
                

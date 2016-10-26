@@ -209,6 +209,33 @@ namespace Server.Mobiles
                 return newLocation;
             }
         }
+
+        public static bool HostileToPlayer(PlayerMobile player, Mobile mobile)
+        {
+            if (player == null) return false;
+            if (player == mobile) return false;
+            if (mobile == null) return false;            
+            if (!mobile.CanBeDamaged()) return false;
+            if (!mobile.Alive) return false;
+            if (mobile.AccessLevel > AccessLevel.Player) return false;
+           
+            if (player.Combatant == mobile) return true;
+            if (mobile.Combatant == player) return true;
+
+            foreach (AggressorInfo aggressor in player.Aggressors)
+            {
+                if (aggressor.Attacker == mobile || aggressor.Defender == mobile)                
+                    return true;                
+            }
+
+            foreach (AggressorInfo aggressed in player.Aggressed)
+            {
+                if (aggressed.Attacker == mobile || aggressed.Defender == mobile)
+                    return true;  
+            }
+
+            return false;
+        }
         
         public static bool MonsterCanDamage(Mobile creature, Mobile target)
         {

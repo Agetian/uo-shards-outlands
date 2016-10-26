@@ -68,6 +68,12 @@ namespace Server.Items
         public static double BaseArmorRatingBonus = .20;
         public static double ArmorRatingBonusPerTier = .8;
 
+        public static int BaselineDurability = 150;
+        public static int IncreasedDurabilityPerTier = 20;
+
+        public static double AspectWeaponEffectChance = .01;
+        public static double AspectWeaponEffectChancePerTier = .001;       
+
         //Aspect Armor Bonuses
         public static double AirMeleeSwingSpeedBonus = .05;
         public static double AirMeleeSwingSpeedBonusPerTier = .005;
@@ -149,13 +155,7 @@ namespace Server.Items
         public static int ChampGain = 5;
         public static int LoHGain = 5;
         public static int BossGain = 15;
-        public static int EventBossGain = 25;
-
-        public static double BaseEffectChance = .01;
-        public static double BaseEffectChancePerTier = .005;
-
-        public static int BaselineDurability = 150;
-        public static int IncreasedDurabilityPerTier = 20;
+        public static int EventBossGain = 25;        
 
         #region Aspect Properties and Functions
 
@@ -577,23 +577,179 @@ namespace Server.Items
             return detail;
         }
 
-        public static void CheckResolveSpecialEffect(BaseWeapon weapon, PlayerMobile attacker, BaseCreature defender)
+        public static void ResolveSpecialEffect(BaseWeapon weapon, PlayerMobile player, BaseCreature bc_Creature)
         {
-            if (weapon == null || attacker == null || defender == null) return;
+            if (weapon == null) return;
+            if (weapon.Deleted) return;
             if (weapon.Aspect == AspectEnum.None) return;
             if (weapon.TierLevel == 0) return;
+            if (player == null) return;
+            if (bc_Creature == null) return;
 
-            double effectChance = BaseEffectChance + ((double)weapon.TierLevel * BaseEffectChancePerTier);
-            double speedScalar = GetEffectWeaponSpeedScalar(weapon);
+            List<Mobile> m_TargetMobiles = new List<Mobile>();
+            Queue m_Queue = new Queue();
 
-            double finalChance = effectChance * speedScalar;
-                        
-            if (Utility.RandomDouble() <= finalChance)
+            IPooledEnumerable mobilesInRange = null;
+
+            int maxTargetCount = 10;
+
+            double totalDamageToDistribute = 600;
+            double maxIndividualDamage = 200;
+            double individualDamage = 0;
+
+            double damageVariation = .1;
+            
+            switch (weapon.Aspect)
             {
-                switch (weapon.Aspect)
-                {
-                }
+                #region Air Aspect
+
+                case AspectEnum.Air:
+                    totalDamageToDistribute = 600;
+                    maxIndividualDamage = 200;
+
+                    if (SpecialAbilities.HostileToPlayer(player, bc_Creature))
+                        m_TargetMobiles.Add(bc_Creature);
+
+                    mobilesInRange = player.Map.GetMobilesInRange(player.Location, 8);
+
+                    foreach (Mobile mobile in mobilesInRange)
+                    {
+                        if (mobile == bc_Creature) continue;
+                        if (mobile is PlayerMobile) continue;
+                        if (!SpecialAbilities.HostileToPlayer(player, mobile)) continue;
+
+                        if (m_TargetMobiles.Count < maxTargetCount)
+                            m_TargetMobiles.Add(mobile);
+                    }
+
+                    if (m_TargetMobiles.Count == 0)
+                        return;
+
+                    individualDamage = totalDamageToDistribute / m_TargetMobiles.Count;
+
+                    if (individualDamage > maxIndividualDamage)
+                        individualDamage = maxIndividualDamage;
+
+                    foreach (BaseCreature creature in m_TargetMobiles)
+                    {
+                        m_Queue.Enqueue(creature);
+                    }
+
+                    while (m_Queue.Count > 0)
+                    {
+                        BaseCreature creature = (BaseCreature)m_Queue.Dequeue();
+                                                
+                        creature.FixedParticles(0x3967, 10, 40, 5036, 2603, 0, EffectLayer.CenterFeet);
+
+                        SpecialAbilities.HinderSpecialAbility(1.0, null, creature, 1.0, 5.0, false, -1, false, "", "You have been shocked!", "-1");
+
+                        int damage = (int)(Math.Round((1 - damageVariation + (Utility.RandomDouble() * damageVariation * .2)) * individualDamage));
+
+                        AOS.Damage(creature, player, damage, 0, 0, 0, 0, 0);
+
+                        for (int a = 0; a < 5; a++)
+                        {
+                            Timer.DelayCall(TimeSpan.FromSeconds((double)a * 0.2), delegate
+                            {
+                                if (!SpecialAbilities.Exists(player)) return;
+                                if (!SpecialAbilities.Exists(creature)) return;
+                                if (player.Map != creature.Map) return;
+                                if (Utility.GetDistance(player.Location, creature.Location) > 20) return;
+
+                                IEntity startLocation = new Entity(Serial.Zero, new Point3D(player.Location.X, player.Location.Y, player.Location.Z + 5), player.Map);
+                                IEntity endLocation = new Entity(Serial.Zero, new Point3D(creature.Location.X, creature.Location.Y, creature.Location.Z + 5), creature.Map);
+
+                                int particleSpeed = 5;
+
+                                Effects.PlaySound(player.Location, player.Map, 0x211);
+
+                                Effects.SendMovingParticles(startLocation, endLocation, 0x3818, particleSpeed, 0, false, false, 2603, 0, 9501, 0, 0, 0x100);
+
+                                double distance = Utility.GetDistanceToSqrt(player.Location, creature.Location);
+                                double distanceDelay = (double)distance * .08;
+
+                                Timer.DelayCall(TimeSpan.FromSeconds(distanceDelay), delegate
+                                {
+                                    if (!SpecialAbilities.Exists(player)) return;
+                                    if (!SpecialAbilities.Exists(creature)) return;
+                                    if (Utility.GetDistance(player.Location, creature.Location) > 30) return;
+
+                                    creature.FixedParticles(0x3967, 10, 40, 5036, 2603, 0, EffectLayer.CenterFeet);
+
+                                    new Blood().MoveToWorld(creature.Location, creature.Map);
+                                });
+                            });
+                        }
+                    }
+                break;
+
+                #endregion
+
+                #region Command Aspect
+
+                case AspectEnum.Command:
+                break;
+
+                #endregion
+
+                #region Earth Aspect
+
+                case AspectEnum.Earth:
+                break;
+
+                #endregion
+
+                #region Eldritch Aspect
+
+                case AspectEnum.Eldritch:
+                break;
+
+                #endregion
+
+                #region Fire Aspect
+
+                case AspectEnum.Fire:
+                break;
+
+                #endregion
+
+                #region Lyric Aspect
+
+                case AspectEnum.Lyric:
+                break;
+
+                #endregion
+
+                #region Poison Aspect
+
+                case AspectEnum.Poison:
+                break;
+
+                #endregion
+
+                #region Shadow Aspect
+
+                case AspectEnum.Shadow:
+                break;
+
+                #endregion
+
+                #region Void Aspect
+
+                case AspectEnum.Void:
+                break;
+
+                #endregion
+
+                #region Water Aspect
+
+                case AspectEnum.Water:
+                break;
+
+                #endregion
             }
+
+            mobilesInRange.Free();
         }
 
         #endregion
